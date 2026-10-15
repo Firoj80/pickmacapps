@@ -1,0 +1,150 @@
+@import "tailwindcss";
+@source "./data/catalog.json";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter Tight", "Geist", ui-sans-serif, sans-serif;
+  --color-canvas: #fbfbfc;
+  --color-surface: #ffffff;
+  --color-surface-2: #f3f4f6;
+  --color-line: #e7e8eb;
+  --color-line-2: #d5d7dc;
+  --color-ink: #0c0d10;
+  --color-body: #3f434b;
+  --color-muted: #6b7079;
+  --color-faint: #9a9ea6;
+  --color-accent: #3b82f6;
+  --color-grid: #0c0d100b;
+}
+
+.dark {
+  color-scheme: dark;
+  --color-canvas: #08090a;
+  --color-surface: #101114;
+  --color-surface-2: #16171b;
+  --color-line: #1d1f24;
+  --color-line-2: #2a2d34;
+  --color-ink: #f4f5f7;
+  --color-body: #b4b8c0;
+  --color-muted: #7b8089;
+  --color-faint: #52565e;
+  --color-grid: #ffffff07;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+  color: var(--color-ink);
+}
+
+.hero-grid {
+  position: relative;
+}
+
+.hero-grid::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(to right, var(--color-grid) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-grid) 1px, transparent 1px);
+  background-size: 56px 56px;
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 40%, #000 20%, transparent 78%);
+  mask-image: radial-gradient(70% 60% at 50% 40%, #000 20%, transparent 78%);
+}
+
+.clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-silver {
+  isolation: isolate;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(145deg, #fdfdfe 0%, #eceef2 38%, #dfe2e8 62%, #f4f5f8 100%);
+  border-color: #cfd3da;
+  box-shadow:
+    inset 0 1px #fffffff2,
+    0 1px 2px #0c0d100d,
+    0 6px 20px -10px #0c0d102e;
+}
+
+.card-silver::after {
+  content: "";
+  pointer-events: none;
+  z-index: -1;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(115deg, transparent 30%, #ffffff8c 48%, transparent 66%);
+  transform: translateX(-60%);
+  transition: transform 0.7s;
+}
+
+.card-silver:hover {
+  border-color: #b9bec7;
+}
+
+.card-silver:hover::after {
+  transform: translateX(60%);
+}
+
+.silver-tag {
+  color: #4a4f58;
+  background: linear-gradient(#fff, #e9ebef);
+  border-color: #c4c8d0;
+}
+
+.dark .card-silver {
+  background: linear-gradient(145deg, #2a2d33 0%, #1d1f24 40%, #15171b 65%, #23262c 100%);
+  border-color: #3a3e46;
+  box-shadow:
+    inset 0 1px #ffffff14,
+    0 6px 20px -10px #0009;
+}
+
+.dark .card-silver::after {
+  background: linear-gradient(115deg, transparent 30%, #ffffff0f 48%, transparent 66%);
+}
+
+.dark .card-silver:hover {
+  border-color: #4a4f58;
+}
+
+.dark .silver-tag {
+  color: #c9ccd2;
+  background: linear-gradient(#32353c, #23262b);
+  border-color: #464a53;
+}
+
+.blog-body table {
+  display: block;
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-line);
+  border-radius: 0.75rem;
+}
+
+.blog-body img {
+  max-width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-silver::after,
+  .animate-ping {
+    animation: none;
+    transition: none;
+  }
+}
+
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+}

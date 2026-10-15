@@ -1,0 +1,145 @@
+import raw from "@/data/catalog.json";
+
+export type Pricing = "free" | "paid" | "freemium";
+
+export type AppItem = {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  description: string;
+  icon: string;
+  website: string;
+  pricing: Pricing;
+  category: string;
+  categoryName: string;
+  categoryIcon: string;
+  featured: boolean;
+  createdAt: string;
+  demo: string;
+  related: string[];
+};
+
+export type HeroIcon = {
+  title: string;
+  slug: string;
+  src: string;
+  style: string;
+  mobile: boolean;
+};
+
+export type CategoryInfo = {
+  slug: string;
+  name: string;
+  emoji: string;
+  paragraphs: string[];
+  tips: string[];
+};
+
+export type TocItem = { id: string; label: string };
+
+export type Post = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  dateLabel: string;
+  minutes: number;
+  tags: string[];
+  toc: TocItem[];
+  html: string;
+  more: string[];
+};
+
+export type AltIcon = { name: string; src: string };
+
+export type Alternative = {
+  slug: string;
+  name: string;
+  icon: string;
+  blurb: string;
+  namesLine: string;
+  extra: number;
+  icons: AltIcon[];
+  paragraphs: string[];
+  appSlugs: string[];
+};
+
+export const apps = raw.apps as AppItem[];
+export const hero = raw.hero as HeroIcon[];
+export const categories = raw.categories as CategoryInfo[];
+export const posts = raw.posts as Post[];
+export const alternatives = raw.alternatives as Alternative[];
+export const editors = new Set(raw.editors);
+export const pinned = raw.pinned as string[];
+
+const priceRank: Record<string, number> = { free: 0, freemium: 1, paid: 2 };
+
+export const pricingLabel: Record<Pricing, string> = {
+  free: "Free",
+  paid: "Paid",
+  freemium: "Freemium",
+};
+
+export const pricingClass: Record<Pricing, string> = {
+  free: "bg-emerald-400/10 text-emerald-700 ring-emerald-400/20 dark:text-emerald-300",
+  paid: "bg-amber-400/10 text-amber-700 ring-amber-400/20 dark:text-amber-300",
+  freemium: "bg-sky-400/10 text-sky-700 ring-sky-400/20 dark:text-sky-300",
+};
+
+export function addedLabel(iso: string, now = Date.now()) {
+  const t = new Date(iso).getTime();
+  if (Number.isNaN(t)) return "—";
+  const days = Math.floor((now - t) / 86_400_000);
+  if (days <= 0) return "today";
+  if (days === 1) return "yesterday";
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? "" : "s"} ago`;
+  const years = Math.floor(days / 365);
+  return `${years} year${years === 1 ? "" : "s"} ago`;
+}
+
+function pinRank(slug: string) {
+  const i = pinned.indexOf(slug);
+  return i === -1 ? Number.POSITIVE_INFINITY : i;
+}
+
+export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
+  const next = [...list];
+  if (order === "name") next.sort((a, b) => a.name.localeCompare(b.name));
+  else if (order === "free") {
+    next.sort((a, b) => (priceRank[a.pricing] ?? 3) - (priceRank[b.pricing] ?? 3));
+  }
+  next.sort((a, b) => {
+    const ap = pinRank(a.slug);
+    const bp = pinRank(b.slug);
+    const aPinned = Number.isFinite(ap);
+    const bPinned = Number.isFinite(bp);
+    if (aPinned && bPinned) return ap - bp;
+    if (aPinned) return -1;
+    if (bPinned) return 1;
+    return 0;
+  });
+  return next;
+}
+
+export function getApp(slug: string) {
+  return apps.find((app) => app.slug === slug);
+}
+
+export function getCategory(slug: string) {
+  return categories.find((category) => category.slug === slug);
+}
+
+export function appsInCategory(slug: string) {
+  return apps.filter((app) => app.category === slug);
+}
+
+export function getPost(slug: string) {
+  return posts.find((post) => post.slug === slug);
+}
+
+export function getAlternative(slug: string) {
+  return alternatives.find((item) => item.slug === slug);
+}
