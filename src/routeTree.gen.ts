@@ -10,9 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SubmitRouteImport } from './routes/submit'
-import { Route as AlternativesIndexRouteImport } from './routes/alternatives/index'
-import { Route as AlternativesSlugRouteImport } from './routes/alternatives/$slug'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
@@ -23,19 +25,29 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LlmsDottxtRoute = LlmsDottxtRouteImport.update({
+  id: '/llms.txt',
+  path: '/llms.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
+  id: '/robots.txt',
+  path: '/robots.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlternativesIndexRoute = AlternativesIndexRouteImport.update({
-  id: '/alternatives/',
-  path: '/alternatives/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AlternativesSlugRoute = AlternativesSlugRouteImport.update({
-  id: '/alternatives/$slug',
-  path: '/alternatives/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSlugRoute = AppSlugRouteImport.update({
@@ -61,76 +73,90 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/llms.txt': typeof LlmsDottxtRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
-  '/alternatives/$slug': typeof AlternativesSlugRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/alternatives/': typeof AlternativesIndexRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/llms.txt': typeof LlmsDottxtRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
-  '/alternatives/$slug': typeof AlternativesSlugRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/alternatives': typeof AlternativesIndexRoute
   '/blog': typeof BlogIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/llms.txt': typeof LlmsDottxtRoute
+  '/privacy': typeof PrivacyRoute
+  '/robots.txt': typeof RobotsDottxtRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
-  '/alternatives/$slug': typeof AlternativesSlugRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
-  '/alternatives/': typeof AlternativesIndexRoute
   '/blog/': typeof BlogIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/llms.txt'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/submit'
-    | '/alternatives/$slug'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/alternatives/'
     | '/blog/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/llms.txt'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/submit'
-    | '/alternatives/$slug'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/alternatives'
     | '/blog'
   id:
     | '__root__'
     | '/'
+    | '/llms.txt'
+    | '/privacy'
+    | '/robots.txt'
+    | '/sitemap.xml'
     | '/submit'
-    | '/alternatives/$slug'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
-    | '/alternatives/'
     | '/blog/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LlmsDottxtRoute: typeof LlmsDottxtRoute
+  PrivacyRoute: typeof PrivacyRoute
+  RobotsDottxtRoute: typeof RobotsDottxtRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
-  AlternativesSlugRoute: typeof AlternativesSlugRoute
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
-  AlternativesIndexRoute: typeof AlternativesIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
 }
 
@@ -143,25 +169,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/llms.txt': {
+      id: '/llms.txt'
+      path: '/llms.txt'
+      fullPath: '/llms.txt'
+      preLoaderRoute: typeof LlmsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/robots.txt': {
+      id: '/robots.txt'
+      path: '/robots.txt'
+      fullPath: '/robots.txt'
+      preLoaderRoute: typeof RobotsDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/submit': {
       id: '/submit'
       path: '/submit'
       fullPath: '/submit'
       preLoaderRoute: typeof SubmitRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alternatives/': {
-      id: '/alternatives/'
-      path: '/alternatives'
-      fullPath: '/alternatives/'
-      preLoaderRoute: typeof AlternativesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/alternatives/$slug': {
-      id: '/alternatives/$slug'
-      path: '/alternatives/$slug'
-      fullPath: '/alternatives/$slug'
-      preLoaderRoute: typeof AlternativesSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$slug': {
@@ -197,12 +237,14 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LlmsDottxtRoute: LlmsDottxtRoute,
+  PrivacyRoute: PrivacyRoute,
+  RobotsDottxtRoute: RobotsDottxtRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
-  AlternativesSlugRoute: AlternativesSlugRoute,
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
-  AlternativesIndexRoute: AlternativesIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
 }
 export const routeTree = rootRouteImport

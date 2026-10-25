@@ -1,111 +1,107 @@
 import { Link } from "@tanstack/react-router";
-import { categories } from "@/lib/catalog";
+import { apps, categories, editors } from "@/lib/catalog";
+
+const menu = [
+  { to: "/", label: "Home" },
+  { to: "/blog", label: "Guides" },
+  { to: "/submit", label: "Submit an app" },
+  { to: "/privacy", label: "Privacy" },
+] as const;
+
+const fan = ["-rotate-12 translate-y-1", "rotate-6 -translate-y-1.5", "-rotate-8 translate-y-2", "rotate-3 -translate-y-1"];
 
 export function SiteFooter() {
+  const used = categories.filter((category) => apps.some((app) => app.category === category.slug));
+  const picks = apps.filter((app) => editors.has(app.slug));
+  const icons = picks.slice(0, 8);
+
   return (
-    <footer className="mt-auto border-t border-line bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6">
-        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
-          <div className="col-span-2 sm:col-span-1">
-            <Link to="/" className="text-[19px] font-medium text-ink">
-              PickMacApps
+    <footer className="mt-16 px-5 pt-12 pb-10 md:px-10">
+      <div className="mx-auto w-full max-w-[1400px]">
+        {icons.length > 0 ? (
+          <div className="mb-14 flex justify-center overflow-hidden py-6">
+            <div className="flex items-center">
+              {icons.map((app, index) => (
+                <Link
+                  key={app.id}
+                  to="/app/$slug"
+                  params={{ slug: app.slug }}
+                  aria-label={app.name}
+                  className={`${index === 0 ? "" : "-ml-3 md:-ml-4"} ${fan[index] ?? ""} transition-transform duration-300 hover:z-10 hover:translate-y-0 hover:rotate-0 hover:scale-110`}
+                >
+                  <img alt="" src={app.icon} className="h-11 w-11 rounded-xl bg-white object-cover shadow-lg ring-1 ring-black/5 md:h-14 md:w-14 md:rounded-2xl" />
+                </Link>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
+        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <Link to="/" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-tight text-ink">
+              <span>Pick</span>
+              <img src="/favicon.svg" alt="" className="h-6 w-6 rounded-[5px] object-cover" />
+              <span>MacApps</span>
             </Link>
-            <p className="mt-3 max-w-[26ch] text-[13px] leading-relaxed text-muted">
-              A growing directory of the best apps for macOS, added by developers and makers
-              everywhere.
+            <p className="mt-3 max-w-[240px] text-[13px] leading-relaxed text-muted">
+              A curated shelf of Mac apps worth installing.
             </p>
           </div>
+
           <div>
-            <p className="text-[13px] font-semibold text-ink">Browse</p>
-            <ul className="mt-3.5 space-y-2.5">
-              <li>
-                <Link to="/" hash="apps" className="text-[13px] text-muted transition-colors hover:text-ink">
-                  All Apps
-                </Link>
-              </li>
-              <li>
-                <Link to="/blog" className="text-[13px] text-muted transition-colors hover:text-ink">
-                  Blog
-                </Link>
-              </li>
-              <li>
-                <Link to="/submit" className="text-[13px] text-muted transition-colors hover:text-ink">
-                  Submit an App
-                </Link>
-              </li>
-            </ul>
-          </div>
-          <div>
-            <p className="text-[13px] font-semibold text-ink">Categories</p>
-            <ul className="mt-3.5 space-y-2.5">
-              {categories.map((category) => (
-                <li key={category.slug}>
-                  <Link
-                    to="/category/$slug"
-                    params={{ slug: category.slug }}
-                    className="text-[13px] text-muted transition-colors hover:text-ink"
-                  >
-                    {category.name}
+            <h2 className="text-[13px] font-semibold text-ink">Menu</h2>
+            <ul className="mt-4 space-y-2.5 text-[14px]">
+              {menu.map((item) => (
+                <li key={item.label}>
+                  <Link to={item.to} className="text-ink transition hover:text-muted">
+                    {item.label}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
+
           <div>
-            <p className="text-[13px] font-semibold text-ink">Links</p>
-            <ul className="mt-3.5 space-y-2.5">
-              <li>
-                <a
-                  href="https://x.com/hii_mohit"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[13px] text-muted transition-colors hover:text-ink"
-                >
-                  Support
-                </a>
-              </li>
+            <h2 className="text-[13px] font-semibold text-ink">Categories</h2>
+            <ul className="mt-4 space-y-2.5 text-[14px]">
+              {used.length === 0 ? (
+                <li className="text-faint">—</li>
+              ) : (
+                used.map((category) => (
+                  <li key={category.slug}>
+                    <Link to="/category/$slug" params={{ slug: category.slug }} className="text-ink transition hover:text-muted">
+                      {category.name}
+                    </Link>
+                  </li>
+                ))
+              )}
+            </ul>
+          </div>
+
+          <div className="col-span-2 md:col-span-1">
+            <h2 className="text-[13px] font-semibold text-ink">Editor's Choice</h2>
+            <ul className="mt-4 space-y-2.5">
+              {picks.length === 0 ? (
+                <li className="text-[14px] text-faint">—</li>
+              ) : (
+                picks.map((app) => (
+                  <li key={app.id}>
+                    <Link to="/app/$slug" params={{ slug: app.slug }} className="group flex items-center gap-2.5">
+                      <img alt="" src={app.icon} className="h-7 w-7 shrink-0 rounded-lg bg-white object-cover" />
+                      <span className="truncate text-[14px] text-ink transition group-hover:text-muted">{app.name}</span>
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>
-        <div className="mt-12 border-t border-line pt-8">
-          <p className="text-[13px] font-semibold text-ink">Popular Categories</p>
-          <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-            {categories.map((category) => (
-              <Link
-                key={category.slug}
-                to="/category/$slug"
-                params={{ slug: category.slug }}
-                className="flex items-center gap-2.5 border-b border-line/70 pb-2.5 text-[13px] text-muted transition-colors hover:text-ink"
-              >
-                <span className="text-[13px] leading-none">{category.emoji}</span>
-                {category.name} Apps
-              </Link>
-            ))}
-          </div>
-        </div>
-        <div className="mt-12 flex flex-col-reverse items-start gap-5 border-t border-line pt-8 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[12.5px] text-faint">© 2026 PickMacApps. All rights reserved.</p>
-          <div className="flex flex-wrap items-center gap-3">
-            <a href="https://wired.business" target="_blank" rel="noopener noreferrer">
-              <img src="https://wired.business/badge0-white.svg" alt="Featured on Wired Business" width="160" height="43" />
-            </a>
-            <a href="https://findly.tools/try-mac-apps?utm_source=try-mac-apps" target="_blank" rel="noopener noreferrer">
-              <img
-                src="https://findly.tools/badges/findly-tools-badge-light.svg"
-                alt="Featured on Findly.tools"
-                width="140"
-                height="44"
-                className="dark:hidden"
-              />
-              <img
-                src="https://findly.tools/badges/findly-tools-badge-dark.svg"
-                alt="Featured on Findly.tools"
-                width="140"
-                height="44"
-                className="hidden dark:block"
-              />
-            </a>
-          </div>
+
+        <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-[12px] leading-relaxed text-muted md:flex-row md:items-center md:justify-between">
+          <p>© {new Date().getFullYear()} PickMacApps. All rights reserved.</p>
+          <p className="max-w-xl md:text-right">
+            A manually curated collection. Not affiliated with Apple Inc. App marks belong to their owners.
+          </p>
         </div>
       </div>
     </footer>

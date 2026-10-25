@@ -1,19 +1,24 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { Missing } from "@/components/missing";
 import { appsInCategory, getCategory } from "@/lib/catalog";
+import { canonical, metaDescription, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/category/$slug")({
+  beforeLoad: ({ params }) => {
+    if (!getCategory(params.slug) || appsInCategory(params.slug).length === 0) throw notFound();
+  },
   component: CategoryPage,
-  head: ({ params }) => {
+  head: ({ params, matches }) => {
     const category = getCategory(params.slug);
+    if (!category || appsInCategory(params.slug).length === 0) {
+      return { meta: [{ title: "Page not found — PickMacApps" }, { name: "robots", content: "noindex" }] };
+    }
     return {
       meta: [
-        {
-          title: category ? `${category.name} Mac Apps — PickMacApps` : "Category — PickMacApps",
-        },
-        { name: "description", content: category?.paragraphs[0] ?? "Mac apps by category" },
+        { title: `${category.name} Mac Apps — PickMacApps` },
+        { name: "description", content: metaDescription(category?.paragraphs[0] ?? "Mac apps by category") },
       ],
+      links: [canonical(originFrom(matches), `/category/${params.slug}`)],
     };
   },
 });
@@ -21,28 +26,28 @@ export const Route = createFileRoute("/category/$slug")({
 function CategoryPage() {
   const { slug } = Route.useParams();
   const category = getCategory(slug);
-  if (!category) {
-    return <Missing title="Category not found" body="That category isn't in the directory." />;
-  }
+  if (!category) return null;
   const listed = appsInCategory(slug);
   const label = category.name.toLowerCase();
 
   return (
     <main>
-      <section className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6">
-        <h1 className="flex items-center gap-3 text-3xl font-[550] tracking-[-0.025em] text-ink sm:text-4xl">
-          <span aria-hidden="true">{category.emoji}</span>
-          {category.name} Mac Apps
-        </h1>
+      <section className="mx-auto max-w-[1400px] px-5 py-14 md:px-10">
+        <div className="flex items-center gap-3">
+          <span aria-hidden="true" className="text-4xl">
+            {category.emoji}
+          </span>
+          <h1 className="font-display text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
+            {category.name} Mac Apps
+          </h1>
+        </div>
         <div className="mt-5 max-w-3xl space-y-4 text-[15px] leading-relaxed text-body">
           {category.paragraphs.map((paragraph) => (
             <p key={paragraph}>{paragraph}</p>
           ))}
         </div>
         <section className="mt-12 max-w-3xl">
-          <h2 className="text-[19px] font-[550] tracking-[-0.025em] text-ink">
-            What to look for in a {label} app
-          </h2>
+          <h2 className="font-display text-2xl font-semibold text-ink">What to look for</h2>
           <ul className="mt-4 space-y-3">
             {category.tips.map((tip) => (
               <li key={tip} className="flex gap-3 text-[15px] leading-relaxed text-body">
@@ -53,13 +58,10 @@ function CategoryPage() {
           </ul>
         </section>
         <section className="mt-14">
-          <div className="flex items-center gap-5">
-            <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">
-              All {listed.length} {label} apps
-            </h2>
-            <span aria-hidden="true" className="h-px flex-1 bg-line" />
-          </div>
-          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <h2 className="font-display text-2xl font-semibold text-ink">
+            {listed.length} {label} apps
+          </h2>
+          <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
             {listed.map((app) => (
               <AppCard key={app.id} app={app} />
             ))}

@@ -1,62 +1,34 @@
-import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { ClockIcon, FeaturedMark, LayersIcon, TagIcon } from "@/components/icons";
-import { addedLabel, pricingLabel, type AppItem } from "@/lib/catalog";
+import { editors, type AppItem } from "@/lib/catalog";
 
-function Meta({
-  icon,
-  label,
-  value,
-}: {
-  icon: ReactNode;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-center gap-2.5 text-[12.5px]">
-      <span className="flex shrink-0 items-center gap-1.5 text-muted">
-        {icon}
-        {label}
-      </span>
-      <span aria-hidden="true" className="h-px min-w-3 flex-1 bg-line-2" />
-      <span className="shrink-0 font-medium text-ink">{value}</span>
-    </div>
-  );
-}
+const covers = ["#f6d6c6", "#d7e4f5", "#e7d7f2", "#d8efe2", "#f3e6c4", "#f6d5e2", "#d9e8e4"];
 
-export function AppCard({ app, silver = false }: { app: AppItem; silver?: boolean }) {
-  const choice = silver;
+export function AppCard({ app, size = "md" }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
+  const choice = editors.has(app.slug);
+  const icon = size === "lg" ? "h-14 w-14" : size === "md" ? "h-12 w-12" : "h-10 w-10";
+  const title = size === "lg" ? "text-[20px]" : size === "md" ? "text-[17px]" : "text-[15px]";
+  const tag = size === "lg" ? "text-[15px]" : size === "md" ? "text-[14px]" : "text-[13px]";
+  const gap = size === "lg" ? "gap-4" : "gap-3.5";
+  const image = app.demo && !app.demo.endsWith(".mp4") ? app.demo : "";
+  const wash = covers[app.name.length % covers.length];
+
   return (
-    <Link
-      to="/app/$slug"
-      params={{ slug: app.slug }}
-      className={
-        choice
-          ? "card-silver group flex flex-col rounded-xl border p-5 transition-colors duration-200"
-          : "group flex flex-col rounded-xl border border-line bg-surface p-5 transition-colors duration-200 hover:border-line-2 hover:bg-surface-2"
-      }
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
-          <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg ring-1 ring-line">
-            <img alt={app.name} src={app.icon} className="h-full w-full object-cover" />
-          </div>
-          <h3 className="flex min-w-0 items-center gap-1.5 text-xl font-[550] tracking-[-0.025em] text-ink">
-            <span className="truncate">{app.name}</span>
-            {app.featured && !choice ? <FeaturedMark /> : null}
-          </h3>
-        </div>
-        {choice ? (
-          <span className="silver-tag shrink-0 rounded-md border px-2 py-1 text-[11px] font-medium">
-            Editor's Choice
-          </span>
-        ) : null}
+    <Link to="/app/$slug" params={{ slug: app.slug }} className="shelf-card rise group block min-w-0">
+      <div className="cover relative aspect-[1200/630] overflow-hidden rounded-2xl border border-line/80 bg-surface-2">
+        {image ? (
+          <img alt="" src={image} className="h-full w-full object-cover" />
+        ) : (
+          <div className="wash h-full w-full" style={{ background: `linear-gradient(135deg, ${wash} 0%, #111113 78%)` }} />
+        )}
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_10%,rgba(255,255,255,0.55),transparent_55%)] opacity-70 mix-blend-overlay" />
       </div>
-      <p className="clamp-2 mt-4 min-h-[2.75rem] text-[14px] leading-[1.45] text-body">{app.tagline}</p>
-      <div className="mt-4 flex flex-col gap-2">
-        <Meta icon={<LayersIcon />} label="Category" value={app.categoryName} />
-        <Meta icon={<TagIcon />} label="Pricing" value={pricingLabel[app.pricing]} />
-        <Meta icon={<ClockIcon />} label="Added" value={addedLabel(app.createdAt)} />
+      <div className={`mt-4 flex ${gap}`}>
+        <img alt="" src={app.icon} className={`mark mt-0.5 shrink-0 rounded-xl bg-white object-cover ${icon}`} />
+        <div className="min-w-0">
+          <h3 className={`${title} truncate font-semibold tracking-tight text-ink`}>{app.name}</h3>
+          <p className={`mt-0.5 line-clamp-2 ${tag} leading-relaxed text-muted`}>{app.tagline}</p>
+          {choice ? <p className="mt-1 text-[11px] font-medium text-muted">Paid placement</p> : null}
+        </div>
       </div>
     </Link>
   );

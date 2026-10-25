@@ -1,16 +1,18 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { posts } from "@/lib/catalog";
+import { canonical, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
-      { title: "The PickMacApps Blog" },
+      { title: "Guides — PickMacApps" },
       {
         name: "description",
         content: "Hand-researched guides to the best Mac apps.",
       },
     ],
+    links: [canonical(originFrom(matches), "/blog")],
   }),
 });
 
@@ -18,38 +20,26 @@ function BlogIndex() {
   return (
     <main>
       <div className="mx-auto max-w-3xl px-6 py-14 lg:py-20">
-        <header className="mb-12">
-          <h1 className="text-3xl font-[550] tracking-[-0.025em] text-ink sm:text-4xl">The PickMacApps Blog</h1>
-          <p className="mt-4 text-lg leading-relaxed text-body">
-            Hand-researched guides to the best Mac apps — comparing the tools everyone recommends, the
-            ones worth paying for, and the hidden gems most lists miss.
-          </p>
+        <header className="mb-10">
+          <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">Guides</p>
+          <h1 className="font-display mt-3 text-5xl font-semibold tracking-[-0.04em] text-ink">Guides</h1>
         </header>
-        <div className="space-y-4">
-          {posts.map((post) => (
+        <div className="space-y-8">
+          {posts.map((post, index) => (
             <Link
               key={post.slug}
               to="/blog/$slug"
               params={{ slug: post.slug }}
-              className="group block rounded-xl border border-line bg-surface p-6 transition-colors duration-200 hover:border-line-2 hover:bg-surface-2"
+              className={index === 0 ? "block border-b border-line pb-8" : "block"}
             >
-              <div className="flex items-center gap-2 text-xs text-muted">
+              <p className="text-[12.5px] text-muted">
                 <time dateTime={post.date}>{post.dateLabel}</time>
-                <span>·</span>
-                <span>{post.minutes} min read</span>
-              </div>
-              <h2 className="mt-2 text-xl font-[550] tracking-[-0.025em] text-ink">{post.title}</h2>
-              <p className="mt-2 text-[0.975rem] leading-relaxed text-body">{post.excerpt}</p>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-md border border-line-2 bg-canvas px-2.5 py-1 text-xs font-medium text-muted"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
+                <span> · {post.minutes} min</span>
+              </p>
+              <h2 className={`font-display mt-2 font-semibold tracking-[-0.03em] text-ink ${index === 0 ? "text-4xl" : "text-2xl"}`}>
+                {post.title}
+              </h2>
+              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-body">{post.excerpt}</p>
             </Link>
           ))}
         </div>

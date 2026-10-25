@@ -70,7 +70,7 @@ export const hero = raw.hero as HeroIcon[];
 export const categories = raw.categories as CategoryInfo[];
 export const posts = raw.posts as Post[];
 export const alternatives = raw.alternatives as Alternative[];
-export const editors = new Set(raw.editors);
+export const editors = new Set<string>(raw.editors);
 export const pinned = raw.pinned as string[];
 
 const priceRank: Record<string, number> = { free: 0, freemium: 1, paid: 2 };
@@ -82,9 +82,9 @@ export const pricingLabel: Record<Pricing, string> = {
 };
 
 export const pricingClass: Record<Pricing, string> = {
-  free: "bg-emerald-400/10 text-emerald-700 ring-emerald-400/20 dark:text-emerald-300",
-  paid: "bg-amber-400/10 text-amber-700 ring-amber-400/20 dark:text-amber-300",
-  freemium: "bg-sky-400/10 text-sky-700 ring-sky-400/20 dark:text-sky-300",
+  free: "bg-accent/10 text-accent ring-accent/25",
+  paid: "bg-amber-800/10 text-amber-900 ring-amber-800/20 dark:text-amber-200",
+  freemium: "bg-stone-500/10 text-stone-700 ring-stone-500/20 dark:text-stone-300",
 };
 
 export function addedLabel(iso: string, now = Date.now()) {
@@ -110,6 +110,8 @@ export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
   if (order === "name") next.sort((a, b) => a.name.localeCompare(b.name));
   else if (order === "free") {
     next.sort((a, b) => (priceRank[a.pricing] ?? 3) - (priceRank[b.pricing] ?? 3));
+  } else {
+    next.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
   }
   next.sort((a, b) => {
     const ap = pinRank(a.slug);
@@ -142,4 +144,13 @@ export function getPost(slug: string) {
 
 export function getAlternative(slug: string) {
   return alternatives.find((item) => item.slug === slug);
+}
+
+export function alternativesForApp(slug: string) {
+  return alternatives.filter((item) => item.slug === slug || item.appSlugs.includes(slug));
+}
+
+export function alternativesInCategory(categorySlug: string) {
+  const slugs = new Set(apps.filter((app) => app.category === categorySlug).map((app) => app.slug));
+  return alternatives.filter((item) => item.appSlugs.some((slug) => slugs.has(slug)));
 }

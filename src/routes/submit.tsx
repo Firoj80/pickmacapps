@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { CheckIcon, QuoteIcon } from "@/components/icons";
+import { CheckIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
-import { createFileRoute } from "@tanstack/react-router";
+import { canonical, originFrom } from "@/lib/seo";
+import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/submit")({
   component: SubmitPage,
-  head: () => ({
+  head: ({ matches }) => ({
     meta: [
       { title: "Submit Your Mac App — PickMacApps" },
-      { name: "description", content: "Submit your Mac app to the PickMacApps directory." },
+      { name: "description", content: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is a paid placement." },
     ],
+    links: [canonical(originFrom(matches), "/submit")],
   }),
 });
 
@@ -21,33 +23,6 @@ const BADGE_HTML = `<a href="/" target="_blank" rel="noopener">
     height="54"
   />
 </a>`;
-
-const quotes = [
-  {
-    quote: "I liked this idea of sharing Mac Apps made by indie hackers so I’ve submitted my one to be listed here 🙂",
-    name: "Paweł Karniej",
-    role: "Indie Mac App Developer",
-    photo: "/user1.jpg",
-  },
-  {
-    quote: "Looks solid! Thanks for including LocalCan 💜",
-    name: "Jarek",
-    role: "Founder, LocalCan",
-    photo: "/user2.jpg",
-  },
-  {
-    quote: "Thanks for including both Klack and Alcove!",
-    name: "Henrik",
-    role: "Founder, Klack & Alcove",
-    photo: "/user3.png",
-  },
-  {
-    quote: "great to see lookaway in the list! thank you for including it",
-    name: "kush",
-    role: "Founder, Lookaway",
-    photo: "/user4.jpg",
-  },
-];
 
 const checks = ["Your app is functional", "It delivers what it promises", "Is not an infoproduct"];
 
@@ -87,7 +62,8 @@ function SubmitPage() {
         <div className="mx-auto max-w-6xl px-6 py-10 lg:py-14">
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-16 xl:gap-24">
             <div className="w-full lg:max-w-[420px]">
-              <h1 className="mb-8 text-2xl font-[550] tracking-[-0.025em] text-ink">Submit Your Mac App</h1>
+              <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">List an app</p>
+              <h1 className="font-display mt-2 mb-8 text-4xl font-semibold tracking-[-0.03em] text-ink">Submit your Mac app</h1>
               {sent ? (
                 <div className="rounded-xl border border-line bg-surface p-6">
                   <h2 className="text-lg font-[550] tracking-[-0.025em] text-ink">Submission received</h2>
@@ -116,6 +92,7 @@ function SubmitPage() {
                     <input
                       required
                       name="name"
+                      aria-label="App name"
                       placeholder="App Name"
                       className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
                     />
@@ -123,12 +100,14 @@ function SubmitPage() {
                       required
                       type="url"
                       name="website_url"
+                      aria-label="Website URL"
                       placeholder="Website URL..."
                       className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
                     />
                     <input
                       required
                       name="tagline"
+                      aria-label="Short tagline"
                       placeholder="Short tagline..."
                       className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
                     />
@@ -136,6 +115,7 @@ function SubmitPage() {
                       required
                       type="email"
                       name="email"
+                      aria-label="Email address"
                       placeholder="Your email address..."
                       className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
                     />
@@ -148,7 +128,7 @@ function SubmitPage() {
                         type="button"
                         onClick={() => setPlan("free")}
                         className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
-                          plan === "free" ? "border-line-2 bg-surface-2" : "border-line hover:border-line-2"
+                          plan === "free" ? "border-accent bg-accent/5" : "border-line hover:border-line-2"
                         }`}
                       >
                         <span className="absolute -top-2 left-3 rounded-full bg-ink px-2 py-0.5 text-[10px] font-medium text-canvas">
@@ -157,16 +137,15 @@ function SubmitPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-baseline gap-1.5">
                             <span className="text-lg font-bold text-ink">Free</span>
-                            <span className="text-xs text-muted line-through">$29</span>
-                            <span className="text-xs text-muted">with our badge</span>
+                            <span className="text-xs text-muted">after review</span>
                           </div>
                           <Radio selected={plan === "free"} />
                         </div>
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
                           {[
-                            "Add our badge to your site, get listed forever.",
-                            "Get a strong backlink",
-                            "Thousands of monthly visitors",
+                            "Add our badge, then we review the listing.",
+                            "The listing can link back to your site.",
+                            "No visitor count is promised.",
                           ].map((line) => (
                             <li key={line} className="flex items-start gap-1.5 text-[11px] text-body">
                               <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
@@ -179,7 +158,7 @@ function SubmitPage() {
                         type="button"
                         onClick={() => setPlan("choice")}
                         className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
-                          plan === "choice" ? "border-line-2 bg-surface-2" : "border-line hover:border-line-2"
+                          plan === "choice" ? "border-accent bg-accent/5" : "border-line hover:border-line-2"
                         }`}
                       >
                         <span className="absolute -top-2 left-3 rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-body">
@@ -188,37 +167,17 @@ function SubmitPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-baseline gap-1.5">
-                              <span className="text-lg font-bold text-ink">$199</span>
-                              <span className="text-xs text-muted line-through">$299</span>
+                              <span className="text-lg font-bold text-ink">$99</span>
+                              <span className="text-xs text-muted line-through">$199</span>
                               <span className="text-xs text-muted">one-time</span>
                             </div>
-                            <p className="mt-0.5 text-[11px] font-medium text-emerald-600 dark:text-emerald-400">
-                              * Only 3 spots remaining in October.
-                            </p>
+                            <p className="mt-0.5 text-[11px] text-body">Paid placement. Labeled on the listing.</p>
                           </div>
                           <Radio selected={plan === "choice"} />
                         </div>
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
-                          <ChoiceLine strong="Top 3 placement" rest=" on our directory for 1 month" />
-                          <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <span className="font-medium text-ink">Featured in our </span>
-                              <a
-                                href="https://medium.com/@hii_mohit"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="font-medium text-ink underline underline-offset-2 hover:text-body"
-                              >
-                                Medium
-                              </a>
-                              <span className="font-medium text-ink"> listicle</span>
-                              <span> with 8K+ followers</span>
-                            </span>
-                          </li>
-                          <ChoiceLine strong="Dedicated blog post" rest=" for your app, including competitor comparisons" />
-                          <ChoiceLine strong="High-quality backlink" rest=" to boost your SEO" />
-                          <ChoiceLine strong="Hundreds of monthly visitors" rest=" discovering your app" />
+                          <ChoiceLine strong="Editor’s Choice label" rest=" on the directory. It is marked as a paid placement." />
+                          <ChoiceLine strong="A link from the listing" rest=" to your site." />
                         </ul>
                       </button>
                     </div>
@@ -279,6 +238,13 @@ function SubmitPage() {
                       ))}
                     </div>
                   </div>
+                  <p className="text-[12.5px] leading-relaxed text-muted">
+                    Email is used only to reply about this submission. See{" "}
+                    <Link to="/privacy" className="text-ink underline underline-offset-2">
+                      privacy
+                    </Link>
+                    .
+                  </p>
                   <button
                     type="submit"
                     disabled={badge !== "ok"}
@@ -290,39 +256,16 @@ function SubmitPage() {
               )}
             </div>
 
-            <div className="hidden flex-1 lg:block">
-              <div className="sticky top-24 space-y-6">
-                {quotes.map((item) => (
-                  <figure key={item.name} className="rounded-2xl border border-line bg-surface p-6">
-                    <QuoteIcon />
-                    <blockquote className="text-[15px] leading-relaxed text-body">{item.quote}</blockquote>
-                    <figcaption className="mt-4 flex items-center gap-3">
-                      <img alt={item.name} src={item.photo} className="h-9 w-9 rounded-full object-cover ring-2 ring-line" />
-                      <div>
-                        <p className="text-sm font-semibold text-ink">{item.name}</p>
-                        <p className="text-xs text-muted">{item.role}</p>
-                      </div>
-                    </figcaption>
-                  </figure>
-                ))}
+            <div className="flex-1">
+              <div className="sticky top-24 space-y-4 rounded-2xl border border-line bg-surface p-6">
+                <h2 className="font-display text-2xl font-semibold text-ink">How listing works</h2>
+                <p className="text-[15px] leading-relaxed text-body">Listings are reviewed by hand. Nothing goes live from the form alone.</p>
+                <p className="text-[15px] leading-relaxed text-body">
+                  Editor’s Choice costs $99, marked down from $199. Those listings say “paid placement” on the page.
+                </p>
+                <p className="text-[15px] leading-relaxed text-body">Visitor counts are not promised, because this directory does not publish traffic numbers.</p>
               </div>
             </div>
-          </div>
-
-          <div className="mt-10 space-y-4 lg:hidden">
-            <h2 className="text-lg font-[550] tracking-[-0.025em] text-ink">What developers say</h2>
-            {quotes.map((item) => (
-              <figure key={item.name} className="rounded-2xl border border-line bg-surface p-5">
-                <blockquote className="text-sm leading-relaxed text-body">“{item.quote}”</blockquote>
-                <figcaption className="mt-3 flex items-center gap-2.5">
-                  <img alt={item.name} src={item.photo} className="h-8 w-8 rounded-full object-cover ring-2 ring-line" />
-                  <div>
-                    <p className="text-xs font-semibold text-ink">{item.name}</p>
-                    <p className="text-[11px] text-muted">{item.role}</p>
-                  </div>
-                </figcaption>
-              </figure>
-            ))}
           </div>
         </div>
       </div>

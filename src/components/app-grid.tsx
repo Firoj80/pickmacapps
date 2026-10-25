@@ -1,11 +1,20 @@
 import { useMemo, useState } from "react";
 import { AppCard } from "@/components/app-card";
-import { ChevronIcon, SearchIcon } from "@/components/icons";
 import { categories, editors, sortApps, type AppItem } from "@/lib/catalog";
 
-export function AppGrid({ apps }: { apps: AppItem[] }) {
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState("all");
+export function AppGrid({
+  apps,
+  query,
+  category,
+  onQuery,
+  onCategory,
+}: {
+  apps: AppItem[];
+  query: string;
+  category: string;
+  onQuery: (value: string) => void;
+  onCategory: (value: string) => void;
+}) {
   const [order, setOrder] = useState<"newest" | "name" | "free">("newest");
 
   const visible = useMemo(() => {
@@ -18,76 +27,89 @@ export function AppGrid({ apps }: { apps: AppItem[] }) {
         app.tagline.toLowerCase().includes(needle);
       return inCategory && matches;
     });
-    return sortApps(filtered, order);
+    const ordered = sortApps(filtered, order);
+    return [...ordered].sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)));
   }, [apps, query, category, order]);
 
   return (
-    <section id="apps" className="scroll-mt-20">
-      <div className="mb-6 flex items-center gap-5">
-        <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">
-          Browse every Mac app
-        </h2>
-        <span aria-hidden="true" className="h-px flex-1 bg-line" />
+    <section id="apps" className="scroll-mt-24">
+      <div id="categories" className="flex scroll-mt-8 flex-wrap items-center gap-1 text-sm">
+        <FilterTab active={category === "all"} onClick={() => onCategory("all")}>
+          All
+        </FilterTab>
+        {categories.map((item) => (
+          <FilterTab key={item.slug} active={category === item.slug} onClick={() => onCategory(item.slug)}>
+            {item.name}
+          </FilterTab>
+        ))}
+        <span aria-hidden="true" className="mx-2 hidden h-4 w-px bg-line sm:inline-block" />
+        <FilterTab active={order === "newest"} onClick={() => setOrder("newest")}>
+          Latest
+        </FilterTab>
+        <FilterTab active={order === "name"} onClick={() => setOrder("name")}>
+          A–Z
+        </FilterTab>
+        <FilterTab active={order === "free"} onClick={() => setOrder("free")}>
+          Free
+        </FilterTab>
+        <span className="ml-auto text-[13px] text-muted">
+          {visible.length} apps
+        </span>
       </div>
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <SearchIcon className="pointer-events-none absolute top-1/2 left-3.5 h-4 w-4 -translate-y-1/2 text-muted" />
-          <input
-            type="search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Search apps..."
-            aria-label="Search apps"
-            className="h-11 w-full rounded-lg border border-line bg-surface pr-3.5 pl-10 text-[13.5px] text-ink transition-colors placeholder:text-muted hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
-          />
-        </div>
-        <label className="relative">
-          <span className="sr-only">Filter by category</span>
-          <select
-            aria-label="Filter by category"
-            value={category}
-            onChange={(event) => setCategory(event.target.value)}
-            className="h-11 w-full cursor-pointer appearance-none rounded-lg border border-line bg-surface pr-9 pl-3.5 text-[13.5px] font-medium text-ink transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none sm:w-auto"
-          >
-            <option value="all">All categories</option>
-            {categories.map((item) => (
-              <option key={item.slug} value={item.slug}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-          <ChevronIcon className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
-        </label>
-        <label className="relative">
-          <span className="sr-only">Order by</span>
-          <select
-            aria-label="Order by"
-            value={order}
-            onChange={(event) => setOrder(event.target.value as "newest" | "name" | "free")}
-            className="h-11 w-full cursor-pointer appearance-none rounded-lg border border-line bg-surface pr-9 pl-3.5 text-[13.5px] font-medium text-ink transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none sm:w-auto"
-          >
-            <option value="newest">Newest</option>
-            <option value="name">Name A–Z</option>
-            <option value="free">Free first</option>
-          </select>
-          <ChevronIcon className="pointer-events-none absolute top-1/2 right-3 h-3.5 w-3.5 -translate-y-1/2 text-muted" />
-        </label>
-      </div>
+
+      {query ? (
+        <button type="button" onClick={() => onQuery("")} className="mt-3 text-[13px] text-accent hover:underline">
+          Clear “{query}”
+        </button>
+      ) : null}
+
       {visible.length === 0 ? (
-        <div className="mt-6 rounded-xl border border-line bg-surface px-6 py-20 text-center">
-          <p className="text-[15px] font-medium text-ink">No apps found</p>
-          <p className="mt-1 text-[13.5px] text-muted">Try a different search or category.</p>
+        <p className="mt-10 text-[15px] text-body">Nothing on the shelf matches that.</p>
+      ) : category === "all" && !query ? (
+        <div className="mt-8 space-y-16 pb-8">
+          <section className="shelf grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2">
+            {visible.slice(0, 2).map((app) => (
+              <AppCard key={app.id} app={app} size="lg" />
+            ))}
+          </section>
+          <section className="shelf grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {visible.slice(2, 8).map((app) => (
+              <AppCard key={app.id} app={app} size="md" />
+            ))}
+          </section>
+          <section className="shelf grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {visible.slice(8).map((app) => (
+              <AppCard key={app.id} app={app} size="sm" />
+            ))}
+          </section>
         </div>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="shelf mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((app) => (
-            <AppCard key={app.id} app={app} silver={editors.has(app.slug)} />
+            <AppCard key={app.id} app={app} size="md" />
           ))}
         </div>
       )}
-      <p className="mt-8 text-center text-[13px] text-muted">
-        Showing {visible.length} of {apps.length} apps
-      </p>
     </section>
+  );
+}
+
+function FilterTab({
+  active,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  onClick: () => void;
+  children: string;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={`rounded-full px-3.5 py-2 transition-colors duration-200 ${active ? "bg-surface-2 font-medium text-ink" : "text-muted hover:bg-surface-2/70 hover:text-ink"}`}
+    >
+      {children}
+    </button>
   );
 }
