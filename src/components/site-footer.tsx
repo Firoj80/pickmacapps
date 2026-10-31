@@ -4,6 +4,7 @@ import { apps, categories, editors } from "@/lib/catalog";
 const menu = [
   { to: "/", label: "Home" },
   { to: "/blog", label: "Guides" },
+  { to: "/compare", label: "Comparisons" },
   { to: "/submit", label: "Submit an app" },
   { to: "/privacy", label: "Privacy" },
 ] as const;

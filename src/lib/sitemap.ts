@@ -1,7 +1,8 @@
 import { apps, appsInCategory, categories, posts } from "@/lib/catalog";
+import { comparePairs, hubLastmod, pairLastmod } from "@/lib/compare";
 import { site } from "@/lib/site";
 
-export const SITEMAP_SECTIONS = ["pages", "apps", "guides", "categories"] as const;
+export const SITEMAP_SECTIONS = ["pages", "apps", "guides", "categories", "compare"] as const;
 export type SitemapSection = (typeof SITEMAP_SECTIONS)[number];
 
 const SHARD = 45_000;
@@ -71,18 +72,28 @@ export function sectionUrls(section: SitemapSection, origin: string, today = tod
       lastmod: asLastmod(post.date, today),
     }));
   }
-  return categories
-    .filter((category) => appsInCategory(category.slug).length > 0)
-    .map((category) => {
-      const newest = appsInCategory(category.slug)
-        .map((app) => app.createdAt)
-        .sort()
-        .at(-1);
-      return {
-        loc: absoluteUrl(origin, `/category/${category.slug}`),
-        lastmod: asLastmod(newest, today),
-      };
-    });
+  if (section === "categories") {
+    return categories
+      .filter((category) => appsInCategory(category.slug).length > 0)
+      .map((category) => {
+        const newest = appsInCategory(category.slug)
+          .map((app) => app.createdAt)
+          .sort()
+          .at(-1);
+        return {
+          loc: absoluteUrl(origin, `/category/${category.slug}`),
+          lastmod: asLastmod(newest, today),
+        };
+      });
+  }
+  const pairs = comparePairs();
+  return [
+    { loc: absoluteUrl(origin, "/compare"), lastmod: asLastmod(hubLastmod(), today) },
+    ...pairs.map((pair) => ({
+      loc: absoluteUrl(origin, `/compare/${pair.slug}`),
+      lastmod: asLastmod(pairLastmod(pair), today),
+    })),
+  ];
 }
 
 export function indexLocs(origin: string, today = todayUtc()) {

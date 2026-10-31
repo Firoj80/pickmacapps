@@ -70,6 +70,9 @@ export function SiteHeader() {
           <Link to="/blog" className="rounded-full px-3.5 py-2 text-muted transition hover:text-ink">
             Guides
           </Link>
+          <Link to="/compare" className="rounded-full px-3.5 py-2 text-muted transition hover:text-ink">
+            Comparisons
+          </Link>
         </nav>
       </div>
 
@@ -121,6 +124,9 @@ export function SiteHeader() {
           </a>
           <Link to="/blog" onClick={() => setMenu(false)} className="block rounded-xl px-3 py-2 text-sm text-ink">
             Guides
+          </Link>
+          <Link to="/compare" onClick={() => setMenu(false)} className="block rounded-xl px-3 py-2 text-sm text-ink">
+            Comparisons
           </Link>
           <Link to="/submit" onClick={() => setMenu(false)} className="mt-1 block rounded-xl bg-ink px-3 py-2 text-center text-sm text-canvas">
             Submit an app

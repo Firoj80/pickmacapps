@@ -1,5 +1,6 @@
 import { site } from "@/lib/site";
 import type { AppItem, Post } from "@/lib/catalog";
+import type { ComparePair } from "@/lib/compare";
 
 type Json = string | number | boolean | Json[] | { [key: string]: Json };
 
@@ -238,6 +239,75 @@ export function categoryGraph(
       path,
       apps.map((app) => ({ name: app.name, path: `/app/${app.slug}` })),
     ),
+  ]);
+}
+
+function faqNode(origin: string, path: string, faqs: { q: string; a: string }[]) {
+  return {
+    "@type": "FAQPage",
+    "@id": `${absoluteUrl(origin, path)}#faq`,
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.q,
+      acceptedAnswer: { "@type": "Answer", text: faq.a },
+    })),
+  };
+}
+
+export function compareHubGraph(
+  origin: string,
+  pairs: { name: string; slug: string }[],
+  faqs: { q: string; a: string }[],
+) {
+  const path = "/compare";
+  return graph(origin, [
+    organizationNode(origin),
+    breadcrumbNode(origin, path, [
+      { name: "Home", path: "/" },
+      { name: "Comparisons", path },
+    ]),
+    {
+      "@type": "CollectionPage",
+      "@id": `${absoluteUrl(origin, path)}#page`,
+      name: "Mac app comparisons",
+      url: absoluteUrl(origin, path),
+      mainEntity: { "@id": `${absoluteUrl(origin, path)}#list` },
+    },
+    itemListNode(
+      origin,
+      path,
+      pairs.map((pair) => ({ name: pair.name, path: `/compare/${pair.slug}` })),
+    ),
+    faqNode(origin, path, faqs),
+  ]);
+}
+
+export function compareGraph(
+  origin: string,
+  pair: ComparePair,
+  faqs: { q: string; a: string }[],
+) {
+  const path = `/compare/${pair.slug}`;
+  const name = `${pair.left.name} vs ${pair.right.name}`;
+  return graph(origin, [
+    organizationNode(origin),
+    breadcrumbNode(origin, path, [
+      { name: "Home", path: "/" },
+      { name: "Comparisons", path: "/compare" },
+      { name, path },
+    ]),
+    {
+      "@type": "CollectionPage",
+      "@id": `${absoluteUrl(origin, path)}#page`,
+      name,
+      url: absoluteUrl(origin, path),
+      mainEntity: { "@id": `${absoluteUrl(origin, path)}#list` },
+    },
+    itemListNode(origin, path, [
+      { name: pair.left.name, path: `/app/${pair.left.slug}` },
+      { name: pair.right.name, path: `/app/${pair.right.slug}` },
+    ]),
+    faqNode(origin, path, faqs),
   ]);
 }
 

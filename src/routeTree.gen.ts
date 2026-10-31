@@ -21,8 +21,11 @@ import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
+import { Route as CompareIndexRouteImport } from './routes/compare/index'
+import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
 import { Route as SitemapAppsDotxmlRouteImport } from './routes/sitemap/apps[.]xml'
 import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap/categories[.]xml'
+import { Route as SitemapCompareDotxmlRouteImport } from './routes/sitemap/compare[.]xml'
 import { Route as SitemapGuidesDotxmlRouteImport } from './routes/sitemap/guides[.]xml'
 import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap/pages[.]xml'
 import { Route as ApiMdSplatRouteImport } from './routes/api/md/$'
@@ -87,6 +90,16 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CompareIndexRoute = CompareIndexRouteImport.update({
+  id: '/compare/',
+  path: '/compare/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CompareSlugRoute = CompareSlugRouteImport.update({
+  id: '/compare/$slug',
+  path: '/compare/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapAppsDotxmlRoute = SitemapAppsDotxmlRouteImport.update({
   id: '/sitemap/apps.xml',
   path: '/sitemap/apps.xml',
@@ -95,6 +108,11 @@ const SitemapAppsDotxmlRoute = SitemapAppsDotxmlRouteImport.update({
 const SitemapCategoriesDotxmlRoute = SitemapCategoriesDotxmlRouteImport.update({
   id: '/sitemap/categories.xml',
   path: '/sitemap/categories.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCompareDotxmlRoute = SitemapCompareDotxmlRouteImport.update({
+  id: '/sitemap/compare.xml',
+  path: '/sitemap/compare.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapGuidesDotxmlRoute = SitemapGuidesDotxmlRouteImport.update({
@@ -125,11 +143,14 @@ export interface FileRoutesByFullPath {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog/': typeof BlogIndexRoute
+  '/compare/': typeof CompareIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
 export interface FileRoutesByTo {
@@ -144,11 +165,14 @@ export interface FileRoutesByTo {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog': typeof BlogIndexRoute
+  '/compare': typeof CompareIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
 export interface FileRoutesById {
@@ -164,11 +188,14 @@ export interface FileRoutesById {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/compare/$slug': typeof CompareSlugRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog/': typeof BlogIndexRoute
+  '/compare/': typeof CompareIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
 export interface FileRouteTypes {
@@ -185,11 +212,14 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/compare/$slug'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
+    | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
     | '/blog/'
+    | '/compare/'
     | '/api/md/$'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -204,11 +234,14 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/compare/$slug'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
+    | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
     | '/blog'
+    | '/compare'
     | '/api/md/$'
   id:
     | '__root__'
@@ -223,11 +256,14 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/compare/$slug'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
+    | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
     | '/blog/'
+    | '/compare/'
     | '/api/md/$'
   fileRoutesById: FileRoutesById
 }
@@ -243,11 +279,14 @@ export interface RootRouteChildren {
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  CompareSlugRoute: typeof CompareSlugRoute
   SitemapAppsDotxmlRoute: typeof SitemapAppsDotxmlRoute
   SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
+  SitemapCompareDotxmlRoute: typeof SitemapCompareDotxmlRoute
   SitemapGuidesDotxmlRoute: typeof SitemapGuidesDotxmlRoute
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  CompareIndexRoute: typeof CompareIndexRoute
   ApiMdSplatRoute: typeof ApiMdSplatRoute
 }
 
@@ -337,6 +376,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/compare/': {
+      id: '/compare/'
+      path: '/compare'
+      fullPath: '/compare/'
+      preLoaderRoute: typeof CompareIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/compare/$slug': {
+      id: '/compare/$slug'
+      path: '/compare/$slug'
+      fullPath: '/compare/$slug'
+      preLoaderRoute: typeof CompareSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap/apps.xml': {
       id: '/sitemap/apps.xml'
       path: '/sitemap/apps.xml'
@@ -349,6 +402,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap/categories.xml'
       fullPath: '/sitemap/categories.xml'
       preLoaderRoute: typeof SitemapCategoriesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/compare.xml': {
+      id: '/sitemap/compare.xml'
+      path: '/sitemap/compare.xml'
+      fullPath: '/sitemap/compare.xml'
+      preLoaderRoute: typeof SitemapCompareDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap/guides.xml': {
@@ -387,11 +447,14 @@ const rootRouteChildren: RootRouteChildren = {
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
+  CompareSlugRoute: CompareSlugRoute,
   SitemapAppsDotxmlRoute: SitemapAppsDotxmlRoute,
   SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
+  SitemapCompareDotxmlRoute: SitemapCompareDotxmlRoute,
   SitemapGuidesDotxmlRoute: SitemapGuidesDotxmlRoute,
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   BlogIndexRoute: BlogIndexRoute,
+  CompareIndexRoute: CompareIndexRoute,
   ApiMdSplatRoute: ApiMdSplatRoute,
 }
 export const routeTree = rootRouteImport

@@ -9,10 +9,18 @@ import {
   posts,
   sortApps,
 } from "@/lib/catalog"
-import { site } from "@/lib/site"
+import {
+  comparePairs,
+  hubIntro,
+  hubTitle,
+  pairHeading,
+  pairIntro,
+  relatedPairs,
+} from "@/lib/compare"
 import { abs, htmlToMarkdown, markdownPath, oneSentence, pageMarkdown } from "@/lib/md/format"
+import { site } from "@/lib/site"
 
-export type MarkdownGroup = "core" | "guides" | "categories" | "apps" | "legal"
+export type MarkdownGroup = "core" | "guides" | "categories" | "apps" | "legal" | "compare"
 
 export type MarkdownRoute = {
   htmlPath: string
@@ -288,11 +296,55 @@ function finish(
   }
 }
 
+function renderCompareHub(origin: string): MarkdownPage {
+  const pairs = comparePairs()
+  return finish(origin, {
+    title: hubTitle(pairs.length),
+    summary: hubIntro(pairs),
+    htmlPath: "/compare",
+    body: linkList(
+      pairs.map((pair) => ({
+        label: pairHeading(pair),
+        href: abs(origin, `/compare/${pair.slug}`),
+        note: `${pair.left.name} is ${pair.left.pricing}. ${pair.right.name} is ${pair.right.pricing}.`,
+      })),
+    ),
+    related: [{ label: "Home", href: abs(origin, "/") }],
+  })
+}
+
+function renderCompare(origin: string, slug: string): MarkdownPage | null {
+  const pair = comparePairs().find((item) => item.slug === slug)
+  if (!pair) return null
+  const body = [
+    pairIntro(pair),
+    "",
+    `- [${pair.left.name}](${abs(origin, `/app/${pair.left.slug}`)}) — ${pair.left.tagline}`,
+    `- [${pair.right.name}](${abs(origin, `/app/${pair.right.slug}`)}) — ${pair.right.tagline}`,
+    "",
+    pair.guides
+      .map((guide) => `- Guide: [${guide.title}](${abs(origin, `/blog/${guide.slug}`)})`)
+      .join("\n"),
+  ].join("\n")
+  return finish(origin, {
+    title: pairHeading(pair),
+    summary: pairIntro(pair),
+    htmlPath: `/compare/${pair.slug}`,
+    updated: (pair.guides[0]?.date ?? pair.left.createdAt).slice(0, 10),
+    body,
+    related: relatedPairs(pair).map((item) => ({
+      label: pairHeading(item),
+      href: abs(origin, `/compare/${item.slug}`),
+    })),
+  })
+}
+
 const staticRenderers: Record<string, (origin: string) => MarkdownPage> = {
   "/": renderHome,
   "/blog": renderBlogIndex,
   "/submit": renderSubmit,
   "/privacy": renderPrivacy,
+  "/compare": renderCompareHub,
 }
 
 export function renderMarkdown(origin: string, htmlPath: string): MarkdownPage | null {
@@ -305,6 +357,8 @@ export function renderMarkdown(origin: string, htmlPath: string): MarkdownPage |
   if (post) return renderPost(origin, decodeURIComponent(post[1]))
   const category = /^\/category\/([^/]+)$/.exec(path)
   if (category) return renderCategory(origin, decodeURIComponent(category[1]))
+  const compare = /^\/compare\/([^/]+)$/.exec(path)
+  if (compare) return renderCompare(origin, decodeURIComponent(compare[1]))
   return null
 }
 
@@ -318,7 +372,10 @@ export function contentPathFromMarkdown(pathname: string) {
 
 export function isContentPath(pathname: string) {
   if (staticRenderers[pathname]) return true
-  return /^\/(?:app|blog|category)\/[^/]+$/.test(pathname)
+  if (/^\/(?:app|blog|category)\/[^/]+$/.test(pathname)) return true
+  if (pathname === "/compare") return true
+  const compare = /^\/compare\/([^/]+)$/.exec(pathname)
+  return Boolean(compare && comparePairs().some((pair) => pair.slug === decodeURIComponent(compare[1])))
 }
 
 export function listMarkdownRoutes(): MarkdownRoute[] {
@@ -362,6 +419,22 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       description: appNote(app),
       group: "apps",
     }))
+  const comparisons: MarkdownRoute[] = [
+    {
+      htmlPath: "/compare",
+      mdPath: "/compare.md",
+      title: hubTitle(),
+      description: hubIntro(),
+      group: "compare",
+    },
+    ...comparePairs().map((pair) => ({
+      htmlPath: `/compare/${pair.slug}`,
+      mdPath: markdownPath(`/compare/${pair.slug}`),
+      title: pairHeading(pair),
+      description: pairIntro(pair),
+      group: "compare" as const,
+    })),
+  ]
   const legal: MarkdownRoute[] = [
     {
       htmlPath: "/privacy",
@@ -371,5 +444,5 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       group: "legal",
     },
   ]
-  return [...core, ...guides, ...categoryRoutes, ...appRoutes, ...legal]
+  return [...core, ...guides, ...categoryRoutes, ...appRoutes, ...comparisons, ...legal]
 }
