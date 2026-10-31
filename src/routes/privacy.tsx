@@ -1,18 +1,22 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { canonical, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/privacy")({
   component: PrivacyPage,
-  head: ({ matches }) => ({
-    meta: [
-      { title: "Privacy — PickMacApps" },
-      {
-        name: "description",
-        content: "What the PickMacApps submit form collects, and what it does not.",
-      },
-    ],
-    links: [canonical(originFrom(matches), "/privacy")],
-  }),
+  head: ({ matches }) => {
+    const origin = originFrom(matches);
+    const seo = buildMetadata({
+      title: pageCopy.privacy.title,
+      description: pageCopy.privacy.description,
+      path: "/privacy",
+      origin,
+    });
+    return {
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(origin, "/privacy")],
+    };
+  },
 });
 
 function PrivacyPage() {

@@ -4,7 +4,8 @@ import { Missing } from "@/components/missing";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { fetchSiteOrigin } from "@/lib/seo";
+import { buildMetadata, fetchSiteOrigin, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 import appCss from "../styles.css?url";
 
 const THEME_SCRIPT = `(function(){try{document.documentElement.classList.remove("dark");document.documentElement.dataset.theme="light";localStorage.removeItem("theme")}catch(e){}})()`;
@@ -22,21 +23,27 @@ export const Route = createRootRoute({
   ),
   head: ({ matches }) => {
     const missing = matches.some((match) => match.status === "notFound" || match._notFound);
+    const origin = originFrom(matches);
+    const described = (path: string) => ({
+      rel: "describedby",
+      href: origin ? `${origin}${path}` : path,
+      type: "text/plain",
+    });
+    const missingMeta = missing
+      ? buildMetadata({
+          title: pageCopy.notFound.title,
+          description: pageCopy.notFound.description,
+          path: "/",
+          origin,
+          noindex: true,
+        })
+      : null;
     return {
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#ffffff" },
-        missing
-          ? { title: "Page not found — PickMacApps" }
-          : { title: "PickMacApps — Mac apps worth installing" },
-        missing
-          ? { name: "description", content: "That page isn't part of the directory." }
-          : {
-              name: "description",
-              content: "A curated shelf of Mac apps. Browse by category, compare alternatives, and read short guides.",
-            },
-        ...(missing ? [{ name: "robots", content: "noindex" }] : []),
+        ...(missingMeta?.meta ?? []),
       ],
       links: [
       { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
@@ -47,6 +54,10 @@ export const Route = createRootRoute({
       },
       { rel: "manifest", href: "/__grok/manifest.webmanifest" },
       { rel: "apple-touch-icon", href: "/__grok/icon-180.png" },
+      described("/llms.txt"),
+      described("/llms-full.txt"),
+      described("/ai.txt"),
+      ...(missingMeta?.links ?? []),
       ],
       scripts: [{ children: THEME_SCRIPT }],
     };

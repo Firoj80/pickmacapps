@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
-import { canonical, metaDescription, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, metaDescription, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/app/$slug")({
   beforeLoad: ({ params }) => {
@@ -13,17 +14,26 @@ export const Route = createFileRoute("/app/$slug")({
   head: ({ params, matches }) => {
     const app = getApp(params.slug);
     if (!app) {
-      return { meta: [{ title: "App not found — PickMacApps" }, { name: "robots", content: "noindex" }] };
+      const missing = buildMetadata({
+        title: pageCopy.notFound.title,
+        description: pageCopy.notFound.description,
+        path: `/app/${params.slug}`,
+        origin: originFrom(matches),
+        noindex: true,
+      });
+      return { meta: missing.meta, links: missing.links };
     }
     const tagline = app.tagline.trim();
     const joiner = /[.!?]$/.test(tagline) ? " " : ". ";
-    const description = metaDescription(`${app.name}: ${tagline}${joiner}${app.description}`);
+    const seo = buildMetadata({
+      title: `${app.name} — ${tagline}`,
+      description: `${app.name}: ${tagline}${joiner}${app.description}`,
+      path: `/app/${params.slug}`,
+      origin: originFrom(matches),
+    });
     return {
-      meta: [
-        { title: `${app.name} — ${app.tagline}` },
-        { name: "description", content: description },
-      ],
-      links: [canonical(originFrom(matches), `/app/${params.slug}`)],
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(originFrom(matches), `/app/${params.slug}`)],
     };
   },
 });

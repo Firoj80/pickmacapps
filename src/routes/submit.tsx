@@ -1,18 +1,25 @@
 import { useState } from "react";
 import { CheckIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
-import { canonical, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/submit")({
   component: SubmitPage,
-  head: ({ matches }) => ({
-    meta: [
-      { title: "Submit Your Mac App — PickMacApps" },
-      { name: "description", content: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is a paid placement." },
-    ],
-    links: [canonical(originFrom(matches), "/submit")],
-  }),
+  head: ({ matches }) => {
+    const origin = originFrom(matches);
+    const seo = buildMetadata({
+      title: pageCopy.submit.title,
+      description: pageCopy.submit.description,
+      path: "/submit",
+      origin,
+    });
+    return {
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(origin, "/submit")],
+    };
+  },
 });
 
 const BADGE_HTML = `<a href="/" target="_blank" rel="noopener">

@@ -1,15 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router"
+
+async function respond(request: Request) {
+  const { handleIncoming } = await import("@/lib/md/handle")
+  return handleIncoming(request) ?? new Response("Not found\n", { status: 404 })
+}
 
 export const Route = createFileRoute("/robots.txt")({
   server: {
     handlers: {
-      GET: async ({ request }) => {
-        const origin = new URL(request.url).origin;
-        const body = `User-agent: *\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n# ${origin}/llms.txt\n`;
-        return new Response(body, {
-          headers: { "Content-Type": "text/plain; charset=utf-8" },
-        });
-      },
+      GET: async ({ request }) => respond(request),
+      HEAD: async ({ request }) => respond(request),
     },
   },
-});
+})

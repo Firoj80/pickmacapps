@@ -1,19 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { posts } from "@/lib/catalog";
-import { canonical, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/blog/")({
   component: BlogIndex,
-  head: ({ matches }) => ({
-    meta: [
-      { title: "Guides — PickMacApps" },
-      {
-        name: "description",
-        content: "Hand-researched guides to the best Mac apps.",
-      },
-    ],
-    links: [canonical(originFrom(matches), "/blog")],
-  }),
+  head: ({ matches }) => {
+    const origin = originFrom(matches);
+    const seo = buildMetadata({
+      title: pageCopy.guides.title,
+      description: pageCopy.guides.description,
+      path: "/blog",
+      origin,
+    });
+    return {
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(origin, "/blog")],
+    };
+  },
 });
 
 function BlogIndex() {

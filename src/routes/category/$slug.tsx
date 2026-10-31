@@ -1,7 +1,8 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { appsInCategory, getCategory } from "@/lib/catalog";
-import { canonical, metaDescription, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/category/$slug")({
   beforeLoad: ({ params }) => {
@@ -11,14 +12,24 @@ export const Route = createFileRoute("/category/$slug")({
   head: ({ params, matches }) => {
     const category = getCategory(params.slug);
     if (!category || appsInCategory(params.slug).length === 0) {
-      return { meta: [{ title: "Page not found — PickMacApps" }, { name: "robots", content: "noindex" }] };
+      const missing = buildMetadata({
+        title: pageCopy.notFound.title,
+        description: pageCopy.notFound.description,
+        path: `/category/${params.slug}`,
+        origin: originFrom(matches),
+        noindex: true,
+      });
+      return { meta: missing.meta, links: missing.links };
     }
+    const seo = buildMetadata({
+      title: `${category.name} Mac Apps`,
+      description: category.paragraphs[0] ?? "Mac apps in this category.",
+      path: `/category/${params.slug}`,
+      origin: originFrom(matches),
+    });
     return {
-      meta: [
-        { title: `${category.name} Mac Apps — PickMacApps` },
-        { name: "description", content: metaDescription(category?.paragraphs[0] ?? "Mac apps by category") },
-      ],
-      links: [canonical(originFrom(matches), `/category/${params.slug}`)],
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(originFrom(matches), `/category/${params.slug}`)],
     };
   },
 });

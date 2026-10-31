@@ -1,7 +1,8 @@
 import { createFileRoute, Link, notFound, useRouterState } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { apps, getPost, posts } from "@/lib/catalog";
-import { canonical, metaDescription, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, metaDescription, originFrom } from "@/lib/seo";
+import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/blog/$slug")({
   beforeLoad: ({ params }) => {
@@ -12,14 +13,26 @@ export const Route = createFileRoute("/blog/$slug")({
   head: ({ params, matches }) => {
     const post = getPost(params.slug);
     if (!post) {
-      return { meta: [{ title: "Guide not found — PickMacApps" }, { name: "robots", content: "noindex" }] };
+      const missing = buildMetadata({
+        title: pageCopy.notFound.title,
+        description: pageCopy.notFound.description,
+        path: `/blog/${params.slug}`,
+        origin: originFrom(matches),
+        noindex: true,
+      });
+      return { meta: missing.meta, links: missing.links };
     }
+    const seo = buildMetadata({
+      title: post.title,
+      description: post.excerpt,
+      path: `/blog/${params.slug}`,
+      origin: originFrom(matches),
+      type: "article",
+      publishedTime: post.date,
+    });
     return {
-      meta: [
-        { title: articleTitle(post.title) },
-        { name: "description", content: metaDescription(post?.excerpt ?? "Mac app guide") },
-      ],
-      links: [canonical(originFrom(matches), `/blog/${params.slug}`)],
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(originFrom(matches), `/blog/${params.slug}`)],
     };
   },
 });
@@ -138,9 +151,4 @@ function BlogPost() {
       </article>
     </main>
   );
-}
-
-function articleTitle(title: string) {
-  const branded = `${title} — PickMacApps`;
-  return branded.length <= 60 ? branded : title;
 }

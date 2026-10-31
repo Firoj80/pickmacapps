@@ -2,7 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { AppleMark } from "@/components/site-header";
 import { apps, posts } from "@/lib/catalog";
-import { canonical, originFrom } from "@/lib/seo";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { site } from "@/lib/site";
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { q?: string; cat?: string } => {
@@ -12,16 +13,40 @@ export const Route = createFileRoute("/")({
     return next;
   },
   component: Home,
-  head: ({ matches }) => ({
-    meta: [
-      { title: "PickMacApps — Mac apps worth installing" },
-      {
-        name: "description",
-        content: "A curated shelf of Mac apps. Browse by category, compare alternatives, and read short guides.",
-      },
-    ],
-    links: [canonical(originFrom(matches), "/")],
-  }),
+  head: ({ matches }) => {
+    const origin = originFrom(matches);
+    const jsonLd = {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": `${origin}/#organization`,
+          name: site.name,
+          url: origin,
+          description: site.description,
+          logo: `${origin}${site.logoPath}`,
+        },
+        {
+          "@type": "WebSite",
+          name: site.name,
+          url: origin,
+          description: site.description,
+          publisher: { "@id": `${origin}/#organization` },
+        },
+      ],
+    };
+    const seo = buildMetadata({
+      title: site.title,
+      description: site.description,
+      path: "/",
+      origin,
+    });
+    return {
+      meta: seo.meta,
+      links: [...seo.links, markdownAlternate(origin, "/")],
+      scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }],
+    };
+  },
 });
 
 function Home() {
