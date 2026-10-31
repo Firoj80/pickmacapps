@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import raw from "@/data/catalog.json";
 import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
-import { createChoiceCheckout, updateDodoPrice } from "@/lib/dodo.server";
+import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
 import type { AppItem, Post, Pricing } from "@/lib/catalog";
 
 type AppRow = {
@@ -171,10 +171,18 @@ export async function publicOffer() {
   const sql = await directorySql();
   const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
   const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
-  return {
-    priceCents: Number(map.choice_price_cents ?? 9900),
-    compareCents: Number(map.choice_compare_cents ?? 19900),
-  };
+  let priceCents = Number(map.choice_price_cents ?? 9900);
+  const compareCents = Number(map.choice_compare_cents ?? 19900);
+  const live = await readDodoPrice();
+  if (live != null && live !== priceCents) {
+    priceCents = live;
+    await sql.query(
+      `insert into settings (key, value) values ('choice_price_cents', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(live)],
+    );
+  }
+  return { priceCents, compareCents };
 }
 
 export async function adminStats() {

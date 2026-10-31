@@ -68,6 +68,45 @@ export async function createChoiceCheckout(input: { submissionId: string; email:
   return { checkoutUrl: json.checkout_url, paymentId: json.payment_id ?? "" };
 }
 
+function dodoMessage(body: string) {
+  try {
+    const json = JSON.parse(body) as { message?: string };
+    const message = json.message?.replace(/\s+/g, " ").trim();
+    if (message) return ` ${message.slice(0, 180)}`;
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function dodoFailure(action: string, status: number, body: string) {
+  const message = dodoMessage(body);
+  if (status === 403) {
+    return `Dodo refused ${action} (403).${message} In Dodo, open this API key and allow Products write. You can still change the price on the product itself.`;
+  }
+  return `Dodo rejected ${action} (${status}).${message}`;
+}
+
+/** The amount Dodo will charge, in cents. Null when the product cannot be read. */
+export async function readDodoPrice() {
+  const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
+  const productId = process.env.DODO_PRODUCT_ID?.trim();
+  if (!apiKey || !productId) return null;
+  try {
+    const response = await fetch(`${dodoBase()}/products/${productId}`, {
+      headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
+    });
+    if (!response.ok) return null;
+    const json = (await response.json()) as { price?: { price?: number; currency?: string } };
+    const amount = json.price?.price;
+    if (json.price?.currency && json.price.currency !== "USD") return null;
+    if (typeof amount !== "number" || !Number.isInteger(amount) || amount < 100) return null;
+    return amount;
+  } catch {
+    return null;
+  }
+}
+
 /** Updates the Dodo product. The amount is the server setting, never a browser field. */
 export async function updateDodoPrice(amountCents: number) {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
@@ -91,7 +130,6 @@ export async function updateDodoPrice(amountCents: number) {
       },
     }),
   });
-  if (!response.ok) {
-    throw new Error(`Dodo rejected the price change (${response.status}).`);
-  }
+  const text = await response.text();
+  if (!response.ok) throw new Error(dodoFailure("the price change", response.status, text));
 }
