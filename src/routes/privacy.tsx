@@ -37,7 +37,7 @@ function PrivacyPage() {
           from Google Fonts, which means your browser requests them from Google.
         </p>
         <p>
-          Editor’s Choice is a paid placement. Pages that use it say so on the listing. This page describes the site’s
+          Editor’s Choice listings are labeled Editor’s Choice. This page describes the site’s
           own practices. It is not legal advice.
         </p>
         <p>

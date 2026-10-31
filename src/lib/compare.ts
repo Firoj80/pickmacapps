@@ -1,8 +1,8 @@
-import { apps, getApp, posts, pricingLabel, type AppItem, type Post } from "@/lib/catalog";
+import { apps, posts, pricingLabel, type AppItem, type Post } from "@/lib/catalog";
 
-/** A guide is a comparison source only when it names 2 or 3 catalog apps. */
+/** A guide is a comparison source when it names between 2 and 5 catalog apps. */
 export const COMPARE_GROUP_MIN = 2;
-export const COMPARE_GROUP_MAX = 3;
+export const COMPARE_GROUP_MAX = 5;
 /** One app can appear in at most this many comparison pages. */
 export const COMPARE_PAIR_CAP = 3;
 
@@ -20,9 +20,9 @@ export type CompareHit =
   | { status: "hub" }
   | { status: "missing" };
 
-function appsNamedIn(post: Post) {
+function appsNamedIn(post: Post, list: AppItem[]) {
   const html = post.html.toLowerCase();
-  return apps.filter((app) => html.includes(app.name.toLowerCase()));
+  return list.filter((app) => html.includes(app.name.toLowerCase()));
 }
 
 function pairSlug(left: string, right: string) {
@@ -32,12 +32,14 @@ function pairSlug(left: string, right: string) {
 
 /**
  * The only gate for comparison pages. Routes, the sitemap, the hub, and
- * related links all call this. Guides that name 4 or more apps are not a source.
+ * related links all call this. Guides outside the size range are not a source.
  */
-export function comparePairs(): ComparePair[] {
+export function comparePairs(source?: { apps: AppItem[]; posts: Post[] }): ComparePair[] {
+  const list = source?.apps ?? apps;
+  const guideList = source?.posts ?? posts;
   const found = new Map<string, { left: AppItem; right: AppItem; guides: Post[]; groupSize: number }>();
-  for (const post of posts) {
-    const named = appsNamedIn(post);
+  for (const post of guideList) {
+    const named = appsNamedIn(post, list);
     if (named.length < COMPARE_GROUP_MIN || named.length > COMPARE_GROUP_MAX) continue;
     for (let i = 0; i < named.length; i += 1) {
       for (let j = i + 1; j < named.length; j += 1) {
@@ -56,9 +58,11 @@ export function comparePairs(): ComparePair[] {
 
   const used = new Map<string, number>();
   const kept: ComparePair[] = [];
-  for (const slug of [...found.keys()].sort()) {
-    const item = found.get(slug);
-    if (!item) continue;
+  const ranked = [...found.entries()].sort((a, b) => {
+    if (a[1].groupSize !== b[1].groupSize) return a[1].groupSize - b[1].groupSize;
+    return a[0].localeCompare(b[0]);
+  });
+  for (const [slug, item] of ranked) {
     const leftCount = used.get(item.left.slug) ?? 0;
     const rightCount = used.get(item.right.slug) ?? 0;
     if (leftCount >= COMPARE_PAIR_CAP || rightCount >= COMPARE_PAIR_CAP) continue;
@@ -66,11 +70,12 @@ export function comparePairs(): ComparePair[] {
     used.set(item.right.slug, rightCount + 1);
     kept.push({ slug, left: item.left, right: item.right, guides: item.guides, groupSize: item.groupSize });
   }
+  kept.sort((a, b) => a.slug.localeCompare(b.slug));
   return kept;
 }
 
-export function comparePair(slug: string) {
-  return comparePairs().find((pair) => pair.slug === slug);
+export function comparePair(slug: string, source?: { apps: AppItem[]; posts: Post[] }) {
+  return comparePairs(source).find((pair) => pair.slug === slug);
 }
 
 export function parseCompareSlug(slug: string) {
@@ -79,21 +84,22 @@ export function parseCompareSlug(slug: string) {
   return { left: parts[0], right: parts[1] };
 }
 
-export function resolveCompareSlug(slug: string): CompareHit {
+export function resolveCompareSlug(slug: string, source?: { apps: AppItem[]; posts: Post[] }): CompareHit {
   const parsed = parseCompareSlug(slug);
   if (!parsed) return { status: "missing" };
-  const left = getApp(parsed.left);
-  const right = getApp(parsed.right);
+  const list = source?.apps ?? apps;
+  const left = list.find((app) => app.slug === parsed.left);
+  const right = list.find((app) => app.slug === parsed.right);
   if (!left || !right || left.slug === right.slug) return { status: "missing" };
   const canonical = pairSlug(left.slug, right.slug);
   if (slug !== canonical) return { status: "redirect", to: `/compare/${canonical}` };
-  const pair = comparePair(canonical);
+  const pair = comparePair(canonical, source);
   if (!pair) return { status: "hub" };
   return { status: "ok", pair };
 }
 
-export function relatedPairs(pair: ComparePair) {
-  return comparePairs().filter(
+export function relatedPairs(pair: ComparePair, source?: { apps: AppItem[]; posts: Post[] }) {
+  return comparePairs(source).filter(
     (other) =>
       other.slug !== pair.slug &&
       (other.left.slug === pair.left.slug ||
@@ -138,7 +144,7 @@ export function pairFaqs(pair: ComparePair) {
     },
     {
       q: `Why are ${pair.left.name} and ${pair.right.name} compared?`,
-      a: `${guideNames} names both. A comparison is published only when a guide names 2 or 3 apps, and each app is in at most ${COMPARE_PAIR_CAP} comparisons.`,
+      a: `${guideNames} names both. A comparison is published only when a guide names ${COMPARE_GROUP_MIN} to ${COMPARE_GROUP_MAX} apps, and each app is in at most ${COMPARE_PAIR_CAP} comparisons.`,
     },
     {
       q: "Are they ranked?",
@@ -157,7 +163,7 @@ export function hubIntro(pairs = comparePairs()) {
     .map((pair) => pairHeading(pair))
     .join(", ");
   const newer = (hubLastmod() ?? "").slice(0, 10);
-  return `This hub lists ${pairs.length} Mac app comparisons. Each one is a pair from a guide that names only 2 or 3 apps, and no app is in more than ${COMPARE_PAIR_CAP} pairs. They are not rankings. The first pairs are ${names}. The newest listing date among them is ${newer}.`;
+  return `This hub lists ${pairs.length} Mac app comparisons. Each one is a pair from a guide that names ${COMPARE_GROUP_MIN} to ${COMPARE_GROUP_MAX} apps, and no app is in more than ${COMPARE_PAIR_CAP} pairs. They are not rankings. The first pairs are ${names}. The newest listing date among them is ${newer}.`;
 }
 
 export function hubFaqs(pairs = comparePairs()) {
@@ -168,7 +174,7 @@ export function hubFaqs(pairs = comparePairs()) {
     },
     {
       q: "Which pairs are left out?",
-      a: `A guide that names 4 or more apps does not create comparison pages. A pair is also left out once either app is already in ${COMPARE_PAIR_CAP} comparisons.`,
+      a: `A guide that names fewer than ${COMPARE_GROUP_MIN} apps, or more than ${COMPARE_GROUP_MAX}, does not create comparison pages. A pair is also left out once either app is already in ${COMPARE_PAIR_CAP} comparisons.`,
     },
     {
       q: "Are the apps ranked?",

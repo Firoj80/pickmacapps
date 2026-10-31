@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useRouteContext } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { apps } from "@/lib/catalog";
@@ -17,13 +17,15 @@ export function SiteHeader() {
   const [menu, setMenu] = useState(false);
   const [q, setQ] = useState("");
 
+  const { directory } = useRouteContext({ from: "__root__" });
+  const list = directory?.apps ?? apps;
   const hits = useMemo(() => {
     const needle = q.trim().toLowerCase();
-    if (!needle) return apps.slice(0, 6);
-    return apps
+    if (!needle) return list.slice(0, 6);
+    return list
       .filter((app) => app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle))
       .slice(0, 8);
-  }, [q]);
+  }, [q, list]);
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {

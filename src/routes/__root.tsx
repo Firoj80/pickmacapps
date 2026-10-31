@@ -5,6 +5,7 @@ import { PreviewHostBridge } from "@/components/preview-host-bridge";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buildMetadata, fetchSiteOrigin, originFrom } from "@/lib/seo";
+import { fetchDirectory } from "@/lib/directory.fn";
 import { pageCopy } from "@/lib/site";
 import appCss from "../styles.css?url";
 
@@ -12,10 +13,16 @@ const THEME_SCRIPT = `(function(){try{document.documentElement.classList.remove(
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
+    let origin = "";
     try {
-      return { origin: await fetchSiteOrigin() };
+      origin = await fetchSiteOrigin();
     } catch {
-      return { origin: "" };
+      origin = "";
+    }
+    try {
+      return { origin, directory: await fetchDirectory() };
+    } catch {
+      return { origin, directory: null };
     }
   },
   notFoundComponent: () => (

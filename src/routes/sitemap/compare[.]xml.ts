@@ -10,7 +10,7 @@ export const Route = createFileRoute("/sitemap/compare.xml")({
     handlers: {
       GET: async ({ request }) => respond(request),
       HEAD: async ({ request }) => {
-        const response = respond(request);
+        const response = await respond(request);
         return new Response(null, { status: response.status, headers: response.headers });
       },
     },

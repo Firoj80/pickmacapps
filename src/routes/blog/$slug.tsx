@@ -6,13 +6,16 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/blog/$slug")({
-  beforeLoad: ({ params }) => {
-    if (!getPost(params.slug)) throw notFound();
+  beforeLoad: ({ params, context }) => {
+    const directory = context.directory;
+    const found = directory ? directory.posts.some((post) => post.slug === params.slug) : Boolean(getPost(params.slug));
+    if (!found) throw notFound();
   },
   component: BlogPost,
   notFoundComponent: () => <Missing title="Guide not found" body="That article isn't on the blog." />,
   head: ({ params, matches }) => {
-    const post = getPost(params.slug);
+    const directory = matches[0]?.context.directory;
+    const post = directory ? directory.posts.find((item) => item.slug === params.slug) : getPost(params.slug);
     if (!post) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -42,13 +45,16 @@ export const Route = createFileRoute("/blog/$slug")({
 
 function BlogPost() {
   const { slug } = Route.useParams();
-  const post = getPost(slug);
+  const { directory } = Route.useRouteContext();
+  const guideList = directory?.posts ?? posts;
+  const appList = directory?.apps ?? apps;
+  const post = guideList.find((item) => item.slug === slug) ?? null;
   if (!post) return null;
   const more = post.more
-    .map((item) => posts.find((entry) => entry.slug === item))
+    .map((item) => guideList.find((entry) => entry.slug === item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const haystack = `${post.title} ${post.excerpt} ${post.html}`.toLowerCase();
-  const mentioned = apps.filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8);
+  const mentioned = appList.filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8);
 
   return (
     <main>

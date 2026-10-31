@@ -4,7 +4,7 @@ import { editors, type AppItem } from "@/lib/catalog";
 const covers = ["#f6d6c6", "#d7e4f5", "#e7d7f2", "#d8efe2", "#f3e6c4", "#f6d5e2", "#d9e8e4"];
 
 export function AppCard({ app, size = "md" }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
-  const choice = editors.has(app.slug);
+  const choice = app.editorChoice ?? editors.has(app.slug);
   const icon = size === "lg" ? "h-14 w-14" : size === "md" ? "h-12 w-12" : "h-10 w-10";
   const title = size === "lg" ? "text-[20px]" : size === "md" ? "text-[17px]" : "text-[15px]";
   const tag = size === "lg" ? "text-[15px]" : size === "md" ? "text-[14px]" : "text-[13px]";
@@ -27,7 +27,11 @@ export function AppCard({ app, size = "md" }: { app: AppItem; size?: "lg" | "md"
         <div className="min-w-0">
           <h3 className={`${title} truncate font-semibold tracking-tight text-ink`}>{app.name}</h3>
           <p className={`mt-0.5 line-clamp-2 ${tag} leading-relaxed text-muted`}>{app.tagline}</p>
-          {choice ? <p className="mt-1 text-[11px] font-medium text-muted">Paid placement</p> : null}
+          {choice ? (
+            <p className="mt-1.5 inline-flex rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+              Editor’s Choice
+            </p>
+          ) : null}
         </div>
       </div>
     </Link>

@@ -14,7 +14,8 @@ export const Route = createFileRoute("/blog/")({
       path: "/blog",
       origin,
     });
-    const script = jsonLdScript(guidesGraph(origin, posts));
+    const directory = matches[0]?.context.directory;
+    const script = jsonLdScript(guidesGraph(origin, directory?.posts ?? posts));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/blog")],
@@ -24,6 +25,8 @@ export const Route = createFileRoute("/blog/")({
 });
 
 function BlogIndex() {
+  const { directory } = Route.useRouteContext();
+  const list = directory?.posts ?? posts;
   return (
     <main>
       <div className="mx-auto max-w-3xl px-6 py-14 lg:py-20">
@@ -32,7 +35,7 @@ function BlogIndex() {
           <h1 className="font-display mt-3 text-5xl font-semibold tracking-[-0.04em] text-ink">Guides</h1>
         </header>
         <div className="space-y-8">
-          {posts.map((post, index) => (
+          {list.map((post, index) => (
             <Link
               key={post.slug}
               to="/blog/$slug"

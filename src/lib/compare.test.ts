@@ -16,12 +16,20 @@ const origin = "https://pickmacapps.test"
 
 test("the comparison gate is the only source for pages, sitemap, and chips", () => {
   const pairs = comparePairs()
-  assert.equal(pairs.length, 13)
+  assert.equal(pairs.length, 26)
   const slugs = pairs.map((pair) => pair.slug)
   assert.equal(new Set(slugs).size, slugs.length)
-  assert.equal(slugs.includes("better-shot-vs-boom"), false)
-  assert.equal(slugs.includes("shottr-vs-better-shot") || slugs.includes("better-shot-vs-shottr"), true)
+  assert.equal(slugs.includes("better-shot-vs-boom"), true)
+  assert.equal(slugs.includes("holdspeak-vs-precis"), true)
+  assert.equal(slugs.some((slug) => slug.includes("notchdodo")), false)
+  assert.equal(slugs.includes("better-shot-vs-shottr"), true)
   assert.equal(slugs.filter((slug) => slug.includes("anytype") && slug.includes("ia-writer")).length, 1)
+  const counts = new Map<string, number>()
+  for (const pair of pairs) {
+    counts.set(pair.left.slug, (counts.get(pair.left.slug) ?? 0) + 1)
+    counts.set(pair.right.slug, (counts.get(pair.right.slug) ?? 0) + 1)
+  }
+  for (const count of counts.values()) assert.ok(count <= 3)
 
   const canonical = resolveCompareSlug("tucket-vs-clippio")
   const flipped = resolveCompareSlug("clippio-vs-tucket")
@@ -36,6 +44,7 @@ test("the comparison gate is the only source for pages, sitemap, and chips", () 
 
   const below = resolveCompareSlug("helumi-vs-macwhisper")
   assert.equal(below.status, "hub")
+  assert.equal(resolveCompareSlug("better-shot-vs-screen-charm").status, "hub")
   assert.equal(resolveCompareSlug("not-a-pair").status, "missing")
 
   for (const pair of pairs) {

@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppCard } from "@/components/app-card";
-import { categories, shelfApps, type AppItem } from "@/lib/catalog";
+import { categories, homeGroups, shelfApps, type AppItem } from "@/lib/catalog";
 
 export function AppGrid({
   apps,
@@ -57,23 +57,7 @@ export function AppGrid({
       {visible.length === 0 ? (
         <p className="mt-10 text-[15px] text-body">Nothing on the shelf matches that.</p>
       ) : category === "all" && !query ? (
-        <div className="mt-8 space-y-16 pb-8">
-          <section className="shelf grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2">
-            {visible.slice(0, 2).map((app) => (
-              <AppCard key={app.id} app={app} size="lg" />
-            ))}
-          </section>
-          <section className="shelf grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-            {visible.slice(2, 8).map((app) => (
-              <AppCard key={app.id} app={app} size="md" />
-            ))}
-          </section>
-          <section className="shelf grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {visible.slice(8).map((app) => (
-              <AppCard key={app.id} app={app} size="sm" />
-            ))}
-          </section>
-        </div>
+        <GroupedShelf apps={visible} order={order} />
       ) : (
         <div className="shelf mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
           {visible.map((app) => (
@@ -82,6 +66,32 @@ export function AppGrid({
         </div>
       )}
     </section>
+  );
+}
+
+function GroupedShelf({ apps, order }: { apps: AppItem[]; order: "newest" | "name" | "free" }) {
+  const { choice, groups } = homeGroups(apps, order);
+  return (
+    <div className="mt-8 space-y-16 pb-8">
+      {choice.length ? (
+        <section className="shelf grid grid-cols-1 gap-x-8 gap-y-16 sm:grid-cols-2">
+          {choice.map((app) => (
+            <AppCard key={app.id} app={app} size="lg" />
+          ))}
+        </section>
+      ) : null}
+      {groups.map((group) => (
+        <section key={group.id}>
+          <h2 className="text-2xl font-semibold tracking-tight text-ink">{group.title}</h2>
+          <p className="mt-1 text-sm text-muted">{group.line}</p>
+          <div className="shelf mt-6 grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+            {group.apps.map((app) => (
+              <AppCard key={app.id} app={app} size="md" />
+            ))}
+          </div>
+        </section>
+      ))}
+    </div>
   );
 }
 

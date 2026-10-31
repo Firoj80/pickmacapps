@@ -16,15 +16,20 @@ const ARCHIVE = "public, s-maxage=86400, stale-while-revalidate=604800";
 
 export const Route = createFileRoute("/compare/$slug")({
   headers: () => ({ "Cache-Control": ARCHIVE }),
-  beforeLoad: ({ params }) => {
-    const hit = resolveCompareSlug(params.slug);
+  beforeLoad: ({ params, context }) => {
+    const source = context.directory
+      ? { apps: context.directory.apps, posts: context.directory.posts }
+      : undefined;
+    const hit = resolveCompareSlug(params.slug, source);
     if (hit.status === "redirect") throw redirect({ href: hit.to, statusCode: 308 });
     if (hit.status === "hub") throw redirect({ href: "/compare", statusCode: 308 });
     if (hit.status === "missing") throw notFound();
   },
   component: ComparePage,
   head: ({ params, matches }) => {
-    const hit = resolveCompareSlug(params.slug);
+    const directory = matches[0]?.context.directory;
+    const source = directory ? { apps: directory.apps, posts: directory.posts } : undefined;
+    const hit = resolveCompareSlug(params.slug, source);
     if (hit.status !== "ok") {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -54,11 +59,13 @@ export const Route = createFileRoute("/compare/$slug")({
 
 function ComparePage() {
   const { slug } = Route.useParams();
-  const hit = resolveCompareSlug(slug);
+  const { directory } = Route.useRouteContext();
+  const source = directory ? { apps: directory.apps, posts: directory.posts } : undefined;
+  const hit = resolveCompareSlug(slug, source);
   if (hit.status !== "ok") return null;
   const { pair } = hit;
   const faqs = pairFaqs(pair);
-  const related = relatedPairs(pair);
+  const related = relatedPairs(pair, source);
   return (
     <main>
       <article className="mx-auto max-w-3xl px-6 py-14 lg:py-20">

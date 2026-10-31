@@ -56,7 +56,7 @@ function linkList(items: { label: string; href: string; note?: string }[]) {
 }
 
 function appNote(app: (typeof apps)[number]) {
-  const choice = editors.has(app.slug) ? " Editor’s Choice, paid placement." : ""
+  const choice = editors.has(app.slug) ? " Editor’s Choice." : ""
   return `${app.tagline}${choice}`
 }
 
@@ -65,7 +65,7 @@ function renderHome(origin: string): MarkdownPage {
     (a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)),
   )
   const body = [
-    "Listings link to the developer. Editor’s Choice is a paid placement and the listing says so.",
+    "Listings link to the developer. Editor’s Choice listings are labeled Editor’s Choice.",
     "",
     "## Categories",
     linkList(
@@ -168,7 +168,7 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
     "",
     `- Price model: ${app.pricing === "free" ? "Free" : app.pricing === "paid" ? "Paid" : "Freemium"}`,
     `- Category: [${app.categoryName}](${abs(origin, `/category/${app.category}`)})`,
-    choice ? "- Editor’s Choice: paid placement" : "",
+    choice ? "- Editor’s Choice" : "",
     `- Added: ${app.createdAt.slice(0, 10)}`,
     "",
     app.description.trim(),
@@ -230,9 +230,9 @@ function renderSubmit(origin: string): MarkdownPage {
     "- No visitor count is promised.",
     "",
     "## Editor’s Choice",
-    "Editor’s Choice costs $99, marked down from $199, paid once. Those listings say “paid placement” on the page.",
+    "Editor’s Choice costs $99, marked down from $199, paid once. Those listings are labeled Editor’s Choice.",
     "",
-    "- Editor’s Choice label on the directory. It is marked as a paid placement.",
+    "- Editor’s Choice label on the directory.",
     "- A link from the listing to the app’s site.",
     "",
     "## Checklist",
@@ -244,7 +244,7 @@ function renderSubmit(origin: string): MarkdownPage {
   ].join("\n")
   return finish(origin, {
     title: "Submit your Mac app",
-    summary: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is a paid placement.",
+    summary: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is labeled on the listing.",
     htmlPath: "/submit",
     body,
     related: [{ label: "Privacy", href: abs(origin, "/privacy") }],
@@ -257,7 +257,7 @@ function renderPrivacy(origin: string): MarkdownPage {
     "",
     "The site does not ask you to create an account. Theme preference is stored in this browser. Fonts are loaded from Google Fonts, which means your browser requests them from Google.",
     "",
-    "Editor’s Choice is a paid placement. Pages that use it say so on the listing. This page describes the site’s own practices. It is not legal advice.",
+    "Editor’s Choice listings are labeled Editor’s Choice. This page describes the site’s own practices. It is not legal advice.",
   ].join("\n")
   return finish(origin, {
     title: "Privacy",
@@ -392,7 +392,7 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       htmlPath: "/submit",
       mdPath: "/submit.md",
       title: "Submit an app",
-      description: "Send a Mac app for review. Editor’s Choice is a $99 paid placement, marked down from $199.",
+      description: "Send a Mac app for review. Editor’s Choice is labeled on the listing and costs $99, marked down from $199.",
       group: "core",
     },
   ]

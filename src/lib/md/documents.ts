@@ -31,7 +31,7 @@ export function llmsText(origin: string) {
     "",
     `> ${site.description} Listings link to the developer. A guide says when the popular app is still the better fit.`,
     "",
-    "The directory is for people choosing Mac software. A free listing is reviewed by hand. Editor’s Choice is a one-time $99 placement, marked down from $199, and the page says it is paid. There is no public contact email; the submit form is the contact.",
+    "The directory is for people choosing Mac software. A free listing is reviewed by hand. Editor’s Choice is a one-time $99 placement, marked down from $199, and the listing is labeled Editor’s Choice. There is no public contact email; the submit form is the contact.",
     "",
     "# keep in sync with /robots.txt and /ai.txt",
     "",
@@ -131,7 +131,7 @@ export function aiText(origin: string) {
 }
 
 function botBlock(name: string) {
-  return [`User-agent: ${name}`, "Allow: /", "Disallow: /api/auth", "Disallow: /auth", ""].join("\n")
+  return [`User-agent: ${name}`, "Allow: /", "Disallow: /api/auth", "Disallow: /auth", "Disallow: /admin", "Disallow: /api/admin", "Disallow: /api/cron", ""].join("\n")
 }
 
 export function robotsText(origin: string) {
@@ -147,6 +147,9 @@ export function robotsText(origin: string) {
     "Allow: /api/md",
     "Disallow: /api/auth",
     "Disallow: /auth",
+    "Disallow: /admin",
+    "Disallow: /api/admin",
+    "Disallow: /api/cron",
     "",
     `Sitemap: ${abs(origin, "/sitemap.xml")}`,
     "",

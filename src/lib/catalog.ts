@@ -15,6 +15,7 @@ export type AppItem = {
   categoryName: string;
   categoryIcon: string;
   featured: boolean;
+  editorChoice?: boolean;
   createdAt: string;
   demo: string;
   related: string[];
@@ -140,6 +141,76 @@ export function shelfApps(
     return inCategory && matches;
   });
   return [...sortApps(filtered, order)].sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)));
+}
+
+export function isEditorChoice(app: AppItem) {
+  return app.editorChoice ?? editors.has(app.slug);
+}
+
+const homeJobs: { id: string; title: string; line: string; slugs: string[] }[] = [
+  {
+    id: "screenshots",
+    title: "Screenshots",
+    line: "Capture, annotate, or record the screen.",
+    slugs: ["shottr", "better-shot", "dejashot", "screen-charm", "screentoast", "boom"],
+  },
+  {
+    id: "menu-bar",
+    title: "Menu bar",
+    line: "Menu bar icons and the notch.",
+    slugs: ["clearbar", "lounge", "alcove", "notchdodo", "droppy"],
+  },
+  {
+    id: "clipboard",
+    title: "Clipboard",
+    line: "Clipboard history.",
+    slugs: ["tucket", "clippio", "maclip"],
+  },
+  {
+    id: "voice",
+    title: "Voice",
+    line: "Dictation and transcription.",
+    slugs: ["holdspeak", "precis", "voicera"],
+  },
+  {
+    id: "writing",
+    title: "Writing",
+    line: "Notes and a focused draft.",
+    slugs: ["anytype", "ia-writer"],
+  },
+  {
+    id: "disk",
+    title: "Disk",
+    line: "Uninstall an app, or see what fills the disk.",
+    slugs: ["mole", "plumby", "bytesweep"],
+  },
+];
+
+/** Editor’s Choice stays its own row. Every other app is grouped by job. */
+export function homeGroups(list: AppItem[], order: "newest" | "name" | "free" = "newest") {
+  const choice = list.filter(isEditorChoice);
+  const rest = new Map(list.filter((app) => !isEditorChoice(app)).map((app) => [app.slug, app]));
+  const groups = homeJobs.flatMap((job) => {
+    const apps = sortApps(
+      job.slugs.flatMap((slug) => {
+        const app = rest.get(slug);
+        if (!app) return [];
+        rest.delete(slug);
+        return [app];
+      }),
+      order,
+    );
+    return apps.length ? [{ id: job.id, title: job.title, line: job.line, apps }] : [];
+  });
+  if (rest.size) {
+    groups.push({
+      id: "more",
+      title: "More",
+      line: "Other apps on the shelf.",
+      apps: sortApps([...rest.values()], order),
+    });
+  }
+  return { choice, groups };
 }
 
 export function getApp(slug: string) {

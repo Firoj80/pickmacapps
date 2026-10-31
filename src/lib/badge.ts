@@ -27,39 +27,37 @@ function publicUrl(value: string) {
   return url;
 }
 
+export async function checkBadgeOnPage(value: string) {
+  const url = publicUrl(value.trim());
+  if (!url) {
+    return { ok: false, message: "Enter a public website URL, including https://" };
+  }
+  try {
+    const response = await fetch(url, {
+      redirect: "follow",
+      signal: AbortSignal.timeout(8000),
+      headers: {
+        "User-Agent": "PickMacAppsBadgeCheck/1.0",
+        Accept: "text/html",
+      },
+    });
+    if (!response.ok) {
+      return { ok: false, message: `We couldn't open that page (${response.status}).` };
+    }
+    const html = (await response.text()).slice(0, 1_500_000).toLowerCase();
+    const found = html.includes("pickmacapps") || html.includes("badge.svg") || html.includes("badge.png");
+    if (!found) {
+      return { ok: false, message: "We couldn't find the PickMacApps badge on that page yet." };
+    }
+    return { ok: true, message: "Badge found. You can submit your app." };
+  } catch {
+    return { ok: false, message: "We couldn't reach that page. Check the URL and try again." };
+  }
+}
+
 export const verifyBadge = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
     const url = typeof input === "object" && input && "url" in input ? String(input.url) : "";
     return { url };
   })
-  .handler(async ({ data }) => {
-    const url = publicUrl(data.url.trim());
-    if (!url) {
-      return { ok: false, message: "Enter a public website URL, including https://" };
-    }
-    try {
-      const response = await fetch(url, {
-        redirect: "follow",
-        signal: AbortSignal.timeout(8000),
-        headers: {
-          "User-Agent": "PickMacAppsBadgeCheck/1.0",
-          Accept: "text/html",
-        },
-      });
-      if (!response.ok) {
-        return { ok: false, message: `We couldn't open that page (${response.status}).` };
-      }
-      const html = (await response.text()).slice(0, 1_500_000).toLowerCase();
-      const found =
-        html.includes("pickmacapps") || html.includes("badge.svg") || html.includes("badge.png");
-      if (!found) {
-        return {
-          ok: false,
-          message: "We couldn't find the PickMacApps badge on that page yet.",
-        };
-      }
-      return { ok: true, message: "Badge found. You can submit your app." };
-    } catch {
-      return { ok: false, message: "We couldn't reach that page. Check the URL and try again." };
-    }
-  });
+  .handler(async ({ data }) => checkBadgeOnPage(data.url));

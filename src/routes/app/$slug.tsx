@@ -7,13 +7,16 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/app/$slug")({
-  beforeLoad: ({ params }) => {
-    if (!getApp(params.slug)) throw notFound();
+  beforeLoad: ({ params, context }) => {
+    const directory = context.directory;
+    const found = directory ? directory.apps.some((app) => app.slug === params.slug) : Boolean(getApp(params.slug));
+    if (!found) throw notFound();
   },
   component: AppPage,
   notFoundComponent: () => <Missing title="App not found" body="That Mac app isn't in the directory." />,
   head: ({ params, matches }) => {
-    const app = getApp(params.slug);
+    const directory = matches[0]?.context.directory;
+    const app = directory ? directory.apps.find((item) => item.slug === params.slug) : getApp(params.slug);
     if (!app) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -43,13 +46,14 @@ export const Route = createFileRoute("/app/$slug")({
 
 function AppPage() {
   const { slug } = Route.useParams();
-  const app = getApp(slug);
+  const { directory } = Route.useRouteContext();
+  const app = directory ? directory.apps.find((item) => item.slug === slug) ?? null : getApp(slug);
   if (!app) return null;
 
   const related = app.related
     .map((item) => getApp(item))
     .filter((item): item is AppItem => Boolean(item));
-  const choice = editors.has(app.slug);
+  const choice = app.editorChoice ?? editors.has(app.slug);
 
   return (
     <main>
@@ -69,7 +73,7 @@ function AppPage() {
             <div>
               {choice ? (
                 <p className="text-[12px] font-semibold tracking-[0.14em] text-accent uppercase">
-                  Editor’s Choice · paid placement
+                  Editor’s Choice
                 </p>
               ) : (
                 <p className="text-[12px] font-semibold tracking-[0.14em] text-muted uppercase">{app.categoryName}</p>

@@ -1,12 +1,14 @@
 import { useState } from "react";
 import { CheckIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
+import { fetchOffer, submitListingFn } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/submit")({
+  loader: () => fetchOffer(),
   component: SubmitPage,
   head: ({ matches }) => {
     const origin = originFrom(matches);
@@ -42,6 +44,10 @@ function SubmitPage() {
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
   const [badgeMessage, setBadgeMessage] = useState("");
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const offer = Route.useLoaderData();
+  const price = (offer.priceCents / 100).toFixed(0);
+  const compare = (offer.compareCents / 100).toFixed(0);
 
   async function copyBadge() {
     try {
@@ -92,10 +98,36 @@ function SubmitPage() {
               ) : (
                 <form
                   className="space-y-5"
-                  onSubmit={(event) => {
+                  onSubmit={async (event) => {
                     event.preventDefault();
-                    if (badge !== "ok") return;
-                    setSent(true);
+                    if (badge !== "ok" || sending) return;
+                    const form = new FormData(event.currentTarget);
+                    setSending(true);
+                    try {
+                      const result = await submitListingFn({
+                        data: {
+                          name: String(form.get("name") ?? ""),
+                          website: String(form.get("website_url") ?? ""),
+                          tagline: String(form.get("tagline") ?? ""),
+                          email: String(form.get("email") ?? ""),
+                          plan,
+                        },
+                      });
+                      if (result.checkoutUrl) {
+                        window.location.href = result.checkoutUrl;
+                        return;
+                      }
+                      if (result.ok) setSent(true);
+                      else {
+                        setBadge("fail");
+                        setBadgeMessage(result.message);
+                      }
+                    } catch {
+                      setBadge("fail");
+                      setBadgeMessage("The submission could not be saved.");
+                    } finally {
+                      setSending(false);
+                    }
                   }}
                 >
                   <div className="space-y-3">
@@ -177,16 +209,16 @@ function SubmitPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-baseline gap-1.5">
-                              <span className="text-lg font-bold text-ink">$99</span>
-                              <span className="text-xs text-muted line-through">$199</span>
+                              <span className="text-lg font-bold text-ink">${price}</span>
+                              <span className="text-xs text-muted line-through">${compare}</span>
                               <span className="text-xs text-muted">one-time</span>
                             </div>
-                            <p className="mt-0.5 text-[11px] text-body">Paid placement. Labeled on the listing.</p>
+                            <p className="mt-0.5 text-[11px] text-body">Labeled Editor’s Choice on the listing.</p>
                           </div>
                           <Radio selected={plan === "choice"} />
                         </div>
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
-                          <ChoiceLine strong="Editor’s Choice label" rest=" on the directory. It is marked as a paid placement." />
+                          <ChoiceLine strong="Editor’s Choice label" rest=" on the directory." />
                           <ChoiceLine strong="A link from the listing" rest=" to your site." />
                         </ul>
                       </button>
@@ -271,7 +303,7 @@ function SubmitPage() {
                 <h2 className="font-display text-2xl font-semibold text-ink">How listing works</h2>
                 <p className="text-[15px] leading-relaxed text-body">Listings are reviewed by hand. Nothing goes live from the form alone.</p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  Editor’s Choice costs $99, marked down from $199. Those listings say “paid placement” on the page.
+                  Editor’s Choice costs ${price}, marked down from ${compare}. Those listings are labeled Editor’s Choice. The amount is charged by Dodo from the server, not from this page.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">Visitor counts are not promised, because this directory does not publish traffic numbers.</p>
               </div>

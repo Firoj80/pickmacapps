@@ -19,7 +19,7 @@ export const pageCopy = {
   },
   submit: {
     title: "Submit Your Mac App",
-    description: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is a paid placement.",
+    description: "Submit your Mac app to the PickMacApps directory. Editor’s Choice is labeled on the listing.",
   },
   privacy: {
     title: "Privacy",

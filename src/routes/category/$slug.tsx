@@ -6,13 +6,17 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/category/$slug")({
-  beforeLoad: ({ params }) => {
-    if (!getCategory(params.slug) || appsInCategory(params.slug).length === 0) throw notFound();
+  beforeLoad: ({ params, context }) => {
+    const directory = context.directory;
+    const listed = directory ? directory.apps.filter((app) => app.category === params.slug) : appsInCategory(params.slug);
+    if (!getCategory(params.slug) || listed.length === 0) throw notFound();
   },
   component: CategoryPage,
   head: ({ params, matches }) => {
     const category = getCategory(params.slug);
-    if (!category || appsInCategory(params.slug).length === 0) {
+    const directory = matches[0]?.context.directory;
+    const listed = directory ? directory.apps.filter((app) => app.category === params.slug) : appsInCategory(params.slug);
+    if (!category || listed.length === 0) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
         description: pageCopy.notFound.description,
@@ -29,7 +33,7 @@ export const Route = createFileRoute("/category/$slug")({
       path: `/category/${params.slug}`,
       origin,
     });
-    const script = jsonLdScript(categoryGraph(origin, category, appsInCategory(params.slug)));
+    const script = jsonLdScript(categoryGraph(origin, category, listed));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, `/category/${params.slug}`)],
@@ -42,7 +46,8 @@ function CategoryPage() {
   const { slug } = Route.useParams();
   const category = getCategory(slug);
   if (!category) return null;
-  const listed = appsInCategory(slug);
+  const { directory } = Route.useRouteContext();
+  const listed = directory ? directory.apps.filter((app) => app.category === slug) : appsInCategory(slug);
   const label = category.name.toLowerCase();
 
   return (

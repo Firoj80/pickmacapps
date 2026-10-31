@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouteContext } from "@tanstack/react-router";
 import { apps, categories, editors } from "@/lib/catalog";
 
 const menu = [
@@ -12,8 +12,10 @@ const menu = [
 const fan = ["-rotate-12 translate-y-1", "rotate-6 -translate-y-1.5", "-rotate-8 translate-y-2", "rotate-3 -translate-y-1"];
 
 export function SiteFooter() {
-  const used = categories.filter((category) => apps.some((app) => app.category === category.slug));
-  const picks = apps.filter((app) => editors.has(app.slug));
+  const { directory } = useRouteContext({ from: "__root__" });
+  const list = directory?.apps ?? apps;
+  const used = categories.filter((category) => list.some((app) => app.category === category.slug));
+  const picks = list.filter((app) => app.editorChoice ?? editors.has(app.slug));
   const icons = picks.slice(0, 8);
 
   return (

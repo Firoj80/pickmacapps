@@ -17,6 +17,8 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SubmitRouteImport } from './routes/submit'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
@@ -28,6 +30,14 @@ import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap/ca
 import { Route as SitemapCompareDotxmlRouteImport } from './routes/sitemap/compare[.]xml'
 import { Route as SitemapGuidesDotxmlRouteImport } from './routes/sitemap/guides[.]xml'
 import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap/pages[.]xml'
+import { Route as AdminAppsIndexRouteImport } from './routes/admin/apps/index'
+import { Route as AdminAppsIdRouteImport } from './routes/admin/apps/$id'
+import { Route as AdminGuidesIndexRouteImport } from './routes/admin/guides/index'
+import { Route as AdminGuidesSlugRouteImport } from './routes/admin/guides/$slug'
+import { Route as AdminGuidesNewRouteImport } from './routes/admin/guides/new'
+import { Route as ApiAdminSplatRouteImport } from './routes/api/admin/$'
+import { Route as ApiCronBadgesRouteImport } from './routes/api/cron/badges'
+import { Route as ApiDodoWebhookRouteImport } from './routes/api/dodo/webhook'
 import { Route as ApiMdSplatRouteImport } from './routes/api/md/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -68,6 +78,16 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const SubmitRoute = SubmitRouteImport.update({
   id: '/submit',
   path: '/submit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/admin/login',
+  path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSlugRoute = AppSlugRouteImport.update({
@@ -125,6 +145,46 @@ const SitemapPagesDotxmlRoute = SitemapPagesDotxmlRouteImport.update({
   path: '/sitemap/pages.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAppsIndexRoute = AdminAppsIndexRouteImport.update({
+  id: '/admin/apps/',
+  path: '/admin/apps/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminAppsIdRoute = AdminAppsIdRouteImport.update({
+  id: '/admin/apps/$id',
+  path: '/admin/apps/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGuidesIndexRoute = AdminGuidesIndexRouteImport.update({
+  id: '/admin/guides/',
+  path: '/admin/guides/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGuidesSlugRoute = AdminGuidesSlugRouteImport.update({
+  id: '/admin/guides/$slug',
+  path: '/admin/guides/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminGuidesNewRoute = AdminGuidesNewRouteImport.update({
+  id: '/admin/guides/new',
+  path: '/admin/guides/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminSplatRoute = ApiAdminSplatRouteImport.update({
+  id: '/api/admin/$',
+  path: '/api/admin/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronBadgesRoute = ApiCronBadgesRouteImport.update({
+  id: '/api/cron/badges',
+  path: '/api/cron/badges',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDodoWebhookRoute = ApiDodoWebhookRouteImport.update({
+  id: '/api/dodo/webhook',
+  path: '/api/dodo/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMdSplatRoute = ApiMdSplatRouteImport.update({
   id: '/api/md/$',
   path: '/api/md/$',
@@ -140,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -149,9 +210,18 @@ export interface FileRoutesByFullPath {
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
+  '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/guides/$slug': typeof AdminGuidesSlugRoute
+  '/admin/guides/new': typeof AdminGuidesNewRoute
+  '/api/admin/$': typeof ApiAdminSplatRoute
+  '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/admin/apps/': typeof AdminAppsIndexRoute
+  '/admin/guides/': typeof AdminGuidesIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -162,6 +232,7 @@ export interface FileRoutesByTo {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -171,9 +242,18 @@ export interface FileRoutesByTo {
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
+  '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
   '/compare': typeof CompareIndexRoute
+  '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/guides/$slug': typeof AdminGuidesSlugRoute
+  '/admin/guides/new': typeof AdminGuidesNewRoute
+  '/api/admin/$': typeof ApiAdminSplatRoute
+  '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/admin/apps': typeof AdminAppsIndexRoute
+  '/admin/guides': typeof AdminGuidesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -185,6 +265,7 @@ export interface FileRoutesById {
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/submit': typeof SubmitRoute
+  '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
@@ -194,9 +275,18 @@ export interface FileRoutesById {
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
   '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
+  '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/guides/$slug': typeof AdminGuidesSlugRoute
+  '/admin/guides/new': typeof AdminGuidesNewRoute
+  '/api/admin/$': typeof ApiAdminSplatRoute
+  '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/admin/apps/': typeof AdminAppsIndexRoute
+  '/admin/guides/': typeof AdminGuidesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -209,6 +299,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/admin/login'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
@@ -218,9 +309,18 @@ export interface FileRouteTypes {
     | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
+    | '/admin/'
     | '/blog/'
     | '/compare/'
+    | '/admin/apps/$id'
+    | '/admin/guides/$slug'
+    | '/admin/guides/new'
+    | '/api/admin/$'
+    | '/api/cron/badges'
+    | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/admin/apps/'
+    | '/admin/guides/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -231,6 +331,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/admin/login'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
@@ -240,9 +341,18 @@ export interface FileRouteTypes {
     | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
+    | '/admin'
     | '/blog'
     | '/compare'
+    | '/admin/apps/$id'
+    | '/admin/guides/$slug'
+    | '/admin/guides/new'
+    | '/api/admin/$'
+    | '/api/cron/badges'
+    | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/admin/apps'
+    | '/admin/guides'
   id:
     | '__root__'
     | '/'
@@ -253,6 +363,7 @@ export interface FileRouteTypes {
     | '/robots.txt'
     | '/sitemap.xml'
     | '/submit'
+    | '/admin/login'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
@@ -262,9 +373,18 @@ export interface FileRouteTypes {
     | '/sitemap/compare.xml'
     | '/sitemap/guides.xml'
     | '/sitemap/pages.xml'
+    | '/admin/'
     | '/blog/'
     | '/compare/'
+    | '/admin/apps/$id'
+    | '/admin/guides/$slug'
+    | '/admin/guides/new'
+    | '/api/admin/$'
+    | '/api/cron/badges'
+    | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/admin/apps/'
+    | '/admin/guides/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -276,6 +396,7 @@ export interface RootRouteChildren {
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SubmitRoute: typeof SubmitRoute
+  AdminLoginRoute: typeof AdminLoginRoute
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
@@ -285,9 +406,18 @@ export interface RootRouteChildren {
   SitemapCompareDotxmlRoute: typeof SitemapCompareDotxmlRoute
   SitemapGuidesDotxmlRoute: typeof SitemapGuidesDotxmlRoute
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
+  AdminIndexRoute: typeof AdminIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
+  AdminAppsIdRoute: typeof AdminAppsIdRoute
+  AdminGuidesSlugRoute: typeof AdminGuidesSlugRoute
+  AdminGuidesNewRoute: typeof AdminGuidesNewRoute
+  ApiAdminSplatRoute: typeof ApiAdminSplatRoute
+  ApiCronBadgesRoute: typeof ApiCronBadgesRoute
+  ApiDodoWebhookRoute: typeof ApiDodoWebhookRoute
   ApiMdSplatRoute: typeof ApiMdSplatRoute
+  AdminAppsIndexRoute: typeof AdminAppsIndexRoute
+  AdminGuidesIndexRoute: typeof AdminGuidesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -346,6 +476,20 @@ declare module '@tanstack/react-router' {
       path: '/submit'
       fullPath: '/submit'
       preLoaderRoute: typeof SubmitRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/admin/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$slug': {
@@ -425,6 +569,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SitemapPagesDotxmlRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/apps/': {
+      id: '/admin/apps/'
+      path: '/admin/apps'
+      fullPath: '/admin/apps/'
+      preLoaderRoute: typeof AdminAppsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/apps/$id': {
+      id: '/admin/apps/$id'
+      path: '/admin/apps/$id'
+      fullPath: '/admin/apps/$id'
+      preLoaderRoute: typeof AdminAppsIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/guides/': {
+      id: '/admin/guides/'
+      path: '/admin/guides'
+      fullPath: '/admin/guides/'
+      preLoaderRoute: typeof AdminGuidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/guides/$slug': {
+      id: '/admin/guides/$slug'
+      path: '/admin/guides/$slug'
+      fullPath: '/admin/guides/$slug'
+      preLoaderRoute: typeof AdminGuidesSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/guides/new': {
+      id: '/admin/guides/new'
+      path: '/admin/guides/new'
+      fullPath: '/admin/guides/new'
+      preLoaderRoute: typeof AdminGuidesNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/$': {
+      id: '/api/admin/$'
+      path: '/api/admin/$'
+      fullPath: '/api/admin/$'
+      preLoaderRoute: typeof ApiAdminSplatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/badges': {
+      id: '/api/cron/badges'
+      path: '/api/cron/badges'
+      fullPath: '/api/cron/badges'
+      preLoaderRoute: typeof ApiCronBadgesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dodo/webhook': {
+      id: '/api/dodo/webhook'
+      path: '/api/dodo/webhook'
+      fullPath: '/api/dodo/webhook'
+      preLoaderRoute: typeof ApiDodoWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/md/$': {
       id: '/api/md/$'
       path: '/api/md/$'
@@ -444,6 +644,7 @@ const rootRouteChildren: RootRouteChildren = {
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SubmitRoute: SubmitRoute,
+  AdminLoginRoute: AdminLoginRoute,
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
@@ -453,9 +654,18 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapCompareDotxmlRoute: SitemapCompareDotxmlRoute,
   SitemapGuidesDotxmlRoute: SitemapGuidesDotxmlRoute,
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
+  AdminIndexRoute: AdminIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
+  AdminAppsIdRoute: AdminAppsIdRoute,
+  AdminGuidesSlugRoute: AdminGuidesSlugRoute,
+  AdminGuidesNewRoute: AdminGuidesNewRoute,
+  ApiAdminSplatRoute: ApiAdminSplatRoute,
+  ApiCronBadgesRoute: ApiCronBadgesRoute,
+  ApiDodoWebhookRoute: ApiDodoWebhookRoute,
   ApiMdSplatRoute: ApiMdSplatRoute,
+  AdminAppsIndexRoute: AdminAppsIndexRoute,
+  AdminGuidesIndexRoute: AdminGuidesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

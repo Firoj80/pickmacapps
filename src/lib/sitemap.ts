@@ -1,4 +1,4 @@
-import { apps, appsInCategory, categories, posts } from "@/lib/catalog";
+import { apps, categories, posts, type AppItem, type Post } from "@/lib/catalog";
 import { comparePairs, hubLastmod, pairLastmod } from "@/lib/compare";
 import { site } from "@/lib/site";
 
@@ -51,7 +51,14 @@ export function sitemapIndex(locs: string[]) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</sitemapindex>\n`;
 }
 
-export function sectionUrls(section: SitemapSection, origin: string, today = todayUtc()): SitemapUrl[] {
+export function sectionUrls(
+  section: SitemapSection,
+  origin: string,
+  today = todayUtc(),
+  source?: { apps: AppItem[]; posts: Post[] },
+): SitemapUrl[] {
+  const list = source?.apps ?? apps;
+  const guideList = source?.posts ?? posts;
   if (section === "pages") {
     return [
       { loc: absoluteUrl(origin, "/") },
@@ -61,22 +68,23 @@ export function sectionUrls(section: SitemapSection, origin: string, today = tod
     ];
   }
   if (section === "apps") {
-    return apps.map((app) => ({
+    return list.map((app) => ({
       loc: absoluteUrl(origin, `/app/${app.slug}`),
       lastmod: asLastmod(app.createdAt, today),
     }));
   }
   if (section === "guides") {
-    return posts.map((post) => ({
+    return guideList.map((post) => ({
       loc: absoluteUrl(origin, `/blog/${post.slug}`),
       lastmod: asLastmod(post.date, today),
     }));
   }
   if (section === "categories") {
     return categories
-      .filter((category) => appsInCategory(category.slug).length > 0)
+      .filter((category) => list.some((app) => app.category === category.slug))
       .map((category) => {
-        const newest = appsInCategory(category.slug)
+        const newest = list
+          .filter((app) => app.category === category.slug)
           .map((app) => app.createdAt)
           .sort()
           .at(-1);
@@ -86,7 +94,7 @@ export function sectionUrls(section: SitemapSection, origin: string, today = tod
         };
       });
   }
-  const pairs = comparePairs();
+  const pairs = comparePairs(source);
   return [
     { loc: absoluteUrl(origin, "/compare"), lastmod: asLastmod(hubLastmod(), today) },
     ...pairs.map((pair) => ({
@@ -96,8 +104,8 @@ export function sectionUrls(section: SitemapSection, origin: string, today = tod
   ];
 }
 
-export function indexLocs(origin: string, today = todayUtc()) {
-  return SITEMAP_SECTIONS.filter((section) => sectionUrls(section, origin, today).length > 0).map((section) =>
+export function indexLocs(origin: string, today = todayUtc(), source?: { apps: AppItem[]; posts: Post[] }) {
+  return SITEMAP_SECTIONS.filter((section) => sectionUrls(section, origin, today, source).length > 0).map((section) =>
     absoluteUrl(origin, `/sitemap/${section}.xml`),
   );
 }
@@ -113,14 +121,22 @@ function xml(body: string, status = 200) {
   });
 }
 
-export function sitemapResponse(kind: "index" | SitemapSection, origin: string) {
+export async function sitemapResponse(kind: "index" | SitemapSection, origin: string) {
   const key = `${origin}:${kind}`;
+  let source: { apps: AppItem[]; posts: Post[] } | undefined;
+  try {
+    const { publishedDirectory } = await import("@/lib/directory.server");
+    const directory = await publishedDirectory();
+    source = { apps: directory.apps, posts: directory.posts };
+  } catch (error) {
+    console.error("[sitemap] directory unavailable", error);
+  }
   try {
     const today = todayUtc();
     const body =
       kind === "index"
-        ? sitemapIndex(indexLocs(origin, today))
-        : urlSet(sectionUrls(kind, origin, today));
+        ? sitemapIndex(indexLocs(origin, today, source))
+        : urlSet(sectionUrls(kind, origin, today, source));
     if (!body.includes("<loc>")) {
       return new Response("Not found\n", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
     }

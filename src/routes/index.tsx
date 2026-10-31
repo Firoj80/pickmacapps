@@ -24,7 +24,9 @@ export const Route = createFileRoute("/")({
       path: "/",
       origin,
     });
-    const script = jsonLdScript(homeGraph(origin, filtered ? null : shelfApps(apps)));
+    const directory = matches[0]?.context.directory;
+    const list = directory?.apps ?? apps;
+    const script = jsonLdScript(homeGraph(origin, filtered ? null : shelfApps(list)));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/")],
@@ -36,7 +38,10 @@ export const Route = createFileRoute("/")({
 function Home() {
   const { q = "", cat = "all" } = Route.useSearch();
   const navigate = useNavigate();
-  const [lead, side] = posts;
+  const { directory } = Route.useRouteContext();
+  const list = directory?.apps ?? apps;
+  const guideList = directory?.posts ?? posts;
+  const [lead, side] = guideList;
 
   return (
     <main className="flex-1">
@@ -65,7 +70,7 @@ function Home() {
 
       <div className="mx-auto w-full max-w-[1400px] px-5 py-10 md:px-10">
         <AppGrid
-          apps={apps}
+          apps={list}
           query={q}
           category={cat}
           onQuery={(value) => navigate({ to: "/", search: { q: value, cat } })}

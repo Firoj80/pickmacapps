@@ -11,7 +11,8 @@ export const Route = createFileRoute("/compare/")({
   component: CompareHub,
   head: ({ matches }) => {
     const origin = originFrom(matches);
-    const pairs = comparePairs();
+    const directory = matches[0]?.context.directory;
+    const pairs = directory ? comparePairs({ apps: directory.apps, posts: directory.posts }) : comparePairs();
     const description = hubIntro(pairs);
     const seo = buildMetadata({
       title: hubTitle(pairs.length),
@@ -35,7 +36,8 @@ export const Route = createFileRoute("/compare/")({
 });
 
 function CompareHub() {
-  const pairs = comparePairs();
+  const { directory } = Route.useRouteContext();
+  const pairs = directory ? comparePairs({ apps: directory.apps, posts: directory.posts }) : comparePairs();
   const faqs = hubFaqs(pairs);
   return (
     <main>
