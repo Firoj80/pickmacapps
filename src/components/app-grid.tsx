@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { AppCard } from "@/components/app-card";
-import { categories, editors, sortApps, type AppItem } from "@/lib/catalog";
+import { categories, shelfApps, type AppItem } from "@/lib/catalog";
 
 export function AppGrid({
   apps,
@@ -17,19 +17,10 @@ export function AppGrid({
 }) {
   const [order, setOrder] = useState<"newest" | "name" | "free">("newest");
 
-  const visible = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    const filtered = apps.filter((app) => {
-      const inCategory = category === "all" || app.category === category;
-      const matches =
-        !needle ||
-        app.name.toLowerCase().includes(needle) ||
-        app.tagline.toLowerCase().includes(needle);
-      return inCategory && matches;
-    });
-    const ordered = sortApps(filtered, order);
-    return [...ordered].sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)));
-  }, [apps, query, category, order]);
+  const visible = useMemo(
+    () => shelfApps(apps, query, category, order),
+    [apps, query, category, order],
+  );
 
   return (
     <section id="apps" className="scroll-mt-24">

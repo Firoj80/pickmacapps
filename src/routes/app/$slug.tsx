@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
-import { buildMetadata, markdownAlternate, metaDescription, originFrom } from "@/lib/seo";
+import { appGraph, jsonLdScript } from "@/lib/jsonld";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/app/$slug")({
@@ -31,9 +32,11 @@ export const Route = createFileRoute("/app/$slug")({
       path: `/app/${params.slug}`,
       origin: originFrom(matches),
     });
+    const script = jsonLdScript(appGraph(originFrom(matches), app));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(originFrom(matches), `/app/${params.slug}`)],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });
@@ -47,17 +50,6 @@ function AppPage() {
     .map((item) => getApp(item))
     .filter((item): item is AppItem => Boolean(item));
   const choice = editors.has(app.slug);
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    name: app.name,
-    description: metaDescription(`${app.tagline}. ${app.description}`, app.tagline),
-    applicationCategory: app.categoryName,
-    operatingSystem: "macOS",
-    ...(app.pricing === "free"
-      ? { offers: { "@type": "Offer", price: "0", priceCurrency: "USD" } }
-      : {}),
-  };
 
   return (
     <main>
@@ -109,7 +101,6 @@ function AppPage() {
         </div>
       </div>
       <article className="mx-auto max-w-[720px] px-5 py-10 sm:px-6">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
         <div className="text-[16.5px] leading-[1.75] whitespace-pre-line text-body">{app.description}</div>
         {related.length > 0 ? (
           <section className="mt-14 border-t border-line pt-8">

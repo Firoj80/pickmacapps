@@ -1,7 +1,8 @@
-import { createFileRoute, Link, notFound, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { apps, getPost, posts } from "@/lib/catalog";
-import { buildMetadata, markdownAlternate, metaDescription, originFrom } from "@/lib/seo";
+import { guideGraph, jsonLdScript } from "@/lib/jsonld";
+import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/blog/$slug")({
@@ -30,9 +31,11 @@ export const Route = createFileRoute("/blog/$slug")({
       type: "article",
       publishedTime: post.date,
     });
+    const script = jsonLdScript(guideGraph(originFrom(matches), post));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(originFrom(matches), `/blog/${params.slug}`)],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });
@@ -47,25 +50,9 @@ function BlogPost() {
   const haystack = `${post.title} ${post.excerpt} ${post.html}`.toLowerCase();
   const mentioned = apps.filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8);
 
-  const origin = originFrom(useRouterState({ select: (state) => state.matches }));
-  const pageUrl = origin ? `${origin}/blog/${post.slug}` : "";
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: post.title,
-    description: metaDescription(post.excerpt),
-    datePublished: post.date,
-    dateModified: post.date,
-    inLanguage: "en",
-    ...(pageUrl ? { url: pageUrl, mainEntityOfPage: pageUrl } : {}),
-    author: { "@type": "Organization", name: "PickMacApps", ...(origin ? { url: origin } : {}) },
-    publisher: { "@type": "Organization", name: "PickMacApps", ...(origin ? { url: origin } : {}) },
-  };
-
   return (
     <main>
       <article className="mx-auto max-w-3xl px-6 py-12 lg:py-16">
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
         <nav className="mb-8 flex items-center gap-2 text-sm text-muted">
           <Link to="/" className="transition-colors hover:text-ink">
             Home

@@ -126,6 +126,22 @@ export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
   return next;
 }
 
+export function shelfApps(
+  list: AppItem[] = apps,
+  query = "",
+  category = "all",
+  order: "newest" | "name" | "free" = "newest",
+) {
+  const needle = query.trim().toLowerCase();
+  const filtered = list.filter((app) => {
+    const inCategory = category === "all" || app.category === category;
+    const matches =
+      !needle || app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle);
+    return inCategory && matches;
+  });
+  return [...sortApps(filtered, order)].sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)));
+}
+
 export function getApp(slug: string) {
   return apps.find((app) => app.slug === slug);
 }

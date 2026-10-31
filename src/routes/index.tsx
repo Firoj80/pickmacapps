@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { AppleMark } from "@/components/site-header";
-import { apps, posts } from "@/lib/catalog";
+import { apps, posts, shelfApps } from "@/lib/catalog";
+import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { site } from "@/lib/site";
 
@@ -15,36 +16,19 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: ({ matches }) => {
     const origin = originFrom(matches);
-    const jsonLd = {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "Organization",
-          "@id": `${origin}/#organization`,
-          name: site.name,
-          url: origin,
-          description: site.description,
-          logo: `${origin}${site.logoPath}`,
-        },
-        {
-          "@type": "WebSite",
-          name: site.name,
-          url: origin,
-          description: site.description,
-          publisher: { "@id": `${origin}/#organization` },
-        },
-      ],
-    };
+    const search = matches.at(-1)?.search as { q?: string; cat?: string } | undefined;
+    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all"));
     const seo = buildMetadata({
       title: site.title,
       description: site.description,
       path: "/",
       origin,
     });
+    const script = jsonLdScript(homeGraph(origin, filtered ? null : shelfApps(apps)));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/")],
-      scripts: [{ type: "application/ld+json", children: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });

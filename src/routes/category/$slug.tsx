@@ -1,6 +1,7 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { appsInCategory, getCategory } from "@/lib/catalog";
+import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
@@ -21,15 +22,18 @@ export const Route = createFileRoute("/category/$slug")({
       });
       return { meta: missing.meta, links: missing.links };
     }
+    const origin = originFrom(matches);
     const seo = buildMetadata({
       title: `${category.name} Mac Apps`,
       description: category.paragraphs[0] ?? "Mac apps in this category.",
       path: `/category/${params.slug}`,
-      origin: originFrom(matches),
+      origin,
     });
+    const script = jsonLdScript(categoryGraph(origin, category, appsInCategory(params.slug)));
     return {
       meta: seo.meta,
-      links: [...seo.links, markdownAlternate(originFrom(matches), `/category/${params.slug}`)],
+      links: [...seo.links, markdownAlternate(origin, `/category/${params.slug}`)],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });

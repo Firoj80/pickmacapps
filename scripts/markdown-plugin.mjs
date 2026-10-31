@@ -25,7 +25,8 @@ export function markdownPlugin() {
             pathOnly === "/robots.txt" ||
             pathOnly === "/api/md" ||
             pathOnly.startsWith("/api/md/") ||
-            pathOnly.endsWith(".md")
+            pathOnly.endsWith(".md") ||
+            /^\/[a-f0-9]{32}\.txt$/.test(pathOnly)
           const host = String(req.headers["x-forwarded-host"] ?? req.headers.host ?? "localhost:8080")
           const proto = String(req.headers["x-forwarded-proto"] ?? "http")
           if (!machine && !accept.includes("text/markdown")) {

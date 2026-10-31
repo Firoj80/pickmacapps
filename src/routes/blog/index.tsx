@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { posts } from "@/lib/catalog";
+import { guidesGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
@@ -13,9 +14,11 @@ export const Route = createFileRoute("/blog/")({
       path: "/blog",
       origin,
     });
+    const script = jsonLdScript(guidesGraph(origin, posts));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/blog")],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });

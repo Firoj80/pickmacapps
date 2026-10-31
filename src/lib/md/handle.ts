@@ -1,4 +1,5 @@
 import { aiText, catalogJson, llmsFullText, llmsText, robotsText } from "@/lib/md/documents"
+import { indexNowKey } from "@/lib/indexnow"
 import { abs } from "@/lib/md/format"
 import { markdownHttp, optionsHttp, prefersMarkdown, textHttp } from "@/lib/md/http"
 import { contentPathFromMarkdown, isContentPath, renderMarkdown } from "@/lib/md/registry"
@@ -72,7 +73,12 @@ export function handleIncoming(request: Request): Response | null {
   const origin = originOf(request)
 
   if (SKIP_PREFIXES.some((prefix) => pathname.startsWith(prefix))) return null
-  if (pathname === "/sitemap.xml") return null
+  if (pathname === "/sitemap.xml" || pathname.startsWith("/sitemap/")) return null
+
+  const key = indexNowKey()
+  if (key && pathname === `/${key}.txt` && (method === "GET" || method === "HEAD")) {
+    return textHttp(`${key}\n`, "text/plain; charset=utf-8", "public, max-age=3600", method)
+  }
 
   const machine = pathname === "/llms.txt" || pathname === "/llms-full.txt" || pathname === "/ai.txt" || pathname === "/robots.txt"
   const api = pathname === "/api/md" || pathname.startsWith("/api/md/")

@@ -21,6 +21,10 @@ import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
+import { Route as SitemapAppsDotxmlRouteImport } from './routes/sitemap/apps[.]xml'
+import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap/categories[.]xml'
+import { Route as SitemapGuidesDotxmlRouteImport } from './routes/sitemap/guides[.]xml'
+import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap/pages[.]xml'
 import { Route as ApiMdSplatRouteImport } from './routes/api/md/$'
 
 const IndexRoute = IndexRouteImport.update({
@@ -83,6 +87,26 @@ const CategorySlugRoute = CategorySlugRouteImport.update({
   path: '/category/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SitemapAppsDotxmlRoute = SitemapAppsDotxmlRouteImport.update({
+  id: '/sitemap/apps.xml',
+  path: '/sitemap/apps.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapCategoriesDotxmlRoute = SitemapCategoriesDotxmlRouteImport.update({
+  id: '/sitemap/categories.xml',
+  path: '/sitemap/categories.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapGuidesDotxmlRoute = SitemapGuidesDotxmlRouteImport.update({
+  id: '/sitemap/guides.xml',
+  path: '/sitemap/guides.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SitemapPagesDotxmlRoute = SitemapPagesDotxmlRouteImport.update({
+  id: '/sitemap/pages.xml',
+  path: '/sitemap/pages.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiMdSplatRoute = ApiMdSplatRouteImport.update({
   id: '/api/md/$',
   path: '/api/md/$',
@@ -101,6 +125,10 @@ export interface FileRoutesByFullPath {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
+  '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
+  '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog/': typeof BlogIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
@@ -116,6 +144,10 @@ export interface FileRoutesByTo {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
+  '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
+  '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog': typeof BlogIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
@@ -132,6 +164,10 @@ export interface FileRoutesById {
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
+  '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
+  '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
+  '/sitemap/guides.xml': typeof SitemapGuidesDotxmlRoute
+  '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/blog/': typeof BlogIndexRoute
   '/api/md/$': typeof ApiMdSplatRoute
 }
@@ -149,6 +185,10 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/sitemap/apps.xml'
+    | '/sitemap/categories.xml'
+    | '/sitemap/guides.xml'
+    | '/sitemap/pages.xml'
     | '/blog/'
     | '/api/md/$'
   fileRoutesByTo: FileRoutesByTo
@@ -164,6 +204,10 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/sitemap/apps.xml'
+    | '/sitemap/categories.xml'
+    | '/sitemap/guides.xml'
+    | '/sitemap/pages.xml'
     | '/blog'
     | '/api/md/$'
   id:
@@ -179,6 +223,10 @@ export interface FileRouteTypes {
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
+    | '/sitemap/apps.xml'
+    | '/sitemap/categories.xml'
+    | '/sitemap/guides.xml'
+    | '/sitemap/pages.xml'
     | '/blog/'
     | '/api/md/$'
   fileRoutesById: FileRoutesById
@@ -195,6 +243,10 @@ export interface RootRouteChildren {
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
+  SitemapAppsDotxmlRoute: typeof SitemapAppsDotxmlRoute
+  SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
+  SitemapGuidesDotxmlRoute: typeof SitemapGuidesDotxmlRoute
+  SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   BlogIndexRoute: typeof BlogIndexRoute
   ApiMdSplatRoute: typeof ApiMdSplatRoute
 }
@@ -285,6 +337,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CategorySlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/sitemap/apps.xml': {
+      id: '/sitemap/apps.xml'
+      path: '/sitemap/apps.xml'
+      fullPath: '/sitemap/apps.xml'
+      preLoaderRoute: typeof SitemapAppsDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/categories.xml': {
+      id: '/sitemap/categories.xml'
+      path: '/sitemap/categories.xml'
+      fullPath: '/sitemap/categories.xml'
+      preLoaderRoute: typeof SitemapCategoriesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/guides.xml': {
+      id: '/sitemap/guides.xml'
+      path: '/sitemap/guides.xml'
+      fullPath: '/sitemap/guides.xml'
+      preLoaderRoute: typeof SitemapGuidesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sitemap/pages.xml': {
+      id: '/sitemap/pages.xml'
+      path: '/sitemap/pages.xml'
+      fullPath: '/sitemap/pages.xml'
+      preLoaderRoute: typeof SitemapPagesDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/md/$': {
       id: '/api/md/$'
       path: '/api/md/$'
@@ -307,6 +387,10 @@ const rootRouteChildren: RootRouteChildren = {
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
+  SitemapAppsDotxmlRoute: SitemapAppsDotxmlRoute,
+  SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
+  SitemapGuidesDotxmlRoute: SitemapGuidesDotxmlRoute,
+  SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   BlogIndexRoute: BlogIndexRoute,
   ApiMdSplatRoute: ApiMdSplatRoute,
 }

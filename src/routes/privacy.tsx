@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
@@ -12,9 +13,11 @@ export const Route = createFileRoute("/privacy")({
       path: "/privacy",
       origin,
     });
+    const script = jsonLdScript(crumbGraph(origin, "/privacy", "Privacy"));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/privacy")],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });

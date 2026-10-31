@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
+import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
@@ -15,9 +16,11 @@ export const Route = createFileRoute("/submit")({
       path: "/submit",
       origin,
     });
+    const script = jsonLdScript(crumbGraph(origin, "/submit", "Submit your Mac app"));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/submit")],
+      ...(script ? { scripts: [script] } : {}),
     };
   },
 });
