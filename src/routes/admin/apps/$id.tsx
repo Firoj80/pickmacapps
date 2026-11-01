@@ -92,10 +92,33 @@ function EditApp() {
             <option value="rejected">Rejected</option>
           </select>
         </Field>
-        <label className="flex items-center gap-2 text-sm text-ink">
-          <input type="checkbox" name="editor_choice" defaultChecked={app.editorChoice} />
-          Editor’s Choice — follow link, no badge check
-        </label>
+        <div className="rounded-xl border border-line bg-[#faf9f5] p-3.5 space-y-2">
+          <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
+            <input
+              type="checkbox"
+              name="editor_choice"
+              defaultChecked={app.editorChoice}
+              disabled={app.editorChoiceSlotsFull && !app.editorChoice}
+              className="h-4 w-4 rounded border-line text-ink focus:ring-accent"
+            />
+            <span className="font-medium">Editor’s Choice</span>
+            <span className="text-xs text-muted">— follow link, no badge check</span>
+          </label>
+          <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
+            <span className="text-muted">
+              Capacity: {app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0)} / 3 active slots
+            </span>
+            {app.editorChoiceSlotsFull && !app.editorChoice ? (
+              <span className="font-semibold text-rose-600 dark:text-rose-400">
+                Slots full (3/3). Uncheck another published app to enable.
+              </span>
+            ) : (
+              <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                {3 - (app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0))} slots available
+              </span>
+            )}
+          </div>
+        </div>
         <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
           Save listing
         </button>

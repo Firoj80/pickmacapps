@@ -90,6 +90,9 @@ export async function handleAdminPost(request: Request) {
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not save";
+    if (action === "apps" && form.get("id")) {
+      return redirect(`/admin/apps/${encodeURIComponent(String(form.get("id")))}?error=${encodeURIComponent(message)}`);
+    }
     return redirect(`/admin?error=${encodeURIComponent(message)}`);
   }
   return new Response("Not found\n", { status: 404 });

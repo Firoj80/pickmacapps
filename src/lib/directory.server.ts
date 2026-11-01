@@ -169,7 +169,46 @@ export async function publishedDirectory() {
   };
 }
 
-export async function publicOffer() {
+export const MAX_EDITOR_CHOICE_SLOTS = 3;
+
+export function getNextCycleLabel(now = new Date()): string {
+  const d = new Date(now);
+  const day = d.getDay(); // 0 is Sunday, 1 is Monday...
+  const daysUntilSunday = (7 - day) % 7 || 7;
+  d.setDate(d.getDate() + daysUntilSunday);
+  const dayNum = d.getDate();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${dayNum} ${months[d.getMonth()]}`;
+}
+
+export async function countActiveEditorChoiceApps(excludeId?: string): Promise<number> {
+  const sql = await directorySql();
+  if (excludeId) {
+    const rows = await sql.query<{ count: string }>(
+      "select count(*)::text as count from apps where editor_choice = true and status = 'published' and id <> $1",
+      [excludeId],
+    );
+    return Number(rows[0]?.count ?? 0);
+  }
+  const rows = await sql.query<{ count: string }>(
+    "select count(*)::text as count from apps where editor_choice = true and status = 'published'",
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
+export type EditorChoiceSlotsInfo = {
+  total: number;
+  active: number;
+  remaining: number;
+  isFull: boolean;
+  nextDate: string;
+};
+
+export async function publicOffer(): Promise<{
+  priceCents: number;
+  compareCents: number;
+  slots: EditorChoiceSlotsInfo;
+}> {
   const sql = await directorySql();
   const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
   const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
@@ -184,7 +223,19 @@ export async function publicOffer() {
       [String(live)],
     );
   }
-  return { priceCents, compareCents };
+  const active = await countActiveEditorChoiceApps();
+  const remaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - active);
+  return {
+    priceCents,
+    compareCents,
+    slots: {
+      total: MAX_EDITOR_CHOICE_SLOTS,
+      active,
+      remaining,
+      isFull: remaining === 0,
+      nextDate: getNextCycleLabel(),
+    },
+  };
 }
 
 export async function adminStats() {
@@ -227,7 +278,13 @@ export async function listApps() {
 export async function getAppRow(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>("select * from apps where id = $1", [id]);
-  return rows[0] ? toApp(rows[0]) : null;
+  if (!rows[0]) return null;
+  const otherCount = await countActiveEditorChoiceApps(id);
+  return {
+    ...toApp(rows[0]),
+    otherEditorChoiceCount: otherCount,
+    editorChoiceSlotsFull: otherCount >= MAX_EDITOR_CHOICE_SLOTS,
+  };
 }
 
 function cleanPricing(value: string): Pricing {
@@ -258,6 +315,17 @@ export async function saveApp(input: {
   const current = await sql.query<AppRow>("select * from apps where id = $1", [input.id]);
   const row = current[0];
   if (!row) throw new Error("App not found");
+  const status = cleanStatus(input.status);
+
+  if (input.editorChoice && status === "published") {
+    const otherCount = await countActiveEditorChoiceApps(input.id);
+    if (otherCount >= MAX_EDITOR_CHOICE_SLOTS) {
+      throw new Error(
+        `Cannot enable Editor’s Choice: All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice slots are already taken by other published apps (${otherCount}/${MAX_EDITOR_CHOICE_SLOTS} active). Please uncheck Editor’s Choice on another app first.`
+      );
+    }
+  }
+
   const category = raw.categories.find((item) => item.slug === input.category) ?? {
     slug: row.category,
     name: row.category_name,
@@ -280,12 +348,12 @@ export async function saveApp(input: {
       category.name,
       category.emoji,
       input.editorChoice,
-      cleanStatus(input.status),
+      status,
       input.icon.trim(),
       input.demo.trim(),
     ],
   );
-  await audit(sql, "save-app", input.slug, cleanStatus(input.status));
+  await audit(sql, "save-app", input.slug, status);
 }
 
 export async function deleteApp(id: string) {
@@ -428,6 +496,15 @@ export async function submitListing(
   if (!name || !website || !tagline || !description || !icon || !email.includes("@") || !xHandle || !category) {
     return { ok: false as const, message: "Name, website, tagline, description, icon, category, email, and X handle are required." };
   }
+  if (plan === "choice") {
+    const activeSlots = await countActiveEditorChoiceApps();
+    if (activeSlots >= MAX_EDITOR_CHOICE_SLOTS) {
+      return {
+        ok: false as const,
+        message: `All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice spots are currently full for next week. Please submit using the Free plan or check back next week.`,
+      };
+    }
+  }
   if (plan === "free") {
     const badge = await checkBadgeOnPage(website);
     if (!badge.ok) return { ok: false as const, message: badge.message };
@@ -521,8 +598,16 @@ export async function approveSubmission(id: string) {
   const submission = rows[0];
   if (!submission) throw new Error("Submission not found");
   if (submission.status === "approved") throw new Error("That submission is already approved.");
-  if (submission.plan === "choice" && submission.status !== "paid") {
-    throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
+  if (submission.plan === "choice") {
+    if (submission.status !== "paid") {
+      throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
+    }
+    const active = await countActiveEditorChoiceApps();
+    if (active >= MAX_EDITOR_CHOICE_SLOTS) {
+      throw new Error(
+        `Cannot approve as Editor’s Choice: All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice slots are currently full (${active}/${MAX_EDITOR_CHOICE_SLOTS} active). Please unpublish or remove Editor’s Choice from another app before approving.`
+      );
+    }
   }
   const appId = randomUUID();
   let slug =

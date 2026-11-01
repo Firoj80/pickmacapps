@@ -61,6 +61,13 @@ function SubmitPage() {
   const offer = Route.useLoaderData();
   const price = (offer.priceCents / 100).toFixed(0);
   const compare = (offer.compareCents / 100).toFixed(0);
+  const slots = offer.slots ?? {
+    total: 3,
+    active: 0,
+    remaining: 3,
+    isFull: false,
+    nextDate: "next week",
+  };
   const paid = plan === "choice";
 
   // Always use the real canonical website URL for external badge embeds
@@ -86,7 +93,7 @@ function SubmitPage() {
   const hasEmail = Boolean(email.trim() && email.includes("@"));
   const hasXHandle = Boolean(xHandle.trim());
   const badgeOk = paid || badge === "ok";
-  const canSubmit = Boolean(hasEmail && hasXHandle && badgeOk && !sending);
+  const canSubmit = Boolean(hasEmail && hasXHandle && (!paid || !slots.isFull) && badgeOk && !sending);
 
   async function copyBadge() {
     try {
@@ -556,14 +563,31 @@ function SubmitPage() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setPlan("choice")}
+                        onClick={() => {
+                          if (slots.isFull) {
+                            setPlan("free");
+                            return;
+                          }
+                          setPlan("choice");
+                        }}
                         className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
-                          plan === "choice" ? "border-accent bg-accent/5" : "border-line hover:border-line-2"
+                          slots.isFull
+                            ? "border-line bg-surface-2 opacity-80 cursor-not-allowed"
+                            : plan === "choice"
+                              ? "border-accent bg-accent/5"
+                              : "border-line hover:border-line-2"
                         }`}
                       >
-                        <span className="absolute -top-2 left-3 rounded-full bg-surface-2 px-2 py-0.5 text-[10px] font-medium text-body">
-                          Editor's Choice
-                        </span>
+                        <div className="absolute -top-2 left-3 flex items-center gap-1.5">
+                          <span className="rounded-full bg-surface-2 border border-line px-2 py-0.5 text-[10px] font-medium text-body">
+                            Editor's Choice
+                          </span>
+                          {slots.isFull ? (
+                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                              Sold out
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-baseline gap-1.5">
@@ -571,14 +595,55 @@ function SubmitPage() {
                               <span className="text-xs text-muted line-through">${compare}</span>
                               <span className="text-xs text-muted">one-time</span>
                             </div>
-                            <p className="mt-0.5 text-[11px] text-body">No badge. A follow link on the listing.</p>
+                            {!slots.isFull ? (
+                              <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                * Only {slots.remaining} {slots.remaining === 1 ? "spot" : "spots"} remaining for next week ( {slots.nextDate} )
+                              </p>
+                            ) : (
+                              <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
+                                * All 3 Editor's Choice spots are currently full for next week
+                              </p>
+                            )}
                           </div>
-                          <Radio selected={plan === "choice"} />
+                          <Radio selected={!slots.isFull && plan === "choice"} />
                         </div>
-                        <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
-                          <ChoiceLine strong="Editor’s Choice label" rest=" on the directory." />
-                          <ChoiceLine strong="A follow link" rest=" from the listing to your site." />
-                          <ChoiceLine strong="No badge" rest=" on your site is required." />
+                        <ul className="mt-2.5 space-y-1.5 border-t border-line pt-2.5">
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              <strong className="font-semibold text-ink">Top 3 placement</strong> on our directory for 1 week
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              After 1 week, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              <strong className="font-semibold text-ink">Featured at the top</strong> of alternative pages
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              <strong className="font-semibold text-ink">Dedicated blog post</strong> for your app, including competitor comparisons
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              <strong className="font-semibold text-ink">High-quality backlink</strong> to boost your SEO
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
+                            <span>
+                              <strong className="font-semibold text-ink">Hundreds of monthly visitors</strong> discovering your app
+                            </span>
+                          </li>
                         </ul>
                       </button>
                     </div>
@@ -710,11 +775,13 @@ function SubmitPage() {
                           ? "Enter your email to submit"
                           : !hasXHandle
                             ? "Enter your X handle to submit"
-                            : paid
-                              ? `Continue to payment · $${price}`
-                              : badge === "ok"
-                                ? "Submit your app"
-                                : "Verify your badge to submit"}
+                            : paid && slots.isFull
+                              ? "Editor’s Choice slots are full · Select Free"
+                              : paid
+                                ? `Continue to payment · $${price}`
+                                : badge === "ok"
+                                  ? "Submit your app"
+                                  : "Verify your badge to submit"}
                   </button>
                 </form>
               )}
@@ -725,10 +792,13 @@ function SubmitPage() {
                 <h2 className="font-display text-2xl font-semibold text-ink">How listing works</h2>
                 <p className="text-[15px] leading-relaxed text-body">Listings are reviewed by hand. Nothing goes live from the form alone.</p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  A free listing needs the badge, and the link back to your site is nofollow. Editor’s Choice costs ${price}, marked down from ${compare}. It does not need a badge, and the listing link is a follow link.
+                  A free listing needs our badge, and the link back to your site is nofollow.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  The amount is charged by Dodo from the server, not from this page. Visitor counts are not promised.
+                  <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 3 spots</strong> at any time to guarantee maximum visibility. You receive Top 3 placement on our directory for 1 week, and after that 1 week your app remains listed permanently with a high-quality follow backlink.
+                </p>
+                <p className="text-[15px] leading-relaxed text-body">
+                  Editor’s Choice costs ${price}, marked down from ${compare} one-time. The amount is charged securely by Dodo from the server.
                 </p>
               </div>
             </div>

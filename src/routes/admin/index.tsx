@@ -37,7 +37,7 @@ function AdminHome() {
     ["Revenue", money(data.stats.revenueCents)],
     ["Waiting", waiting],
     ["Published apps", data.stats.free + data.stats.paid + data.stats.freemium],
-    ["Editor’s Choice", data.stats.editorChoice],
+    ["Editor’s Choice", `${data.stats.editorChoice}/3 slots`],
     ["Free apps", data.stats.free],
     ["Paid apps", data.stats.paid],
     ["Freemium", data.stats.freemium],
@@ -96,7 +96,16 @@ function AdminHome() {
                       </div>
                     </td>
                     <td className="px-3 py-3">
-                      {item.plan === "choice" ? <Pill tone="choice">Editor’s Choice</Pill> : <Pill tone="off">Free</Pill>}
+                      {item.plan === "choice" ? (
+                        <div className="flex flex-col items-start gap-0.5">
+                          <Pill tone="choice">Editor’s Choice</Pill>
+                          {data.stats.editorChoice >= 3 && (item.status === "pending" || item.status === "paid") ? (
+                            <span className="text-[10px] font-semibold text-rose-600">3/3 full</span>
+                          ) : null}
+                        </div>
+                      ) : (
+                        <Pill tone="off">Free</Pill>
+                      )}
                     </td>
                     <td className="px-3 py-3">
                       <Pill tone={statusTone(item.status)}>{item.status.replaceAll("_", " ")}</Pill>
