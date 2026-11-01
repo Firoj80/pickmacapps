@@ -180,6 +180,17 @@ export function OgPreviewModal({
           </button>
           <button
             type="button"
+            onClick={() => setTarget({ kind: "app", slug: "helumi" })}
+            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+              target.kind === "app" && target.slug === "helumi"
+                ? "bg-ink text-canvas"
+                : "border border-line bg-canvas text-body hover:text-ink"
+            }`}
+          >
+            App: Helumi
+          </button>
+          <button
+            type="button"
             onClick={() => setTarget({ kind: "app", slug: "shottr" })}
             className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
               target.kind === "app" && target.slug === "shottr"
@@ -199,17 +210,6 @@ export function OgPreviewModal({
             }`}
           >
             App: Anytype
-          </button>
-          <button
-            type="button"
-            onClick={() => setTarget({ kind: "app", slug: "ia-writer" })}
-            className={`rounded-lg px-3 py-1.5 text-xs font-medium transition ${
-              target.kind === "app" && target.slug === "ia-writer"
-                ? "bg-ink text-canvas"
-                : "border border-line bg-canvas text-body hover:text-ink"
-            }`}
-          >
-            App: iA Writer
           </button>
           <button
             type="button"
@@ -248,7 +248,7 @@ export function OgPreviewModal({
               <div className="overflow-hidden rounded-2xl border border-line bg-canvas shadow-xs">
                 <div className="aspect-[1200/630] w-full overflow-hidden border-b border-line bg-surface-2">
                   <img
-                    src={cardData.imageSrc}
+                    src={cardData.imageSrc === "/og.jpg" ? "/og.jpg?v=2" : cardData.imageSrc}
                     alt={cardData.title}
                     referrerPolicy="no-referrer"
                     className="h-full w-full object-cover"
@@ -269,7 +269,7 @@ export function OgPreviewModal({
                 <p className="mt-1 text-xs leading-relaxed text-body">{cardData.description}</p>
                 <div className="mt-3 aspect-[1200/630] w-full overflow-hidden rounded-lg border border-line bg-canvas">
                   <img
-                    src={cardData.imageSrc}
+                    src={cardData.imageSrc === "/og.jpg" ? "/og.jpg?v=2" : cardData.imageSrc}
                     alt={cardData.title}
                     referrerPolicy="no-referrer"
                     className="h-full w-full object-cover"
@@ -281,7 +281,7 @@ export function OgPreviewModal({
             {platform === "raw" ? (
               <div className="overflow-hidden rounded-xl border border-line bg-surface-2">
                 <img
-                  src={cardData.imageSrc}
+                  src={cardData.imageSrc === "/og.jpg" ? "/og.jpg?v=2" : cardData.imageSrc}
                   alt={cardData.title}
                   referrerPolicy="no-referrer"
                   className="aspect-[1200/630] w-full object-cover"

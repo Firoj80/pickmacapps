@@ -2,7 +2,7 @@
 
 ## 2026-10-31 — Social share card and app OG metadata fixes
 
-Updated `/public/og.jpg` (1200×630) to match the current monochrome/silver `Inter Tight` brand system and replaced the outdated 5-category list (`Music & Audio` removed) with the 4 active catalog categories (`Design`, `Developer Tools`, `Productivity`, `Utilities`) and shelf jobs. Updated `src/routes/app/$slug.tsx` and `src/lib/seo.ts` so individual app pages use their `1200×630` cover screenshot (`app.demo`, when not an `.mp4` video) for `og:image` and `twitter:image`. Improved `fitDescription()` to strip trailing dangling articles/conjunctions (such as `"and a"` on `/app/shottr`) and expanded the default site description to 136 characters.
+Redesigned `/public/og.jpg` (1200×630, ~100 KB JPEG) to align with the latest PickMacApps UI (`Inter Tight` display headline `"A curated shelf of hand-picked  Mac apps."`, `Pick [P] MacApps` lockup, soft blue/indigo/violet/blush radial aura, frosted Editor’s Choice showcase card, and fanned macOS app squircles). Updated `src/routes/app/$slug.tsx` and `src/lib/seo.ts` so individual app pages use their `1200×630` cover screenshot (`app.demo`, when not an `.mp4` video) for `og:image` and `twitter:image`. Improved `fitDescription()` to strip trailing dangling articles/conjunctions (such as `"and a"` on `/app/shottr`) and expanded the default site description to 136 characters.
 
 ## 2026-10-18 — Crawl and honesty fixes
 

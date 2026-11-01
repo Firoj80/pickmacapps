@@ -9,14 +9,23 @@ const menu = [
   { to: "/privacy", label: "Privacy" },
 ] as const;
 
-const fan = ["-rotate-12 translate-y-1", "rotate-6 -translate-y-1.5", "-rotate-8 translate-y-2", "rotate-3 -translate-y-1"];
+const fan = [
+  "-rotate-12 translate-y-2",
+  "-rotate-6 translate-y-0.5",
+  "-rotate-3 -translate-y-1",
+  "rotate-2 -translate-y-1.5",
+  "rotate-5 -translate-y-0.5",
+  "rotate-9 translate-y-1",
+  "-rotate-6 translate-y-1.5",
+  "rotate-12 translate-y-2",
+];
 
 export function SiteFooter() {
   const { directory } = useRouteContext({ from: "__root__" });
   const list = directory?.apps ?? apps;
   const used = categories.filter((category) => list.some((app) => app.category === category.slug));
   const picks = list.filter((app) => app.editorChoice ?? editors.has(app.slug));
-  const icons = picks.slice(0, 8);
+  const icons = [...picks, ...list.filter((app) => !picks.includes(app))].slice(0, 8);
 
   return (
     <footer className="mt-16 px-5 pt-12 pb-10 md:px-10">
@@ -30,7 +39,7 @@ export function SiteFooter() {
                   to="/app/$slug"
                   params={{ slug: app.slug }}
                   aria-label={app.name}
-                  className={`${index === 0 ? "" : "-ml-3 md:-ml-4"} ${fan[index] ?? ""} transition-transform duration-300 hover:z-10 hover:translate-y-0 hover:rotate-0 hover:scale-110`}
+                  className={`${index === 0 ? "" : "-ml-3 md:-ml-4"} ${fan[index % fan.length] ?? ""} transition-transform duration-300 hover:z-10 hover:translate-y-0 hover:rotate-0 hover:scale-110`}
                 >
                   <img alt="" src={app.icon} className="h-11 w-11 rounded-xl bg-white object-cover shadow-lg ring-1 ring-black/5 md:h-14 md:w-14 md:rounded-2xl" />
                 </Link>
