@@ -5,7 +5,7 @@ export const site = {
   description:
     "A curated shelf of hand-picked Mac apps. Browse macOS utilities by job, compare alternatives side by side, and read short buying guides.",
   logoPath: "/favicon.svg",
-  ogImage: "/og.jpg",
+  ogImage: "/og-v2.jpg",
   ogImageAlt: "PickMacApps — A curated shelf of hand-picked Mac apps",
   ogImageWidth: "1200",
   ogImageHeight: "630",
