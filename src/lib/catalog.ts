@@ -141,7 +141,7 @@ export function shelfApps(
       !needle || app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle);
     return inCategory && matches;
   });
-  return [...sortApps(filtered, order)].sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)));
+  return [...sortApps(filtered, order)].sort((a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)));
 }
 
 export function isEditorChoice(app: AppItem) {

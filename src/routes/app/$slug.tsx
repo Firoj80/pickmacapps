@@ -95,7 +95,7 @@ function AppPage() {
 
   return (
     <main>
-      <div className="mx-auto w-full max-w-[980px] px-5 pt-8 md:px-10">
+      <div className="mx-auto w-full max-w-[1200px] px-4 pt-10 sm:px-6">
         {app.demo ? (
           <div className="mb-8 overflow-hidden rounded-2xl border border-line/80">
             {app.demo.endsWith(".mp4") ? (
@@ -150,18 +150,18 @@ function AppPage() {
             href={app.website}
             target="_blank"
             rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
-            className="inline-flex shrink-0 items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-canvas hover:opacity-85"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-line-2 bg-surface px-4 py-2.5 text-sm font-medium text-ink hover:bg-surface-2"
           >
-            Visit website
+            Try the app ↗
           </a>
         </div>
       </div>
-      <article className="mx-auto max-w-[720px] px-5 py-10 sm:px-6">
+      <article className="mx-auto max-w-[720px] px-4 py-10 sm:px-6">
         <div className="text-[16.5px] leading-[1.75] whitespace-pre-line text-body">{app.description}</div>
         {related.length > 0 ? (
           <section className="mt-14 border-t border-line pt-8">
             <h2 className="font-display text-2xl font-semibold text-ink">Alternatives</h2>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((item) => (
                 <AppCard key={item.id} app={item} />
               ))}

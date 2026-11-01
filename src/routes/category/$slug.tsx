@@ -52,7 +52,7 @@ function CategoryPage() {
 
   return (
     <main>
-      <section className="mx-auto max-w-[1400px] px-5 py-14 md:px-10">
+      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
         <div className="flex items-center gap-3">
           <span aria-hidden="true" className="text-4xl">
             {category.emoji}
@@ -81,7 +81,7 @@ function CategoryPage() {
           <h2 className="font-display text-2xl font-semibold text-ink">
             {listed.length} {label} apps
           </h2>
-          <div className="mt-8 grid grid-cols-1 gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {listed.map((app) => (
               <AppCard key={app.id} app={app} />
             ))}

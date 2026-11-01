@@ -1,9 +1,7 @@
-import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
-import { OgPreviewModal } from "@/components/og-preview-modal";
-import { AppleMark } from "@/components/site-header";
-import { apps, shelfApps } from "@/lib/catalog";
+import { GuideStrip } from "@/components/guide-strip";
+import { apps, posts, shelfApps } from "@/lib/catalog";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { site } from "@/lib/site";
@@ -65,44 +63,46 @@ function Home() {
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = directory?.apps ?? apps;
-  const [ogOpen, setOgOpen] = useState(false);
+  const guides = directory?.posts ?? posts;
+  const fan = list.slice(0, 9);
 
   return (
     <main className="flex-1">
-      <section className="mx-auto w-full max-w-[1400px] px-5 pt-12 pb-20 md:px-10 md:pt-20 md:pb-28">
-        <h1 className="rise max-w-5xl text-[42px] leading-[1.05] font-bold tracking-[-0.035em] text-ink md:text-[76px]">
-          The Best Mac Apps, Hand-Picked
-        </h1>
-        <p className="rise mt-6 max-w-2xl text-lg text-body md:text-xl" style={{ animationDelay: "45ms" }}>
-          A curated shelf of hand-picked Mac apps. Compare alternatives side by side and find the best Mac apps for your workflow without subscription fatigue.
-        </p>
-        <div className="rise mt-10 flex flex-wrap items-center gap-3" style={{ animationDelay: "90ms" }}>
-          <a
-            href="#apps"
-            className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:opacity-90"
-          >
-            <AppleMark className="h-[15px] w-[15px]" />
-            Browse the collection
-          </a>
-          <Link
-            to="/submit"
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-2"
-          >
-            Submit an app
-          </Link>
-          <button
-            type="button"
-            onClick={() => setOgOpen(true)}
-            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-2/80 px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-2"
-          >
-            Preview social cards
-          </button>
+      <section className="hero-grid relative overflow-hidden border-b border-line px-4 py-12 text-center sm:px-6 lg:py-16">
+        <div className="relative mx-auto max-w-3xl">
+          <h1 className="text-3xl leading-9 font-bold tracking-[-0.04em] text-ink md:text-5xl md:leading-none">
+            The best Mac apps
+            <br />
+            worth installing.
+          </h1>
+          <p className="mx-auto mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
+            Skip the endless lists. A short shelf of useful Mac apps, picked by hand.
+          </p>
+          <div className="mt-10 hidden justify-center sm:flex" aria-label="Featured Mac apps">
+            {fan.map((app, index) => {
+              const mid = (fan.length - 1) / 2;
+              const tilt = (index - mid) * 3;
+              const lift = Math.abs(index - mid) * 4;
+              return (
+                <Link
+                  key={app.id}
+                  to="/app/$slug"
+                  params={{ slug: app.slug }}
+                  title={app.name}
+                  style={{ transform: `translateY(${lift}px) rotate(${tilt}deg)` }}
+                  className="group -mx-1.5 shrink-0 transition-transform duration-200 hover:z-10 sm:-mx-2"
+                >
+                  <span className="block transition-transform duration-200 group-hover:-translate-y-2 group-hover:scale-110">
+                    <img alt="" src={app.icon} className="h-12 w-12 rounded-[22%] bg-surface object-cover shadow-lg shadow-black/15 ring-2 ring-canvas sm:h-14 sm:w-14" />
+                  </span>
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </section>
 
-      <OgPreviewModal open={ogOpen} onClose={() => setOgOpen(false)} appList={list} />
-
-      <div className="mx-auto w-full max-w-[1400px] px-5 py-10 md:px-10">
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
         <AppGrid
           apps={list}
           query={q}
@@ -110,149 +110,23 @@ function Home() {
           onQuery={(value) => navigate({ to: "/", search: { q: value, cat } })}
           onCategory={(value) => navigate({ to: "/", search: { q, cat: value }, hash: "apps" })}
         />
+        <GuideStrip posts={guides} />
 
-        <section className="rise mt-24 border-t border-line pt-12" style={{ animationDelay: "40ms" }}>
-          <div className="flex items-baseline justify-between">
-            <div>
-              <p className="text-xs font-semibold tracking-wider text-accent uppercase">Buying Guides</p>
-              <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Guides & Comparisons</h2>
-            </div>
-            <Link to="/blog" className="text-sm font-medium text-accent hover:underline">
-              All guides →
+        <section className="mt-20">
+          <div className="flex items-center gap-5">
+            <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Questions</h2>
+            <span aria-hidden="true" className="h-px flex-1 bg-line" />
+            <Link to="/how-we-pick" className="text-[13px] font-medium text-body hover:text-ink">
+              How we pick
             </Link>
           </div>
-          <p className="mt-2 text-sm text-muted">
-            In-depth comparisons and curated breakdowns to help you choose the right tools.
-          </p>
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "must-have-mac-apps-2026" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Essential Utilities</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                must have mac apps
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                Essential utilities for screenshots, menu bar, clipboard, voice, writing, and disk.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-free-mac-apps" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Free & Open</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                best free mac apps
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                Verified zero-cost utilities and generous tiers without forced subscriptions.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-clipboard-manager-mac" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Clipboard</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                best clipboard manager for Mac
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                Compare Tucket, Clippio, and Maclip on encryption, notch access, and one-time pricing.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-notes-app-mac" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Writing</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                best notes app for Mac
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                Structured knowledge bases versus focused markdown drafting with Anytype and iA Writer.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-mac-disk-space-analyzer" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Disk Tools</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                mac disk space analyzer
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                ScanMyDisk, Mole, Bytesweep, and Plumby compared for visualizing disk usage.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-bartender-alternative-mac" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Menu Bar</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                bartender alternative
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                ClearBar and Lounge for icon management, plus Alcove for notch alerts.
-              </p>
-            </Link>
-            <Link
-              to="/blog/$slug"
-              params={{ slug: "best-notch-apps-mac" }}
-              className="group rounded-2xl border border-line bg-surface p-6 transition hover:border-ink/20"
-            >
-              <span className="text-xs font-semibold uppercase tracking-wider text-accent">Notch Tools</span>
-              <h3 className="mt-2 text-lg font-semibold text-ink group-hover:text-accent">
-                notch app mac
-              </h3>
-              <p className="mt-2 text-sm text-body">
-                Alcove, NotchDodo, Droppy, Lounge, and Tucket turning the cutout into a productivity hub.
-              </p>
-            </Link>
-          </div>
-        </section>
-
-        {/* Visible Homepage FAQ Section */}
-        <section className="rise mt-24 border-t border-line pt-12" style={{ animationDelay: "60ms" }}>
-          <div>
-            <p className="text-xs font-semibold tracking-wider text-accent uppercase">Answers & Transparency</p>
-            <h2 className="mt-1 text-2xl font-semibold tracking-tight text-ink sm:text-3xl">Frequently Asked Questions</h2>
-            <p className="mt-2 text-sm text-muted">
-              Everything you need to know about our curation methodology, business model, and app submissions.
-            </p>
-          </div>
-
-          <div className="mt-8 space-y-3">
-            {homeFaqs.map((faq, index) => (
-              <details
-                key={index}
-                className="group rounded-2xl border border-line bg-surface p-6 transition-colors open:bg-surface-2"
-              >
-                <summary className="flex cursor-pointer items-center justify-between font-semibold text-ink list-none">
-                  <span className="text-base">{faq.q}</span>
-                  <span className="ml-4 shrink-0 text-muted transition group-open:rotate-180">
-                    ↓
-                  </span>
-                </summary>
+          <div className="mt-6 space-y-3">
+            {homeFaqs.map((faq) => (
+              <details key={faq.q} className="rounded-xl border border-line bg-surface px-5 py-4">
+                <summary className="cursor-pointer text-[15px] font-medium text-ink">{faq.q}</summary>
                 <p className="mt-3 text-sm leading-relaxed text-body">{faq.a}</p>
               </details>
             ))}
-          </div>
-
-          <div className="mt-8 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-line bg-surface p-5 text-sm">
-            <span className="text-muted">
-              Have questions about how we evaluate apps? Read our full review criteria.
-            </span>
-            <Link to="/how-we-pick" className="font-semibold text-accent hover:underline">
-              Editorial standards & policy →
-            </Link>
           </div>
         </section>
       </div>

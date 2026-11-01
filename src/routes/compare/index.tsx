@@ -41,7 +41,7 @@ function CompareHub() {
   const faqs = hubFaqs(pairs);
   return (
     <main>
-      <section className="mx-auto max-w-3xl px-6 py-14 lg:py-20">
+      <section className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
         <nav className="mb-8 flex items-center gap-2 text-sm text-muted">
           <Link to="/" className="hover:text-ink">
             Home

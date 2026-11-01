@@ -1,4 +1,5 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from '@tanstack/react-router'
+import { GuideCard } from "@/components/guide-strip";
 import { posts } from "@/lib/catalog";
 import { guidesGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -29,28 +30,14 @@ function BlogIndex() {
   const list = directory?.posts ?? posts;
   return (
     <main>
-      <div className="mx-auto max-w-3xl px-6 py-14 lg:py-20">
-        <header className="mb-10">
-          <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">Guides</p>
-          <h1 className="font-display mt-3 text-5xl font-semibold tracking-[-0.04em] text-ink">Guides</h1>
-        </header>
-        <div className="space-y-8">
-          {list.map((post, index) => (
-            <Link
-              key={post.slug}
-              to="/blog/$slug"
-              params={{ slug: post.slug }}
-              className={index === 0 ? "block border-b border-line pb-8" : "block"}
-            >
-              <p className="text-[12.5px] text-muted">
-                <time dateTime={post.date}>{post.dateLabel}</time>
-                <span> · {post.minutes} min</span>
-              </p>
-              <h2 className={`font-display mt-2 font-semibold tracking-[-0.03em] text-ink ${index === 0 ? "text-4xl" : "text-2xl"}`}>
-                {post.title}
-              </h2>
-              <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-body">{post.excerpt}</p>
-            </Link>
+      <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
+        <div className="mb-6 flex items-center gap-5">
+          <h1 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Guides to the best Mac apps</h1>
+          <span aria-hidden="true" className="h-px flex-1 bg-line" />
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {list.map((post) => (
+            <GuideCard key={post.slug} post={post} />
           ))}
         </div>
       </div>

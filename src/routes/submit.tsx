@@ -163,7 +163,7 @@ function SubmitPage() {
   return (
     <main>
       <div className="min-h-screen">
-        <div className="mx-auto max-w-6xl px-6 py-10 lg:py-14">
+        <div className="mx-auto max-w-[1200px] px-4 py-10 sm:px-6 lg:py-14">
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-16 xl:gap-24">
             <div className="w-full lg:max-w-[460px]">
               <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">List an app</p>

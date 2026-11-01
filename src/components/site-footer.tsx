@@ -1,133 +1,98 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { apps, categories, editors } from "@/lib/catalog";
-
-const menu = [
-  { to: "/", label: "Home" },
-  { to: "/blog", label: "Guides" },
-  { to: "/compare", label: "Comparisons" },
-  { to: "/about", label: "About" },
-  { to: "/how-we-pick", label: "How we pick" },
-  { to: "/submit", label: "Submit an app" },
-  { to: "/privacy", label: "Privacy" },
-] as const;
-
-const fan = [
-  "-rotate-12 translate-y-2",
-  "-rotate-6 translate-y-0.5",
-  "-rotate-3 -translate-y-1",
-  "rotate-2 -translate-y-1.5",
-  "rotate-5 -translate-y-0.5",
-  "rotate-9 translate-y-1",
-  "-rotate-6 translate-y-1.5",
-  "rotate-12 translate-y-2",
-];
+import { apps, categories } from "@/lib/catalog";
 
 export function SiteFooter() {
   const { directory } = useRouteContext({ from: "__root__" });
   const list = directory?.apps ?? apps;
   const used = categories.filter((category) => list.some((app) => app.category === category.slug));
-  const picks = list.filter((app) => app.editorChoice ?? editors.has(app.slug));
-  const icons = [...picks, ...list.filter((app) => !picks.includes(app))].slice(0, 8);
 
   return (
-    <footer className="mt-16 px-5 pt-12 pb-10 md:px-10">
-      <div className="mx-auto w-full max-w-[1400px]">
-        {icons.length > 0 ? (
-          <div className="mb-14 flex justify-center overflow-hidden py-6">
-            <div className="flex items-center">
-              {icons.map((app, index) => (
-                <Link
-                  key={app.id}
-                  to="/app/$slug"
-                  params={{ slug: app.slug }}
-                  aria-label={app.name}
-                  className={`${index === 0 ? "" : "-ml-3 md:-ml-4"} ${fan[index % fan.length] ?? ""} transition-transform duration-300 hover:z-10 hover:translate-y-0 hover:rotate-0 hover:scale-110`}
-                >
-                  <img alt="" src={app.icon} className="h-11 w-11 rounded-xl bg-white object-cover shadow-lg ring-1 ring-black/5 md:h-14 md:w-14 md:rounded-2xl" />
-                </Link>
-              ))}
-            </div>
-          </div>
-        ) : null}
-
-        <div className="grid grid-cols-2 gap-10 md:grid-cols-4 md:gap-8">
-          <div className="col-span-2 md:col-span-1">
-            <Link to="/" className="flex items-center gap-1.5 text-[15px] font-semibold tracking-tight text-ink">
-              <span>Pick</span>
-              <img src="/favicon.svg" alt="" className="h-6 w-6 rounded-[5px] object-cover" />
-              <span>MacApps</span>
+    <footer className="mt-auto border-t border-line bg-canvas">
+      <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6">
+        <div className="grid grid-cols-2 gap-10 sm:grid-cols-4">
+          <div className="col-span-2 sm:col-span-1">
+            <Link to="/" className="text-[19px] font-medium text-ink">
+              PickMacApps
             </Link>
-            <p className="mt-3 max-w-[240px] text-[13px] leading-relaxed text-muted">
-              A curated shelf of Mac apps worth installing.
+            <p className="mt-3 max-w-[26ch] text-[13px] leading-relaxed text-muted">
+              A growing directory of useful Mac apps, picked by hand.
             </p>
           </div>
-
           <div>
-            <h2 className="text-[13px] font-semibold text-ink">Menu</h2>
-            <ul className="mt-4 space-y-2.5 text-[14px]">
-              {menu.map((item) => (
-                <li key={item.label}>
-                  <Link to={item.to} className="text-ink transition hover:text-muted">
-                    {item.label}
+            <p className="text-[13px] font-semibold text-ink">Browse</p>
+            <ul className="mt-3.5 space-y-2.5">
+              <li>
+                <a className="text-[13px] text-muted transition-colors hover:text-ink" href="/#apps">
+                  All Apps
+                </a>
+              </li>
+              <li>
+                <Link to="/blog" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/submit" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  Submit an App
+                </Link>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <p className="text-[13px] font-semibold text-ink">Categories</p>
+            <ul className="mt-3.5 space-y-2.5">
+              {used.map((category) => (
+                <li key={category.slug}>
+                  <Link to="/category/$slug" params={{ slug: category.slug }} className="text-[13px] text-muted transition-colors hover:text-ink">
+                    {category.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-
           <div>
-            <h2 className="text-[13px] font-semibold text-ink">Categories</h2>
-            <ul className="mt-4 space-y-2.5 text-[14px]">
-              {used.length === 0 ? (
-                <li className="text-faint">—</li>
-              ) : (
-                used.map((category) => (
-                  <li key={category.slug}>
-                    <Link to="/category/$slug" params={{ slug: category.slug }} className="text-ink transition hover:text-muted">
-                      {category.name}
-                    </Link>
-                  </li>
-                ))
-              )}
-            </ul>
-          </div>
-
-          <div className="col-span-2 md:col-span-1">
-            <h2 className="text-[13px] font-semibold text-ink">Editor's Choice</h2>
-            <ul className="mt-4 space-y-2.5">
-              {picks.length === 0 ? (
-                <li className="text-[14px] text-faint">—</li>
-              ) : (
-                picks.map((app) => (
-                  <li key={app.id}>
-                    <Link to="/app/$slug" params={{ slug: app.slug }} className="group flex items-center gap-2.5">
-                      <img alt="" src={app.icon} className="h-7 w-7 shrink-0 rounded-lg bg-white object-cover" />
-                      <span className="truncate text-[14px] text-ink transition group-hover:text-muted">{app.name}</span>
-                    </Link>
-                  </li>
-                ))
-              )}
+            <p className="text-[13px] font-semibold text-ink">Links</p>
+            <ul className="mt-3.5 space-y-2.5">
+              <li>
+                <Link to="/about" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link to="/how-we-pick" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  How we pick
+                </Link>
+              </li>
+              <li>
+                <Link to="/compare" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  Alternatives
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-[13px] text-muted transition-colors hover:text-ink">
+                  Privacy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>
-
-        <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-[12px] leading-relaxed text-muted md:flex-row md:items-center md:justify-between">
-          <p>
-            © {new Date().getFullYear()} PickMacApps. Curated by{" "}
-            <Link to="/about" className="text-ink underline underline-offset-2 hover:text-accent">
-              Firoj Alam
-            </Link>
-            .
-          </p>
-          <p className="max-w-xl md:text-right">
-            Independent curation of Mac apps. Zero affiliate links. Editor’s Choice spots are sponsored placements
-            disclosed per our{" "}
-            <Link to="/how-we-pick" className="text-ink underline underline-offset-2 hover:text-accent">
-              editorial policy
-            </Link>
-            . Not affiliated with Apple Inc.
-          </p>
+        <div className="mt-12 border-t border-line pt-8">
+          <p className="text-[13px] font-semibold text-ink">Popular Categories</p>
+          <div className="mt-4 grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+            {used.map((category) => (
+              <Link
+                key={category.slug}
+                to="/category/$slug"
+                params={{ slug: category.slug }}
+                className="flex items-center gap-2.5 border-b border-line/70 pb-2.5 text-[13px] text-muted transition-colors hover:text-ink"
+              >
+                <span className="text-[13px] leading-none">{category.emoji}</span>
+                {category.name} Apps
+              </Link>
+            ))}
+          </div>
         </div>
+        <p className="mt-8 text-[13px] text-muted">© {new Date().getFullYear()} PickMacApps. Not affiliated with Apple.</p>
       </div>
     </footer>
   );

@@ -9,7 +9,7 @@ import { fetchDirectory } from "@/lib/directory.fn";
 import { pageCopy } from "@/lib/site";
 import appCss from "../styles.css?url";
 
-const THEME_SCRIPT = `(function(){try{document.documentElement.classList.remove("dark");document.documentElement.dataset.theme="light";localStorage.removeItem("theme")}catch(e){}})()`;
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";d.dataset.theme=t;d.classList.toggle("dark",t==="dark"||(t==="system"&&m.matches))}a();m.addEventListener("change",a)}catch(e){}})()`;
 
 function Frame() {
   const path = useRouterState({ select: (state) => state.location.pathname });
