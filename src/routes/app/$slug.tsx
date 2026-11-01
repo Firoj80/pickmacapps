@@ -97,7 +97,7 @@ function AppPage() {
           <a
             href={app.website}
             target="_blank"
-            rel={choice ? "sponsored noopener noreferrer" : "noopener noreferrer"}
+            rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
             className="inline-flex shrink-0 items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-semibold text-canvas hover:opacity-85"
           >
             Visit website

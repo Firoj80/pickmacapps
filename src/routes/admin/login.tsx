@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { fieldClass } from "@/components/admin-shell";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/login")({
@@ -21,23 +22,27 @@ export const Route = createFileRoute("/admin/login")({
 function Login() {
   const { error } = Route.useSearch();
   return (
-    <main className="mx-auto max-w-md px-6 py-16">
-      <h1 className="font-display text-4xl font-semibold text-ink">Admin</h1>
-      <p className="mt-3 text-sm text-body">The password is checked on the server. It is not stored in the page.</p>
-      {error ? <p className="mt-4 text-sm text-amber-800">That password was not accepted.</p> : null}
-      <form method="post" action="/api/admin/login" className="mt-6 space-y-3">
-        <input
-          type="password"
-          name="password"
-          required
-          autoComplete="current-password"
-          aria-label="Admin password"
-          className="w-full rounded-lg border border-line bg-surface px-3 py-2 text-sm"
-        />
-        <button type="submit" className="rounded-full bg-ink px-4 py-2 text-sm text-canvas">
-          Sign in
-        </button>
-      </form>
+    <main className="flex min-h-screen items-center justify-center bg-[#f4f3ef] px-6">
+      <div className="w-full max-w-sm rounded-2xl border border-line bg-white p-6">
+        <p className="text-[11px] font-medium tracking-[0.16em] text-muted uppercase">PickMacApps</p>
+        <h1 className="font-display mt-2 text-3xl font-semibold tracking-tight text-ink">Sign in</h1>
+        <p className="mt-2 text-sm text-body">The password is checked on the server. It is not stored in the page.</p>
+        {error ? <p className="mt-4 rounded-xl bg-amber-50 px-3 py-2 text-sm text-amber-950">That password was not accepted.</p> : null}
+        <form method="post" action="/api/admin/login" className="mt-5 space-y-3">
+          <input
+            type="password"
+            name="password"
+            required
+            autoComplete="current-password"
+            aria-label="Admin password"
+            placeholder="Password"
+            className={fieldClass}
+          />
+          <button type="submit" className="w-full rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
+            Continue
+          </button>
+        </form>
+      </div>
     </main>
   );
 }

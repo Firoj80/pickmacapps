@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { CheckIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
+import { categories } from "@/lib/catalog";
 import { fetchOffer, submitListingFn } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -37,6 +38,8 @@ const BADGE_HTML = `<a href="/" target="_blank" rel="noopener">
 </a>`;
 
 const checks = ["Your app is functional", "It delivers what it promises", "Is not an infoproduct"];
+const field =
+  "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
 
 function SubmitPage() {
   const [plan, setPlan] = useState<"free" | "choice">("free");
@@ -48,6 +51,7 @@ function SubmitPage() {
   const offer = Route.useLoaderData();
   const price = (offer.priceCents / 100).toFixed(0);
   const compare = (offer.compareCents / 100).toFixed(0);
+  const paid = plan === "choice";
 
   async function copyBadge() {
     try {
@@ -77,15 +81,14 @@ function SubmitPage() {
       <div className="min-h-screen">
         <div className="mx-auto max-w-6xl px-6 py-10 lg:py-14">
           <div className="flex flex-col gap-10 lg:flex-row lg:gap-16 xl:gap-24">
-            <div className="w-full lg:max-w-[420px]">
+            <div className="w-full lg:max-w-[460px]">
               <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">List an app</p>
               <h1 className="font-display mt-2 mb-8 text-4xl font-semibold tracking-[-0.03em] text-ink">Submit your Mac app</h1>
               {sent ? (
                 <div className="rounded-xl border border-line bg-surface p-6">
                   <h2 className="text-lg font-[550] tracking-[-0.025em] text-ink">Submission received</h2>
                   <p className="mt-2 text-sm leading-relaxed text-body">
-                    Thanks. We’ll review {plan === "choice" ? "your Editor’s Choice request" : "your listing"} and
-                    follow up by email.
+                    Thanks. We’ll review your listing and follow up by email.
                   </p>
                   <button
                     type="button"
@@ -100,7 +103,8 @@ function SubmitPage() {
                   className="space-y-5"
                   onSubmit={async (event) => {
                     event.preventDefault();
-                    if (badge !== "ok" || sending) return;
+                    if (sending) return;
+                    if (plan === "free" && badge !== "ok") return;
                     const form = new FormData(event.currentTarget);
                     setSending(true);
                     try {
@@ -109,6 +113,11 @@ function SubmitPage() {
                           name: String(form.get("name") ?? ""),
                           website: String(form.get("website_url") ?? ""),
                           tagline: String(form.get("tagline") ?? ""),
+                          description: String(form.get("description") ?? ""),
+                          icon: String(form.get("icon") ?? ""),
+                          demo: String(form.get("demo") ?? ""),
+                          pricing: String(form.get("pricing") ?? ""),
+                          category: String(form.get("category") ?? ""),
                           email: String(form.get("email") ?? ""),
                           plan,
                         },
@@ -130,41 +139,40 @@ function SubmitPage() {
                     }
                   }}
                 >
-                  <div className="space-y-3">
-                    <input
+                  <div className="space-y-3 rounded-xl border border-line bg-surface p-4">
+                    <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">App</h2>
+                    <input required name="name" aria-label="App name" placeholder="App name" className={field} />
+                    <input required type="url" name="website_url" aria-label="Website URL" placeholder="Website URL" className={field} />
+                    <input required name="tagline" aria-label="Tagline" placeholder="Short tagline" className={field} />
+                    <textarea
                       required
-                      name="name"
-                      aria-label="App name"
-                      placeholder="App Name"
-                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
+                      name="description"
+                      aria-label="Description"
+                      placeholder="What the app does"
+                      rows={5}
+                      className={field}
                     />
-                    <input
-                      required
-                      type="url"
-                      name="website_url"
-                      aria-label="Website URL"
-                      placeholder="Website URL..."
-                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
-                    />
-                    <input
-                      required
-                      name="tagline"
-                      aria-label="Short tagline"
-                      placeholder="Short tagline..."
-                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
-                    />
-                    <input
-                      required
-                      type="email"
-                      name="email"
-                      aria-label="Email address"
-                      placeholder="Your email address..."
-                      className="w-full rounded-lg border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none"
-                    />
+                    <input required type="url" name="icon" aria-label="Icon URL" placeholder="Icon image URL" className={field} />
+                    <input type="url" name="demo" aria-label="Demo image URL" placeholder="Demo image URL, optional" className={field} />
+                    <div className="grid grid-cols-2 gap-3">
+                      <select required name="pricing" aria-label="Price model" defaultValue="free" className={field}>
+                        <option value="free">Free</option>
+                        <option value="freemium">Freemium</option>
+                        <option value="paid">Paid</option>
+                      </select>
+                      <select required name="category" aria-label="Category" defaultValue={categories[0]?.slug} className={field}>
+                        {categories.map((category) => (
+                          <option key={category.slug} value={category.slug}>
+                            {category.emoji} {category.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <input required type="email" name="email" aria-label="Email address" placeholder="Your email address" className={field} />
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface p-4">
-                    <h2 className="mb-3 text-base font-[550] tracking-[-0.025em] text-ink">Price</h2>
+                    <h2 className="mb-3 text-base font-[550] tracking-[-0.025em] text-ink">Listing</h2>
                     <div className="space-y-2.5">
                       <button
                         type="button"
@@ -186,7 +194,7 @@ function SubmitPage() {
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
                           {[
                             "Add our badge, then we review the listing.",
-                            "The listing can link back to your site.",
+                            "The link back to your site is nofollow.",
                             "No visitor count is promised.",
                           ].map((line) => (
                             <li key={line} className="flex items-start gap-1.5 text-[11px] text-body">
@@ -213,59 +221,60 @@ function SubmitPage() {
                               <span className="text-xs text-muted line-through">${compare}</span>
                               <span className="text-xs text-muted">one-time</span>
                             </div>
-                            <p className="mt-0.5 text-[11px] text-body">Labeled Editor’s Choice on the listing.</p>
+                            <p className="mt-0.5 text-[11px] text-body">No badge. A follow link on the listing.</p>
                           </div>
                           <Radio selected={plan === "choice"} />
                         </div>
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
                           <ChoiceLine strong="Editor’s Choice label" rest=" on the directory." />
-                          <ChoiceLine strong="A link from the listing" rest=" to your site." />
+                          <ChoiceLine strong="A follow link" rest=" from the listing to your site." />
+                          <ChoiceLine strong="No badge" rest=" on your site is required." />
                         </ul>
                       </button>
                     </div>
                   </div>
 
-                  <div className="rounded-xl border border-line bg-surface p-4">
-                    <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">Add our badge, get listed free</h2>
-                    <p className="mt-1.5 text-[13px] leading-relaxed text-body">
-                      Paste this badge on your app's landing page. Your app gets a permanent listing on PickMacApps
-                      and a strong backlink to your website, at no cost.
-                    </p>
-                    <div className="mt-3 flex justify-center rounded-lg border border-line bg-surface-2 p-3">
-                      <img src="/badge.svg" alt="Featured on PickMacApps" width="200" height="54" />
-                    </div>
-                    <div className="mt-3 overflow-hidden rounded-lg border border-line bg-canvas">
-                      <div className="flex items-center justify-between border-b border-line px-3 py-1.5">
-                        <span className="text-[11px] font-medium text-muted">HTML</span>
-                        <button
-                          type="button"
-                          onClick={copyBadge}
-                          className="rounded-md border border-line-2 bg-surface px-2 py-0.5 text-[11px] font-medium text-ink transition-colors hover:bg-surface-2"
-                        >
-                          {copied ? "Copied" : "Copy"}
-                        </button>
-                      </div>
-                      <pre className="overflow-x-auto p-3 text-[11px] leading-relaxed text-body">
-                        <code>{BADGE_HTML}</code>
-                      </pre>
-                    </div>
-                    <button
-                      type="button"
-                      disabled={badge === "checking"}
-                      onClick={(event) => {
-                        const form = event.currentTarget.form;
-                        if (form) void checkBadge(form);
-                      }}
-                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line-2 bg-surface-2 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-accent disabled:opacity-60"
-                    >
-                      {badge === "checking" ? "Checking…" : "Check my badge"}
-                    </button>
-                    {badgeMessage ? (
-                      <p className={`mt-2 text-[12.5px] ${badge === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-body"}`}>
-                        {badgeMessage}
+                  {paid ? null : (
+                    <div className="rounded-xl border border-line bg-surface p-4">
+                      <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">Add our badge, get listed free</h2>
+                      <p className="mt-1.5 text-[13px] leading-relaxed text-body">
+                        Paste this badge on your app's landing page. A free listing needs it before we can review the app.
                       </p>
-                    ) : null}
-                  </div>
+                      <div className="mt-3 flex justify-center rounded-lg border border-line bg-surface-2 p-3">
+                        <img src="/badge.svg" alt="Featured on PickMacApps" width="200" height="54" />
+                      </div>
+                      <div className="mt-3 overflow-hidden rounded-lg border border-line bg-canvas">
+                        <div className="flex items-center justify-between border-b border-line px-3 py-1.5">
+                          <span className="text-[11px] font-medium text-muted">HTML</span>
+                          <button
+                            type="button"
+                            onClick={copyBadge}
+                            className="rounded-md border border-line-2 bg-surface px-2 py-0.5 text-[11px] font-medium text-ink transition-colors hover:bg-surface-2"
+                          >
+                            {copied ? "Copied" : "Copy"}
+                          </button>
+                        </div>
+                        <pre className="overflow-x-auto p-3 text-[11px] leading-relaxed text-body">
+                          <code>{BADGE_HTML}</code>
+                        </pre>
+                      </div>
+                      <button
+                        type="button"
+                        disabled={badge === "checking"}
+                        onClick={(event) => {
+                          const form = event.currentTarget.form;
+                          if (form) void checkBadge(form);
+                        }}
+                        className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-line-2 bg-surface-2 px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:border-accent disabled:opacity-60"
+                      >
+                        {badge === "checking" ? "Checking…" : "Check my badge"}
+                      </button>
+                    </div>
+                  )}
+
+                  {badgeMessage ? (
+                    <p className={`text-[12.5px] ${badge === "ok" ? "text-emerald-600 dark:text-emerald-400" : "text-body"}`}>{badgeMessage}</p>
+                  ) : null}
 
                   <div className="rounded-xl border border-line bg-surface p-4">
                     <h2 className="mb-2.5 text-base font-[550] tracking-[-0.025em] text-ink">Checklist</h2>
@@ -289,10 +298,10 @@ function SubmitPage() {
                   </p>
                   <button
                     type="submit"
-                    disabled={badge !== "ok"}
+                    disabled={sending || (!paid && badge !== "ok")}
                     className="w-full rounded-lg bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {badge === "ok" ? "Submit your app" : "Verify your badge to submit"}
+                    {sending ? "Sending…" : paid ? `Continue to payment · $${price}` : badge === "ok" ? "Submit your app" : "Verify your badge to submit"}
                   </button>
                 </form>
               )}
@@ -303,9 +312,11 @@ function SubmitPage() {
                 <h2 className="font-display text-2xl font-semibold text-ink">How listing works</h2>
                 <p className="text-[15px] leading-relaxed text-body">Listings are reviewed by hand. Nothing goes live from the form alone.</p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  Editor’s Choice costs ${price}, marked down from ${compare}. Those listings are labeled Editor’s Choice. The amount is charged by Dodo from the server, not from this page.
+                  A free listing needs the badge, and the link back to your site is nofollow. Editor’s Choice costs ${price}, marked down from ${compare}. It does not need a badge, and the listing link is a follow link.
                 </p>
-                <p className="text-[15px] leading-relaxed text-body">Visitor counts are not promised, because this directory does not publish traffic numbers.</p>
+                <p className="text-[15px] leading-relaxed text-body">
+                  The amount is charged by Dodo from the server, not from this page. Visitor counts are not promised.
+                </p>
               </div>
             </div>
           </div>

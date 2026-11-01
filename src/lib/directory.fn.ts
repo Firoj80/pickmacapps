@@ -17,6 +17,11 @@ export const submitListingFn = createServerFn({ method: "POST" })
       name: String(data.name ?? "").slice(0, 120),
       website: String(data.website ?? "").slice(0, 300),
       tagline: String(data.tagline ?? "").slice(0, 180),
+      description: String(data.description ?? "").slice(0, 8000),
+      icon: String(data.icon ?? "").slice(0, 400),
+      demo: String(data.demo ?? "").slice(0, 400),
+      pricing: data.pricing === "paid" || data.pricing === "freemium" || data.pricing === "free" ? data.pricing : "free",
+      category: String(data.category ?? "").slice(0, 80),
       email: String(data.email ?? "").slice(0, 180),
       plan: data.plan === "choice" ? "choice" : "free",
     };
@@ -52,7 +57,7 @@ export const fetchAdminHome = createServerFn({ method: "GET" }).handler(async ()
     stats,
     offer,
     submissions,
-    badges: badges.filter((app) => app.pricing === "free" && !app.editorChoice),
+    badges: badges.filter((app) => !app.editorChoice),
   };
 });
 

@@ -1,4 +1,4 @@
-import { createRootRoute, HeadContent, Outlet, Scripts } from "@tanstack/react-router";
+import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { Missing } from "@/components/missing";
 import { PreviewHostBridge } from "@/components/preview-host-bridge";
@@ -10,6 +10,20 @@ import { pageCopy } from "@/lib/site";
 import appCss from "../styles.css?url";
 
 const THEME_SCRIPT = `(function(){try{document.documentElement.classList.remove("dark");document.documentElement.dataset.theme="light";localStorage.removeItem("theme")}catch(e){}})()`;
+
+function Frame() {
+  const path = useRouterState({ select: (state) => state.location.pathname });
+  const admin = path.startsWith("/admin");
+  return (
+    <>
+      {admin ? null : <SiteHeader />}
+      <div className="flex-1">
+        <Outlet />
+      </div>
+      {admin ? null : <SiteFooter />}
+    </>
+  );
+}
 
 export const Route = createRootRoute({
   beforeLoad: async () => {
@@ -77,11 +91,7 @@ export const Route = createRootRoute({
       <body className="flex min-h-full flex-col bg-canvas font-sans text-body">
         <PreviewHostBridge />
         <AuthProvider>
-          <SiteHeader />
-          <div className="flex-1">
-            <Outlet />
-          </div>
-          <SiteFooter />
+          <Frame />
         </AuthProvider>
         <Scripts />
       </body>

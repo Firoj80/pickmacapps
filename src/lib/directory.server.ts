@@ -244,6 +244,8 @@ export async function saveApp(input: {
   slug: string;
   tagline: string;
   description: string;
+  icon: string;
+  demo: string;
   website: string;
   pricing: string;
   category: string;
@@ -261,7 +263,8 @@ export async function saveApp(input: {
   };
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
-      category = $8, category_name = $9, category_icon = $10, editor_choice = $11, status = $12, updated_at = now()
+      category = $8, category_name = $9, category_icon = $10, editor_choice = $11, status = $12,
+      icon = $13, demo = $14, updated_at = now()
      where id = $1`,
     [
       input.id,
@@ -276,6 +279,8 @@ export async function saveApp(input: {
       category.emoji,
       input.editorChoice,
       cleanStatus(input.status),
+      input.icon.trim(),
+      input.demo.trim(),
     ],
   );
   await audit(sql, "save-app", input.slug, cleanStatus(input.status));
@@ -381,23 +386,67 @@ export async function listSubmissions() {
   }>("select id, app_name, website, plan, status, email, created_at from submissions order by created_at desc limit 100");
 }
 
-export async function submitListing(input: { name: string; website: string; tagline: string; email: string; plan: string }, origin: string) {
+export async function rejectSubmission(id: string) {
+  const sql = await directorySql();
+  const rows = await sql.query<{ id: string }>(
+    "update submissions set status = 'rejected' where id = $1 and status <> 'approved' returning id",
+    [id],
+  );
+  if (!rows.length) throw new Error("That submission cannot be rejected.");
+  await audit(sql, "reject", id);
+}
+
+export async function submitListing(
+  input: {
+    name: string;
+    website: string;
+    tagline: string;
+    description: string;
+    icon: string;
+    demo: string;
+    pricing: string;
+    category: string;
+    email: string;
+    plan: string;
+  },
+  origin: string,
+) {
   const plan = input.plan === "choice" ? "choice" : "free";
   const name = input.name.trim();
   const website = input.website.trim();
   const tagline = input.tagline.trim();
+  const description = input.description.trim();
+  const icon = input.icon.trim();
+  const demo = input.demo.trim();
   const email = input.email.trim();
-  if (!name || !website || !tagline || !email.includes("@")) {
-    return { ok: false as const, message: "Name, website, tagline, and email are required." };
+  const category = raw.categories.find((item) => item.slug === input.category);
+  if (!name || !website || !tagline || !description || !icon || !email.includes("@") || !category) {
+    return { ok: false as const, message: "Name, website, tagline, description, icon, category, and email are required." };
   }
-  const badge = await checkBadgeOnPage(website);
-  if (!badge.ok) return { ok: false as const, message: badge.message };
+  if (plan === "free") {
+    const badge = await checkBadgeOnPage(website);
+    if (!badge.ok) return { ok: false as const, message: badge.message };
+  }
   const sql = await directorySql();
   const id = randomUUID();
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, plan, badge_ok, status)
-     values ($1,$2,$3,$4,$5,$6,true,$7)`,
-    [id, name, website, tagline, email, plan, plan === "choice" ? "awaiting_payment" : "pending"],
+    `insert into submissions (id, app_name, website, tagline, email, plan, badge_ok, status, description, icon, demo, pricing, category)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+    [
+      id,
+      name,
+      website,
+      tagline,
+      email,
+      plan,
+      plan === "free",
+      plan === "choice" ? "awaiting_payment" : "pending",
+      description,
+      icon,
+      demo,
+      cleanPricing(input.pricing),
+      category.slug,
+    ],
   );
   if (plan === "free") return { ok: true as const, message: "Submitted. It stays pending until an admin approves it." };
   try {
@@ -453,6 +502,11 @@ export async function approveSubmission(id: string) {
     app_name: string;
     website: string;
     tagline: string;
+    description: string;
+    icon: string;
+    demo: string;
+    pricing: string;
+    category: string;
     email: string;
     plan: string;
     status: string;
@@ -472,18 +526,30 @@ export async function approveSubmission(id: string) {
       .slice(0, 80) || appId.slice(0, 8);
   const taken = await sql.query("select id from apps where slug = $1", [slug]);
   if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
+  const category = raw.categories.find((item) => item.slug === submission.category) ?? {
+    slug: "utilities",
+    name: "Utilities",
+    emoji: "🔧",
+  };
   await sql.query(
-    `insert into apps (id, name, slug, tagline, description, website, pricing, category, category_name, editor_choice, status, submitter_email)
-     values ($1,$2,$3,$4,$5,$6,$7,'utilities','Utilities',$8,'published',$9)`,
+    `insert into apps (
+      id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
+      editor_choice, demo, status, submitter_email
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'published',$14)`,
     [
       appId,
       submission.app_name,
       slug || appId.slice(0, 8),
       submission.tagline,
-      submission.tagline,
+      submission.description || submission.tagline,
+      submission.icon || "",
       submission.website,
-      submission.plan === "choice" ? "paid" : "free",
+      cleanPricing(submission.pricing || (submission.plan === "choice" ? "paid" : "free")),
+      category.slug,
+      category.name,
+      category.emoji,
       submission.plan === "choice",
+      submission.demo || "",
       submission.email,
     ],
   );
@@ -494,7 +560,7 @@ export async function approveSubmission(id: string) {
 export async function runBadgeChecks() {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>(
-    "select * from apps where status = 'published' and editor_choice = false and pricing = 'free'",
+    "select * from apps where status = 'published' and editor_choice = false",
   );
   const results: { slug: string; result: string; detail: string }[] = [];
   for (const row of rows) {

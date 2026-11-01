@@ -1,5 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { GuideForm } from "@/components/guide-form";
+import { AdminShell, Notice, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminGuide, requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -27,18 +28,20 @@ export const Route = createFileRoute("/admin/guides/$slug")({
 
 function EditGuide() {
   const guide = Route.useLoaderData();
-  if (!guide) return <main className="px-6 py-12">That guide is not in the directory.</main>;
+  const notice = useAdminNotice();
+  if (!guide) {
+    return (
+      <AdminShell title="Missing guide" active="guides">
+        <p className="text-sm text-body">That guide is not in the directory.</p>
+      </AdminShell>
+    );
+  }
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="font-display text-4xl font-semibold text-ink">{guide.title}</h1>
-      <GuideForm
-        isNew={false}
-        slug={guide.slug}
-        title={guide.title}
-        excerpt={guide.excerpt}
-        html={guide.html}
-        status={guide.status}
-      />
-    </main>
+    <AdminShell title={guide.title} active="guides">
+      <Notice {...notice} />
+      <div className="max-w-3xl rounded-2xl border border-line bg-white p-5">
+        <GuideForm isNew={false} slug={guide.slug} title={guide.title} excerpt={guide.excerpt} html={guide.html} status={guide.status} />
+      </div>
+    </AdminShell>
   );
 }

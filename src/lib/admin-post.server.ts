@@ -3,6 +3,7 @@ import {
   approveSubmission,
   deleteApp,
   deleteGuide,
+  rejectSubmission,
   runBadgeChecks,
   saveApp,
   saveGuide,
@@ -41,6 +42,8 @@ export async function handleAdminPost(request: Request) {
         slug: String(form.get("slug") ?? ""),
         tagline: String(form.get("tagline") ?? ""),
         description: String(form.get("description") ?? ""),
+        icon: String(form.get("icon") ?? ""),
+        demo: String(form.get("demo") ?? ""),
         website: String(form.get("website") ?? ""),
         pricing: String(form.get("pricing") ?? ""),
         category: String(form.get("category") ?? ""),
@@ -80,6 +83,10 @@ export async function handleAdminPost(request: Request) {
     if (action === "approve") {
       await approveSubmission(String(form.get("id") ?? ""));
       return redirect("/admin?saved=approved");
+    }
+    if (action === "reject") {
+      await rejectSubmission(String(form.get("id") ?? ""));
+      return redirect("/admin?saved=rejected");
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : "Could not save";

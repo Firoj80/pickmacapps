@@ -1,4 +1,5 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
 import { fetchAdminGuides, requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -27,25 +28,35 @@ export const Route = createFileRoute("/admin/guides/")({
 function GuidesPage() {
   const guides = Route.useLoaderData();
   return (
-    <main className="mx-auto max-w-4xl px-6 py-12">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display text-4xl font-semibold text-ink">Guides</h1>
-        <Link to="/admin/guides/new" className="rounded-full bg-ink px-4 py-2 text-sm text-canvas">
+    <AdminShell
+      title="Guides"
+      lede="Drafts stay off the public site until you publish them."
+      active="guides"
+      actions={
+        <Link to="/admin/guides/new" className="rounded-xl bg-ink px-4 py-2 text-sm font-medium text-canvas">
           New guide
         </Link>
+      }
+    >
+      <div className="overflow-hidden rounded-2xl border border-line bg-white">
+        {guides.length === 0 ? <p className="px-4 py-8 text-sm text-muted">No guides yet.</p> : null}
+        <ul className="divide-y divide-line">
+          {guides.map((guide) => (
+            <li key={guide.slug} className="flex items-center justify-between gap-3 px-4 py-3">
+              <div>
+                <p className="text-sm font-medium text-ink">{guide.title}</p>
+                <p className="text-xs text-muted">{guide.date}</p>
+              </div>
+              <div className="flex items-center gap-3">
+                <Pill tone={statusTone(guide.status)}>{guide.status}</Pill>
+                <Link to="/admin/guides/$slug" params={{ slug: guide.slug }} className="text-sm font-medium text-ink underline">
+                  Edit
+                </Link>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
-      <ul className="mt-6 divide-y divide-line">
-        {guides.map((guide) => (
-          <li key={guide.slug} className="flex items-center justify-between py-3 text-sm">
-            <span>
-              {guide.title} · {guide.status}
-            </span>
-            <Link to="/admin/guides/$slug" params={{ slug: guide.slug }} className="underline">
-              Edit
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </main>
+    </AdminShell>
   );
 }

@@ -1,4 +1,5 @@
-import { createFileRoute, Link, redirect, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AdminShell, Notice, Pill, fieldClass, statusTone, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminHome, requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -30,111 +31,140 @@ function money(cents: number) {
 
 function AdminHome() {
   const data = Route.useLoaderData();
-  const search = useRouterState({ select: (state) => state.location.searchStr });
-  const params = new URLSearchParams(search);
-  const error = params.get("error") ?? "";
-  const saved = params.get("saved") ?? "";
+  const notice = useAdminNotice();
+  const waiting = data.submissions.filter((item) => item.status === "pending" || item.status === "paid").length;
+  const stats = [
+    ["Revenue", money(data.stats.revenueCents)],
+    ["Waiting", waiting],
+    ["Published apps", data.stats.free + data.stats.paid + data.stats.freemium],
+    ["Editor’s Choice", data.stats.editorChoice],
+    ["Free apps", data.stats.free],
+    ["Paid apps", data.stats.paid],
+    ["Freemium", data.stats.freemium],
+    ["Guides", data.stats.guides],
+  ];
   return (
-    <main className="mx-auto max-w-5xl px-6 py-12">
-      <div className="flex items-center justify-between gap-4">
-        <h1 className="font-display text-4xl font-semibold text-ink">Directory</h1>
-        <form method="post" action="/api/admin/logout">
-          <button type="submit" className="text-sm text-muted underline">
-            Sign out
-          </button>
-        </form>
-      </div>
-      <nav className="mt-4 flex gap-4 text-sm">
-        <Link to="/admin/apps" className="underline">
-          Apps
-        </Link>
-        <Link to="/admin/guides" className="underline">
-          Guides
-        </Link>
-      </nav>
-      {error ? <p className="mt-4 text-sm text-amber-800">{error}</p> : null}
-      {saved ? <p className="mt-4 text-sm text-body">Saved.</p> : null}
-      <dl className="mt-8 grid grid-cols-2 gap-4 md:grid-cols-4">
-        {[
-          ["Free apps", data.stats.free],
-          ["Paid apps", data.stats.paid],
-          ["Freemium", data.stats.freemium],
-          ["Editor’s Choice", data.stats.editorChoice],
-          ["Published guides", data.stats.guides],
-          ["Other guides", data.stats.draftGuides],
-          ["Pending apps", data.stats.pendingApps],
-          ["Revenue", money(data.stats.revenueCents)],
-        ].map(([label, value]) => (
-          <div key={String(label)} className="rounded-2xl border border-line p-4">
-            <dt className="text-xs text-muted">{label}</dt>
-            <dd className="mt-1 text-2xl font-semibold text-ink">{value}</dd>
+    <AdminShell title="Overview" lede="Approve listings, set the Editor’s Choice price, and check free-listing badges." active="overview">
+      <Notice {...notice} />
+      <dl className="grid grid-cols-2 gap-3 xl:grid-cols-4">
+        {stats.map(([label, value]) => (
+          <div key={String(label)} className="rounded-2xl border border-line bg-white px-4 py-3.5">
+            <dt className="text-[12px] font-medium text-muted">{label}</dt>
+            <dd className="mt-1 font-display text-[28px] leading-none font-semibold tracking-tight text-ink">{value}</dd>
           </div>
         ))}
       </dl>
 
-      <section className="mt-10">
-        <h2 className="font-display text-2xl font-semibold text-ink">Editor’s Choice price</h2>
-        <p className="mt-2 max-w-xl text-sm text-body">
-          This updates the Dodo product. The checkout uses that product, so a browser cannot choose the amount. Current
-          price {money(data.offer.priceCents)}, shown as marked down from {money(data.offer.compareCents)}.
-        </p>
-        <form method="post" action="/api/admin/price" className="mt-4 flex flex-wrap items-end gap-3">
-          <label className="text-sm text-body">
-            Charge in dollars
-            <input name="dollars" defaultValue={(data.offer.priceCents / 100).toFixed(2)} className="mt-1 block rounded-lg border border-line px-3 py-2" />
-          </label>
-          <label className="text-sm text-body">
-            Compare-at
-            <input name="compare" defaultValue={(data.offer.compareCents / 100).toFixed(2)} className="mt-1 block rounded-lg border border-line px-3 py-2" />
-          </label>
-          <button type="submit" className="rounded-full bg-ink px-4 py-2 text-sm text-canvas">
-            Save price
-          </button>
-        </form>
+      <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-white">
+        <div className="flex items-center justify-between border-b border-line px-4 py-3">
+          <h2 className="text-sm font-semibold text-ink">Submissions</h2>
+          <span className="text-xs text-muted">{waiting} to review</span>
+        </div>
+        {data.submissions.length === 0 ? (
+          <p className="px-4 py-8 text-sm text-muted">No submissions yet.</p>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[640px] text-left text-sm">
+              <thead className="text-[11px] tracking-wide text-muted uppercase">
+                <tr>
+                  <th className="px-4 py-2 font-medium">App</th>
+                  <th className="px-3 py-2 font-medium">Plan</th>
+                  <th className="px-3 py-2 font-medium">Status</th>
+                  <th className="px-4 py-2 text-right font-medium">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.submissions.map((item) => (
+                  <tr key={item.id} className="border-t border-line">
+                    <td className="px-4 py-3">
+                      <p className="font-medium text-ink">{item.app_name}</p>
+                      <a href={item.website} className="text-xs text-muted underline" target="_blank" rel="noreferrer">
+                        {item.website}
+                      </a>
+                    </td>
+                    <td className="px-3 py-3">
+                      {item.plan === "choice" ? <Pill tone="choice">Editor’s Choice</Pill> : <Pill tone="off">Free</Pill>}
+                    </td>
+                    <td className="px-3 py-3">
+                      <Pill tone={statusTone(item.status)}>{item.status.replaceAll("_", " ")}</Pill>
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      {item.status === "pending" || item.status === "paid" ? (
+                        <div className="flex justify-end gap-2">
+                          <form method="post" action="/api/admin/reject">
+                            <input type="hidden" name="id" value={item.id} />
+                            <button type="submit" className="rounded-lg px-2.5 py-1.5 text-xs text-muted hover:bg-[#f4f3ef]">
+                              Reject
+                            </button>
+                          </form>
+                          <form method="post" action="/api/admin/approve">
+                            <input type="hidden" name="id" value={item.id} />
+                            <button type="submit" className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-canvas">
+                              Approve
+                            </button>
+                          </form>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-muted">{item.email}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </section>
 
-      <section className="mt-10">
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-2xl font-semibold text-ink">Free-app badge check</h2>
-          <form method="post" action="/api/admin/badges">
-            <button type="submit" className="rounded-full border border-line px-4 py-2 text-sm">
-              Check now
+      <div className="mt-6 grid gap-4 lg:grid-cols-2">
+        <section className="rounded-2xl border border-line bg-white p-5">
+          <h2 className="text-sm font-semibold text-ink">Editor’s Choice price</h2>
+          <p className="mt-1 text-sm leading-relaxed text-body">
+            Charged by Dodo: {money(data.offer.priceCents)}, shown as marked down from {money(data.offer.compareCents)}.
+            The browser cannot set the amount.
+          </p>
+          <form method="post" action="/api/admin/price" className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+            <label className="text-[13px] font-medium text-ink">
+              Charge
+              <input name="dollars" defaultValue={(data.offer.priceCents / 100).toFixed(2)} className={fieldClass} />
+            </label>
+            <label className="text-[13px] font-medium text-ink">
+              Compare-at
+              <input name="compare" defaultValue={(data.offer.compareCents / 100).toFixed(2)} className={fieldClass} />
+            </label>
+            <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
+              Save price
             </button>
           </form>
-        </div>
-        <p className="mt-2 text-sm text-body">
-          A free listing is unpublished after two checks find the page up and the badge gone. A site that is down is only flagged.
-        </p>
-        <ul className="mt-4 space-y-2 text-sm">
-          {data.badges.map((app) => (
-            <li key={app.id}>
-              {app.name}: {app.badgeStatus}
-              {app.badgeDetail ? ` — ${app.badgeDetail}` : ""}
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="mt-10">
-        <h2 className="font-display text-2xl font-semibold text-ink">Submissions</h2>
-        <ul className="mt-4 space-y-3 text-sm">
-          {data.submissions.map((item) => (
-            <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 border-b border-line py-2">
-              <span>
-                {item.app_name} · {item.plan} · {item.status}
-              </span>
-              {item.status === "pending" || item.status === "paid" ? (
-                <form method="post" action="/api/admin/approve">
-                  <input type="hidden" name="id" value={item.id} />
-                  <button type="submit" className="underline">
-                    Approve
-                  </button>
-                </form>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </section>
-    </main>
+        </section>
+        <section className="rounded-2xl border border-line bg-white p-5">
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold text-ink">Free-listing badges</h2>
+              <p className="mt-1 text-sm leading-relaxed text-body">
+                Editor’s Choice is not checked. A free listing is unpublished after two checks find the page up and the badge gone.
+              </p>
+            </div>
+            <form method="post" action="/api/admin/badges">
+              <button type="submit" className="rounded-xl border border-line px-3 py-2 text-sm font-medium text-ink">
+                Check now
+              </button>
+            </form>
+          </div>
+          <ul className="mt-4 max-h-56 space-y-2 overflow-auto text-sm">
+            {data.badges.length === 0 ? <li className="text-muted">No free listings to check.</li> : null}
+            {data.badges.map((app) => (
+              <li key={app.id} className="flex items-center justify-between gap-3">
+                <span className="truncate text-ink">{app.name}</span>
+                <span className="shrink-0 text-xs text-muted">
+                  {app.badgeStatus}
+                  {app.badgeDetail ? ` · ${app.badgeDetail}` : ""}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      </div>
+    </AdminShell>
   );
 }

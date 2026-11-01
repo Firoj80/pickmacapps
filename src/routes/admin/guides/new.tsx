@@ -1,7 +1,8 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
+import { GuideForm } from "@/components/guide-form";
+import { AdminShell } from "@/components/admin-shell";
 import { requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
-import { GuideForm } from "@/components/guide-form";
 
 export const Route = createFileRoute("/admin/guides/new")({
   beforeLoad: async () => {
@@ -26,9 +27,10 @@ export const Route = createFileRoute("/admin/guides/new")({
 
 function NewGuide() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-12">
-      <h1 className="font-display text-4xl font-semibold text-ink">New guide</h1>
-      <GuideForm isNew slug="" title="" excerpt="" html="<p></p>" status="draft" />
-    </main>
+    <AdminShell title="New guide" lede="Write it as HTML. It stays a draft until you publish." active="guides">
+      <div className="max-w-3xl rounded-2xl border border-line bg-white p-5">
+        <GuideForm isNew slug="" title="" excerpt="" html="<p></p>" status="draft" />
+      </div>
+    </AdminShell>
   );
 }

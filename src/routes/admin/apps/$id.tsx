@@ -1,4 +1,5 @@
-import { createFileRoute, Link, redirect } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
 import { categories } from "@/lib/catalog";
 import { fetchAdminApp, requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -27,53 +28,85 @@ export const Route = createFileRoute("/admin/apps/$id")({
 
 function EditApp() {
   const app = Route.useLoaderData();
-  if (!app) return <main className="px-6 py-12">That app is not in the directory.</main>;
+  const notice = useAdminNotice();
+  if (!app) {
+    return (
+      <AdminShell title="Missing app" active="apps">
+        <p className="text-sm text-body">That app is not in the directory.</p>
+      </AdminShell>
+    );
+  }
   return (
-    <main className="mx-auto max-w-2xl px-6 py-12">
-      <Link to="/admin/apps" className="text-sm text-muted">
-        Apps
-      </Link>
-      <h1 className="font-display mt-3 text-4xl font-semibold text-ink">{app.name}</h1>
-      <form method="post" action="/api/admin/apps" className="mt-6 space-y-3">
+    <AdminShell title={app.name} lede="These are the fields a listing is published with." active="apps">
+      <Notice {...notice} />
+      <form method="post" action="/api/admin/apps" className="max-w-2xl space-y-4 rounded-2xl border border-line bg-white p-5">
         <input type="hidden" name="id" value={app.id} />
-        <input name="name" defaultValue={app.name} aria-label="Name" className="w-full rounded-lg border border-line px-3 py-2" />
-        <input name="slug" defaultValue={app.slug} aria-label="Slug" className="w-full rounded-lg border border-line px-3 py-2" />
-        <input name="website" defaultValue={app.website} aria-label="Website" className="w-full rounded-lg border border-line px-3 py-2" />
-        <input name="tagline" defaultValue={app.tagline} aria-label="Tagline" className="w-full rounded-lg border border-line px-3 py-2" />
-        <textarea name="description" defaultValue={app.description} aria-label="Description" rows={8} className="w-full rounded-lg border border-line px-3 py-2" />
-        <select name="pricing" defaultValue={app.pricing} aria-label="Pricing" className="w-full rounded-lg border border-line px-3 py-2">
-          <option value="free">Free</option>
-          <option value="freemium">Freemium</option>
-          <option value="paid">Paid</option>
-        </select>
-        <select name="category" defaultValue={app.category} aria-label="Category" className="w-full rounded-lg border border-line px-3 py-2">
-          {categories.map((category) => (
-            <option key={category.slug} value={category.slug}>
-              {category.name}
-            </option>
-          ))}
-        </select>
-        <select name="status" defaultValue={app.status} aria-label="Status" className="w-full rounded-lg border border-line px-3 py-2">
-          <option value="published">Published</option>
-          <option value="unpublished">Unpublished</option>
-          <option value="pending">Pending</option>
-          <option value="rejected">Rejected</option>
-        </select>
-        <label className="flex items-center gap-2 text-sm">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Name">
+            <input name="name" defaultValue={app.name} required className={fieldClass} />
+          </Field>
+          <Field label="Slug">
+            <input name="slug" defaultValue={app.slug} required className={fieldClass} />
+          </Field>
+        </div>
+        <Field label="Website">
+          <input name="website" type="url" defaultValue={app.website} required className={fieldClass} />
+        </Field>
+        <Field label="Tagline">
+          <input name="tagline" defaultValue={app.tagline} required className={fieldClass} />
+        </Field>
+        <Field label="Description">
+          <textarea name="description" defaultValue={app.description} rows={8} className={fieldClass} />
+        </Field>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Icon URL">
+            <input name="icon" type="url" defaultValue={app.icon} className={fieldClass} />
+          </Field>
+          <Field label="Demo image URL">
+            <input name="demo" type="url" defaultValue={app.demo} className={fieldClass} />
+          </Field>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Price model">
+            <select name="pricing" defaultValue={app.pricing} className={fieldClass}>
+              <option value="free">Free</option>
+              <option value="freemium">Freemium</option>
+              <option value="paid">Paid</option>
+            </select>
+          </Field>
+          <Field label="Category">
+            <select name="category" defaultValue={app.category} className={fieldClass}>
+              {categories.map((category) => (
+                <option key={category.slug} value={category.slug}>
+                  {category.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+        <Field label="Status">
+          <select name="status" defaultValue={app.status} className={fieldClass}>
+            <option value="published">Published</option>
+            <option value="unpublished">Unpublished</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </Field>
+        <label className="flex items-center gap-2 text-sm text-ink">
           <input type="checkbox" name="editor_choice" defaultChecked={app.editorChoice} />
-          Editor’s Choice
+          Editor’s Choice — follow link, no badge check
         </label>
-        <button type="submit" className="rounded-full bg-ink px-4 py-2 text-sm text-canvas">
-          Save
+        <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
+          Save listing
         </button>
       </form>
-      <form method="post" action="/api/admin/apps" className="mt-4">
+      <form method="post" action="/api/admin/apps" className="mt-3 max-w-2xl">
         <input type="hidden" name="intent" value="delete" />
         <input type="hidden" name="id" value={app.id} />
         <button type="submit" className="text-sm text-amber-900 underline">
           Delete
         </button>
       </form>
-    </main>
+    </AdminShell>
   );
 }

@@ -29,8 +29,9 @@ function PrivacyPage() {
       <h1 className="font-display mt-3 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">Privacy</h1>
       <div className="mt-6 space-y-4 text-[16px] leading-relaxed text-body">
         <p>
-          The submit form asks for an app name, website, tagline, and email so a listing can be reviewed. That
-          information is used only to reply about the submission. It is not sold.
+          The submit form asks for an app name, website, tagline, description, icon, category, price model, and
+          email so a listing can be reviewed. That information is used only to reply about the submission. It is not
+          sold.
         </p>
         <p>
           The site does not ask you to create an account. Theme preference is stored in this browser. Fonts are loaded
