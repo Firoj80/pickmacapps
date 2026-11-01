@@ -4,7 +4,13 @@ import { Missing } from "@/components/missing";
 import { editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
-import { pageCopy } from "@/lib/site";
+import { pageCopy, site } from "@/lib/site";
+
+export function appShareImage(demo?: string) {
+  const clean = demo?.trim() ?? "";
+  if (!clean || /\.mp4($|\?)/i.test(clean)) return site.ogImage;
+  return clean;
+}
 
 export const Route = createFileRoute("/app/$slug")({
   beforeLoad: ({ params, context }) => {
@@ -34,6 +40,8 @@ export const Route = createFileRoute("/app/$slug")({
       description: `${app.name}: ${tagline}${joiner}${app.description}`,
       path: `/app/${params.slug}`,
       origin: originFrom(matches),
+      image: appShareImage(app.demo),
+      imageAlt: `${app.name} — ${tagline}`,
     });
     const script = jsonLdScript(appGraph(originFrom(matches), app));
     return {

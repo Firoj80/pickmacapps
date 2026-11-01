@@ -1,5 +1,7 @@
+import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
+import { OgPreviewModal } from "@/components/og-preview-modal";
 import { AppleMark } from "@/components/site-header";
 import { apps, posts, shelfApps } from "@/lib/catalog";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
@@ -42,6 +44,7 @@ function Home() {
   const list = directory?.apps ?? apps;
   const guideList = directory?.posts ?? posts;
   const [lead, side] = guideList;
+  const [ogOpen, setOgOpen] = useState(false);
 
   return (
     <main className="flex-1">
@@ -65,8 +68,17 @@ function Home() {
           >
             Submit an app
           </Link>
+          <button
+            type="button"
+            onClick={() => setOgOpen(true)}
+            className="inline-flex items-center gap-2 rounded-full border border-line bg-surface-2/80 px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-2"
+          >
+            Preview social cards
+          </button>
         </div>
       </section>
+
+      <OgPreviewModal open={ogOpen} onClose={() => setOgOpen(false)} appList={list} />
 
       <div className="mx-auto w-full max-w-[1400px] px-5 py-10 md:px-10">
         <AppGrid

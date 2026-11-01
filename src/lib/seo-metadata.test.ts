@@ -11,7 +11,7 @@ function meta(tags: ReadonlyArray<{ title?: string; name?: string; content?: str
   return named?.content
 }
 
-function check(label: string, result: ReturnType<typeof buildMetadata>, path: string) {
+function check(label: string, result: ReturnType<typeof buildMetadata>, path: string, expectedImage?: string) {
   assert.ok(result.title, `${label} title`)
   assert.ok(result.description, `${label} description`)
   assert.ok(result.title.length <= 60, `${label} title ${result.title.length}: ${result.title}`)
@@ -20,10 +20,11 @@ function check(label: string, result: ReturnType<typeof buildMetadata>, path: st
     result.description.length >= 70 && result.description.length <= 160,
     `${label} description ${result.description.length}: ${result.description}`,
   )
+  assert.equal(/\s(a|an|the|and|or)$/i.test(result.description), false, `${label} dangling tail: ${result.description}`)
   const canonical = result.links[0]?.href ?? ""
   assert.equal(canonical, `${origin}${path}`, `${label} canonical ${canonical}`)
   assert.equal(canonical.includes("?"), false)
-  assert.equal(meta(result.meta, "og:image"), `${origin}${site.ogImage}`)
+  assert.equal(meta(result.meta, "og:image"), expectedImage ?? `${origin}${site.ogImage}`)
   assert.equal(meta(result.meta, "og:url"), canonical)
   assert.equal(meta(result.meta, "twitter:card"), "summary_large_image")
   return result.description
@@ -50,13 +51,20 @@ test("static pages and every catalog record have unique metadata in range", () =
   for (const app of apps) {
     const tagline = app.tagline.trim()
     const joiner = /[.!?]$/.test(tagline) ? " " : ". "
+    const rawDemo = app.demo?.trim() ?? ""
+    const image = !rawDemo || /\.mp4($|\?)/i.test(rawDemo) ? site.ogImage : rawDemo
+    const expectedImage = /^https?:\/\//i.test(image)
+      ? image
+      : `${origin}${image.startsWith("/") ? image : `/${image}`}`
     const result = buildMetadata({
       title: `${app.name} — ${tagline}`,
       description: `${app.name}: ${tagline}${joiner}${app.description}`,
       path: `/app/${app.slug}`,
       origin,
+      image,
+      imageAlt: `${app.name} — ${tagline}`,
     })
-    remember(app.slug, check(app.slug, result, `/app/${app.slug}`))
+    remember(app.slug, check(app.slug, result, `/app/${app.slug}`, expectedImage))
     if (result.title.length < `${app.name} — ${tagline}`.length) {
       assert.equal(`${app.name} — ${tagline}`.startsWith(result.title), true, app.slug)
     }
@@ -108,7 +116,7 @@ test("missing pages are noindex and filters do not change the canonical", () => 
   assert.equal(filtered.links[0]?.href, `${origin}/`)
 })
 
-test("titles and descriptions are not cut mid-word", () => {
+test("titles and descriptions are not cut mid-word or left with dangling articles", () => {
   const long = "One two three four five six seven eight nine ten eleven twelve thirteen fourteen fifteen sixteen"
   const title = fitTitle(long)
   assert.equal(title.endsWith(" "), false)
@@ -117,4 +125,9 @@ test("titles and descriptions are not cut mid-word", () => {
   const description = fitDescription(`${long} ${long} ${long}`)
   assert.ok(description.length <= 160)
   assert.equal(description.endsWith("…"), false)
+  const shottrDesc = fitDescription(
+    "Shottr: Screenshots, scrolling capture, OCR, and a screen ruler. Shottr takes screenshots, including scrolling captures, and adds OCR, a screen ruler, and a color picker.",
+  )
+  assert.equal(shottrDesc.endsWith("and a"), false)
+  assert.equal(shottrDesc.endsWith("screen ruler"), true)
 })

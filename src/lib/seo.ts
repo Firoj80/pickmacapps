@@ -3,7 +3,15 @@ import { site } from "@/lib/site";
 
 export const fetchSiteOrigin = createServerFn({ method: "GET" }).handler(async () => {
   const { getRequestUrl } = await import("@tanstack/start-server-core");
-  return getRequestUrl({ xForwardedHost: true, xForwardedProto: true }).origin;
+  const reqOrigin = getRequestUrl({ xForwardedHost: true, xForwardedProto: true }).origin;
+  if (reqOrigin && !reqOrigin.includes("localhost") && !reqOrigin.includes("127.0.0.1")) {
+    return reqOrigin;
+  }
+  const envUrl = process.env.APP_URL?.trim();
+  if (envUrl && /^https?:\/\//i.test(envUrl)) {
+    return envUrl.replace(/\/$/, "");
+  }
+  return reqOrigin;
 });
 
 export function originFrom(matches: ReadonlyArray<{ context: unknown }>) {
@@ -19,9 +27,78 @@ export function canonicalPath(path: string) {
 }
 
 export function absoluteUrl(origin: string, path: string) {
+  if (/^https?:\/\//i.test(path)) return path;
   const cleanOrigin = origin.replace(/\/$/, "");
   const cleanPath = path.startsWith("/") ? path : `/${path}`;
   return cleanOrigin ? `${cleanOrigin}${cleanPath}` : cleanPath;
+}
+
+const DANGLING_WORDS = new Set([
+  "a",
+  "an",
+  "the",
+  "and",
+  "or",
+  "but",
+  "nor",
+  "to",
+  "for",
+  "with",
+  "without",
+  "in",
+  "on",
+  "of",
+  "by",
+  "from",
+  "at",
+  "as",
+  "into",
+  "that",
+  "which",
+  "who",
+  "where",
+  "when",
+  "while",
+  "after",
+  "before",
+  "then",
+  "also",
+  "is",
+  "are",
+  "has",
+  "have",
+  "can",
+  "will",
+  "you",
+  "your",
+  "it",
+  "its",
+  "them",
+  "those",
+  "this",
+  "these",
+  "one-time",
+  "paid",
+  "drafted",
+  "zero",
+  "sold",
+  "keeps",
+  "opens",
+  "choose",
+  "notch",
+  "turn",
+]);
+
+function stripDanglingTail(value: string, minLength: number) {
+  let current = value.replace(/[\s.,;:|–—-]+$/g, "").trim();
+  while (current.length > minLength) {
+    const lastSpace = current.lastIndexOf(" ");
+    if (lastSpace < minLength) break;
+    const lastWord = current.slice(lastSpace + 1).toLowerCase();
+    if (!DANGLING_WORDS.has(lastWord)) break;
+    current = current.slice(0, lastSpace).replace(/[\s.,;:|–—-]+$/g, "").trim();
+  }
+  return current;
 }
 
 /** Keep a title within 60 characters. Never cut a word, and never add an ellipsis. */
@@ -34,19 +111,33 @@ export function fitTitle(title: string) {
   const chosen = branded.length <= 60 ? branded : base;
   if (chosen.length <= 60) return chosen;
   const slice = chosen.slice(0, 60);
+  const comma = slice.lastIndexOf(", ");
+  if (comma >= 34) {
+    return slice.slice(0, comma).replace(/[\s.,;:|–—-]+$/g, "").trim();
+  }
   const space = slice.lastIndexOf(" ");
-  const trimmed = (space >= 24 ? slice.slice(0, space) : slice).replace(/[\s.,;:|–—-]+$/g, "").trim();
+  const trimmed = stripDanglingTail(space >= 24 ? slice.slice(0, space) : slice, 24);
   return trimmed || slice.trim();
 }
 
-/** Keep a description within 160 characters, on a word boundary, without adding an ellipsis. */
+/** Keep a description within 160 characters, on a word boundary, without adding an ellipsis or dangling stop-words. */
 export function fitDescription(text: string, fallback: string = site.description) {
   const clean = text.replace(/\s+/g, " ").trim() || fallback;
   if (clean.length <= 160) return clean;
   const slice = clean.slice(0, 160);
+  const period = slice.lastIndexOf(". ");
+  if (period >= 75) {
+    return slice.slice(0, period + 1).trim();
+  }
+  const comma = slice.lastIndexOf(", ");
+  if (comma >= 105) {
+    const atComma = stripDanglingTail(slice.slice(0, comma), 70);
+    if (atComma.length >= 70) return atComma;
+  }
   const space = slice.lastIndexOf(" ");
-  const trimmed = (space >= 70 ? slice.slice(0, space) : slice).replace(/[\s.,;:]+$/g, "").trim();
-  return trimmed.length >= 70 ? trimmed : slice.trim();
+  const candidate = (space >= 70 ? slice.slice(0, space) : slice).replace(/[\s.,;:]+$/g, "").trim();
+  const trimmed = stripDanglingTail(candidate, 70);
+  return trimmed.length >= 70 ? trimmed : candidate || slice.trim();
 }
 
 export function metaDescription(text: string, fallback: string = site.description) {
@@ -86,7 +177,9 @@ export function buildMetadata(input: {
   const origin = input.origin ?? "";
   const url = absoluteUrl(origin, path);
   const imagePath = input.image || site.ogImage;
-  const image = absoluteUrl(origin, imagePath.startsWith("/") ? imagePath : `/${imagePath}`);
+  const image = /^https?:\/\//i.test(imagePath)
+    ? imagePath
+    : absoluteUrl(origin, imagePath.startsWith("/") ? imagePath : `/${imagePath}`);
   const imageAlt = input.imageAlt || site.ogImageAlt;
   const meta: MetaTag[] = [
     { title },
@@ -99,17 +192,14 @@ export function buildMetadata(input: {
     { property: "og:site_name", content: site.name },
     { property: "og:image", content: image },
     { property: "og:image:alt", content: imageAlt },
+    { property: "og:image:width", content: site.ogImageWidth },
+    { property: "og:image:height", content: site.ogImageHeight },
     { name: "twitter:card", content: "summary_large_image" },
     { name: "twitter:title", content: title },
     { name: "twitter:description", content: description },
     { name: "twitter:image", content: image },
+    { name: "twitter:image:alt", content: imageAlt },
   ];
-  if (!input.image || input.image === site.ogImage) {
-    meta.push(
-      { property: "og:image:width", content: site.ogImageWidth },
-      { property: "og:image:height", content: site.ogImageHeight },
-    );
-  }
   if (input.publishedTime) meta.push({ property: "article:published_time", content: input.publishedTime });
   if (input.modifiedTime) meta.push({ property: "article:modified_time", content: input.modifiedTime });
   if (input.noindex) meta.push({ name: "robots", content: "noindex, follow" });

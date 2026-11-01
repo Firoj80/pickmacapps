@@ -2,10 +2,11 @@
 export const site = {
   name: "PickMacApps",
   title: "PickMacApps — Mac apps worth installing",
-  description: "A curated shelf of Mac apps. Browse by category, compare alternatives, and read short guides.",
+  description:
+    "A curated shelf of hand-picked Mac apps. Browse macOS utilities by job, compare alternatives side by side, and read short buying guides.",
   logoPath: "/favicon.svg",
   ogImage: "/og.jpg",
-  ogImageAlt: "PickMacApps, a curated shelf of Mac apps",
+  ogImageAlt: "PickMacApps — A curated shelf of hand-picked Mac apps",
   ogImageWidth: "1200",
   ogImageHeight: "630",
   policyUpdated: "2026-10-27",
