@@ -84,9 +84,11 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
 }
 
 function toPost(row: GuideRow): Post {
+  const seed = (raw.posts as Post[]).find((p) => p.slug === row.slug);
   return {
     slug: row.slug,
     title: row.title,
+    h1: seed?.h1,
     excerpt: row.excerpt,
     date: row.date,
     dateLabel: row.date_label,
@@ -99,15 +101,19 @@ function toPost(row: GuideRow): Post {
 }
 
 async function ensureSeed(sql: Sql) {
-  const existing = await sql.query<{ count: string }>("select count(*)::text as count from apps");
-  if (Number(existing[0]?.count ?? 0) > 0) return;
   const editors = new Set(raw.editors);
   for (const app of raw.apps) {
     await sql.query(
       `insert into apps (
         id, name, slug, tagline, description, icon, website, pricing, category, category_name,
         category_icon, editor_choice, created_at, demo, related, status
-      ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')`,
+      ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
+       on conflict (id) do update set
+         editor_choice = excluded.editor_choice,
+         description = excluded.description,
+         tagline = excluded.tagline,
+         related = excluded.related,
+         demo = excluded.demo`,
       [
         app.id,
         app.name,
@@ -130,7 +136,17 @@ async function ensureSeed(sql: Sql) {
   for (const post of raw.posts) {
     await sql.query(
       `insert into guides (slug, title, excerpt, date, date_label, minutes, tags, toc, html, more, status)
-       values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10::jsonb,'published')`,
+       values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10::jsonb,'published')
+       on conflict (slug) do update set
+         title = excluded.title,
+         excerpt = excluded.excerpt,
+         html = excluded.html,
+         tags = excluded.tags,
+         toc = excluded.toc,
+         more = excluded.more,
+         date = excluded.date,
+         date_label = excluded.date_label,
+         minutes = excluded.minutes`,
       [
         post.slug,
         post.title,

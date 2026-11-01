@@ -5,6 +5,8 @@ const menu = [
   { to: "/", label: "Home" },
   { to: "/blog", label: "Guides" },
   { to: "/compare", label: "Comparisons" },
+  { to: "/about", label: "About" },
+  { to: "/how-we-pick", label: "How we pick" },
   { to: "/submit", label: "Submit an app" },
   { to: "/privacy", label: "Privacy" },
 ] as const;
@@ -110,9 +112,20 @@ export function SiteFooter() {
         </div>
 
         <div className="mt-12 flex flex-col gap-3 border-t border-line pt-6 text-[12px] leading-relaxed text-muted md:flex-row md:items-center md:justify-between">
-          <p>© {new Date().getFullYear()} PickMacApps. All rights reserved.</p>
+          <p>
+            © {new Date().getFullYear()} PickMacApps. Curated by{" "}
+            <Link to="/about" className="text-ink underline underline-offset-2 hover:text-accent">
+              Firoj Alam
+            </Link>
+            .
+          </p>
           <p className="max-w-xl md:text-right">
-            A manually curated collection. Not affiliated with Apple Inc. App marks belong to their owners.
+            Independent curation of Mac apps. Zero affiliate links. Editor’s Choice spots are sponsored placements
+            disclosed per our{" "}
+            <Link to="/how-we-pick" className="text-ink underline underline-offset-2 hover:text-accent">
+              editorial policy
+            </Link>
+            . Not affiliated with Apple Inc.
           </p>
         </div>
       </div>

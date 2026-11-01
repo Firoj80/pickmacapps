@@ -111,7 +111,11 @@ export function jsonLdScript(data: object | null) {
   return { type: "application/ld+json" as const, children: serializeJsonLd(data) };
 }
 
-export function homeGraph(origin: string, apps: { name: string; slug: string }[] | null) {
+export function homeGraph(
+  origin: string,
+  apps: { name: string; slug: string }[] | null,
+  faqs?: { q: string; a: string }[],
+) {
   const nodes: unknown[] = [
     organizationNode(origin),
     websiteNode(origin, true),
@@ -130,6 +134,9 @@ export function homeGraph(origin: string, apps: { name: string; slug: string }[]
       },
       itemListNode(origin, "/", items),
     );
+  }
+  if (faqs && faqs.length > 0) {
+    nodes.push(faqNode(origin, "/", faqs));
   }
   return graph(origin, nodes);
 }
@@ -163,9 +170,9 @@ export function appGraph(origin: string, app: AppItem) {
   ]);
 }
 
-export function guideGraph(origin: string, post: Post) {
+export function guideGraph(origin: string, post: Post, faqs?: { q: string; a: string }[]) {
   const path = `/blog/${post.slug}`;
-  return graph(origin, [
+  const nodes: unknown[] = [
     organizationNode(origin),
     breadcrumbNode(origin, path, [
       { name: "Home", path: "/" },
@@ -173,18 +180,38 @@ export function guideGraph(origin: string, post: Post) {
       { name: post.title, path },
     ]),
     {
-      "@type": "BlogPosting",
+      "@type": "Article",
       "@id": `${absoluteUrl(origin, path)}#article`,
       headline: post.title,
       description: post.excerpt,
+      image: [absoluteUrl(origin, site.ogImage)],
       datePublished: post.date,
+      dateModified: post.date,
       inLanguage: "en",
       url: absoluteUrl(origin, path),
       mainEntityOfPage: absoluteUrl(origin, path),
-      author: { "@id": orgId(origin) },
-      publisher: { "@id": orgId(origin) },
+      author: {
+        "@type": "Person",
+        name: "Firoj Alam",
+        url: absoluteUrl(origin, "/about"),
+        jobTitle: "Indie Hacker & Mac/iOS App Developer",
+        description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: site.name,
+        url: absoluteUrl(origin, "/"),
+        logo: {
+          "@type": "ImageObject",
+          url: absoluteUrl(origin, site.logoPath),
+        },
+      },
     },
-  ]);
+  ];
+  if (faqs && faqs.length > 0) {
+    nodes.push(faqNode(origin, path, faqs));
+  }
+  return graph(origin, nodes);
 }
 
 export function guidesGraph(origin: string, posts: Post[]) {
@@ -319,3 +346,50 @@ export function crumbGraph(origin: string, path: string, name: string) {
     ]),
   ]);
 }
+
+export function aboutGraph(origin: string) {
+  const path = "/about";
+  return graph(origin, [
+    organizationNode(origin),
+    breadcrumbNode(origin, path, [
+      { name: "Home", path: "/" },
+      { name: "About", path },
+    ]),
+    {
+      "@type": "AboutPage",
+      "@id": `${absoluteUrl(origin, path)}#page`,
+      name: "About PickMacApps & Curator Firoj Alam",
+      url: absoluteUrl(origin, path),
+      description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+      mainEntity: {
+        "@type": "Person",
+        "@id": `${absoluteUrl(origin, path)}#author`,
+        name: "Firoj Alam",
+        url: absoluteUrl(origin, path),
+        jobTitle: "Indie Hacker & Mac/iOS App Developer",
+        description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+        email: "mailto:firojalama80@gmail.com",
+        worksFor: { "@id": orgId(origin) },
+      },
+    },
+  ]);
+}
+
+export function howWePickGraph(origin: string) {
+  const path = "/how-we-pick";
+  return graph(origin, [
+    organizationNode(origin),
+    breadcrumbNode(origin, path, [
+      { name: "Home", path: "/" },
+      { name: "How We Pick", path },
+    ]),
+    {
+      "@type": "WebPage",
+      "@id": `${absoluteUrl(origin, path)}#page`,
+      name: "How We Pick & Editorial Policy | PickMacApps",
+      url: absoluteUrl(origin, path),
+      description: "Our testing methodology, evaluation criteria, and transparency policy for curated Mac apps.",
+    },
+  ]);
+}
+

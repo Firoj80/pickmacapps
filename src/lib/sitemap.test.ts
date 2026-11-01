@@ -1,5 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
+import { apps, posts } from "./catalog.ts"
 import { comparePairs } from "./compare.ts"
 import { asLastmod, indexLocs, sectionUrls, SITEMAP_SECTIONS, SHARD, sitemapIndex, urlSet } from "./sitemap.ts"
 
@@ -30,12 +31,12 @@ test("sitemap sections are absolute, unique, and dated only when we know", () =>
       total += 1
     }
   }
-  assert.equal(sectionUrls("pages", origin, today).length, 4)
-  assert.equal(sectionUrls("apps", origin, today).length, 24)
-  assert.equal(sectionUrls("guides", origin, today).length, 9)
+  assert.equal(sectionUrls("pages", origin, today).length, 6)
+  assert.equal(sectionUrls("apps", origin, today).length, apps.length)
+  assert.equal(sectionUrls("guides", origin, today).length, posts.length)
   assert.equal(sectionUrls("categories", origin, today).length, 4)
   assert.equal(sectionUrls("compare", origin, today).length, comparePairs().length + 1)
-  assert.equal(total, 41 + comparePairs().length + 1)
+  assert.equal(total, 6 + apps.length + posts.length + 4 + comparePairs().length + 1)
   const index = sitemapIndex(indexLocs(origin, today))
   assert.match(index, /<sitemapindex/)
   assert.equal(index.split("<loc>").length - 1, 5)

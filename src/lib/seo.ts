@@ -106,7 +106,12 @@ export function fitTitle(title: string) {
   const base = title.replace(/\s+/g, " ").trim();
   const suffix = ` — ${site.name}`;
   const alreadyBranded =
-    base === site.name || base.startsWith(`${site.name} —`) || base.endsWith(suffix) || base.endsWith(`- ${site.name}`);
+    base === site.name ||
+    base.startsWith(`${site.name} —`) ||
+    base.endsWith(suffix) ||
+    base.endsWith(`- ${site.name}`) ||
+    base.endsWith(`| ${site.name}`) ||
+    base.includes(site.name);
   const branded = alreadyBranded ? base : `${base}${suffix}`;
   const chosen = branded.length <= 60 ? branded : base;
   if (chosen.length <= 60) return chosen;
@@ -199,6 +204,7 @@ export function buildMetadata(input: {
     { name: "twitter:description", content: description },
     { name: "twitter:image", content: image },
     { name: "twitter:image:alt", content: imageAlt },
+    { name: "apple-mobile-web-app-title", content: title },
   ];
   if (input.publishedTime) meta.push({ property: "article:published_time", content: input.publishedTime });
   if (input.modifiedTime) meta.push({ property: "article:modified_time", content: input.modifiedTime });

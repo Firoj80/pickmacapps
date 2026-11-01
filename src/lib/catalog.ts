@@ -42,6 +42,7 @@ export type TocItem = { id: string; label: string };
 export type Post = {
   slug: string;
   title: string;
+  h1?: string;
   excerpt: string;
   date: string;
   dateLabel: string;
@@ -147,7 +148,7 @@ export function isEditorChoice(app: AppItem) {
   return app.editorChoice ?? editors.has(app.slug);
 }
 
-const homeJobs: { id: string; title: string; line: string; slugs: string[] }[] = [
+const homeJobs: { id: string; title: string; line: string; slugs: string[]; guideHref?: string }[] = [
   {
     id: "screenshots",
     title: "Screenshots",
@@ -159,12 +160,14 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[] }[] =
     title: "Menu bar",
     line: "Menu bar icons and the notch.",
     slugs: ["clearbar", "lounge", "alcove", "notchdodo", "droppy"],
+    guideHref: "/blog/best-bartender-alternative-mac",
   },
   {
     id: "clipboard",
     title: "Clipboard",
     line: "Clipboard history.",
     slugs: ["tucket", "clippio", "maclip"],
+    guideHref: "/blog/best-clipboard-manager-mac",
   },
   {
     id: "voice",
@@ -177,12 +180,14 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[] }[] =
     title: "Writing",
     line: "Notes and a focused draft.",
     slugs: ["anytype", "ia-writer"],
+    guideHref: "/blog/best-notes-app-mac",
   },
   {
     id: "disk",
     title: "Disk",
     line: "Uninstall an app, or see what fills the disk.",
-    slugs: ["mole", "plumby", "bytesweep"],
+    slugs: ["scanmydisk", "mole", "plumby", "bytesweep"],
+    guideHref: "/blog/best-mac-disk-space-analyzer",
   },
 ];
 
@@ -200,13 +205,14 @@ export function homeGroups(list: AppItem[], order: "newest" | "name" | "free" = 
       }),
       order,
     );
-    return apps.length ? [{ id: job.id, title: job.title, line: job.line, apps }] : [];
+    return apps.length ? [{ id: job.id, title: job.title, line: job.line, guideHref: job.guideHref, apps }] : [];
   });
   if (rest.size) {
     groups.push({
       id: "more",
       title: "More",
       line: "Other apps on the shelf.",
+      guideHref: undefined,
       apps: sortApps([...rest.values()], order),
     });
   }

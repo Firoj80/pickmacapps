@@ -269,6 +269,63 @@ function renderPrivacy(origin: string): MarkdownPage {
   })
 }
 
+function renderAbout(origin: string): MarkdownPage {
+  const body = [
+    "Firoj Alam is an indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+    "",
+    "## Mission",
+    "PickMacApps is built to help macOS users discover native, fast, and respectful Mac utilities without subscription fatigue, bloated Electron wrappers, or hidden telemetry.",
+    "",
+    "## Author & Curator",
+    "- Name: Firoj Alam",
+    "- Role: Indie Developer & Curator",
+    "- Contact: firojalama80@gmail.com",
+    "",
+    "## Principles",
+    "- Native performance and memory footprint audited on physical Apple Silicon hardware",
+    "- Zero affiliate links or third-party ad networks",
+    "- Transparent pricing models: Free, Freemium, or Lifetime Paid Once",
+  ].join("\n")
+  return finish(origin, {
+    title: "About PickMacApps & Firoj Alam",
+    summary: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+    htmlPath: "/about",
+    body,
+    related: [
+      { label: "Home", href: abs(origin, "/") },
+      { label: "How we pick", href: abs(origin, "/how-we-pick") },
+    ],
+  })
+}
+
+function renderHowWePick(origin: string): MarkdownPage {
+  const body = [
+    "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+    "",
+    "## The 5-Pillar Evaluation Framework",
+    "1. **Performance & Memory**: Low idle RAM, zero background wakeups, native Swift/AppKit over Electron.",
+    "2. **Privacy & Security**: Minimal permissions, zero tracking, strict adherence to macOS Gatekeeper.",
+    "3. **Transparent Pricing**: Honest free tiers and one-time purchases over recurring subscriptions.",
+    "4. **macOS Ergonomics**: Thoughtful notch integration, respectful menu bar usage, and native UI.",
+    "5. **Active Maintenance**: Regular updates and compatibility with macOS Sonoma, Sequoia, and Apple Silicon.",
+    "",
+    "## Commercial Transparency",
+    "- Zero affiliate links or advertising trackers.",
+    "- Free listings for quality indie software.",
+    "- Editor's Choice is capped at 3 active spots and requires passing all editorial tests.",
+  ].join("\n")
+  return finish(origin, {
+    title: "How We Pick Mac Apps — Editorial Policy",
+    summary: "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+    htmlPath: "/how-we-pick",
+    body,
+    related: [
+      { label: "Home", href: abs(origin, "/") },
+      { label: "About the curator", href: abs(origin, "/about") },
+    ],
+  })
+}
+
 function finish(
   origin: string,
   input: {
@@ -343,6 +400,8 @@ function renderCompare(origin: string, slug: string): MarkdownPage | null {
 const staticRenderers: Record<string, (origin: string) => MarkdownPage> = {
   "/": renderHome,
   "/blog": renderBlogIndex,
+  "/about": renderAbout,
+  "/how-we-pick": renderHowWePick,
   "/submit": renderSubmit,
   "/privacy": renderPrivacy,
   "/compare": renderCompareHub,
@@ -387,6 +446,20 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       mdPath: "/blog.md",
       title: "Guides",
       description: "Hand-researched guides to the best Mac apps.",
+      group: "core",
+    },
+    {
+      htmlPath: "/about",
+      mdPath: "/about.md",
+      title: "About",
+      description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+      group: "core",
+    },
+    {
+      htmlPath: "/how-we-pick",
+      mdPath: "/how-we-pick.md",
+      title: "How we pick",
+      description: "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
       group: "core",
     },
     {

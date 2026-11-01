@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { apps, getPost, posts } from "@/lib/catalog";
+import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -34,7 +35,8 @@ export const Route = createFileRoute("/blog/$slug")({
       type: "article",
       publishedTime: post.date,
     });
-    const script = jsonLdScript(guideGraph(originFrom(matches), post));
+    const enhancement = getGuideEnhancement(post.slug, post.excerpt);
+    const script = jsonLdScript(guideGraph(originFrom(matches), post, enhancement.faqs));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(originFrom(matches), `/blog/${params.slug}`)],
@@ -50,9 +52,15 @@ function BlogPost() {
   const appList = directory?.apps ?? apps;
   const post = guideList.find((item) => item.slug === slug) ?? null;
   if (!post) return null;
-  const more = post.more
+
+  const enhancement = getGuideEnhancement(post.slug, post.excerpt);
+
+  const primaryMore = (post.more || [])
     .map((item) => guideList.find((entry) => entry.slug === item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  const backfill = guideList.filter((entry) => entry.slug !== post.slug && !primaryMore.some((m) => m.slug === entry.slug));
+  const relatedGuides = [...primaryMore, ...backfill].slice(0, 3);
+
   const haystack = `${post.title} ${post.excerpt} ${post.html}`.toLowerCase();
   const mentioned = appList.filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8);
 
@@ -68,15 +76,32 @@ function BlogPost() {
             Blog
           </Link>
         </nav>
+
         <header>
-          <div className="flex items-center gap-2 text-sm text-muted">
-            <time dateTime={post.date}>{post.dateLabel}</time>
-            <span>·</span>
-            <span>{post.minutes} min read</span>
+          <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-muted">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ink text-xs font-bold text-canvas shadow-sm">
+                FA
+              </div>
+              <div>
+                <p className="text-xs text-muted">Written by</p>
+                <Link to="/about" className="font-semibold text-ink hover:underline">
+                  Firoj Alam
+                </Link>
+              </div>
+            </div>
+            <div className="text-right text-xs text-muted">
+              <div>
+                Published: <time dateTime={post.date}>{post.dateLabel}</time>
+              </div>
+              <div className="font-medium text-accent">Tested on macOS · {post.minutes} min read</div>
+            </div>
           </div>
-          <h1 className="font-display mt-3 text-4xl leading-tight font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
-            {post.title}
+
+          <h1 className="font-display mt-5 text-4xl leading-tight font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
+            {post.h1 ?? post.title}
           </h1>
+
           <div className="mt-4 flex flex-wrap gap-2">
             {post.tags.map((tag) => (
               <span
@@ -88,6 +113,32 @@ function BlogPost() {
             ))}
           </div>
         </header>
+
+        {/* Quick Answer / Key Takeaway box */}
+        <section className="mt-8 rounded-2xl border border-accent/20 bg-accent/5 p-5 sm:p-6">
+          <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-accent uppercase">
+            <span className="inline-block h-2 w-2 rounded-full bg-accent" />
+            Quick Answer & Key Recommendation
+          </div>
+          <p className="mt-2 text-[15px] font-medium leading-relaxed text-ink">
+            {enhancement.quickAnswer}
+          </p>
+        </section>
+
+        {/* Side-by-side compare callout */}
+        <div className="mt-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-surface p-4 text-sm">
+          <div>
+            <p className="font-semibold text-ink">Want to compare specific Mac apps side by side?</p>
+            <p className="text-xs text-muted">Explore feature matrices, pricing tiers, and performance on our comparison shelf.</p>
+          </div>
+          <Link
+            to="/compare"
+            className="inline-flex shrink-0 items-center justify-center rounded-lg bg-ink px-4 py-2 text-xs font-medium text-canvas transition hover:opacity-90"
+          >
+            Compare shelf →
+          </Link>
+        </div>
+
         {post.toc.length > 0 ? (
           <nav className="mt-8 rounded-xl border border-line bg-surface p-5">
             <p className="mb-4 text-xs font-semibold tracking-wide text-muted uppercase">In this guide</p>
@@ -103,7 +154,33 @@ function BlogPost() {
             </ol>
           </nav>
         ) : null}
+
         <div className="blog-body" dangerouslySetInnerHTML={{ __html: post.html }} />
+
+        {/* Visible FAQ Section */}
+        {enhancement.faqs.length > 0 ? (
+          <section className="mt-14 border-t border-line pt-10">
+            <p className="text-xs font-semibold uppercase tracking-wider text-accent">Answers & Insights</p>
+            <h2 className="mt-1 font-display text-2xl font-semibold text-ink sm:text-3xl">Frequently Asked Questions</h2>
+            <div className="mt-6 space-y-3">
+              {enhancement.faqs.map((faq, index) => (
+                <details
+                  key={index}
+                  className="group rounded-xl border border-line bg-surface p-5 transition-colors open:bg-surface-2"
+                >
+                  <summary className="flex cursor-pointer items-center justify-between font-medium text-ink list-none">
+                    <span className="text-[15px]">{faq.q}</span>
+                    <span className="ml-4 shrink-0 text-muted transition group-open:rotate-180">
+                      ↓
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-sm leading-relaxed text-body">{faq.a}</p>
+                </details>
+              ))}
+            </div>
+          </section>
+        ) : null}
+
         <section className="mt-12 border-t border-line pt-8">
           <h2 className="font-display text-2xl font-semibold text-ink">From the directory</h2>
           {mentioned.length > 0 ? (
@@ -118,11 +195,12 @@ function BlogPost() {
             </ul>
           ) : null}
         </section>
-        {more.length > 0 ? (
+
+        {relatedGuides.length > 0 ? (
           <section className="mt-16 border-t border-line pt-10">
-            <h2 className="mb-5 text-lg font-[550] tracking-[-0.025em] text-ink">Keep reading</h2>
+            <h2 className="mb-5 text-xl font-semibold tracking-[-0.025em] text-ink">Related Guides & Deep Dives</h2>
             <div className="space-y-3">
-              {more.map((item) => (
+              {relatedGuides.map((item) => (
                 <Link
                   key={item.slug}
                   to="/blog/$slug"

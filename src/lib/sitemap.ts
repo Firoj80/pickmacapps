@@ -60,10 +60,15 @@ export function sectionUrls(
   const list = source?.apps ?? apps;
   const guideList = source?.posts ?? posts;
   if (section === "pages") {
+    const newestPostDate = guideList.map((p) => p.date).sort().at(-1);
+    const newestAppDate = list.map((a) => a.createdAt).sort().at(-1);
+    const latestSiteDate = [newestPostDate, newestAppDate, site.policyUpdated].filter(Boolean).sort().at(-1);
     return [
-      { loc: absoluteUrl(origin, "/") },
-      { loc: absoluteUrl(origin, "/blog") },
-      { loc: absoluteUrl(origin, "/submit") },
+      { loc: absoluteUrl(origin, "/"), lastmod: asLastmod(latestSiteDate, today) },
+      { loc: absoluteUrl(origin, "/blog"), lastmod: asLastmod(newestPostDate, today) },
+      { loc: absoluteUrl(origin, "/about"), lastmod: asLastmod(site.policyUpdated, today) },
+      { loc: absoluteUrl(origin, "/how-we-pick"), lastmod: asLastmod(site.policyUpdated, today) },
+      { loc: absoluteUrl(origin, "/submit"), lastmod: asLastmod(site.policyUpdated, today) },
       { loc: absoluteUrl(origin, "/privacy"), lastmod: asLastmod(site.policyUpdated, today) },
     ];
   }

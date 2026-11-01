@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
-import { editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { apps, editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
@@ -10,6 +10,28 @@ export function appShareImage(demo?: string) {
   const clean = demo?.trim() ?? "";
   if (!clean || /\.mp4($|\?)/i.test(clean)) return site.ogImage;
   return clean;
+}
+
+export function appMetaDescription(app: AppItem): string {
+  const summary = `${app.name} for Mac: ${app.tagline.trim().replace(/\.$/, "")}. ${app.description.replace(/\s+/g, " ").trim()}`;
+  if (summary.length >= 120 && summary.length <= 155) return summary;
+  if (summary.length > 155) {
+    const slice = summary.slice(0, 154);
+    const lastPeriod = slice.lastIndexOf(". ");
+    if (lastPeriod >= 115) {
+      return slice.slice(0, lastPeriod + 1).trim();
+    }
+    const lastSpace = slice.lastIndexOf(" ");
+    const trimmed = (lastSpace >= 110 ? slice.slice(0, lastSpace) : slice).replace(/[\s,;:-]+$/, "").trim();
+    return `${trimmed}.`;
+  }
+  const expanded = `${summary.replace(/\.$/, "")}. Check pricing, key features, and Mac alternatives on PickMacApps.`;
+  if (expanded.length > 155) {
+    const slice = expanded.slice(0, 154);
+    const lastSpace = slice.lastIndexOf(" ");
+    return (lastSpace >= 110 ? slice.slice(0, lastSpace) : slice).replace(/[\s,;:-]+$/, "").trim() + ".";
+  }
+  return expanded;
 }
 
 export const Route = createFileRoute("/app/$slug")({
@@ -33,15 +55,15 @@ export const Route = createFileRoute("/app/$slug")({
       });
       return { meta: missing.meta, links: missing.links };
     }
-    const tagline = app.tagline.trim();
-    const joiner = /[.!?]$/.test(tagline) ? " " : ". ";
+    const title = `${app.name} for Mac: Review, Pricing and Alternatives | PickMacApps`;
+    const description = appMetaDescription(app);
     const seo = buildMetadata({
-      title: `${app.name} — ${tagline}`,
-      description: `${app.name}: ${tagline}${joiner}${app.description}`,
+      title,
+      description,
       path: `/app/${params.slug}`,
       origin: originFrom(matches),
       image: appShareImage(app.demo),
-      imageAlt: `${app.name} — ${tagline}`,
+      imageAlt: `${app.name} for Mac review and alternatives`,
     });
     const script = jsonLdScript(appGraph(originFrom(matches), app));
     return {
@@ -58,9 +80,17 @@ function AppPage() {
   const app = directory ? directory.apps.find((item) => item.slug === slug) ?? null : getApp(slug);
   if (!app) return null;
 
-  const related = app.related
-    .map((item) => getApp(item))
+  const allOtherApps = (directory?.apps ?? apps).filter((item) => item.slug !== app.slug);
+  const explicitRelated = app.related
+    .map((item) => allOtherApps.find((a) => a.slug === item))
     .filter((item): item is AppItem => Boolean(item));
+  const sameCategory = allOtherApps.filter(
+    (item) => item.category === app.category && !explicitRelated.some((r) => r.slug === item.slug),
+  );
+  const others = allOtherApps.filter(
+    (item) => !explicitRelated.some((r) => r.slug === item.slug) && !sameCategory.some((c) => c.slug === item.slug),
+  );
+  const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 3);
   const choice = app.editorChoice ?? editors.has(app.slug);
 
   return (
@@ -71,13 +101,13 @@ function AppPage() {
             {app.demo.endsWith(".mp4") ? (
               <video src={app.demo} controls muted loop playsInline className="aspect-[1200/630] w-full object-cover" />
             ) : (
-              <img alt={`${app.name} screenshot`} src={app.demo} className="aspect-[1200/630] w-full object-cover" />
+              <img alt={`${app.name} for Mac screenshot`} src={app.demo} className="aspect-[1200/630] w-full object-cover" />
             )}
           </div>
         ) : null}
         <div className="flex flex-col gap-6 pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-start gap-5">
-            <img alt="" src={app.icon} className="h-20 w-20 rounded-2xl object-cover ring-1 ring-line sm:h-24 sm:w-24" />
+            <img alt={`${app.name} for Mac icon`} src={app.icon} className="h-20 w-20 rounded-2xl object-cover ring-1 ring-line sm:h-24 sm:w-24" />
             <div>
               {choice ? (
                 <p className="text-[12px] font-semibold tracking-[0.14em] text-accent uppercase">
@@ -86,7 +116,7 @@ function AppPage() {
               ) : (
                 <p className="text-[12px] font-semibold tracking-[0.14em] text-muted uppercase">{app.categoryName}</p>
               )}
-              <h1 className="font-display mt-1 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">{app.name}</h1>
+              <h1 className="font-display mt-1 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">{app.name} for Mac</h1>
               <p className="mt-2 max-w-xl text-[16px] text-body">{app.tagline}</p>
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={`rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${pricingClass[app.pricing]}`}>
@@ -116,8 +146,8 @@ function AppPage() {
         <div className="text-[16.5px] leading-[1.75] whitespace-pre-line text-body">{app.description}</div>
         {related.length > 0 ? (
           <section className="mt-14 border-t border-line pt-8">
-            <h2 className="font-display text-2xl font-semibold text-ink">Also on the shelf</h2>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <h2 className="font-display text-2xl font-semibold text-ink">Alternatives</h2>
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
               {related.map((item) => (
                 <AppCard key={item.id} app={item} />
               ))}

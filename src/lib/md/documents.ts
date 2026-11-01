@@ -5,8 +5,19 @@ import { listMarkdownRoutes, renderMarkdown, type MarkdownGroup, type MarkdownRo
 const FULL_CHAR_LIMIT = 500_000
 const APP_CAP = 50
 
-const searchBots = ["OAI-SearchBot", "ChatGPT-User", "Claude-SearchBot", "Claude-User", "PerplexityBot", "Perplexity-User"]
-const trainingBots = ["GPTBot", "ClaudeBot", "Google-Extended", "Applebot-Extended", "CCBot", "Bytespider"]
+const searchBots = [
+  "Googlebot",
+  "Bingbot",
+  "GPTBot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "ClaudeBot",
+  "Claude-SearchBot",
+  "Claude-User",
+  "PerplexityBot",
+  "Perplexity-User",
+]
+const trainingBots = ["Google-Extended", "Applebot-Extended", "CCBot", "Bytespider"]
 
 function section(title: string, routes: MarkdownRoute[], origin: string) {
   if (!routes.length) return ""
@@ -112,6 +123,9 @@ export function aiText(origin: string) {
     "",
     "[scope]",
     "include: /",
+    "include: /about",
+    "include: /how-we-pick",
+    "include: /compare",
     "include: /app/",
     "include: /blog/",
     "include: /category/",

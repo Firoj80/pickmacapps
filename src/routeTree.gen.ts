@@ -10,7 +10,9 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as AiDottxtRouteImport } from './routes/ai[.]txt'
+import { Route as HowWePickRouteImport } from './routes/how-we-pick'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -45,9 +47,19 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AiDottxtRoute = AiDottxtRouteImport.update({
   id: '/ai.txt',
   path: '/ai.txt',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HowWePickRoute = HowWePickRouteImport.update({
+  id: '/how-we-pick',
+  path: '/how-we-pick',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
@@ -193,7 +205,9 @@ const ApiMdSplatRoute = ApiMdSplatRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ai.txt': typeof AiDottxtRoute
+  '/how-we-pick': typeof HowWePickRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -225,7 +239,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ai.txt': typeof AiDottxtRoute
+  '/how-we-pick': typeof HowWePickRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -258,7 +274,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/ai.txt': typeof AiDottxtRoute
+  '/how-we-pick': typeof HowWePickRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -292,7 +310,9 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/ai.txt'
+    | '/how-we-pick'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -324,7 +344,9 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/ai.txt'
+    | '/how-we-pick'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -356,7 +378,9 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/ai.txt'
+    | '/how-we-pick'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -389,7 +413,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   AiDottxtRoute: typeof AiDottxtRoute
+  HowWePickRoute: typeof HowWePickRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -429,11 +455,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ai.txt': {
       id: '/ai.txt'
       path: '/ai.txt'
       fullPath: '/ai.txt'
       preLoaderRoute: typeof AiDottxtRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/how-we-pick': {
+      id: '/how-we-pick'
+      path: '/how-we-pick'
+      fullPath: '/how-we-pick'
+      preLoaderRoute: typeof HowWePickRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms-full.txt': {
@@ -637,7 +677,9 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   AiDottxtRoute: AiDottxtRoute,
+  HowWePickRoute: HowWePickRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacyRoute: PrivacyRoute,

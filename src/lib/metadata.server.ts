@@ -140,7 +140,7 @@ export function parseAppMetadataFromHtml(html: string, pageUrl: string): Fetched
   const titleSource = ogTitle || rawTitle;
 
   // Check if title has separator like "AppName - The Short Tagline" or "AppName | Tagline" or "AppName: Tagline"
-  const titleDelimMatch = titleSource.match(/^([^—–|:•\-]+?)\s*[—–|:•\-]\s*(.+)$/);
+  const titleDelimMatch = titleSource.match(/^([^—–|:•-]+?)\s*[—–|:•-]\s*(.+)$/);
   if (titleDelimMatch && titleDelimMatch[1] && titleDelimMatch[2]) {
     const part1 = titleDelimMatch[1].trim();
     const part2 = titleDelimMatch[2].trim();

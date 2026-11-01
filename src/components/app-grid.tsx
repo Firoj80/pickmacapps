@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { Link } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { categories, homeGroups, shelfApps, type AppItem } from "@/lib/catalog";
 
@@ -82,7 +83,14 @@ function GroupedShelf({ apps, order }: { apps: AppItem[]; order: "newest" | "nam
       ) : null}
       {groups.map((group) => (
         <section key={group.id}>
-          <h2 className="text-2xl font-semibold tracking-tight text-ink">{group.title}</h2>
+          <div className="flex items-baseline justify-between gap-4">
+            <h2 className="text-2xl font-semibold tracking-tight text-ink">{group.title}</h2>
+            {group.guideHref ? (
+              <Link to={group.guideHref} className="text-sm font-medium text-accent hover:underline">
+                See the guide →
+              </Link>
+            ) : null}
+          </div>
           <p className="mt-1 text-sm text-muted">{group.line}</p>
           <div className="shelf mt-6 grid grid-cols-1 gap-x-8 gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
             {group.apps.map((app) => (

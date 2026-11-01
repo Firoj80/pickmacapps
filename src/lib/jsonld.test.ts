@@ -85,11 +85,10 @@ test("each public page type builds a self-contained graph", () => {
   const post = getPost("best-paste-alternative-mac")
   assert.ok(post)
   const guide = parse(guideGraph(origin, post))
-  const article = node(guide, "BlogPosting")
+  const article = node(guide, "Article")
   assert.equal(article.headline, post.title)
   assert.equal(article.datePublished, post.date)
-  assert.equal(article.dateModified, undefined)
-  assert.equal((article.author as { "@id": string })["@id"], `${origin}/#organization`)
+  assert.equal((article.author as { name: string }).name, "Firoj Alam")
   const crumbs = node(guide, "BreadcrumbList").itemListElement as Array<{ name: string }>
   assert.deepEqual(crumbs.map((crumb) => crumb.name), ["Home", "Blog", post.title])
 

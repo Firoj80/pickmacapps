@@ -44,9 +44,9 @@ export const Route = createFileRoute("/category/$slug")({
 
 function CategoryPage() {
   const { slug } = Route.useParams();
+  const { directory } = Route.useRouteContext();
   const category = getCategory(slug);
   if (!category) return null;
-  const { directory } = Route.useRouteContext();
   const listed = directory ? directory.apps.filter((app) => app.category === slug) : appsInCategory(slug);
   const label = category.name.toLowerCase();
 

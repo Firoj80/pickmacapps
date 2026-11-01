@@ -1,12 +1,12 @@
 /** Facts shared by the HTML head, markdown, llms.txt, and ai.txt. */
 export const site = {
   name: "PickMacApps",
-  title: "PickMacApps — Mac apps worth installing",
+  title: "Best Mac Apps (2026): Hand-Picked Utilities | PickMacApps",
   description:
-    "A curated shelf of hand-picked Mac apps. Browse macOS utilities by job, compare alternatives side by side, and read short buying guides.",
+    "Hand-picked best Mac apps for 2026. Browse utilities by job, compare alternatives side by side, and read short buying guides.",
   logoPath: "/favicon.svg",
   ogImage: "/og-v2.jpg",
-  ogImageAlt: "PickMacApps — A curated shelf of hand-picked Mac apps",
+  ogImageAlt: "PickMacApps: Best Mac Apps, Hand-Picked",
   ogImageWidth: "1200",
   ogImageHeight: "630",
   policyUpdated: "2026-10-27",
@@ -26,6 +26,15 @@ export const pageCopy = {
     title: "Privacy",
     description:
       "What the PickMacApps submit form collects, and what it does not. It is used only to reply about a listing and it is not sold.",
+  },
+  about: {
+    title: "About PickMacApps & Firoj Alam",
+    description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+  },
+  howWePick: {
+    title: "How We Pick Mac Apps — Editorial Policy",
+    description:
+      "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
   },
   notFound: {
     title: "Page not found",
