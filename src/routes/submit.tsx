@@ -63,10 +63,8 @@ function SubmitPage() {
   const compare = (offer.compareCents / 100).toFixed(0);
   const paid = plan === "choice";
 
-  const siteOrigin =
-    typeof window !== "undefined" && window.location.origin && !window.location.origin.includes("localhost")
-      ? window.location.origin
-      : "https://www.picmacapps.store";
+  // Always use the real canonical website URL for external badge embeds
+  const siteOrigin = "https://www.picmacapps.store";
 
   const badgeFile =
     badgeVariant === "classic"
