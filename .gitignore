@@ -11,3 +11,4 @@ screenshots
 .env.*
 !.env.example
 .DS_Store
+.next

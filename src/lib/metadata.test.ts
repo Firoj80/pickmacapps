@@ -115,3 +115,34 @@ test("parseAppMetadataFromHtml detects productivity apps", () => {
   assert.equal(meta.pricing, "freemium");
   assert.equal(meta.icon, "https://focusnotes.app/icon.png");
 });
+
+test("parseAppMetadataFromHtml extracts X handle from meta tags or social links", () => {
+  const htmlWithMeta = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>QuickClean Mac</title>
+      <meta name="twitter:creator" content="@quickclean_app">
+    </head>
+    <body><p>Clean your Mac with ease.</p></body>
+    </html>
+  `;
+  const meta1 = parseAppMetadataFromHtml(htmlWithMeta, "https://quickclean.app");
+  assert.equal(meta1.xHandle, "@quickclean_app");
+
+  const htmlWithLink = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>ClipSnap</title>
+    </head>
+    <body>
+      <footer>
+        <a href="https://x.com/clipsnapmac">Follow on X</a>
+      </footer>
+    </body>
+    </html>
+  `;
+  const meta2 = parseAppMetadataFromHtml(htmlWithLink, "https://clipsnap.app");
+  assert.equal(meta2.xHandle, "@clipsnapmac");
+});

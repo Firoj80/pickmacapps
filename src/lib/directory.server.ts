@@ -3,6 +3,7 @@ import raw from "@/data/catalog.json";
 import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
+import { cleanXHandle } from "@/lib/metadata.server";
 import type { AppItem, Post, Pricing } from "@/lib/catalog";
 
 type AppRow = {
@@ -27,6 +28,7 @@ type AppRow = {
   badge_checked_at: string | Date | null;
   badge_detail: string;
   submitter_email: string | null;
+  submitter_x?: string | null;
 };
 
 type GuideRow = {
@@ -382,8 +384,9 @@ export async function listSubmissions() {
     plan: string;
     status: string;
     email: string;
+    x_handle?: string;
     created_at: string | Date;
-  }>("select id, app_name, website, plan, status, email, created_at from submissions order by created_at desc limit 100");
+  }>("select id, app_name, website, plan, status, email, coalesce(x_handle, '') as x_handle, created_at from submissions order by created_at desc limit 100");
 }
 
 export async function rejectSubmission(id: string) {
@@ -407,6 +410,7 @@ export async function submitListing(
     pricing: string;
     category: string;
     email: string;
+    xHandle?: string;
     plan: string;
   },
   origin: string,
@@ -419,9 +423,10 @@ export async function submitListing(
   const icon = input.icon.trim();
   const demo = input.demo.trim();
   const email = input.email.trim();
+  const xHandle = cleanXHandle(input.xHandle ?? "");
   const category = raw.categories.find((item) => item.slug === input.category);
-  if (!name || !website || !tagline || !description || !icon || !email.includes("@") || !category) {
-    return { ok: false as const, message: "Name, website, tagline, description, icon, category, and email are required." };
+  if (!name || !website || !tagline || !description || !icon || !email.includes("@") || !xHandle || !category) {
+    return { ok: false as const, message: "Name, website, tagline, description, icon, category, email, and X handle are required." };
   }
   if (plan === "free") {
     const badge = await checkBadgeOnPage(website);
@@ -430,14 +435,15 @@ export async function submitListing(
   const sql = await directorySql();
   const id = randomUUID();
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, plan, badge_ok, status, description, icon, demo, pricing, category)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, badge_ok, status, description, icon, demo, pricing, category)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
     [
       id,
       name,
       website,
       tagline,
       email,
+      xHandle,
       plan,
       plan === "free",
       plan === "choice" ? "awaiting_payment" : "pending",
@@ -508,6 +514,7 @@ export async function approveSubmission(id: string) {
     pricing: string;
     category: string;
     email: string;
+    x_handle?: string;
     plan: string;
     status: string;
   }>("select * from submissions where id = $1", [id]);
@@ -534,8 +541,8 @@ export async function approveSubmission(id: string) {
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, demo, status, submitter_email
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'published',$14)`,
+      editor_choice, demo, status, submitter_email, submitter_x
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'published',$14,$15)`,
     [
       appId,
       submission.app_name,
@@ -551,6 +558,7 @@ export async function approveSubmission(id: string) {
       submission.plan === "choice",
       submission.demo || "",
       submission.email,
+      submission.x_handle || "",
     ],
   );
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);

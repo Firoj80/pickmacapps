@@ -32,6 +32,7 @@ export const submitListingFn = createServerFn({ method: "POST" })
       pricing: data.pricing === "paid" || data.pricing === "freemium" || data.pricing === "free" ? data.pricing : "free",
       category: String(data.category ?? "").slice(0, 80),
       email: String(data.email ?? "").slice(0, 180),
+      xHandle: String(data.xHandle ?? data.x_handle ?? "").slice(0, 80),
       plan: data.plan === "choice" ? "choice" : "free",
     };
   })

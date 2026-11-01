@@ -9,6 +9,7 @@ export type FetchedMetadata = {
   demo: string;
   pricing: "free" | "freemium" | "paid";
   category: "design" | "developer-tools" | "productivity" | "utilities";
+  xHandle?: string;
 };
 
 export type FetchMetadataResult =
@@ -397,6 +398,23 @@ export function parseAppMetadataFromHtml(html: string, pageUrl: string): Fetched
     }
   }
 
+  // 8. X / Twitter handle extraction
+  let xHandle = "";
+  const twitterCreator = getMeta(["twitter:creator", "twitter:creator:id", "twitter:site", "twitter:site:id"]);
+  if (twitterCreator) {
+    xHandle = cleanXHandle(twitterCreator);
+  }
+  if (!xHandle) {
+    const twitterLinkMatch = html.match(/href=["']https?:\/\/(?:www\.)?(?:twitter|x)\.com\/([a-zA-Z0-9_]{1,30})["']/i);
+    if (twitterLinkMatch && twitterLinkMatch[1]) {
+      const candidate = twitterLinkMatch[1];
+      const excluded = new Set(["home", "intent", "share", "search", "explore", "settings", "i", "hashtag", "privacy", "tos"]);
+      if (!excluded.has(candidate.toLowerCase())) {
+        xHandle = `@${candidate}`;
+      }
+    }
+  }
+
   return {
     name: name.slice(0, 100),
     website: pageUrl,
@@ -406,7 +424,17 @@ export function parseAppMetadataFromHtml(html: string, pageUrl: string): Fetched
     demo: demo.slice(0, 400),
     pricing,
     category: bestCategory,
+    ...(xHandle ? { xHandle } : {}),
   };
+}
+
+export function cleanXHandle(raw: string): string {
+  let handle = raw.trim();
+  if (!handle) return "";
+  handle = handle.replace(/^https?:\/\/(www\.)?(twitter|x)\.com\//i, "");
+  handle = handle.replace(/[/?#].*$/, "");
+  handle = handle.replace(/^@+/, "");
+  return handle ? `@${handle}` : "";
 }
 
 export async function fetchAppMetadata(rawUrl: string): Promise<FetchMetadataResult> {

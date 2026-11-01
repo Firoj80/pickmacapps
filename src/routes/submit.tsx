@@ -59,6 +59,7 @@ function SubmitPage() {
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
   const [category, setCategory] = useState<string>(categories[0]?.slug ?? "utilities");
   const [email, setEmail] = useState("");
+  const [xHandle, setXHandle] = useState("");
 
   // Auto-fetch status
   const [fetching, setFetching] = useState(false);
@@ -69,6 +70,11 @@ function SubmitPage() {
   const price = (offer.priceCents / 100).toFixed(0);
   const compare = (offer.compareCents / 100).toFixed(0);
   const paid = plan === "choice";
+
+  const hasEmail = Boolean(email.trim() && email.includes("@"));
+  const hasXHandle = Boolean(xHandle.trim());
+  const badgeOk = paid || badge === "ok";
+  const canSubmit = Boolean(hasEmail && hasXHandle && badgeOk && !sending);
 
   async function copyBadge() {
     try {
@@ -102,6 +108,7 @@ function SubmitPage() {
         if (data.demo) setDemo(data.demo);
         if (data.pricing) setPricing(data.pricing);
         if (data.category) setCategory(data.category);
+        if (data.xHandle && !xHandle) setXHandle(data.xHandle);
 
         setFetchStatus("success");
         setFetchMessage(
@@ -156,6 +163,7 @@ function SubmitPage() {
                       setBadgeMessage("");
                       setFetchStatus("idle");
                       setFetchMessage("");
+                      setXHandle("");
                     }}
                   >
                     Submit another
@@ -167,6 +175,11 @@ function SubmitPage() {
                   onSubmit={async (event) => {
                     event.preventDefault();
                     if (sending) return;
+                    if (!hasEmail || !hasXHandle) {
+                      setBadge("fail");
+                      setBadgeMessage("Both email and X handle are mandatory to submit.");
+                      return;
+                    }
                     if (plan === "free" && badge !== "ok") return;
                     setSending(true);
                     try {
@@ -181,6 +194,7 @@ function SubmitPage() {
                           pricing,
                           category,
                           email: email.trim(),
+                          xHandle: xHandle.trim(),
                           plan,
                         },
                       });
@@ -453,22 +467,44 @@ function SubmitPage() {
                         </div>
                       </div>
 
-                      <div>
-                        <label htmlFor="email" className="mb-1 block text-xs font-medium text-body">
-                          Your email <span className="text-accent">*</span>
-                        </label>
-                        <input
-                          id="email"
-                          required
-                          type="email"
-                          name="email"
-                          aria-label="Email address"
-                          placeholder="your@email.com"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          className={field}
-                        />
+                      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <div>
+                          <label htmlFor="email" className="mb-1 block text-xs font-medium text-body">
+                            Your email <span className="text-accent">*</span>
+                          </label>
+                          <input
+                            id="email"
+                            required
+                            type="email"
+                            name="email"
+                            aria-label="Email address"
+                            placeholder="your@email.com"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            className={field}
+                          />
+                        </div>
+
+                        <div>
+                          <label htmlFor="x_handle" className="mb-1 block text-xs font-medium text-body">
+                            Your X (Twitter) handle <span className="text-accent">*</span>
+                          </label>
+                          <input
+                            id="x_handle"
+                            required
+                            type="text"
+                            name="x_handle"
+                            aria-label="X (Twitter) handle"
+                            placeholder="@username"
+                            value={xHandle}
+                            onChange={(e) => setXHandle(e.target.value)}
+                            className={field}
+                          />
+                        </div>
                       </div>
+                      <p className="text-[11px] text-muted">
+                        Both email and X handle are mandatory. We’ll use your email for review updates and your X handle to tag you when your app is featured.
+                      </p>
                     </div>
                   </div>
 
@@ -591,7 +627,7 @@ function SubmitPage() {
                     </div>
                   </div>
                   <p className="text-[12.5px] leading-relaxed text-muted">
-                    Email is used only to reply about this submission. See{" "}
+                    Email and X handle are used only to communicate about this submission and feature your app. See{" "}
                     <Link to="/privacy" className="text-ink underline underline-offset-2">
                       privacy
                     </Link>
@@ -599,10 +635,22 @@ function SubmitPage() {
                   </p>
                   <button
                     type="submit"
-                    disabled={sending || (!paid && badge !== "ok")}
+                    disabled={!canSubmit}
                     className="w-full rounded-lg bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {sending ? "Sending…" : paid ? `Continue to payment · $${price}` : badge === "ok" ? "Submit your app" : "Verify your badge to submit"}
+                    {sending
+                      ? "Sending…"
+                      : !hasEmail && !hasXHandle
+                        ? "Enter email & X handle to submit"
+                        : !hasEmail
+                          ? "Enter your email to submit"
+                          : !hasXHandle
+                            ? "Enter your X handle to submit"
+                            : paid
+                              ? `Continue to payment · $${price}`
+                              : badge === "ok"
+                                ? "Submit your app"
+                                : "Verify your badge to submit"}
                   </button>
                 </form>
               )}

@@ -78,9 +78,22 @@ function AdminHome() {
                   <tr key={item.id} className="border-t border-line">
                     <td className="px-4 py-3">
                       <p className="font-medium text-ink">{item.app_name}</p>
-                      <a href={item.website} className="text-xs text-muted underline" target="_blank" rel="noreferrer">
-                        {item.website}
-                      </a>
+                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
+                        <a href={item.website} className="underline" target="_blank" rel="noreferrer">
+                          {item.website}
+                        </a>
+                        {item.email && <span>• {item.email}</span>}
+                        {item.x_handle && (
+                          <a
+                            href={`https://x.com/${item.x_handle.replace(/^@/, "")}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="font-medium text-ink hover:underline"
+                          >
+                            • {item.x_handle}
+                          </a>
+                        )}
+                      </div>
                     </td>
                     <td className="px-3 py-3">
                       {item.plan === "choice" ? <Pill tone="choice">Editor’s Choice</Pill> : <Pill tone="off">Free</Pill>}
