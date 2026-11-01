@@ -28,15 +28,6 @@ export const Route = createFileRoute("/submit")({
   },
 });
 
-const BADGE_HTML = `<a href="/" target="_blank" rel="noopener">
-  <img
-    src="/badge.svg"
-    alt="Featured on PickMacApps"
-    width="200"
-    height="54"
-  />
-</a>`;
-
 const checks = ["Your app is functional", "It delivers what it promises", "Is not an infoproduct"];
 const field =
   "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
@@ -44,6 +35,7 @@ const field =
 function SubmitPage() {
   const [plan, setPlan] = useState<"free" | "choice">("free");
   const [copied, setCopied] = useState(false);
+  const [badgeVariant, setBadgeVariant] = useState<"light" | "dark">("light");
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
   const [badgeMessage, setBadgeMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -71,6 +63,21 @@ function SubmitPage() {
   const compare = (offer.compareCents / 100).toFixed(0);
   const paid = plan === "choice";
 
+  const siteOrigin =
+    typeof window !== "undefined" && window.location.origin && !window.location.origin.includes("localhost")
+      ? window.location.origin
+      : "https://www.picmacapps.store";
+
+  const badgeSrc = badgeVariant === "dark" ? `${siteOrigin}/badge-dark.svg` : `${siteOrigin}/badge.svg`;
+  const badgeHtml = `<a href="${siteOrigin}" target="_blank" rel="noopener">
+  <img
+    src="${badgeSrc}"
+    alt="Featured on PickMacApps"
+    width="200"
+    height="54"
+  />
+</a>`;
+
   const hasEmail = Boolean(email.trim() && email.includes("@"));
   const hasXHandle = Boolean(xHandle.trim());
   const badgeOk = paid || badge === "ok";
@@ -78,8 +85,9 @@ function SubmitPage() {
 
   async function copyBadge() {
     try {
-      await navigator.clipboard.writeText(BADGE_HTML);
+      await navigator.clipboard.writeText(badgeHtml);
       setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       setCopied(false);
     }
@@ -573,28 +581,68 @@ function SubmitPage() {
 
                   {paid ? null : (
                     <div className="rounded-xl border border-line bg-surface p-4">
-                      <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">Add our badge, get listed free</h2>
+                      <div className="flex items-center justify-between">
+                        <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">Add our badge, get listed free</h2>
+                        <span className="text-[11px] font-medium text-muted">200 × 54 px</span>
+                      </div>
                       <p className="mt-1.5 text-[13px] leading-relaxed text-body">
                         Paste this badge on your app's landing page. A free listing needs it before we can review the app.
                       </p>
-                      <div className="mt-3 flex justify-center rounded-lg border border-line bg-surface-2 p-3">
-                        <img src="/badge.svg" alt="Featured on PickMacApps" width="200" height="54" />
+
+                      {/* Variant Selector */}
+                      <div className="mt-3.5 flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("light")}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                            badgeVariant === "light"
+                              ? "bg-ink text-canvas shadow-xs"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Light badge (Recommended)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("dark")}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                            badgeVariant === "dark"
+                              ? "bg-ink text-canvas shadow-xs"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Dark badge
+                        </button>
                       </div>
+
+                      {/* Live Badge Preview */}
+                      <div className="mt-3 flex justify-center rounded-xl border border-line bg-[#0B0F19] p-4 sm:p-5">
+                        <img
+                          src={badgeVariant === "dark" ? "/badge-dark.svg" : "/badge.svg"}
+                          alt="Featured on PickMacApps"
+                          width="200"
+                          height="54"
+                          className="h-[54px] w-[200px]"
+                        />
+                      </div>
+
+                      {/* Copy Code Box */}
                       <div className="mt-3 overflow-hidden rounded-lg border border-line bg-canvas">
                         <div className="flex items-center justify-between border-b border-line px-3 py-1.5">
-                          <span className="text-[11px] font-medium text-muted">HTML</span>
+                          <span className="text-[11px] font-medium text-muted">HTML Embed Code (Absolute URL)</span>
                           <button
                             type="button"
                             onClick={copyBadge}
-                            className="rounded-md border border-line-2 bg-surface px-2 py-0.5 text-[11px] font-medium text-ink transition-colors hover:bg-surface-2"
+                            className="rounded-md border border-line-2 bg-surface px-2.5 py-1 text-[11px] font-semibold text-ink transition-colors hover:bg-surface-2"
                           >
-                            {copied ? "Copied" : "Copy"}
+                            {copied ? "Copied!" : "Copy code"}
                           </button>
                         </div>
                         <pre className="overflow-x-auto p-3 text-[11px] leading-relaxed text-body">
-                          <code>{BADGE_HTML}</code>
+                          <code>{badgeHtml}</code>
                         </pre>
                       </div>
+
                       <button
                         type="button"
                         disabled={badge === "checking"}
