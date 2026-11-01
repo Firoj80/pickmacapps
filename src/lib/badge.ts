@@ -1,6 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 
-function publicUrl(value: string) {
+export function publicUrl(value: string) {
   let url: URL;
   try {
     url = new URL(value);

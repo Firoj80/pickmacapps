@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { CheckIcon } from "@/components/icons";
+import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
 import { categories } from "@/lib/catalog";
-import { fetchOffer, submitListingFn } from "@/lib/directory.fn";
+import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -48,6 +48,23 @@ function SubmitPage() {
   const [badgeMessage, setBadgeMessage] = useState("");
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
+
+  // App details form state (editable & populated by auto-fetch)
+  const [website, setWebsite] = useState("");
+  const [name, setName] = useState("");
+  const [tagline, setTagline] = useState("");
+  const [description, setDescription] = useState("");
+  const [icon, setIcon] = useState("");
+  const [demo, setDemo] = useState("");
+  const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
+  const [category, setCategory] = useState<string>(categories[0]?.slug ?? "utilities");
+  const [email, setEmail] = useState("");
+
+  // Auto-fetch status
+  const [fetching, setFetching] = useState(false);
+  const [fetchStatus, setFetchStatus] = useState<"idle" | "success" | "error">("idle");
+  const [fetchMessage, setFetchMessage] = useState("");
+
   const offer = Route.useLoaderData();
   const price = (offer.priceCents / 100).toFixed(0);
   const compare = (offer.compareCents / 100).toFixed(0);
@@ -62,12 +79,52 @@ function SubmitPage() {
     }
   }
 
+  async function handleAutoFetch() {
+    const target = website.trim();
+    if (!target) {
+      setFetchStatus("error");
+      setFetchMessage("Please enter your app's website URL first.");
+      return;
+    }
+    setFetching(true);
+    setFetchStatus("idle");
+    setFetchMessage("");
+
+    try {
+      const result = await fetchAppMetadataFn({ data: { url: target } });
+      if (result.ok) {
+        const data = result.data;
+        if (data.name) setName(data.name);
+        if (data.website) setWebsite(data.website);
+        if (data.tagline) setTagline(data.tagline);
+        if (data.description) setDescription(data.description);
+        if (data.icon) setIcon(data.icon);
+        if (data.demo) setDemo(data.demo);
+        if (data.pricing) setPricing(data.pricing);
+        if (data.category) setCategory(data.category);
+
+        setFetchStatus("success");
+        setFetchMessage(
+          "Details auto-filled from your website! Please review each field below, customize anything, and submit."
+        );
+      } else {
+        setFetchStatus("error");
+        setFetchMessage(result.error);
+      }
+    } catch {
+      setFetchStatus("error");
+      setFetchMessage("Could not fetch details from that URL. Check the URL and try again, or enter details manually.");
+    } finally {
+      setFetching(false);
+    }
+  }
+
   async function checkBadge(form: HTMLFormElement) {
-    const website = String(new FormData(form).get("website_url") ?? "");
+    const targetUrl = website.trim() || String(new FormData(form).get("website_url") ?? "");
     setBadge("checking");
     setBadgeMessage("");
     try {
-      const result = await verifyBadge({ data: { url: website } });
+      const result = await verifyBadge({ data: { url: targetUrl } });
       setBadge(result.ok ? "ok" : "fail");
       setBadgeMessage(result.message);
     } catch {
@@ -93,7 +150,13 @@ function SubmitPage() {
                   <button
                     type="button"
                     className="mt-5 text-sm font-medium text-ink underline underline-offset-2"
-                    onClick={() => setSent(false)}
+                    onClick={() => {
+                      setSent(false);
+                      setBadge("idle");
+                      setBadgeMessage("");
+                      setFetchStatus("idle");
+                      setFetchMessage("");
+                    }}
                   >
                     Submit another
                   </button>
@@ -105,20 +168,19 @@ function SubmitPage() {
                     event.preventDefault();
                     if (sending) return;
                     if (plan === "free" && badge !== "ok") return;
-                    const form = new FormData(event.currentTarget);
                     setSending(true);
                     try {
                       const result = await submitListingFn({
                         data: {
-                          name: String(form.get("name") ?? ""),
-                          website: String(form.get("website_url") ?? ""),
-                          tagline: String(form.get("tagline") ?? ""),
-                          description: String(form.get("description") ?? ""),
-                          icon: String(form.get("icon") ?? ""),
-                          demo: String(form.get("demo") ?? ""),
-                          pricing: String(form.get("pricing") ?? ""),
-                          category: String(form.get("category") ?? ""),
-                          email: String(form.get("email") ?? ""),
+                          name: name.trim(),
+                          website: website.trim(),
+                          tagline: tagline.trim(),
+                          description: description.trim(),
+                          icon: icon.trim(),
+                          demo: demo.trim(),
+                          pricing,
+                          category,
+                          email: email.trim(),
                           plan,
                         },
                       });
@@ -139,36 +201,275 @@ function SubmitPage() {
                     }
                   }}
                 >
-                  <div className="space-y-3 rounded-xl border border-line bg-surface p-4">
-                    <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">App</h2>
-                    <input required name="name" aria-label="App name" placeholder="App name" className={field} />
-                    <input required type="url" name="website_url" aria-label="Website URL" placeholder="Website URL" className={field} />
-                    <input required name="tagline" aria-label="Tagline" placeholder="Short tagline" className={field} />
-                    <textarea
-                      required
-                      name="description"
-                      aria-label="Description"
-                      placeholder="What the app does"
-                      rows={5}
-                      className={field}
-                    />
-                    <input required type="url" name="icon" aria-label="Icon URL" placeholder="Icon image URL" className={field} />
-                    <input type="url" name="demo" aria-label="Demo image URL" placeholder="Demo image URL, optional" className={field} />
-                    <div className="grid grid-cols-2 gap-3">
-                      <select required name="pricing" aria-label="Price model" defaultValue="free" className={field}>
-                        <option value="free">Free</option>
-                        <option value="freemium">Freemium</option>
-                        <option value="paid">Paid</option>
-                      </select>
-                      <select required name="category" aria-label="Category" defaultValue={categories[0]?.slug} className={field}>
-                        {categories.map((category) => (
-                          <option key={category.slug} value={category.slug}>
-                            {category.emoji} {category.name}
-                          </option>
-                        ))}
-                      </select>
+                  <div className="space-y-4 rounded-xl border border-line bg-surface p-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="text-base font-[550] tracking-[-0.025em] text-ink">App information</h2>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2 py-0.5 text-[11px] font-medium text-accent">
+                        <SparklesIcon className="h-3 w-3" /> Auto-fill
+                      </span>
                     </div>
-                    <input required type="email" name="email" aria-label="Email address" placeholder="Your email address" className={field} />
+
+                    {/* Website URL + Auto-fetch button */}
+                    <div className="space-y-1.5">
+                      <label htmlFor="website_url" className="text-xs font-medium text-body">
+                        Website URL <span className="text-accent">*</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="website_url"
+                          required
+                          type="url"
+                          name="website_url"
+                          aria-label="Website URL"
+                          placeholder="https://yourmacapp.com"
+                          value={website}
+                          onChange={(e) => setWebsite(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              e.preventDefault();
+                              void handleAutoFetch();
+                            }
+                          }}
+                          className={field}
+                        />
+                        <button
+                          type="button"
+                          disabled={fetching || !website.trim()}
+                          onClick={() => void handleAutoFetch()}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line-2 bg-surface-2 px-3.5 py-2.5 text-xs font-semibold text-ink transition-all hover:border-accent hover:bg-accent/5 disabled:opacity-50"
+                        >
+                          {fetching ? (
+                            <>
+                              <SpinnerIcon className="h-3.5 w-3.5 text-ink" />
+                              <span>Fetching…</span>
+                            </>
+                          ) : (
+                            <>
+                              <SparklesIcon className="h-3.5 w-3.5 text-accent" />
+                              <span>Auto-fetch</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                      <p className="text-[11px] text-muted">
+                        Enter your app’s website and click <strong>Auto-fetch</strong>. We’ll pull the name, tagline, description, icon, demo preview, and category for you to review and edit.
+                      </p>
+                    </div>
+
+                    {/* Auto-fetch notification banner */}
+                    {fetchStatus === "success" && (
+                      <div className="rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs leading-relaxed text-emerald-800 dark:text-emerald-300">
+                        <div className="flex items-start gap-2">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-600 dark:text-emerald-400" />
+                          <div>
+                            <span className="font-semibold">Details fetched: </span>
+                            <span>{fetchMessage}</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {fetchStatus === "error" && (
+                      <div className="rounded-lg border border-amber-500/30 bg-amber-500/10 p-3 text-xs leading-relaxed text-amber-800 dark:text-amber-300">
+                        <div className="flex items-start gap-2">
+                          <span className="font-semibold shrink-0">Note:</span>
+                          <span>{fetchMessage}</span>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Live Visual Preview Card when an icon or demo is available */}
+                    {(icon || demo || name) && (
+                      <div className="rounded-xl border border-line bg-surface-2 p-3.5 transition-all">
+                        <div className="flex items-center justify-between mb-2.5">
+                          <span className="text-[11px] font-semibold tracking-wider text-muted uppercase">Review Preview</span>
+                          <span className="text-[10px] text-muted">Editable below</span>
+                        </div>
+                        <div className="flex items-start gap-3">
+                          {icon ? (
+                            <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl border border-line bg-surface shadow-xs">
+                              <img
+                                src={icon}
+                                alt={name || "App icon"}
+                                className="h-full w-full object-cover"
+                                onError={(e) => {
+                                  (e.currentTarget as HTMLElement).style.display = "none";
+                                }}
+                              />
+                            </div>
+                          ) : (
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-line bg-surface text-xs font-bold text-muted">
+                              APP
+                            </div>
+                          )}
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-ink truncate">{name || "App Name"}</span>
+                              <span className="rounded bg-accent/10 px-1.5 py-0.5 text-[10px] font-medium text-accent capitalize">
+                                {pricing}
+                              </span>
+                            </div>
+                            <p className="mt-0.5 text-xs text-body line-clamp-1">{tagline || "Your short tagline"}</p>
+                          </div>
+                        </div>
+                        {demo && (
+                          <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface">
+                            <img
+                              src={demo}
+                              alt="Demo screenshot"
+                              className="max-h-40 w-full object-cover"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = "none";
+                              }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Editable Form Inputs */}
+                    <div className="space-y-3 pt-1">
+                      <div>
+                        <label htmlFor="name" className="mb-1 block text-xs font-medium text-body">
+                          App name <span className="text-accent">*</span>
+                        </label>
+                        <input
+                          id="name"
+                          required
+                          name="name"
+                          aria-label="App name"
+                          placeholder="App name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="tagline" className="mb-1 block text-xs font-medium text-body">
+                          Tagline <span className="text-accent">*</span>
+                        </label>
+                        <input
+                          id="tagline"
+                          required
+                          name="tagline"
+                          aria-label="Tagline"
+                          placeholder="Short tagline (e.g. More space for your Mac)"
+                          value={tagline}
+                          onChange={(e) => setTagline(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="description" className="mb-1 block text-xs font-medium text-body">
+                          Description <span className="text-accent">*</span>
+                        </label>
+                        <textarea
+                          id="description"
+                          required
+                          name="description"
+                          aria-label="Description"
+                          placeholder="What the app does, key features, and requirements"
+                          rows={5}
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="icon" className="mb-1 block text-xs font-medium text-body">
+                          Icon image URL <span className="text-accent">*</span>
+                        </label>
+                        <input
+                          id="icon"
+                          required
+                          type="url"
+                          name="icon"
+                          aria-label="Icon URL"
+                          placeholder="https://.../icon.png"
+                          value={icon}
+                          onChange={(e) => setIcon(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+
+                      <div>
+                        <label htmlFor="demo" className="mb-1 block text-xs font-medium text-body">
+                          Demo screenshot image URL <span className="text-muted">(optional)</span>
+                        </label>
+                        <input
+                          id="demo"
+                          type="url"
+                          name="demo"
+                          aria-label="Demo image URL"
+                          placeholder="https://.../demo.png"
+                          value={demo}
+                          onChange={(e) => setDemo(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label htmlFor="pricing" className="mb-1 block text-xs font-medium text-body">
+                            Price model <span className="text-accent">*</span>
+                          </label>
+                          <select
+                            id="pricing"
+                            required
+                            name="pricing"
+                            aria-label="Price model"
+                            value={pricing}
+                            onChange={(e) => setPricing(e.target.value as "free" | "freemium" | "paid")}
+                            className={field}
+                          >
+                            <option value="free">Free</option>
+                            <option value="freemium">Freemium</option>
+                            <option value="paid">Paid</option>
+                          </select>
+                        </div>
+
+                        <div>
+                          <label htmlFor="category" className="mb-1 block text-xs font-medium text-body">
+                            Category <span className="text-accent">*</span>
+                          </label>
+                          <select
+                            id="category"
+                            required
+                            name="category"
+                            aria-label="Category"
+                            value={category}
+                            onChange={(e) => setCategory(e.target.value)}
+                            className={field}
+                          >
+                            {categories.map((cat) => (
+                              <option key={cat.slug} value={cat.slug}>
+                                {cat.emoji} {cat.name}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div>
+                        <label htmlFor="email" className="mb-1 block text-xs font-medium text-body">
+                          Your email <span className="text-accent">*</span>
+                        </label>
+                        <input
+                          id="email"
+                          required
+                          type="email"
+                          name="email"
+                          aria-label="Email address"
+                          placeholder="your@email.com"
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          className={field}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   <div className="rounded-xl border border-line bg-surface p-4">

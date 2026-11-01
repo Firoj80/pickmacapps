@@ -9,6 +9,15 @@ export const fetchOffer = createServerFn({ method: "GET" }).handler(async () => 
   const { publicOffer } = await import("./directory.server");
   return publicOffer();
 });
+export const fetchAppMetadataFn = createServerFn({ method: "POST" })
+  .validator((input: unknown) => {
+    const url = typeof input === "object" && input && "url" in input ? String(input.url) : "";
+    return { url };
+  })
+  .handler(async ({ data }) => {
+    const { fetchAppMetadata } = await import("./metadata.server");
+    return fetchAppMetadata(data.url);
+  });
 
 export const submitListingFn = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
