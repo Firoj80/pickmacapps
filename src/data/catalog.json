@@ -1152,10 +1152,6 @@
     }
   ],
   "alternatives": [],
-  "editors": [
-    "helumi",
-    "macwhisper",
-    "scanmydisk"
-  ],
+  "editors": [],
   "pinned": []
 }

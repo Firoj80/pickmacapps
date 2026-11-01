@@ -1,7 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
-import { apps, editors, getApp, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { apps, getApp, isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
@@ -91,7 +91,7 @@ function AppPage() {
     (item) => !explicitRelated.some((r) => r.slug === item.slug) && !sameCategory.some((c) => c.slug === item.slug),
   );
   const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 3);
-  const choice = app.editorChoice ?? editors.has(app.slug);
+  const choice = isEditorChoice(app);
 
   return (
     <main>

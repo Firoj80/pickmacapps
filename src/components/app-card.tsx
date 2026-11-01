@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { addedLabel, editors, pricingLabel, type AppItem } from "@/lib/catalog";
+import { addedLabel, isEditorChoice, pricingLabel, type AppItem } from "@/lib/catalog";
 
 export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
-  const choice = app.editorChoice ?? editors.has(app.slug);
+  const choice = isEditorChoice(app);
   return (
     <Link
       to="/app/$slug"

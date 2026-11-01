@@ -2,7 +2,7 @@ import {
   apps,
   appsInCategory,
   categories,
-  editors,
+  isEditorChoice,
   getApp,
   getCategory,
   getPost,
@@ -56,13 +56,13 @@ function linkList(items: { label: string; href: string; note?: string }[]) {
 }
 
 function appNote(app: (typeof apps)[number]) {
-  const choice = editors.has(app.slug) ? " Editor’s Choice." : ""
+  const choice = isEditorChoice(app) ? " Editor’s Choice." : ""
   return `${app.tagline}${choice}`
 }
 
 function renderHome(origin: string): MarkdownPage {
   const ordered = [...sortApps(apps, "newest")].sort(
-    (a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)),
+    (a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)),
   )
   const body = [
     "Listings link to the developer. Editor’s Choice listings are labeled Editor’s Choice.",
@@ -159,7 +159,7 @@ function renderPost(origin: string, slug: string): MarkdownPage | null {
 function renderApp(origin: string, slug: string): MarkdownPage | null {
   const app = getApp(slug)
   if (!app) return null
-  const choice = editors.has(app.slug)
+  const choice = isEditorChoice(app)
   const related = app.related
     .map((item) => getApp(item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
@@ -485,7 +485,7 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
     group: "categories",
   }))
   const appRoutes: MarkdownRoute[] = [...sortApps(apps, "newest")]
-    .sort((a, b) => Number(editors.has(b.slug)) - Number(editors.has(a.slug)))
+    .sort((a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)))
     .map((app) => ({
       htmlPath: `/app/${app.slug}`,
       mdPath: markdownPath(`/app/${app.slug}`),

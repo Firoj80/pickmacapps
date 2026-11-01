@@ -103,7 +103,6 @@ function toPost(row: GuideRow): Post {
 let seedPromise: Promise<void> | null = null;
 
 async function ensureSeed(sql: Sql) {
-  const editors = new Set(raw.editors);
   for (const app of raw.apps) {
     try {
       // Check if app already exists by slug or by id
@@ -126,9 +125,8 @@ async function ensureSeed(sql: Sql) {
             category = $9,
             category_name = $10,
             category_icon = $11,
-            editor_choice = $12,
-            demo = case when $13 <> '' then $13 else demo end,
-            related = $14::jsonb,
+            demo = case when $12 <> '' then $12 else demo end,
+            related = $13::jsonb,
             status = 'published'
           where id = $1`,
           [
@@ -143,7 +141,6 @@ async function ensureSeed(sql: Sql) {
             app.category,
             app.categoryName,
             app.categoryIcon,
-            editors.has(app.slug),
             app.demo,
             JSON.stringify(app.related ?? []),
           ],
@@ -156,7 +153,6 @@ async function ensureSeed(sql: Sql) {
           ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
            on conflict (slug) do update set
              name = excluded.name,
-             editor_choice = excluded.editor_choice,
              description = excluded.description,
              tagline = excluded.tagline,
              icon = case when excluded.icon <> '' then excluded.icon else apps.icon end,
@@ -180,7 +176,7 @@ async function ensureSeed(sql: Sql) {
             app.category,
             app.categoryName,
             app.categoryIcon,
-            editors.has(app.slug),
+            app.editorChoice === true,
             app.createdAt,
             app.demo,
             JSON.stringify(app.related ?? []),

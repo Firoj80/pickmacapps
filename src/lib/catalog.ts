@@ -72,8 +72,7 @@ export const hero = raw.hero as HeroIcon[];
 export const categories = raw.categories as CategoryInfo[];
 export const posts = raw.posts as Post[];
 export const alternatives = raw.alternatives as Alternative[];
-export const editors = new Set<string>(raw.editors);
-export const pinned = raw.pinned as string[];
+const shelfRank = new Map(apps.map((app, index) => [app.slug, index]));
 
 const priceRank: Record<string, number> = { free: 0, freemium: 1, paid: 2 };
 
@@ -103,8 +102,7 @@ export function addedLabel(iso: string, now = Date.now()) {
 }
 
 function pinRank(slug: string) {
-  const i = pinned.indexOf(slug);
-  return i === -1 ? Number.POSITIVE_INFINITY : i;
+  return shelfRank.get(slug) ?? Number.POSITIVE_INFINITY;
 }
 
 export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
@@ -113,7 +111,7 @@ export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
   else if (order === "free") {
     next.sort((a, b) => (priceRank[a.pricing] ?? 3) - (priceRank[b.pricing] ?? 3));
   } else {
-    next.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+    next.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name));
   }
   next.sort((a, b) => {
     const ap = pinRank(a.slug);
@@ -145,7 +143,7 @@ export function shelfApps(
 }
 
 export function isEditorChoice(app: AppItem) {
-  return app.editorChoice ?? editors.has(app.slug);
+  return app.editorChoice === true;
 }
 
 const homeJobs: { id: string; title: string; line: string; slugs: string[]; guideHref?: string }[] = [
