@@ -35,7 +35,7 @@ const field =
 function SubmitPage() {
   const [plan, setPlan] = useState<"free" | "choice">("free");
   const [copied, setCopied] = useState(false);
-  const [badgeVariant, setBadgeVariant] = useState<"light" | "dark">("light");
+  const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
   const [badgeMessage, setBadgeMessage] = useState("");
   const [sent, setSent] = useState(false);
@@ -68,7 +68,14 @@ function SubmitPage() {
       ? window.location.origin
       : "https://www.picmacapps.store";
 
-  const badgeSrc = badgeVariant === "dark" ? `${siteOrigin}/badge-dark.svg` : `${siteOrigin}/badge.svg`;
+  const badgeFile =
+    badgeVariant === "classic"
+      ? "badge-classic.svg"
+      : badgeVariant === "dark"
+        ? "badge-dark.svg"
+        : "badge.svg";
+
+  const badgeSrc = `${siteOrigin}/${badgeFile}`;
   const badgeHtml = `<a href="${siteOrigin}" target="_blank" rel="noopener">
   <img
     src="${badgeSrc}"
@@ -590,17 +597,28 @@ function SubmitPage() {
                       </p>
 
                       {/* Variant Selector */}
-                      <div className="mt-3.5 flex items-center gap-2">
+                      <div className="mt-3.5 flex flex-wrap items-center gap-2">
                         <button
                           type="button"
-                          onClick={() => setBadgeVariant("light")}
+                          onClick={() => setBadgeVariant("logo")}
                           className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
-                            badgeVariant === "light"
+                            badgeVariant === "logo"
                               ? "bg-ink text-canvas shadow-xs"
                               : "border border-line bg-surface-2 text-muted hover:text-ink"
                           }`}
                         >
-                          Light badge (Recommended)
+                          Logo badge (Favicon)
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("classic")}
+                          className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all ${
+                            badgeVariant === "classic"
+                              ? "bg-ink text-canvas shadow-xs"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Classic badge (Previous)
                         </button>
                         <button
                           type="button"
@@ -618,7 +636,7 @@ function SubmitPage() {
                       {/* Live Badge Preview */}
                       <div className="mt-3 flex justify-center rounded-xl border border-line bg-[#0B0F19] p-4 sm:p-5">
                         <img
-                          src={badgeVariant === "dark" ? "/badge-dark.svg" : "/badge.svg"}
+                          src={`/${badgeFile}`}
                           alt="Featured on PickMacApps"
                           width="200"
                           height="54"
