@@ -101,13 +101,27 @@ function AppPage() {
             {app.demo.endsWith(".mp4") ? (
               <video src={app.demo} controls muted loop playsInline className="aspect-[1200/630] w-full object-cover" />
             ) : (
-              <img alt={`${app.name} for Mac screenshot`} src={app.demo} className="aspect-[1200/630] w-full object-cover" />
+              <img
+                alt={`${app.name} for Mac screenshot`}
+                src={app.demo}
+                onError={(e) => {
+                  (e.currentTarget as HTMLElement).style.display = "none";
+                }}
+                className="aspect-[1200/630] w-full object-cover"
+              />
             )}
           </div>
         ) : null}
         <div className="flex flex-col gap-6 pb-8 sm:flex-row sm:items-end sm:justify-between">
           <div className="flex items-start gap-5">
-            <img alt={`${app.name} for Mac icon`} src={app.icon} className="h-20 w-20 rounded-2xl object-cover ring-1 ring-line sm:h-24 sm:w-24" />
+            <img
+              alt={`${app.name} for Mac icon`}
+              src={app.icon}
+              onError={(e) => {
+                e.currentTarget.src = "/site-favicon.svg";
+              }}
+              className="h-20 w-20 rounded-2xl object-cover ring-1 ring-line sm:h-24 sm:w-24"
+            />
             <div>
               {choice ? (
                 <p className="text-[12px] font-semibold tracking-[0.14em] text-accent uppercase">

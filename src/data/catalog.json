@@ -414,7 +414,7 @@
       "slug": "scanmydisk",
       "tagline": "A visual disk space analyzer to see what uses your Mac disk space.",
       "description": "ScanMyDisk is a visual disk space analyzer for Mac. It maps storage usage into an interactive visual breakdown, helping you find oversized files, inspect hidden directories, and reclaim free space.",
-      "icon": "https://pub-621eb870dc3341c586576c494fa43fdc.r2.dev/scanmydisk.png",
+      "icon": "/apps/scanmydisk.png",
       "website": "https://scanmydisk.com",
       "pricing": "paid",
       "category": "utilities",
@@ -423,7 +423,7 @@
       "featured": true,
       "editorChoice": true,
       "createdAt": "2026-10-25",
-      "demo": "https://pub-621eb870dc3341c586576c494fa43fdc.r2.dev/scanmydisk-demo.png",
+      "demo": "/apps/scanmydisk-demo.png",
       "related": [
         "mole",
         "bytesweep",

@@ -15,15 +15,28 @@ export function AppCard({ app, size = "md" }: { app: AppItem; size?: "lg" | "md"
   return (
     <Link to="/app/$slug" params={{ slug: app.slug }} className="shelf-card rise group block min-w-0">
       <div className="cover relative aspect-[1200/630] overflow-hidden rounded-2xl border border-line/80 bg-surface-2">
+        <div className="wash absolute inset-0 h-full w-full" style={{ background: `linear-gradient(135deg, ${wash} 0%, #111113 78%)` }} />
         {image ? (
-          <img alt="" src={image} className="h-full w-full object-cover" />
-        ) : (
-          <div className="wash h-full w-full" style={{ background: `linear-gradient(135deg, ${wash} 0%, #111113 78%)` }} />
-        )}
+          <img
+            alt=""
+            src={image}
+            onError={(e) => {
+              (e.currentTarget as HTMLElement).style.display = "none";
+            }}
+            className="relative h-full w-full object-cover"
+          />
+        ) : null}
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_80%_at_20%_10%,rgba(255,255,255,0.55),transparent_55%)] opacity-70 mix-blend-overlay" />
       </div>
       <div className={`mt-4 flex ${gap}`}>
-        <img alt="" src={app.icon} className={`mark mt-0.5 shrink-0 rounded-xl bg-white object-cover ${icon}`} />
+        <img
+          alt=""
+          src={app.icon}
+          onError={(e) => {
+            e.currentTarget.src = "/site-favicon.svg";
+          }}
+          className={`mark mt-0.5 shrink-0 rounded-xl bg-white object-cover ${icon}`}
+        />
         <div className="min-w-0">
           <h3 className={`${title} truncate font-semibold tracking-tight text-ink`}>{app.name}</h3>
           <p className={`mt-0.5 line-clamp-2 ${tag} leading-relaxed text-muted`}>{app.tagline}</p>

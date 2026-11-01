@@ -100,76 +100,148 @@ function toPost(row: GuideRow): Post {
   };
 }
 
+let seedPromise: Promise<void> | null = null;
+
 async function ensureSeed(sql: Sql) {
   const editors = new Set(raw.editors);
   for (const app of raw.apps) {
-    await sql.query(
-      `insert into apps (
-        id, name, slug, tagline, description, icon, website, pricing, category, category_name,
-        category_icon, editor_choice, created_at, demo, related, status
-      ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
-       on conflict (id) do update set
-         editor_choice = excluded.editor_choice,
-         description = excluded.description,
-         tagline = excluded.tagline,
-         related = excluded.related,
-         demo = excluded.demo`,
-      [
-        app.id,
-        app.name,
-        app.slug,
-        app.tagline,
-        app.description,
-        app.icon,
-        app.website,
-        app.pricing,
-        app.category,
-        app.categoryName,
-        app.categoryIcon,
-        editors.has(app.slug),
-        app.createdAt,
-        app.demo,
-        JSON.stringify(app.related ?? []),
-      ],
-    );
+    try {
+      // Check if app already exists by slug or by id
+      const existing = await sql.query<{ id: string; slug: string }>(
+        "select id, slug from apps where slug = $1 or id = $2 limit 1",
+        [app.slug, app.id],
+      );
+
+      if (existing.length > 0) {
+        const row = existing[0];
+        await sql.query(
+          `update apps set
+            name = $2,
+            slug = $3,
+            tagline = $4,
+            description = $5,
+            icon = case when $6 <> '' then $6 else icon end,
+            website = $7,
+            pricing = $8,
+            category = $9,
+            category_name = $10,
+            category_icon = $11,
+            editor_choice = $12,
+            demo = case when $13 <> '' then $13 else demo end,
+            related = $14::jsonb,
+            status = 'published'
+          where id = $1`,
+          [
+            row.id,
+            app.name,
+            app.slug,
+            app.tagline,
+            app.description,
+            app.icon,
+            app.website,
+            app.pricing,
+            app.category,
+            app.categoryName,
+            app.categoryIcon,
+            editors.has(app.slug),
+            app.demo,
+            JSON.stringify(app.related ?? []),
+          ],
+        );
+      } else {
+        await sql.query(
+          `insert into apps (
+            id, name, slug, tagline, description, icon, website, pricing, category, category_name,
+            category_icon, editor_choice, created_at, demo, related, status
+          ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
+           on conflict (slug) do update set
+             name = excluded.name,
+             editor_choice = excluded.editor_choice,
+             description = excluded.description,
+             tagline = excluded.tagline,
+             icon = case when excluded.icon <> '' then excluded.icon else apps.icon end,
+             website = excluded.website,
+             pricing = excluded.pricing,
+             category = excluded.category,
+             category_name = excluded.category_name,
+             category_icon = excluded.category_icon,
+             related = excluded.related,
+             demo = case when excluded.demo <> '' then excluded.demo else apps.demo end,
+             status = 'published'`,
+          [
+            app.id,
+            app.name,
+            app.slug,
+            app.tagline,
+            app.description,
+            app.icon,
+            app.website,
+            app.pricing,
+            app.category,
+            app.categoryName,
+            app.categoryIcon,
+            editors.has(app.slug),
+            app.createdAt,
+            app.demo,
+            JSON.stringify(app.related ?? []),
+          ],
+        );
+      }
+    } catch (err) {
+      console.error(`ensureSeed failed for app ${app.slug}:`, err);
+    }
   }
   for (const post of raw.posts) {
-    await sql.query(
-      `insert into guides (slug, title, excerpt, date, date_label, minutes, tags, toc, html, more, status)
-       values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10::jsonb,'published')
-       on conflict (slug) do update set
-         title = excluded.title,
-         excerpt = excluded.excerpt,
-         html = excluded.html,
-         tags = excluded.tags,
-         toc = excluded.toc,
-         more = excluded.more,
-         date = excluded.date,
-         date_label = excluded.date_label,
-         minutes = excluded.minutes`,
-      [
-        post.slug,
-        post.title,
-        post.excerpt,
-        post.date,
-        post.dateLabel,
-        post.minutes,
-        JSON.stringify(post.tags ?? []),
-        JSON.stringify(post.toc ?? []),
-        post.html,
-        JSON.stringify(post.more ?? []),
-      ],
-    );
+    try {
+      await sql.query(
+        `insert into guides (slug, title, excerpt, date, date_label, minutes, tags, toc, html, more, status)
+         values ($1,$2,$3,$4,$5,$6,$7::jsonb,$8::jsonb,$9,$10::jsonb,'published')
+         on conflict (slug) do update set
+           title = excluded.title,
+           excerpt = excluded.excerpt,
+           html = excluded.html,
+           tags = excluded.tags,
+           toc = excluded.toc,
+           more = excluded.more,
+           date = excluded.date,
+           date_label = excluded.date_label,
+           minutes = excluded.minutes`,
+        [
+          post.slug,
+          post.title,
+          post.excerpt,
+          post.date,
+          post.dateLabel,
+          post.minutes,
+          JSON.stringify(post.tags ?? []),
+          JSON.stringify(post.toc ?? []),
+          post.html,
+          JSON.stringify(post.more ?? []),
+        ],
+      );
+    } catch (err) {
+      console.error(`ensureSeed failed for guide ${post.slug}:`, err);
+    }
   }
-  await sql.query(
-    `insert into settings (key, value) values ('choice_price_cents', '9900'), ('choice_compare_cents', '19900')
-     on conflict (key) do nothing`,
-  );
+  try {
+    await sql.query(
+      `insert into settings (key, value) values ('choice_price_cents', '9900'), ('choice_compare_cents', '19900')
+       on conflict (key) do nothing`,
+    );
+  } catch (err) {
+    console.error("ensureSeed settings failed:", err);
+  }
 }
 
 export async function directorySql() {
   const sql = await getSql();
-  await ensureSeed(sql);
+  if (!seedPromise) {
+    seedPromise = ensureSeed(sql).catch((err) => {
+      seedPromise = null;
+      console.error("ensureSeed error:", err);
+    });
+  }
+  await seedPromise;
   return sql;
 }
 
@@ -347,6 +419,14 @@ export async function saveApp(input: {
     name: row.category_name,
     emoji: row.category_icon,
   };
+  const cleanSlug = input.slug.trim();
+  const slugConflict = await sql.query<AppRow>(
+    "select id from apps where slug = $1 and id <> $2 limit 1",
+    [cleanSlug, input.id],
+  );
+  if (slugConflict.length > 0) {
+    throw new Error(`The slug "${cleanSlug}" is already in use by another app.`);
+  }
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11, status = $12,
@@ -355,7 +435,7 @@ export async function saveApp(input: {
     [
       input.id,
       input.name.trim(),
-      input.slug.trim(),
+      cleanSlug,
       input.tagline.trim(),
       input.description.trim(),
       input.website.trim(),
