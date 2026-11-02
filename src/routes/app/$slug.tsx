@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
+import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { apps, getApp, isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -132,6 +133,11 @@ function AppPage() {
               )}
               <h1 className="font-display mt-1 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">{app.name} for Mac</h1>
               <p className="mt-2 max-w-xl text-[16px] text-body">{app.tagline}</p>
+              {app.slug === "scanmydisk" ? (
+                <div className="mt-3">
+                  <ScanMyDiskNote />
+                </div>
+              ) : null}
               <div className="mt-4 flex flex-wrap gap-2">
                 <span className={`rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${pricingClass[app.pricing]}`}>
                   {pricingLabel[app.pricing]}

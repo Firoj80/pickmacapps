@@ -1,12 +1,11 @@
 /** Facts shared by the HTML head, markdown, llms.txt, and ai.txt. */
 export const site = {
   name: "PickMacApps",
-  title: "Best Mac Apps (2026): Hand-Picked Utilities | PickMacApps",
-  description:
-    "Hand-picked best Mac apps for 2026. Browse utilities by job, compare alternatives side by side, and read short buying guides.",
+  title: "PickMacApps — Mac apps worth installing",
+  description: "A curated shelf of Mac apps. Browse by category, compare alternatives, and read short guides.",
   logoPath: "/favicon.svg",
   ogImage: "/og-v2.jpg",
-  ogImageAlt: "PickMacApps: Best Mac Apps, Hand-Picked",
+  ogImageAlt: "PickMacApps — Mac apps worth installing",
   ogImageWidth: "1200",
   ogImageHeight: "630",
   policyUpdated: "2026-10-27",
@@ -16,7 +15,7 @@ export const pageCopy = {
   guides: {
     title: "Guides",
     description:
-      "Hand-researched guides to the best Mac apps. Each one compares a popular Mac app with the apps on this shelf.",
+      "Short guides that name apps already in this directory. Each one compares a popular Mac app with the apps on this shelf.",
   },
   submit: {
     title: "Submit Your Mac App",
@@ -34,7 +33,7 @@ export const pageCopy = {
   howWePick: {
     title: "How We Pick Mac Apps — Editorial Policy",
     description:
-      "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+      "Apps are added by hand. Editor’s Choice is a paid placement, not a test score. Listings link to the developer.",
   },
   notFound: {
     title: "Page not found",

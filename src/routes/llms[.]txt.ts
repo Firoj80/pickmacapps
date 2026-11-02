@@ -2,7 +2,8 @@ import { createFileRoute } from "@tanstack/react-router"
 
 async function respond(request: Request) {
   const { handleIncoming } = await import("@/lib/md/handle")
-  return handleIncoming(request) ?? new Response("Not found\n", { status: 404 })
+  const served = await handleIncoming(request)
+  return served ?? new Response("Not found\n", { status: 404 })
 }
 
 export const Route = createFileRoute("/llms.txt")({

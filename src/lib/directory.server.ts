@@ -111,78 +111,31 @@ async function ensureSeed(sql: Sql) {
         [app.slug, app.id],
       );
 
-      if (existing.length > 0) {
-        const row = existing[0];
-        await sql.query(
-          `update apps set
-            name = $2,
-            slug = $3,
-            tagline = $4,
-            description = $5,
-            icon = case when $6 <> '' then $6 else icon end,
-            website = $7,
-            pricing = $8,
-            category = $9,
-            category_name = $10,
-            category_icon = $11,
-            demo = case when $12 <> '' then $12 else demo end,
-            related = $13::jsonb,
-            status = 'published'
-          where id = $1`,
-          [
-            row.id,
-            app.name,
-            app.slug,
-            app.tagline,
-            app.description,
-            app.icon,
-            app.website,
-            app.pricing,
-            app.category,
-            app.categoryName,
-            app.categoryIcon,
-            app.demo,
-            JSON.stringify(app.related ?? []),
-          ],
-        );
-      } else {
-        await sql.query(
-          `insert into apps (
-            id, name, slug, tagline, description, icon, website, pricing, category, category_name,
-            category_icon, editor_choice, created_at, demo, related, status
-          ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
-           on conflict (slug) do update set
-             name = excluded.name,
-             description = excluded.description,
-             tagline = excluded.tagline,
-             icon = case when excluded.icon <> '' then excluded.icon else apps.icon end,
-             website = excluded.website,
-             pricing = excluded.pricing,
-             category = excluded.category,
-             category_name = excluded.category_name,
-             category_icon = excluded.category_icon,
-             related = excluded.related,
-             demo = case when excluded.demo <> '' then excluded.demo else apps.demo end,
-             status = 'published'`,
-          [
-            app.id,
-            app.name,
-            app.slug,
-            app.tagline,
-            app.description,
-            app.icon,
-            app.website,
-            app.pricing,
-            app.category,
-            app.categoryName,
-            app.categoryIcon,
-            app.editorChoice === true,
-            app.createdAt,
-            app.demo,
-            JSON.stringify(app.related ?? []),
-          ],
-        );
-      }
+      if (existing.length > 0) continue;
+      await sql.query(
+        `insert into apps (
+          id, name, slug, tagline, description, icon, website, pricing, category, category_name,
+          category_icon, editor_choice, created_at, demo, related, status
+        ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
+         on conflict (slug) do nothing`,
+        [
+          app.id,
+          app.name,
+          app.slug,
+          app.tagline,
+          app.description,
+          app.icon,
+          app.website,
+          app.pricing,
+          app.category,
+          app.categoryName,
+          app.categoryIcon,
+          app.editorChoice === true,
+          app.createdAt,
+          app.demo,
+          JSON.stringify(app.related ?? []),
+        ],
+      );
     } catch (err) {
       console.error(`ensureSeed failed for app ${app.slug}:`, err);
     }

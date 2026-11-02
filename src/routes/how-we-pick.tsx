@@ -39,61 +39,60 @@ function HowWePickPage() {
           How We Review & Select Mac Apps
         </h1>
         <p className="mt-4 text-lg text-body">
-          Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.
+          How a listing gets on the shelf, and what Editor’s Choice means. This page does not describe a lab test.
         </p>
       </header>
 
       <article className="prose prose-neutral mt-10 space-y-8 text-[16px] leading-relaxed text-body">
         <section>
-          <h2 className="font-display text-2xl font-semibold text-ink">The 5-Pillar Testing Framework</h2>
+          <h2 className="font-display text-2xl font-semibold text-ink">How a listing gets on the shelf</h2>
           <p className="mt-3">
-            Every application featured on PickMacApps is personally downloaded, installed, and evaluated on physical Apple
-            Silicon hardware (M-series MacBooks and desktop Macs) running the latest versions of macOS. We evaluate tools
-            across five core criteria:
+            Apps are added by hand. A listing shows the name, a short description, a pricing label, and a link to the
+            developer. This page does not claim a timed lab test, a fixed number of hours, or that every app is an Apple
+            Silicon build. If a fact is not in the directory, the guide leaves it out.
           </p>
 
           <div className="mt-6 space-y-4">
             <div className="rounded-xl border border-line bg-surface p-5">
-              <h3 className="text-base font-semibold text-ink">1. Performance & Memory Footprint</h3>
+              <h3 className="text-base font-semibold text-ink">1. What a listing contains</h3>
               <p className="mt-1.5 text-sm text-muted leading-relaxed">
-                Background utilities should feel invisible. We monitor Activity Monitor for idle RAM consumption, CPU
-                spikes, and background wakeups. We heavily favor lightweight Swift/AppKit builds over multi-process
-                Electron wrappers for simple status bar or clipboard tasks.
+                A published listing shows the name, a short description, a pricing label, a category, and a link to the
+                developer. If a price, feature, or system requirement is not in that listing, the guides leave it out.
               </p>
             </div>
 
             <div className="rounded-xl border border-line bg-surface p-5">
-              <h3 className="text-base font-semibold text-ink">2. Permission Hygiene & Privacy</h3>
+              <h3 className="text-base font-semibold text-ink">2. Pricing labels</h3>
               <p className="mt-1.5 text-sm text-muted leading-relaxed">
-                We inspect macOS Privacy & Security permissions (Accessibility, Screen Recording, Full Disk Access). An app
-                must only request permissions strictly essential to its advertised function. Apps that send unencrypted
-                clipboard or keystroke telemetry to third-party tracking servers are immediately rejected.
+                The label is Free, Freemium, or Paid. A dollar amount is included only when the listing records one.
+                The directory does not claim that every paid app is a one-time purchase. Voicera Pro, for example, was
+                listed as a subscription.
               </p>
             </div>
 
             <div className="rounded-xl border border-line bg-surface p-5">
-              <h3 className="text-base font-semibold text-ink">3. Transparent, Fair Pricing</h3>
+              <h3 className="text-base font-semibold text-ink">3. Editor’s Choice is paid</h3>
               <p className="mt-1.5 text-sm text-muted leading-relaxed">
-                We clearly label each app as <strong>Free</strong>, <strong>Freemium</strong>, <strong>Paid Once</strong>,
-                or <strong>Subscription</strong>. We highlight tools with lifetime licenses and transparent trial terms,
-                and flag aggressive recurring paywalls.
+                The price is the one on the submit page. A published app with that label is a paid placement, capped at
+                3 apps. The label is not a test score, and it is not a claim that the app was timed or audited.
               </p>
             </div>
 
             <div className="rounded-xl border border-line bg-surface p-5">
-              <h3 className="text-base font-semibold text-ink">4. macOS Ergonomics & Design Craft</h3>
+              <h3 className="text-base font-semibold text-ink">4. Free submissions</h3>
               <p className="mt-1.5 text-sm text-muted leading-relaxed">
-                We look for craftsmanship: seamless notch integration, respectful menu bar overflow management, native
-                dark mode support, responsive keyboard shortcuts, and clean settings panels that follow Apple Human
-                Interface Guidelines.
+                A free listing needs the PickMacApps badge on the app’s site before it can be sent. A person then
+                reviews the submission. Nothing goes live from the form alone. A free listing’s link back to the
+                developer is nofollow. An Editor’s Choice link is not.
               </p>
             </div>
 
             <div className="rounded-xl border border-line bg-surface p-5">
-              <h3 className="text-base font-semibold text-ink">5. Maintenance & Compatibility</h3>
+              <h3 className="text-base font-semibold text-ink">5. What this page does not claim</h3>
               <p className="mt-1.5 text-sm text-muted leading-relaxed">
-                We verify that developers actively maintain their software for recent macOS releases (Sonoma, Sequoia, and
-                beyond), with clear change logs and responsive support channels.
+                It does not claim a timed test, a fixed number of hours, an Activity Monitor reading, a permission
+                audit, or that every app is an Apple silicon build. Those facts are included only when a listing says
+                them.
               </p>
             </div>
           </div>
@@ -101,26 +100,19 @@ function HowWePickPage() {
 
         <section className="border-t border-line pt-8">
           <h2 className="font-display text-2xl font-semibold text-ink">Commercial Disclosures & Editor’s Choice</h2>
-          <p className="mt-3">
-            Independence and reader trust are paramount. Here is exactly how PickMacApps operates financially:
-          </p>
+          <p className="mt-3">How the site is paid for:</p>
           <ul className="mt-4 list-disc space-y-2 pl-5">
             <li>
-              <strong>Zero Affiliate Links:</strong> We do not use Amazon, Setapp, or third-party affiliate networks. Every
-              link points directly to the developer’s official website or App Store page.
+              <strong>No affiliate links.</strong> Listing links go to the developer. The site does not add an affiliate
+              code.
             </li>
             <li>
-              <strong>Free Listings:</strong> Indie developers can submit their tools for free review. Inclusion is based
-              purely on quality and utility.
+              <strong>Free listings</strong> are reviewed after the badge is on the app’s site. Inclusion is a published
+              directory row, not a score.
             </li>
             <li>
-              <strong>Editor’s Choice Policy:</strong> Developers may purchase an Editor’s Choice placement ($99 one-time).
-              However, <em>payment does not guarantee inclusion</em>. An app must first pass our complete 5-pillar editorial
-              review. If an app fails our performance or privacy review, the fee is refunded and the app is not featured.
-            </li>
-            <li>
-              <strong>Strict Slot Caps:</strong> Editor’s Choice placements are capped at a maximum of 3 active spots to
-              prevent directory pollution and maintain genuine curation value.
+              <strong>Editor’s Choice is paid.</strong> The price is the one on the submit page. At most 3 published apps
+              can have the label. The label is not a test score.
             </li>
           </ul>
         </section>
@@ -128,8 +120,7 @@ function HowWePickPage() {
         <section className="border-t border-line pt-8">
           <h2 className="font-display text-2xl font-semibold text-ink">Have a Suggestion or Correction?</h2>
           <p className="mt-3">
-            If you notice an app has changed its pricing model, added unwanted telemetry, or stopped receiving updates,
-            please reach out to curator{" "}
+            If a price or a feature on a listing looks wrong, email{" "}
             <Link to="/about" className="font-medium text-ink underline underline-offset-2">
               Firoj Alam
             </Link>{" "}
@@ -137,7 +128,7 @@ function HowWePickPage() {
             <a href="mailto:firojalama80@gmail.com" className="text-ink underline underline-offset-2">
               firojalama80@gmail.com
             </a>
-            . We update listings and buying guides promptly to maintain accurate recommendations.
+            . Say which sentence looks wrong.
           </p>
         </section>
       </article>

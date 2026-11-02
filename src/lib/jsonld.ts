@@ -388,7 +388,8 @@ export function howWePickGraph(origin: string) {
       "@id": `${absoluteUrl(origin, path)}#page`,
       name: "How We Pick & Editorial Policy | PickMacApps",
       url: absoluteUrl(origin, path),
-      description: "Our testing methodology, evaluation criteria, and transparency policy for curated Mac apps.",
+      description:
+        "Apps are added by hand. Editor’s Choice is a paid placement, not a test score. Listings link to the developer.",
     },
   ]);
 }

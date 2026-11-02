@@ -1,13 +1,13 @@
+import { AsyncLocalStorage } from "node:async_hooks"
 import {
   apps,
-  appsInCategory,
   categories,
   isEditorChoice,
-  getApp,
   getCategory,
-  getPost,
   posts,
   sortApps,
+  type AppItem,
+  type Post,
 } from "@/lib/catalog"
 import {
   comparePairs,
@@ -47,7 +47,37 @@ export const markdownSkip = [
   { path: "/ai.txt", reason: "usage policy" },
 ] as const
 
-const usedCategories = () => categories.filter((category) => appsInCategory(category.slug).length > 0)
+const usedCategories = (list: AppItem[] = liveApps()) =>
+  categories.filter((category) => list.some((app) => app.category === category.slug))
+
+export type DirectorySlice = { apps: AppItem[]; posts: Post[] }
+
+const directoryStore = new AsyncLocalStorage<DirectorySlice>()
+
+/** Markdown and llms.txt use the published directory when a request has loaded it. */
+export function runWithDirectory<T>(source: DirectorySlice, fn: () => T): T {
+  return directoryStore.run(source, fn)
+}
+
+function liveApps() {
+  return directoryStore.getStore()?.apps ?? apps
+}
+
+function livePosts() {
+  return directoryStore.getStore()?.posts ?? posts
+}
+
+function liveSource(): DirectorySlice {
+  return { apps: liveApps(), posts: livePosts() }
+}
+
+function liveApp(slug: string) {
+  return liveApps().find((app) => app.slug === slug)
+}
+
+function livePost(slug: string) {
+  return livePosts().find((post) => post.slug === slug)
+}
 
 function linkList(items: { label: string; href: string; note?: string }[]) {
   return items
@@ -61,7 +91,7 @@ function appNote(app: (typeof apps)[number]) {
 }
 
 function renderHome(origin: string): MarkdownPage {
-  const ordered = [...sortApps(apps, "newest")].sort(
+  const ordered = [...sortApps(liveApps(), "newest")].sort(
     (a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)),
   )
   const body = [
@@ -78,7 +108,7 @@ function renderHome(origin: string): MarkdownPage {
     "",
     "## Guides",
     linkList(
-      posts.map((post) => ({
+      livePosts().map((post) => ({
         label: post.title,
         href: abs(origin, `/blog/${post.slug}`),
         note: post.excerpt,
@@ -98,7 +128,7 @@ function renderHome(origin: string): MarkdownPage {
     title: "PickMacApps",
     summary: site.description,
     htmlPath: "/",
-    updated: posts[0]?.date,
+    updated: livePosts()[0]?.date,
     body,
     related: [
       { label: "Guides", href: abs(origin, "/blog") },
@@ -111,11 +141,11 @@ function renderHome(origin: string): MarkdownPage {
 function renderBlogIndex(origin: string): MarkdownPage {
   return finish(origin, {
     title: "Guides",
-    summary: "Hand-researched guides to the best Mac apps.",
+    summary: "Short guides that name apps already in this directory.",
     htmlPath: "/blog",
-    updated: posts[0]?.date,
+    updated: livePosts()[0]?.date,
     body: linkList(
-      posts.map((post) => ({
+      livePosts().map((post) => ({
         label: post.title,
         href: abs(origin, `/blog/${post.slug}`),
         note: `${post.date} · ${post.minutes} min. ${post.excerpt}`,
@@ -126,15 +156,18 @@ function renderBlogIndex(origin: string): MarkdownPage {
 }
 
 function renderPost(origin: string, slug: string): MarkdownPage | null {
-  const post = getPost(slug)
+  const guideList = livePosts()
+  const post = livePost(slug)
   if (!post) return null
   const haystack = `${post.title} ${post.excerpt} ${post.html}`.toLowerCase()
-  const mentioned = apps.filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8)
+  const mentioned = liveApps().filter((app) => haystack.includes(app.name.toLowerCase())).slice(0, 8)
   const more = post.more
-    .map((item) => posts.find((entry) => entry.slug === item))
+    .map((item) => guideList.find((entry) => entry.slug === item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
   const body = [
-    `Published: ${post.date}`,
+    `By Firoj Alam`,
+    `Published: ${post.dateLabel}`,
+    `Last updated: ${post.dateLabel}`,
     `Read: ${post.minutes} min`,
     post.tags.length ? `Tags: ${post.tags.join(", ")}` : "",
     "",
@@ -157,11 +190,11 @@ function renderPost(origin: string, slug: string): MarkdownPage | null {
 }
 
 function renderApp(origin: string, slug: string): MarkdownPage | null {
-  const app = getApp(slug)
+  const app = liveApp(slug)
   if (!app) return null
   const choice = isEditorChoice(app)
   const related = app.related
-    .map((item) => getApp(item))
+    .map((item) => liveApp(item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item))
   const lines = [
     app.demo ? `![${app.name}](${abs(origin, app.demo)})` : "",
@@ -172,6 +205,7 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
     `- Added: ${app.createdAt.slice(0, 10)}`,
     "",
     app.description.trim(),
+    app.slug === "scanmydisk" ? "ScanMyDisk is built by the author of this site." : "",
     "",
     `[Visit website](${app.website})`,
   ].filter((line) => line !== "")
@@ -192,7 +226,7 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
 
 function renderCategory(origin: string, slug: string): MarkdownPage | null {
   const category = getCategory(slug)
-  const listed = appsInCategory(slug)
+  const listed = liveApps().filter((app) => app.category === slug)
   if (!category || listed.length === 0) return null
   const body = [
     ...category.paragraphs,
@@ -271,20 +305,17 @@ function renderPrivacy(origin: string): MarkdownPage {
 
 function renderAbout(origin: string): MarkdownPage {
   const body = [
-    "Firoj Alam is an indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+    "PickMacApps is a directory of Mac apps kept by Firoj Alam. A listing is a name, a description, a pricing label, and a link to the developer.",
     "",
-    "## Mission",
-    "PickMacApps is built to help macOS users discover native, fast, and respectful Mac utilities without subscription fatigue, bloated Electron wrappers, or hidden telemetry.",
-    "",
-    "## Author & Curator",
+    "## Author",
     "- Name: Firoj Alam",
-    "- Role: Indie Developer & Curator",
     "- Contact: firojalama80@gmail.com",
+    "- Not affiliated with Apple Inc.",
     "",
-    "## Principles",
-    "- Native performance and memory footprint audited on physical Apple Silicon hardware",
-    "- Zero affiliate links or third-party ad networks",
-    "- Transparent pricing models: Free, Freemium, or Lifetime Paid Once",
+    "## Editor’s Choice",
+    "Editor’s Choice is a paid placement. The price is the one on the submit page. At most 3 published apps can carry the label. It is not a test score.",
+    "",
+    "There are no affiliate links.",
   ].join("\n")
   return finish(origin, {
     title: "About PickMacApps & Firoj Alam",
@@ -300,23 +331,16 @@ function renderAbout(origin: string): MarkdownPage {
 
 function renderHowWePick(origin: string): MarkdownPage {
   const body = [
-    "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+    "Apps are added by hand. The directory records a name, a description, a pricing label, and a link to the developer. This page does not claim a timed hardware test.",
     "",
-    "## The 5-Pillar Evaluation Framework",
-    "1. **Performance & Memory**: Low idle RAM, zero background wakeups, native Swift/AppKit over Electron.",
-    "2. **Privacy & Security**: Minimal permissions, zero tracking, strict adherence to macOS Gatekeeper.",
-    "3. **Transparent Pricing**: Honest free tiers and one-time purchases over recurring subscriptions.",
-    "4. **macOS Ergonomics**: Thoughtful notch integration, respectful menu bar usage, and native UI.",
-    "5. **Active Maintenance**: Regular updates and compatibility with macOS Sonoma, Sequoia, and Apple Silicon.",
+    "## Editor’s Choice",
+    "Editor’s Choice is a paid placement. The price is the one on the submit page. At most 3 published apps can have the label.",
     "",
-    "## Commercial Transparency",
-    "- Zero affiliate links or advertising trackers.",
-    "- Free listings for quality indie software.",
-    "- Editor's Choice is capped at 3 active spots and requires passing all editorial tests.",
+    "Links go to the developer. They are not affiliate links.",
   ].join("\n")
   return finish(origin, {
     title: "How We Pick Mac Apps — Editorial Policy",
-    summary: "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+    summary: "Apps are added by hand. Editor’s Choice is a paid placement, not a test score. Listings link to the developer.",
     htmlPath: "/how-we-pick",
     body,
     related: [
@@ -355,7 +379,7 @@ function finish(
 }
 
 function renderCompareHub(origin: string): MarkdownPage {
-  const pairs = comparePairs()
+  const pairs = comparePairs(liveSource())
   return finish(origin, {
     title: hubTitle(pairs.length),
     summary: hubIntro(pairs),
@@ -372,7 +396,7 @@ function renderCompareHub(origin: string): MarkdownPage {
 }
 
 function renderCompare(origin: string, slug: string): MarkdownPage | null {
-  const pair = comparePairs().find((item) => item.slug === slug)
+  const pair = comparePairs(liveSource()).find((item) => item.slug === slug)
   if (!pair) return null
   const body = [
     pairIntro(pair),
@@ -390,7 +414,7 @@ function renderCompare(origin: string, slug: string): MarkdownPage | null {
     htmlPath: `/compare/${pair.slug}`,
     updated: (pair.guides[0]?.date ?? pair.left.createdAt).slice(0, 10),
     body,
-    related: relatedPairs(pair).map((item) => ({
+    related: relatedPairs(pair, liveSource()).map((item) => ({
       label: pairHeading(item),
       href: abs(origin, `/compare/${item.slug}`),
     })),
@@ -435,7 +459,7 @@ export function isContentPath(pathname: string) {
   if (/^\/(?:app|blog|category)\/[^/]+$/.test(pathname)) return true
   if (pathname === "/compare") return true
   const compare = /^\/compare\/([^/]+)$/.exec(pathname)
-  return Boolean(compare && comparePairs().some((pair) => pair.slug === decodeURIComponent(compare[1])))
+  return Boolean(compare && comparePairs(liveSource()).some((pair) => pair.slug === decodeURIComponent(compare[1])))
 }
 
 export function listMarkdownRoutes(): MarkdownRoute[] {
@@ -445,7 +469,7 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       htmlPath: "/blog",
       mdPath: "/blog.md",
       title: "Guides",
-      description: "Hand-researched guides to the best Mac apps.",
+      description: "Short guides that name apps already in this directory.",
       group: "core",
     },
     {
@@ -459,18 +483,19 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       htmlPath: "/how-we-pick",
       mdPath: "/how-we-pick.md",
       title: "How we pick",
-      description: "Our testing criteria, conflict of interest policy, and review methodology for recommending Mac software.",
+      description: "Apps are added by hand. Editor’s Choice is a paid placement, not a test score.",
       group: "core",
     },
     {
       htmlPath: "/submit",
       mdPath: "/submit.md",
       title: "Submit an app",
-      description: "Send a Mac app for review. Editor’s Choice is labeled on the listing and costs $99, marked down from $199.",
+      description: "Send a Mac app for review. Editor’s Choice is labeled on the listing. The price is on the submit page.",
       group: "core",
     },
   ]
-  const guides: MarkdownRoute[] = posts.map((post) => ({
+  const guideList = livePosts()
+  const guides: MarkdownRoute[] = guideList.map((post) => ({
     htmlPath: `/blog/${post.slug}`,
     mdPath: markdownPath(`/blog/${post.slug}`),
     title: post.title,
@@ -484,7 +509,7 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
     description: category.paragraphs[0] ?? category.name,
     group: "categories",
   }))
-  const appRoutes: MarkdownRoute[] = [...sortApps(apps, "newest")]
+  const appRoutes: MarkdownRoute[] = [...sortApps(liveApps(), "newest")]
     .sort((a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)))
     .map((app) => ({
       htmlPath: `/app/${app.slug}`,
@@ -493,15 +518,16 @@ export function listMarkdownRoutes(): MarkdownRoute[] {
       description: appNote(app),
       group: "apps",
     }))
+  const pairs = comparePairs(liveSource())
   const comparisons: MarkdownRoute[] = [
     {
       htmlPath: "/compare",
       mdPath: "/compare.md",
-      title: hubTitle(),
-      description: hubIntro(),
+      title: hubTitle(pairs.length),
+      description: hubIntro(pairs),
       group: "compare",
     },
-    ...comparePairs().map((pair) => ({
+    ...pairs.map((pair) => ({
       htmlPath: `/compare/${pair.slug}`,
       mdPath: markdownPath(`/compare/${pair.slug}`),
       title: pairHeading(pair),

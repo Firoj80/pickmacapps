@@ -1,4 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { apps, posts, shelfApps } from "@/lib/catalog";
@@ -38,15 +39,15 @@ export const Route = createFileRoute("/")({
 const homeFaqs = [
   {
     q: "What makes PickMacApps different from other Mac app directories?",
-    a: "PickMacApps is personally curated by indie developer Firoj Alam. Every listed app is tested on physical Apple Silicon hardware for native speed, memory efficiency, transparent pricing, and privacy without forced subscriptions or bloated tracking.",
+    a: "PickMacApps is a directory of Mac apps, curated by Firoj Alam. Each listing has a name, a short description, a pricing label, and a link to the developer.",
   },
   {
     q: "Are the Mac apps listed here free or paid?",
-    a: "We feature free utilities, open-source software, freemium tools, and one-time paid apps. Each listing clearly marks pricing models (Free, Freemium, Paid Once, Subscription) so you never encounter hidden paywalls.",
+    a: "The directory includes free, freemium, and paid apps. The label on each card is the model. A dollar price is shown only when that listing records one. Some paid apps are one-time purchases and some, such as Voicera Pro, were listed as subscriptions.",
   },
   {
     q: "How are Editor's Choice apps selected and vetted?",
-    a: "Editor's Choice spots are limited to a maximum of 3 verified utilities at any time. Apps must pass our strict performance and utility review. Sponsored slots are explicitly disclosed in accordance with our editorial integrity guidelines.",
+    a: "Editor’s Choice is a paid label, capped at 3 published apps. It is not a separate test score. The apps that have it are the ones marked Editor’s Choice in the directory.",
   },
   {
     q: "How can developers submit their Mac app for review?",
@@ -54,7 +55,7 @@ const homeFaqs = [
   },
   {
     q: "Does PickMacApps use affiliate links or third-party ad trackers?",
-    a: "No. We do not use third-party tracking cookies or affiliate links. Links take you directly to developer websites and official download sources.",
+    a: "No. Listing links go to the developer. The site does not add an affiliate code.",
   },
 ];
 
@@ -71,13 +72,18 @@ function Home() {
       <section className="hero-grid relative overflow-hidden border-b border-line px-4 py-12 text-center sm:px-6 lg:py-16">
         <div className="relative mx-auto max-w-3xl">
           <h1 className="text-3xl leading-9 font-bold tracking-[-0.04em] text-ink md:text-5xl md:leading-none">
-            The best Mac apps
+            A curated shelf of
             <br />
-            worth installing.
+            hand-picked Mac apps.
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
-            Skip the endless lists. A short shelf of useful Mac apps, picked by hand.
+            Browse by category, compare alternatives, and read short guides.
           </p>
+          {featuresScanMyDisk(list.map((app) => app.name)) ? (
+            <div className="mx-auto mt-6 max-w-xl">
+              <ScanMyDiskNote />
+            </div>
+          ) : null}
           <div className="mt-10 hidden justify-center sm:flex" aria-label="Featured Mac apps">
             {fan.map((app, index) => {
               const mid = (fan.length - 1) / 2;

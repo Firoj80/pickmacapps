@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
+import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import {
   pairFaqs,
   pairHeading,
@@ -86,6 +87,11 @@ function ComparePage() {
           <AppCard app={pair.left} />
           <AppCard app={pair.right} />
         </div>
+        {pair.left.slug === "scanmydisk" || pair.right.slug === "scanmydisk" ? (
+          <div className="mt-6">
+            <ScanMyDiskNote />
+          </div>
+        ) : null}
         <p className="mt-6 text-sm text-muted">
           Named in{" "}
           {pair.guides.map((guide, index) => (

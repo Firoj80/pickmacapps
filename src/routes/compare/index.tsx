@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { comparePairs, hubFaqs, hubIntro, hubTitle, pairHeading } from "@/lib/compare";
 import { pricingLabel } from "@/lib/catalog";
+import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { compareHubGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
@@ -51,6 +52,11 @@ function CompareHub() {
         </nav>
         <h1 className="font-display text-5xl font-semibold tracking-[-0.04em] text-ink">Comparisons</h1>
         <p className="mt-5 text-[16px] leading-relaxed text-body">{hubIntro(pairs)}</p>
+        {pairs.some((pair) => pair.left.slug === "scanmydisk" || pair.right.slug === "scanmydisk") ? (
+          <div className="mt-4">
+            <ScanMyDiskNote />
+          </div>
+        ) : null}
         <ol className="mt-10 space-y-4">
           {pairs.map((pair) => (
             <li key={pair.slug}>

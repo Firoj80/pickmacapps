@@ -2,7 +2,7 @@ import { aiText, catalogJson, llmsFullText, llmsText, robotsText } from "@/lib/m
 import { indexNowKey } from "@/lib/indexnow"
 import { abs } from "@/lib/md/format"
 import { markdownHttp, optionsHttp, prefersMarkdown, textHttp } from "@/lib/md/http"
-import { contentPathFromMarkdown, isContentPath, renderMarkdown } from "@/lib/md/registry"
+import { contentPathFromMarkdown, isContentPath, renderMarkdown, runWithDirectory } from "@/lib/md/registry"
 
 const SKIP_PREFIXES = ["/_next/", "/.well-known/", "/__grok/"]
 
@@ -66,7 +66,22 @@ function apiMarkdown(pathname: string, origin: string, method: string) {
  * .md and Accept negotiation only run for known content paths, plus a markdown 404
  * when the URL itself ends in .md and is not a machine file.
  */
-export function handleIncoming(request: Request): Response | null {
+export function handleIncoming(request: Request): Promise<Response | null> {
+  return withPublishedDirectory(() => handleIncomingSync(request))
+}
+
+async function withPublishedDirectory<T>(fn: () => T): Promise<T> {
+  try {
+    const { publishedDirectory } = await import("@/lib/directory.server")
+    const directory = await publishedDirectory()
+    return runWithDirectory({ apps: directory.apps, posts: directory.posts }, fn)
+  } catch (error) {
+    console.error("[directory] markdown used the bundled catalog", error)
+    return fn()
+  }
+}
+
+function handleIncomingSync(request: Request): Response | null {
   const url = new URL(request.url)
   const pathname = decodeURIComponent(url.pathname)
   const method = request.method.toUpperCase()

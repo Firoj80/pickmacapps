@@ -51,9 +51,8 @@ function AboutPage() {
           <h2 className="text-xl font-semibold text-ink">Firoj Alam</h2>
           <p className="text-sm text-accent font-medium">Curator · Indie Developer · macOS Enthusiast</p>
           <p className="mt-3 text-sm leading-relaxed text-body">
-            I build native macOS and iOS software and spend dozens of hours every month testing third-party utilities.
-            PickMacApps is my personal workbench: a shelf of genuinely useful, high-craft Mac apps that respect user
-            privacy and system resources.
+            I build Mac and iOS apps. PickMacApps is the directory I keep of other people’s Mac apps, with a short
+            description and a link to each developer.
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-4 text-xs font-medium text-muted">
             <span className="inline-flex items-center gap-1.5">
@@ -61,7 +60,7 @@ function AboutPage() {
               Active macOS curation
             </span>
             <span>·</span>
-            <span>Zero affiliate links</span>
+            <span>No affiliate links</span>
             <span>·</span>
             <a href="mailto:firojalama80@gmail.com" className="text-ink underline underline-offset-2 hover:text-accent">
               firojalama80@gmail.com
@@ -71,52 +70,33 @@ function AboutPage() {
       </section>
 
       <article className="prose prose-neutral mt-10 space-y-6 text-[16px] leading-relaxed text-body">
-        <h2 className="font-display text-2xl font-semibold text-ink">Why I Built PickMacApps</h2>
+        <h2 className="font-display text-2xl font-semibold text-ink">What PickMacApps is</h2>
         <p>
-          Searching for Mac apps has become deeply frustrating. Search results are dominated by sponsored listicles,
-          bloated SEO content farms, and recurring subscription traps charging $50/year for basic menu bar toggles.
+          PickMacApps is a directory of Mac apps. I run it. A listing is a name, a description, a pricing label, and a
+          link to the developer. The site is not affiliated with Apple Inc.
         </p>
         <p>
-          Meanwhile, brilliant solo developers and indie studios build fast, focused macOS utilities with zero telemetry
-          and transparent pricing—yet they struggle to get discovered.
-        </p>
-        <p>
-          I started <strong>PickMacApps</strong> to provide an honest, clutter-free directory for Mac power users. Every
-          app listed here is verified to run smoothly on Apple Silicon, respect system battery life, and solve a genuine
-          everyday problem.
+          ScanMyDisk is built by the author of this site. When that app is on a page, the page says so. Editor’s Choice
+          on that listing, or any other, is a paid placement. It is not a test score. At most 3 published apps can have
+          the label. The price is the one on the submit page.
         </p>
 
-        <h2 className="font-display mt-10 text-2xl font-semibold text-ink">What We Value in Mac Software</h2>
+        <h2 className="font-display mt-10 text-2xl font-semibold text-ink">What a page will not claim</h2>
         <ul className="list-disc space-y-2 pl-5">
-          <li>
-            <strong>Native Craft & Speed:</strong> Swift, AppKit, or lightweight SwiftUI that opens instantly, uses
-            negligible idle CPU, and doesn’t spawn multiple Chromium helper processes.
-          </li>
-          <li>
-            <strong>Fair Business Models:</strong> Open-source, generous free tiers, and honest one-time lifetime
-            licenses. We actively celebrate developers who don’t rent their software.
-          </li>
-          <li>
-            <strong>System Respect:</strong> Minimal permissions. A clipboard manager doesn’t need network access, and
-            a menu bar utility shouldn’t ask for screen recording unless that is its core function.
-          </li>
-          <li>
-            <strong>Notch & Menu Bar Ergonomics:</strong> Thoughtful integration with modern MacBook displays and
-            external monitor setups.
-          </li>
+          <li>A timed test, a number of hours spent, or a reading from Activity Monitor.</li>
+          <li>That every app is an Apple silicon build, or that every paid app is free of a subscription.</li>
+          <li>A feature, a dollar price, or an encryption detail that the app’s own listing does not record.</li>
         </ul>
 
-        <h2 className="font-display mt-10 text-2xl font-semibold text-ink">Editorial Integrity & Funding</h2>
+        <h2 className="font-display mt-10 text-2xl font-semibold text-ink">How the site is paid for</h2>
         <p>
-          PickMacApps does <strong>not</strong> use affiliate tracking links, third-party advertising networks, or
-          pay-per-click banners.
+          Listing links go to the developer. The site does not add an affiliate code. There are no pay-per-click
+          banners on the directory.
         </p>
         <p>
-          To cover hosting and continuous review hardware costs, we offer a strictly capped <strong>Editor’s Choice</strong>{" "}
-          badge (limited to 3 slots max). An app cannot buy an Editor’s Choice placement unless it has already passed our
-          rigorous editorial testing. You can read our complete review criteria in our{" "}
+          To pay for the site, Editor’s Choice is a paid placement. Read{" "}
           <Link to="/how-we-pick" className="font-medium text-ink underline underline-offset-2 hover:text-accent">
-            How We Pick methodology
+            how we pick
           </Link>
           .
         </p>

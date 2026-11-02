@@ -5,240 +5,229 @@ export type GuideEnhancement = {
   faqs: GuideFaq[];
 };
 
+/** Answers below restate the directory listings. They do not add test results. */
 export const guideEnhancements: Record<string, GuideEnhancement> = {
   "must-have-mac-apps-2026": {
     quickAnswer:
-      "For 2026, the essential Mac utility stack starts with Better Shot for screenshots & OCR, ClearBar for cleaning the menu bar, Tucket for on-device notch clipboard history, Voicera for offline voice dictation, and ScanMyDisk for visual disk analysis.",
+      "Shottr is the screenshot app with scrolling capture and OCR. Better Shot is the free one, and it records as well as capturing. Maclip is the clipboard app described as encrypted. Voicera streams audio for recognition. It is not described as offline.",
     faqs: [
       {
-        q: "What are the absolute must-have Mac apps to install first?",
-        a: "We recommend starting with a lightweight clipboard manager (Tucket or Clippio), a fast screenshot utility (Better Shot or Shottr), and a menu bar organizer (ClearBar or Lounge). These three solve immediate macOS friction points.",
+        q: "Which screenshot app on this shelf does scrolling capture and OCR?",
+        a: "Shottr. The listing says it takes screenshots, including scrolling captures, and adds OCR, a screen ruler, and a color picker. Better Shot takes screenshots and records the screen. Its listing does not say it does OCR or scrolling capture.",
       },
       {
-        q: "Are these Mac utilities optimized for Apple Silicon (M1/M2/M3/M4)?",
-        a: "Yes. Every utility selected in this guide runs natively on Apple Silicon with minimal RAM and CPU idle overhead, preserving all-day battery life.",
+        q: "Which clipboard app is described as encrypted?",
+        a: "Maclip. The listing says it stores clipboard history encrypted on the Mac. Tucket keeps history on the Mac and opens it from the notch. The Tucket listing does not say the history is encrypted.",
       },
       {
-        q: "Do any of these essential utilities require expensive subscriptions?",
-        a: "No. Our recommendations prioritize free software, generous free tiers, and transparent one-time purchases over recurring monthly subscriptions.",
+        q: "Does the directory say Voicera works offline?",
+        a: "No. The Voicera listing says audio is streamed for recognition and not kept after the text comes back. A free plan was listed at 500 words a week. HoldSpeak is the listing that says transcription stays on the Mac.",
       },
     ],
   },
   "best-free-mac-apps": {
     quickAnswer:
-      "The best completely free or free-tier Mac apps in 2026 are Better Shot (scrolling capture & OCR), Mole (deep app uninstaller and cache cleaner), Voicera (free weekly voice transcription), and Anytype (local-first encrypted knowledge base).",
+      "Better Shot is the free app in this list: screenshots and screen recording, no account and no watermark. Shottr has a free period, then a paid license. Mole is not free. It was listed at $19 once.",
     faqs: [
       {
-        q: "Are these free Mac apps safe to install?",
-        a: "Yes. Each app is verified to respect macOS Gatekeeper security, requests only necessary system permissions, and contains zero adware or unwanted telemetry.",
+        q: "Which apps in the directory are actually free?",
+        a: "Better Shot is marked Free. The developer says it is free, with no account and no watermark. Shottr is Freemium: scrolling capture and OCR, with a one-time Basic license listed at $12. Do not treat a paid app as free because it has a trial.",
       },
       {
-        q: "What is the catch with freemium Mac tools?",
-        a: "The tools listed here provide genuinely useful free tiers with no forced trials or artificial export limits on essential daily features.",
+        q: "Is Mole a free AppCleaner alternative?",
+        a: "No. Mole is marked Paid. The site listed $19 once, with a 14-day refund. It uninstalls Mac apps together with leftover files, and it also maps disk usage and clears caches.",
       },
       {
-        q: "Can I replace CleanMyMac with free alternatives?",
-        a: "Yes. Combining Mole for app uninstallation with native macOS Storage Management provides effective disk maintenance without a costly yearly license.",
+        q: "What does the free Voicera plan include?",
+        a: "The listing says a free plan was listed at 500 words a week. Pro was listed at $12 a month, or $5 a month on the yearly plan. Audio is streamed for recognition. The listing does not say transcription stays on the Mac.",
       },
     ],
   },
   "best-clipboard-manager-mac": {
     quickAnswer:
-      "Tucket is the top pick for MacBook users wanting notch-integrated clipboard access with on-device encryption. Clippio is ideal for keyboard-driven power search, while Maclip offers a clean, lightweight history shelf.",
+      "Maclip is the one described as encrypted clipboard history, listed at $9.99 once. Tucket opens history from the notch and was listed at $10 once. Clippio was listed at $6.90 once and says there is no cloud sync.",
     faqs: [
       {
-        q: "Which Mac clipboard manager is most secure for passwords?",
-        a: "Tucket, Clippio, and Maclip all store clipboard history encrypted locally on-device. They ignore entries copied from password managers like 1Password and Bitwarden.",
+        q: "Which of these clipboard apps is encrypted?",
+        a: "Maclip. The listing says history is encrypted on the Mac, clips are not uploaded, and password-manager apps are ignored. Tucket says nothing you copy leaves the Mac. Clippio says there is no cloud sync. Those two listings do not say the store is encrypted.",
       },
       {
-        q: "Does Tucket work on Macs without a notch?",
-        a: "Yes. On external displays or Mac mini / Mac Studio setups, Tucket smoothly anchors to the top center of the screen as a sleek drop-down drawer.",
+        q: "What prices were listed?",
+        a: "Tucket: $10 once, with $15 shown as the regular price, macOS 14 or later. Clippio: $6.90 once, macOS 13 or later. Maclip: $9.99 once for up to two Macs, with a 7-day trial, macOS 13 or later. Check the developer sites before you pay.",
       },
       {
-        q: "Why avoid cloud-synced clipboard managers?",
-        a: "Cloud clipboard sync risks exposing sensitive API keys, private messages, and credentials to remote servers. On-device managers eliminate remote leak vectors completely.",
+        q: "Does Tucket say it ignores password managers?",
+        a: "No. That sentence is on the Maclip listing. Tucket's listing says the history opens from the MacBook notch and that nothing you copy leaves the Mac.",
       },
     ],
   },
   "best-notes-app-mac": {
     quickAnswer:
-      "Choose Anytype if you need an offline-first, relational knowledge graph with databases and block-based pages. Choose iA Writer if you want distraction-free plain text prose with Markdown and syntax highlighting.",
+      "Anytype is the free-plan notes app: typed objects, local-first data, and peer-to-peer sync. iA Writer is the markdown editor sold as a one-time purchase on the Mac.",
     faqs: [
       {
-        q: "Is Anytype completely private and offline?",
-        a: "Yes. Anytype is built on an open-source, local-first architecture with peer-to-peer end-to-end encryption. Your notes remain on your Mac even without internet.",
+        q: "What does the directory say about Anytype?",
+        a: "Anytype organizes information as typed objects with relations, keeps data local-first, and syncs peer-to-peer. It has a free plan. Paid memberships add remote storage and sharing limits. Check current prices on anytype.io before you buy.",
       },
       {
-        q: "Why do writers prefer iA Writer over Obsidian or Notion?",
-        a: "iA Writer strips away sidebar distractions and complex configuration, offering typographic focus, syntax highlighting for parts of speech, and pure plain-text portability.",
-      },
-      {
-        q: "Can I migrate notes easily between these apps?",
-        a: "Both Anytype and iA Writer support standardized Markdown export and import, preventing proprietary database lock-in.",
+        q: "How is iA Writer sold?",
+        a: "The Mac app is a one-time purchase, sold separately from the iPhone, iPad, and Windows versions. It is a markdown editor built around a calm page and plain-text files.",
       },
     ],
   },
   "best-mac-disk-space-analyzer": {
     quickAnswer:
-      "ScanMyDisk is our Editor's Choice for interactive sunburst visualization and rapid large-file triage. For free uninstallation and leftover removal, Mole is our top recommendation.",
+      "ScanMyDisk is the visual disk space analyzer. The listing does not quote a dollar price. Mole also maps disk usage, and the site listed it at $19 once. ScanMyDisk is built by the author of this site.",
     faqs: [
       {
-        q: "What is the difference between a disk analyzer and an app cleaner?",
-        a: "A disk analyzer maps large folders, hidden caches, and disk hogs across your entire drive. An app cleaner specifically tracks down leftover preference files and application support folders when removing software.",
+        q: "What does ScanMyDisk say it does?",
+        a: "It maps storage into an interactive visual breakdown so you can find oversized files and inspect hidden directories. The directory marks it Paid and does not record a dollar amount. It does not describe automatic deletion.",
       },
       {
-        q: "Does ScanMyDisk delete files without confirmation?",
-        a: "No. ScanMyDisk uses safe trash staging and requires explicit user review before any file or directory is moved to macOS Trash.",
+        q: "What does Mole cost, and what else does it do?",
+        a: "The site listed $19 once, with a 14-day refund, and macOS 14 or later. Mole uninstalls Mac apps together with leftover files, maps disk usage, and clears caches. It is not a free app.",
       },
       {
-        q: "Why does macOS System Data take up so much space?",
-        a: "System Data typically consists of Xcode caches, Docker VM images, browser caches, and orphaned application support data. A visual disk analyzer quickly pinpoints these hidden directories.",
+        q: "How is ByteSweep different?",
+        a: "ByteSweep shows what is using disk space and cleans only what you approve. Cleaned items can be restored for 7 days. The site listed $29.99 once. It is not described as an uninstaller.",
       },
     ],
   },
   "best-bartender-alternative-mac": {
     quickAnswer:
-      "ClearBar is the premier Bartender alternative for hiding and revealing menu bar icons on macOS Sonoma and Sequoia without system extensions. Lounge is the top pick for tucking icons behind the MacBook notch.",
+      "ClearBar hides third-party menu bar icons in one panel. The developer says it needs macOS 26 or 27 on Apple silicon, and the site listed a launch price of $5, then $12, as a one-time purchase. Lounge also hides menu bar icons and opens them from a notch panel. Its site did not list a price.",
     faqs: [
       {
-        q: "Why are Mac users switching away from Bartender?",
-        a: "Following an unannounced ownership change in 2024, many Mac power users sought lightweight, transparent alternatives with no background auto-updates or telemetry.",
+        q: "What did ClearBar's site list?",
+        a: "A launch price of $5, then $12, as a one-time purchase. The listing says it hides third-party menu bar icons and keeps those apps in one panel, where you can open a menu or quit the app. It says the app needs macOS 26 or 27 on Apple silicon.",
       },
       {
-        q: "Does ClearBar require Accessibility or Screen Recording permissions?",
-        a: "ClearBar only requires standard Accessibility permissions to position menu bar items, with no invasive Screen Recording access needed.",
-      },
-      {
-        q: "Can Lounge hide icons on external monitors?",
-        a: "Yes. Lounge supports multi-monitor configurations and adapts its overflow panel whether a notch is present or absent.",
+        q: "What does Lounge add?",
+        a: "Lounge hides and reveals menu bar icons and opens a panel near the notch, with clipboard history in that panel. The developer says it needs macOS 26 or later. The site did not list a price when this was checked.",
       },
     ],
   },
   "best-notch-apps-mac": {
     quickAnswer:
-      "Alcove transforms the MacBook notch into an interactive Dynamic Island for media, timers, and notifications. Droppy adds a handy drag-and-drop file shelf, while Tucket hides a clipboard drawer right inside the cutout.",
+      "NotchDodo and Droppy were each listed at $9.99 once. Alcove puts notifications and now playing in the notch, and its site did not list a price. Tucket opens clipboard history from the notch and was listed at $10 once.",
     faqs: [
       {
-        q: "Do notch apps slow down macOS animations or drain battery?",
-        a: "The notch utilities featured on PickMacApps are native Swift apps built with AppKit and SwiftUI. They idle at near-zero CPU and activate only on hover or active events.",
+        q: "What is in the NotchDodo listing?",
+        a: "A hover panel for music, timers, calendar, files, notes, and clipboard. The site listed a lifetime license at $9.99 and said it needs macOS 14 or later.",
       },
       {
-        q: "What happens to notch apps when I plug into an external display?",
-        a: "Apps like Alcove and Droppy automatically adapt by attaching to the top menu bar or displaying a floating pill on non-notch monitors.",
-      },
-      {
-        q: "Which notch app is best for drag-and-drop file management?",
-        a: "Droppy is purpose-built as a temporary file shelf: drag files to the top of your screen to hold them, then switch spaces or full-screen apps and drop them with ease.",
+        q: "What if the Mac has no notch?",
+        a: "Droppy is described as a Dynamic Island that, on a Mac without a notch or on an external display, uses that island instead of a camera cutout. The site listed $9.99 once, with a three-day trial, and macOS 14 or later.",
       },
     ],
   },
   "best-appcleaner-alternative-mac": {
     quickAnswer:
-      "Mole is the best free, modern alternative to AppCleaner, providing instant leftover detection and cache cleanup. If your goal is reclaiming bulk storage, pair it with ScanMyDisk.",
+      "Mole is the paid alternative on this shelf, listed at $19 once. It uninstalls an app together with leftover files and also maps the disk. It is not a free app.",
     faqs: [
       {
-        q: "Why is AppCleaner still so popular on Mac?",
-        a: "AppCleaner is a classic, lightweight drag-and-drop tool that finds files in ~/Library/Application Support. Modern alternatives like Mole expand on this with faster scanning and batch cleanup.",
+        q: "What does Mole cost?",
+        a: "The site listed $19 once, with a 14-day refund, and macOS 14 or later. The pricing label in the directory is Paid.",
       },
       {
-        q: "Is it safe to delete leftover application support files?",
-        a: "Yes, once an application has been uninstalled, its preferences (.plist) and caches in Library can be safely trashed to free space.",
+        q: "What does the Mole listing say it does?",
+        a: "It uninstalls Mac apps together with leftover files, maps disk usage, and clears caches. The listing does not describe System Integrity Protection or which system folders it refuses to touch.",
       },
       {
-        q: "Can Mole remove system files by accident?",
-        a: "No. Mole protects macOS system directories and SIP-protected locations, limiting removal strictly to user-level application residues.",
+        q: "When is ByteSweep the closer fit?",
+        a: "When the job is seeing what filled the disk. ByteSweep shows disk use and deletes only what you approve, with a 7-day restore. The site listed $29.99 once. It does not present itself as the tool you drag an app onto.",
       },
     ],
   },
   "best-notchnook-alternative-mac": {
     quickAnswer:
-      "Alcove is the superior NotchNook alternative for media controls and notifications, while Droppy excels as a dedicated notch drag-and-drop file temporary shelf.",
+      "NotchDodo and Droppy both list $9.99 once. Alcove is the narrower notch display already on this shelf, and its site did not list a price when it was checked.",
     faqs: [
       {
-        q: "Why seek an alternative to NotchNook?",
-        a: "Users often look for lighter, single-purpose alternatives that focus specifically on either media playback widgets or quick file staging without heavy background memory usage.",
-      },
-      {
-        q: "Does Alcove support Spotify and Apple Music?",
-        a: "Yes, Alcove integrates seamlessly with Apple Music, Spotify, and system Now Playing session controls.",
+        q: "What prices are on this shelf?",
+        a: "NotchDodo: $9.99 lifetime, macOS 14 or later. Droppy: $9.99 once, a three-day trial, macOS 14 or later. Alcove: no price was listed. NotchNook itself is not an app in this directory.",
       },
     ],
   },
   "best-paste-alternative-mac": {
     quickAnswer:
-      "Clippio and Tucket provide top-tier alternatives to Paste without recurring monthly or yearly subscription fees.",
+      "Tucket, Clippio, and Maclip each charge once and keep clipboard history on the Mac. Maclip is the listing that says the history is encrypted.",
     faqs: [
       {
-        q: "Can I get a visual clipboard history without paying a subscription?",
-        a: "Yes. Both Clippio and Tucket offer rich visual clipboard cards, quick search, and snippet pinning under transparent one-time purchase models.",
+        q: "What were the one-time prices?",
+        a: "Tucket $10 once, Clippio $6.90 once, and Maclip $9.99 once for up to two Macs. Tucket says nothing you copy leaves the Mac. Clippio says there is no cloud sync. Maclip says clips are not uploaded.",
       },
     ],
   },
   "best-screen-studio-alternative-mac": {
     quickAnswer:
-      "For cinematic screen recordings with smooth automated cursor zooming and motion blur, Screen Charm and CleanShot X provide compelling alternatives to Screen Studio.",
+      "Screen Charm and ScreenToast add zoom after you stop recording. Screen Charm was listed at $99 once. ScreenToast's export needs Pro, listed at $7 a month or $59 a year. Better Shot is the free recorder on this shelf.",
     faqs: [
       {
-        q: "Do Screen Studio alternatives support 4K 60fps export?",
-        a: "Yes, modern Mac screen capture utilities leverage Apple Silicon hardware encoding for crisp 4K recording with zero frame drops.",
+        q: "Which recorder is free?",
+        a: "Better Shot. The developer says it is free, with no account and no watermark, and that it takes screenshots and records the screen. It needs macOS 14 or later on Apple silicon or Intel.",
+      },
+      {
+        q: "What did Screen Charm's site list?",
+        a: "A one-time price of $99, with $149 shown as the regular price, and no subscription. It records the screen, camera, and audio, then applies a zoom on each click. macOS 14 or later is recommended.",
       },
     ],
   },
   "best-cleanshot-x-alternative-mac": {
     quickAnswer:
-      "Better Shot and Shottr are the top alternatives to CleanShot X, offering scrolling capture, OCR text extraction, and privacy blur tools.",
+      "Shottr is the screenshot tool with scrolling capture and OCR. Better Shot is free and also records. DejaShot does not take the shot. It searches screenshots you already saved.",
     faqs: [
       {
-        q: "Can Better Shot capture scrolling web pages?",
-        a: "Yes. Better Shot includes automated vertical scrolling capture for long documents, web pages, and chat threads.",
+        q: "Does Better Shot do scrolling capture or OCR?",
+        a: "The Better Shot listing does not say that. It takes screenshots and records the screen, then lets you annotate or edit the video. Scrolling capture, OCR, a screen ruler, and a color picker are on the Shottr listing.",
+      },
+      {
+        q: "What was Shottr's license price?",
+        a: "The purchase page lists a one-time Basic license at $12, for one person and up to five computers, and says a free copy asks you to upgrade after 30 days. A license is required for commercial use. The app runs on macOS 10.15 or later.",
       },
     ],
   },
   "best-wispr-flow-alternative-mac": {
     quickAnswer:
-      "Voicera and HoldSpeak provide lightning-fast speech-to-text dictation on macOS with privacy-first on-device speech models.",
+      "HoldSpeak and Precis say dictation stays on the Mac. Voicera says the audio is streamed for recognition and then not kept. Voicera is not described as offline.",
     faqs: [
       {
-        q: "Does voice dictation work offline on Mac?",
-        a: "Yes. Voicera utilizes Apple Silicon neural engine Whisper models to transcribe speech directly on your Mac without sending audio to the cloud.",
+        q: "Which dictation apps say the audio stays on the Mac?",
+        a: "HoldSpeak and Precis. HoldSpeak needs Apple silicon and macOS 14.6 or later, and you pay once after a 7-day trial. Precis was listed at a founding price of $19, then $29, paid once.",
+      },
+      {
+        q: "What does Voicera do with the audio?",
+        a: "The developer says audio is streamed for recognition and not kept after the text comes back. A free plan was listed at 500 words a week. Pro was listed at $12 a month, or $5 a month on the yearly plan.",
       },
     ],
   },
   "best-logseq-alternative-notes": {
     quickAnswer:
-      "Anytype is the leading local-first, privacy-focused alternative to Logseq, pairing outliner capabilities with relational databases and end-to-end sync.",
+      "Anytype is the notes app in this directory for that job. It keeps data local-first, organizes notes as typed objects, and syncs peer-to-peer. It has a free plan.",
     faqs: [
       {
-        q: "How does Anytype handle bi-directional linking?",
-        a: "Anytype creates a visual graph view and supports backlink relations across pages, objects, and tasks.",
+        q: "What do paid Anytype memberships add?",
+        a: "The listing says paid memberships add remote storage and sharing limits. It says to check current prices on anytype.io. The free plan is the local-first one.",
       },
     ],
   },
   "best-ulysses-alternative-writing": {
     quickAnswer:
-      "iA Writer is the gold standard alternative to Ulysses for long-form writers who demand clean plain text Markdown files and zero subscription lock-in.",
+      "iA Writer is the markdown editor on this shelf. The Mac app is a one-time purchase, sold separately from the iPhone, iPad, and Windows versions.",
     faqs: [
       {
-        q: "Can iA Writer organize chapters for a full book?",
-        a: "Yes. iA Writer supports content blocks and folder navigation so you can assemble chapters seamlessly into a manuscript.",
+        q: "Does the directory quote iA Writer's price?",
+        a: "The developer's buy page listed the Mac app at $49.99. Confirm the current price on ia.net before you buy. The Mac version is sold separately from the iPhone, iPad, and Windows versions.",
       },
     ],
   },
 };
 
 export function getGuideEnhancement(slug: string, fallbackExcerpt: string): GuideEnhancement {
-  if (guideEnhancements[slug]) return guideEnhancements[slug];
-  return {
-    quickAnswer: fallbackExcerpt,
-    faqs: [
-      {
-        q: `What is the best recommendation in this guide?`,
-        a: fallbackExcerpt,
-      },
-      {
-        q: `Are the tools in this guide tested on macOS?`,
-        a: "Yes. Every utility reviewed on PickMacApps is evaluated on physical Mac hardware for performance, battery life, and privacy.",
-      },
-    ],
-  };
+  return (
+    guideEnhancements[slug] ?? {
+      quickAnswer: fallbackExcerpt,
+      faqs: [],
+    }
+  );
 }

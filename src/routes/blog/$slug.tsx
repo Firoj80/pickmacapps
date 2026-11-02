@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { apps, getPost, posts } from "@/lib/catalog";
+import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/blog/$slug")({
       origin: originFrom(matches),
       type: "article",
       publishedTime: post.date,
+      modifiedTime: post.date,
     });
     const enhancement = getGuideEnhancement(post.slug, post.excerpt);
     const script = jsonLdScript(guideGraph(originFrom(matches), post, enhancement.faqs));
@@ -94,7 +96,10 @@ function BlogPost() {
               <div>
                 Published: <time dateTime={post.date}>{post.dateLabel}</time>
               </div>
-              <div className="font-medium text-accent">Tested on macOS · {post.minutes} min read</div>
+              <div>
+                Last updated: <time dateTime={post.date}>{post.dateLabel}</time>
+              </div>
+              <div>{post.minutes} min read</div>
             </div>
           </div>
 
@@ -156,6 +161,12 @@ function BlogPost() {
         ) : null}
 
         <div className="blog-body" dangerouslySetInnerHTML={{ __html: post.html }} />
+
+        {featuresScanMyDisk(mentioned.map((app) => app.name).concat(post.html.includes("ScanMyDisk") ? ["ScanMyDisk"] : [])) ? (
+          <div className="mt-8">
+            <ScanMyDiskNote />
+          </div>
+        ) : null}
 
         {/* Visible FAQ Section */}
         {enhancement.faqs.length > 0 ? (

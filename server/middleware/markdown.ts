@@ -14,7 +14,7 @@ export default async function markdownMiddleware(
   next: () => unknown | Promise<unknown>,
 ): Promise<unknown> {
   const request = new Request(event.url, { method: event.req.method, headers: event.req.headers })
-  const served = handleIncoming(request)
+  const served = await handleIncoming(request)
   if (served) return served
 
   const result = await next()

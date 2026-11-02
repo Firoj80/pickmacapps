@@ -48,7 +48,7 @@ export function markdownPlugin() {
           }
           const request = new Request(`${proto}://${host}${rawUrl}`, { method, headers })
           const mod = await server.ssrLoadModule("/src/lib/md/handle.ts")
-          const response = mod.handleIncoming(request)
+          const response = await mod.handleIncoming(request)
           if (response) {
             res.statusCode = response.status
             response.headers.forEach((value, key) => {
