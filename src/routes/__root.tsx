@@ -34,8 +34,10 @@ export const Route = createRootRoute({
       origin = "";
     }
     try {
-      return { origin, directory: await fetchDirectory() };
-    } catch {
+      const directory = await fetchDirectory();
+      return { origin, directory };
+    } catch (err) {
+      console.error("[root.beforeLoad] fetchDirectory error:", err);
       return { origin, directory: null };
     }
   },

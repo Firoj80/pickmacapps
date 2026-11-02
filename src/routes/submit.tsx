@@ -821,14 +821,3 @@ function Radio({ selected }: { selected: boolean }) {
   );
 }
 
-function ChoiceLine({ strong, rest }: { strong: string; rest: string }) {
-  return (
-    <li className="flex items-start gap-1.5 text-[11px] text-body">
-      <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-      <span>
-        <span className="font-medium text-ink">{strong}</span>
-        {rest}
-      </span>
-    </li>
-  );
-}

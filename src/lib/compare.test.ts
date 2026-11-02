@@ -16,12 +16,12 @@ const origin = "https://pickmacapps.test"
 
 test("the comparison gate is the only source for pages, sitemap, and chips", () => {
   const pairs = comparePairs()
-  assert.equal(pairs.length, 26)
+  assert.equal(pairs.length, 30)
   const slugs = pairs.map((pair) => pair.slug)
   assert.equal(new Set(slugs).size, slugs.length)
   assert.equal(slugs.includes("better-shot-vs-boom"), true)
   assert.equal(slugs.includes("holdspeak-vs-precis"), true)
-  assert.equal(slugs.some((slug) => slug.includes("notchdodo")), false)
+  assert.equal(slugs.includes("notchdodo-vs-tucket"), true)
   assert.equal(slugs.includes("better-shot-vs-shottr"), true)
   assert.equal(slugs.filter((slug) => slug.includes("anytype") && slug.includes("ia-writer")).length, 1)
   const counts = new Map<string, number>()

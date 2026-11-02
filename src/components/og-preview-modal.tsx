@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { apps, categories, posts, type AppItem } from "@/lib/catalog";
 import { buildMetadata } from "@/lib/seo";
-import { pageCopy, site } from "@/lib/site";
+import { site } from "@/lib/site";
 
 function appShareImage(demo?: string) {
   const clean = demo?.trim() ?? "";
