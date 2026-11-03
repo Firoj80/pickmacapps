@@ -1,11 +1,46 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
-import { GuideStrip } from "@/components/guide-strip";
-import { apps, posts, shelfApps } from "@/lib/catalog";
+import { apps, shelfApps } from "@/lib/catalog";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
-import { site } from "@/lib/site";
+
+const homeTitle = "Best Mac Apps (2026): Hand-Picked Utilities | PickMacApps";
+const homeDescription =
+  "Hand-picked best Mac apps for 2026. Browse utilities by job, compare alternatives side by side, and read short buying guides.";
+const homeImageAlt = "PickMacApps: Best Mac Apps, Hand-Picked";
+const homeH1 = "The Best Mac Apps, Hand-Picked";
+
+const homeGuides = [
+  { slug: "must-have-mac-apps-2026", label: "must-have Mac apps" },
+  { slug: "best-free-mac-apps", label: "best free Mac apps" },
+  { slug: "best-clipboard-manager-mac", label: "best clipboard manager" },
+  { slug: "best-notes-app-mac", label: "best notes app" },
+  { slug: "best-mac-disk-space-analyzer", label: "Mac disk space analyzer" },
+  { slug: "best-appcleaner-alternative-mac", label: "AppCleaner alternative" },
+  { slug: "best-notchnook-alternative-mac", label: "NotchNook alternative" },
+  { slug: "best-bartender-alternative-mac", label: "Bartender alternative" },
+  { slug: "best-notch-apps-mac", label: "notch apps" },
+] as const;
+
+const homeFaqs = [
+  {
+    q: "What is PickMacApps?",
+    a: "PickMacApps is a directory of Mac apps kept by Firoj Alam. A listing is a name, a short description, a pricing label, and a link to the developer.",
+  },
+  {
+    q: "How are apps chosen?",
+    a: "Apps are added by hand. Editor’s Choice is a paid placement, capped at 3 published apps. It is not a test score. The price is the one on the submit page.",
+  },
+  {
+    q: "Are the apps free?",
+    a: "The directory includes free, freemium, and paid apps. The label on each card is the pricing model. A dollar price is shown only when that listing records one.",
+  },
+  {
+    q: "How do I submit an app?",
+    a: "Use the submit page. A free listing needs the PickMacApps badge on the app’s site before it is reviewed. Editor’s Choice does not need the badge. A listing is published only after it is reviewed.",
+  },
+];
 
 export const Route = createFileRoute("/")({
   validateSearch: (search: Record<string, unknown>): { q?: string; cat?: string } => {
@@ -20,14 +55,17 @@ export const Route = createFileRoute("/")({
     const search = matches.at(-1)?.search as { q?: string; cat?: string } | undefined;
     const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all"));
     const seo = buildMetadata({
-      title: site.title,
-      description: site.description,
+      title: homeTitle,
+      description: homeDescription,
       path: "/",
       origin,
+      imageAlt: homeImageAlt,
     });
     const directory = matches[0]?.context.directory;
     const list = directory?.apps ?? apps;
-    const script = jsonLdScript(homeGraph(origin, filtered ? null : shelfApps(list), homeFaqs));
+    const script = jsonLdScript(
+      homeGraph(origin, filtered ? null : shelfApps(list), homeFaqs, { name: homeH1, description: homeDescription }),
+    );
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/")],
@@ -36,35 +74,11 @@ export const Route = createFileRoute("/")({
   },
 });
 
-const homeFaqs = [
-  {
-    q: "What makes PickMacApps different from other Mac app directories?",
-    a: "PickMacApps is a directory of Mac apps, curated by Firoj Alam. Each listing has a name, a short description, a pricing label, and a link to the developer.",
-  },
-  {
-    q: "Are the Mac apps listed here free or paid?",
-    a: "The directory includes free, freemium, and paid apps. The label on each card is the model. A dollar price is shown only when that listing records one. Some paid apps are one-time purchases and some, such as Voicera Pro, were listed as subscriptions.",
-  },
-  {
-    q: "How are Editor's Choice apps selected and vetted?",
-    a: "Editor’s Choice is a paid label, capped at 3 published apps. It is not a separate test score. The apps that have it are the ones marked Editor’s Choice in the directory.",
-  },
-  {
-    q: "How can developers submit their Mac app for review?",
-    a: "Developers can submit utilities via our submit page. Free listings require adding the PickMacApps badge to verify reciprocity. All submissions are manually evaluated before approval.",
-  },
-  {
-    q: "Does PickMacApps use affiliate links or third-party ad trackers?",
-    a: "No. Listing links go to the developer. The site does not add an affiliate code.",
-  },
-];
-
 function Home() {
   const { q = "", cat = "all" } = Route.useSearch();
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = directory?.apps ?? apps;
-  const guides = directory?.posts ?? posts;
   const fan = list.slice(0, 9);
 
   return (
@@ -72,12 +86,13 @@ function Home() {
       <section className="hero-grid relative overflow-hidden border-b border-line px-4 py-12 text-center sm:px-6 lg:py-16">
         <div className="relative mx-auto max-w-3xl">
           <h1 className="text-3xl leading-9 font-bold tracking-[-0.04em] text-ink md:text-5xl md:leading-none">
-            A curated shelf of
-            <br />
-            hand-picked Mac apps.
+            {homeH1}
           </h1>
           <p className="mx-auto mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
-            Browse by category, compare alternatives, and read short guides.
+            A curated shelf of hand-picked Mac apps.
+          </p>
+          <p className="mx-auto mt-3 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
+            Browse the best Mac apps on this shelf by the job they do.
           </p>
           {featuresScanMyDisk(list.map((app) => app.name)) ? (
             <div className="mx-auto mt-6 max-w-xl">
@@ -116,7 +131,32 @@ function Home() {
           onQuery={(value) => navigate({ to: "/", search: { q: value, cat } })}
           onCategory={(value) => navigate({ to: "/", search: { q, cat: value }, hash: "apps" })}
         />
-        <GuideStrip posts={guides} />
+
+        <section className="mt-20">
+          <div className="flex items-center gap-5">
+            <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Guides</h2>
+            <span aria-hidden="true" className="h-px flex-1 bg-line" />
+            <Link
+              to="/blog"
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-2 text-[13px] font-medium text-body transition-colors hover:border-line-2 hover:text-ink"
+            >
+              Read the blog
+            </Link>
+          </div>
+          <ul className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {homeGuides.map((guide) => (
+              <li key={guide.slug}>
+                <Link
+                  to="/blog/$slug"
+                  params={{ slug: guide.slug }}
+                  className="text-[15px] font-medium text-ink underline underline-offset-2"
+                >
+                  {guide.label}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
 
         <section className="mt-20">
           <div className="flex items-center gap-5">

@@ -46,13 +46,13 @@ function organizationNode(origin: string) {
   };
 }
 
-function websiteNode(origin: string, withSearch: boolean) {
+function websiteNode(origin: string, withSearch: boolean, description = site.description) {
   return {
     "@type": "WebSite",
     "@id": siteId(origin),
     name: site.name,
     url: absoluteUrl(origin, "/"),
-    description: site.description,
+    description,
     publisher: { "@id": orgId(origin) },
     ...(withSearch
       ? {
@@ -115,10 +115,12 @@ export function homeGraph(
   origin: string,
   apps: { name: string; slug: string }[] | null,
   faqs?: { q: string; a: string }[],
+  copy?: { name: string; description: string },
 ) {
+  const pageName = copy?.name ?? "The Best Mac Apps, Hand-Picked";
   const nodes: unknown[] = [
     organizationNode(origin),
-    websiteNode(origin, true),
+    websiteNode(origin, true, copy?.description),
     breadcrumbNode(origin, "/", [{ name: "Home", path: "/" }]),
   ];
   if (apps) {
@@ -127,7 +129,7 @@ export function homeGraph(
       {
         "@type": "CollectionPage",
         "@id": `${absoluteUrl(origin, "/")}#page`,
-        name: "A curated shelf of hand-picked Mac apps",
+        name: pageName,
         url: absoluteUrl(origin, "/"),
         isPartOf: { "@id": siteId(origin) },
         mainEntity: { "@id": `${absoluteUrl(origin, "/")}#list` },
