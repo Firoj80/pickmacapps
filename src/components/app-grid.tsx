@@ -10,17 +10,27 @@ export function AppGrid({
   category,
   onQuery,
   onCategory,
+  arranged = false,
+  filters = "all",
 }: {
   apps: AppItem[];
   query: string;
   category: string;
   onQuery: (value: string) => void;
   onCategory: (value: string) => void;
+  arranged?: boolean;
+  filters?: "all" | "search";
 }) {
   const [order, setOrder] = useState<"newest" | "name" | "free">("newest");
   const [page, setPage] = useState(0);
 
-  const visible = useMemo(() => shelfApps(apps, query, category, order), [apps, query, category, order]);
+  const visible = useMemo(() => {
+    if (!arranged) return shelfApps(apps, query, category, order);
+    const needle = query.trim().toLowerCase();
+    return apps.filter(
+      (app) => !needle || app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle),
+    );
+  }, [apps, query, category, order, arranged]);
 
   useEffect(() => {
     setPage(0);
@@ -49,19 +59,23 @@ export function AppGrid({
             className="h-11 w-full rounded-lg border border-line bg-surface pr-3.5 pl-10 text-[13.5px] text-ink transition-colors placeholder:text-muted hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
           />
         </div>
-        <Select label="Filter by category" value={category} onChange={onCategory}>
-          <option value="all">All categories</option>
-          {categories.map((item) => (
-            <option key={item.slug} value={item.slug}>
-              {item.name}
-            </option>
-          ))}
-        </Select>
-        <Select label="Order by" value={order} onChange={(value) => setOrder(value as "newest" | "name" | "free")}>
-          <option value="newest">Newest</option>
-          <option value="name">Name A–Z</option>
-          <option value="free">Free first</option>
-        </Select>
+        {filters === "all" ? (
+          <>
+            <Select label="Filter by category" value={category} onChange={onCategory}>
+              <option value="all">All categories</option>
+              {categories.map((item) => (
+                <option key={item.slug} value={item.slug}>
+                  {item.name}
+                </option>
+              ))}
+            </Select>
+            <Select label="Order by" value={order} onChange={(value) => setOrder(value as "newest" | "name" | "free")}>
+              <option value="newest">Newest</option>
+              <option value="name">Name A–Z</option>
+              <option value="free">Free first</option>
+            </Select>
+          </>
+        ) : null}
       </div>
 
       {visible.length === 0 ? (

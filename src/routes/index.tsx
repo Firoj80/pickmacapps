@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
-import { shelfApps } from "@/lib/catalog";
+import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -43,18 +43,83 @@ const homeFaqs = [
   },
 ];
 
+const heroCategories = [
+  { id: "all", label: "All" },
+  { id: "pick", label: "Supply Pick" },
+  { id: "productivity", label: "Productivity" },
+  { id: "video", label: "Video" },
+  { id: "utility", label: "Utility" },
+  { id: "ai", label: "AI" },
+  { id: "writing", label: "Writing" },
+  { id: "dev", label: "Dev" },
+  { id: "design", label: "Design" },
+  { id: "audio", label: "Audio" },
+  { id: "marketing", label: "Marketing" },
+  { id: "photography", label: "Photography" },
+  { id: "finance", label: "Finance" },
+  { id: "lifestyle", label: "Lifestyle" },
+  { id: "business", label: "Business" },
+  { id: "entertainment", label: "Entertainment" },
+  { id: "communication", label: "Communication" },
+  { id: "analytics", label: "Analytics" },
+] as const;
+
+type HeroCategory = (typeof heroCategories)[number]["id"];
+type HeroSort = "hot" | "new" | "trending";
+
+const videoSlugs = new Set(["screen-charm", "screentoast", "boom"]);
+const writingSlugs = new Set(["anytype", "ia-writer"]);
+const aiSlugs = new Set(["macwhisper", "holdspeak", "precis", "voicera"]);
+
+function inHeroCategory(app: AppItem, category: string) {
+  if (category === "all") return true;
+  if (category === "pick") return isEditorChoice(app);
+  if (category === "productivity") return app.category === "productivity";
+  if (category === "utility") return app.category === "utilities";
+  if (category === "dev") return app.category === "developer-tools";
+  if (category === "design") return app.category === "design";
+  if (category === "video") return videoSlugs.has(app.slug);
+  if (category === "writing") return writingSlugs.has(app.slug);
+  if (category === "ai") return aiSlugs.has(app.slug);
+  return false;
+}
+
+function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
+  const next = [...list];
+  if (sort === "new") {
+    next.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name));
+    return next;
+  }
+  if (sort === "trending") {
+    next.sort(
+      (a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)) || b.createdAt.localeCompare(a.createdAt),
+    );
+    return next;
+  }
+  return shelfApps(next);
+}
+
+function MacLogo({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M17.05 12.536c-.03-3.02 2.463-4.47 2.575-4.54-1.404-2.052-3.59-2.333-4.365-2.365-1.858-.188-3.626 1.093-4.57 1.093-.944 0-2.4-1.067-3.945-1.037-2.03.03-3.9 1.18-4.945 3-2.108 3.653-.54 9.058 1.51 12.02 1.005 1.45 2.203 3.08 3.773 3.02 1.515-.06 2.09-.98 3.923-.98 1.83 0 2.352.98 3.955.95 1.635-.03 2.67-1.475 3.67-2.93 1.155-1.68 1.632-3.31 1.66-3.395-.036-.014-3.185-1.223-3.216-4.836zM14.02 3.61c.834-1.012 1.397-2.415 1.243-3.813-1.203.05-2.66.8-3.522 1.808-.775.895-1.454 2.325-1.27 3.696 1.34.104 2.71-.68 3.55-1.692z" />
+    </svg>
+  );
+}
+
 export const Route = createFileRoute("/")({
-  validateSearch: (search: Record<string, unknown>): { q?: string; cat?: string } => {
-    const next: { q?: string; cat?: string } = {};
+  validateSearch: (search: Record<string, unknown>): { q?: string; cat?: string; sort?: HeroSort } => {
+    const next: { q?: string; cat?: string; sort?: HeroSort } = {};
     if (typeof search.q === "string" && search.q) next.q = search.q;
     if (typeof search.cat === "string" && search.cat && search.cat !== "all") next.cat = search.cat;
+    if (search.sort === "new" || search.sort === "trending") next.sort = search.sort;
     return next;
   },
   component: Home,
   head: ({ matches }) => {
     const origin = originFrom(matches);
-    const search = matches.at(-1)?.search as { q?: string; cat?: string } | undefined;
-    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all"));
+    const search = matches.at(-1)?.search as { q?: string; cat?: string; sort?: HeroSort } | undefined;
+    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all") || search?.sort);
     const seo = buildMetadata({
       title: homeTitle,
       description: homeDescription,
@@ -76,64 +141,125 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { q = "", cat = "all" } = Route.useSearch();
+  const { q = "", cat = "all", sort = "hot" } = Route.useSearch();
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
-  const fan = list.slice(0, 9);
+  const category = heroCategories.some((item) => item.id === cat) ? (cat as HeroCategory) : "all";
+  const shown = arrangeHero(
+    list.filter((app) => inHeroCategory(app, category)),
+    sort,
+  );
+
+  function updateSearch(next: { q?: string; cat?: string; sort?: HeroSort }) {
+    navigate({
+      to: "/",
+      search: {
+        q: next.q ?? q,
+        cat: next.cat ?? cat,
+        sort: next.sort ?? sort,
+      },
+    });
+  }
 
   return (
     <main className="flex-1">
-      <section className="hero-grid relative overflow-hidden border-b border-line px-4 py-12 text-center sm:px-6 lg:py-16">
-        <div className="relative mx-auto max-w-3xl">
-          <h1 className="text-3xl leading-9 font-bold tracking-[-0.04em] text-ink md:text-5xl md:leading-none">
-            {homeH1}
+      <section className="px-4 pt-12 pb-8 sm:px-6 md:pt-20">
+        <div className="mx-auto w-full max-w-[1200px]">
+          <h1 className="max-w-5xl text-[42px] leading-[1.05] font-bold tracking-[-0.035em] text-ink md:text-[68px]">
+            {homeH1.split("Mac")[0]}
+            <MacLogo className="mx-0.5 inline h-[0.78em] w-[0.78em] -translate-y-[0.04em]" />
+            Mac{homeH1.split("Mac")[1]}
           </h1>
-          <p className="mx-auto mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
+          <p className="mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
             A curated shelf of hand-picked Mac apps.
           </p>
-          <p className="mx-auto mt-3 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
+          <p className="mt-3 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
             Browse the best Mac apps on this shelf by the job they do.
           </p>
           {directory ? null : (
-            <p className="mx-auto mt-4 max-w-xl text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
+            <p className="mt-4 max-w-xl text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
           )}
           {featuresScanMyDisk(list.map((app) => app.name)) ? (
-            <div className="mx-auto mt-6 max-w-xl">
+            <div className="mt-6 max-w-xl">
               <ScanMyDiskNote />
             </div>
           ) : null}
-          <div className="mt-10 hidden justify-center sm:flex" aria-label="Featured Mac apps">
-            {fan.map((app, index) => {
-              const mid = (fan.length - 1) / 2;
-              const tilt = (index - mid) * 3;
-              const lift = Math.abs(index - mid) * 4;
-              return (
-                <Link
-                  key={app.id}
-                  to="/app/$slug"
-                  params={{ slug: app.slug }}
-                  title={app.name}
-                  style={{ transform: `translateY(${lift}px) rotate(${tilt}deg)` }}
-                  className="group -mx-1.5 shrink-0 transition-transform duration-200 hover:z-10 sm:-mx-2"
+          <div className="mt-10 flex flex-wrap items-center gap-3">
+            <a
+              href="/#apps"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:opacity-90"
+            >
+              <MacLogo className="h-[15px] w-[15px]" />
+              Browse the collection
+            </a>
+            <Link
+              to="/submit"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-2"
+            >
+              Submit an app
+            </Link>
+          </div>
+          <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
+            <div className="-mx-4 min-w-0 md:mx-0 md:flex-1">
+              <div className="flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
+                {heroCategories.map((item) => {
+                  const active = category === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => updateSearch({ cat: item.id })}
+                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition ${
+                        active
+                          ? "border-ink bg-ink text-canvas"
+                          : "border-line bg-canvas text-muted hover:border-ink/40 hover:text-ink"
+                      }`}
+                    >
+                      {item.id === "pick" ? (
+                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+                          <path d="M12 2.2 14.7 8l6.3.6-4.8 4.1 1.5 6.1L12 15.8 6.3 18.8l1.5-6.1L3 8.6 9.3 8 12 2.2z" />
+                        </svg>
+                      ) : null}
+                      {item.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+            <div className="flex shrink-0 items-center self-start rounded-full border border-line bg-canvas p-0.5 md:self-auto">
+              {(
+                [
+                  ["hot", "Hot"],
+                  ["new", "Latest"],
+                  ["trending", "Trending"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => updateSearch({ sort: id })}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
+                    sort === id ? "bg-ink text-canvas" : "text-muted hover:text-ink"
+                  }`}
                 >
-                  <span className="block transition-transform duration-200 group-hover:-translate-y-2 group-hover:scale-110">
-                    <img alt="" src={app.icon} className="h-12 w-12 rounded-[22%] bg-surface object-cover shadow-lg shadow-black/15 ring-2 ring-canvas sm:h-14 sm:w-14" />
-                  </span>
-                </Link>
-              );
-            })}
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
         <AppGrid
-          apps={list}
+          apps={shown}
           query={q}
-          category={cat}
-          onQuery={(value) => navigate({ to: "/", search: { q: value, cat } })}
-          onCategory={(value) => navigate({ to: "/", search: { q, cat: value }, hash: "apps" })}
+          category="all"
+          arranged
+          filters="search"
+          onQuery={(value) => updateSearch({ q: value })}
+          onCategory={() => {}}
         />
 
         <section className="mt-20">
