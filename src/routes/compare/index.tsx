@@ -1,6 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { comparePairs, hubFaqs, hubIntro, hubTitle, pairHeading } from "@/lib/compare";
 import { pricingLabel } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { compareHubGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -13,7 +14,10 @@ export const Route = createFileRoute("/compare/")({
   head: ({ matches }) => {
     const origin = originFrom(matches);
     const directory = matches[0]?.context.directory;
-    const pairs = directory ? comparePairs({ apps: directory.apps, posts: directory.posts }) : comparePairs();
+    const pairs = comparePairs({
+      apps: [...publishedApps(directory)],
+      posts: directory?.posts ?? [],
+    });
     const description = hubIntro(pairs);
     const seo = buildMetadata({
       title: hubTitle(pairs.length),
@@ -38,7 +42,10 @@ export const Route = createFileRoute("/compare/")({
 
 function CompareHub() {
   const { directory } = Route.useRouteContext();
-  const pairs = directory ? comparePairs({ apps: directory.apps, posts: directory.posts }) : comparePairs();
+  const pairs = comparePairs({
+    apps: [...publishedApps(directory)],
+    posts: directory?.posts ?? [],
+  });
   const faqs = hubFaqs(pairs);
   return (
     <main>

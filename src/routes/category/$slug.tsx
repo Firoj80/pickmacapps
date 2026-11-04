@@ -1,7 +1,8 @@
 import { createFileRoute, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
-import { appsInCategory, getCategory } from "@/lib/catalog";
+import { getCategory } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -9,14 +10,14 @@ import { pageCopy } from "@/lib/site";
 export const Route = createFileRoute("/category/$slug")({
   beforeLoad: ({ params, context }) => {
     const directory = context.directory;
-    const listed = directory ? directory.apps.filter((app) => app.category === params.slug) : appsInCategory(params.slug);
+    const listed = publishedApps(directory).filter((app) => app.category === params.slug);
     if (!getCategory(params.slug) || listed.length === 0) throw notFound();
   },
   component: CategoryPage,
   head: ({ params, matches }) => {
     const category = getCategory(params.slug);
     const directory = matches[0]?.context.directory;
-    const listed = directory ? directory.apps.filter((app) => app.category === params.slug) : appsInCategory(params.slug);
+    const listed = publishedApps(directory).filter((app) => app.category === params.slug);
     if (!category || listed.length === 0) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -48,7 +49,7 @@ function CategoryPage() {
   const { directory } = Route.useRouteContext();
   const category = getCategory(slug);
   if (!category) return null;
-  const listed = directory ? directory.apps.filter((app) => app.category === slug) : appsInCategory(slug);
+  const listed = publishedApps(directory).filter((app) => app.category === slug);
   const label = category.name.toLowerCase();
 
   return (

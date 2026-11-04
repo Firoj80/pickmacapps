@@ -135,6 +135,7 @@ export async function sitemapResponse(kind: "index" | SitemapSection, origin: st
     source = { apps: directory.apps, posts: directory.posts };
   } catch (error) {
     console.error("[sitemap] directory unavailable", error);
+    source = { apps: [], posts };
   }
   try {
     const today = todayUtc();

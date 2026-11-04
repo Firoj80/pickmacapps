@@ -1,9 +1,10 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { apps, categories } from "@/lib/catalog";
+import { categories } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 
 export function SiteFooter() {
   const { directory } = useRouteContext({ from: "__root__" });
-  const list = directory?.apps ?? apps;
+  const list = publishedApps(directory);
   const used = categories.filter((category) => list.some((app) => app.category === category.slug));
 
   return (

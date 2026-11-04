@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import raw from "@/data/catalog.json";
+import { shouldSeedCatalogApps } from "@/lib/app-seed";
 import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
@@ -59,6 +60,10 @@ function iso(value: string | Date) {
   return new Date(value).toISOString();
 }
 
+function asBool(value: unknown) {
+  return value === true || value === "t" || value === "true" || value === 1 || value === "1";
+}
+
 export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: string; badgeStatus: string; badgeDetail: string } {
   return {
     id: row.id,
@@ -73,7 +78,7 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     categoryName: row.category_name,
     categoryIcon: row.category_icon,
     featured: false,
-    editorChoice: row.editor_choice,
+    editorChoice: asBool(row.editor_choice),
     createdAt: iso(row.created_at),
     demo: row.demo,
     related: asJson(row.related, []),
@@ -102,15 +107,30 @@ function toPost(row: GuideRow): Post {
 
 let seedPromise: Promise<void> | null = null;
 
-async function ensureSeed(sql: Sql) {
+async function ensureTombstones(sql: Sql) {
+  await sql.query(
+    `create table if not exists app_tombstones (
+      slug text primary key,
+      deleted_at timestamptz not null default now()
+    )`,
+  );
+}
+
+async function seedCatalogApps(sql: Sql) {
+  let blocked = new Set<string>();
+  try {
+    const buried = await sql.query<{ slug: string }>("select slug from app_tombstones");
+    blocked = new Set(buried.map((row) => row.slug));
+  } catch (err) {
+    console.error("app tombstone read failed:", err);
+  }
   for (const app of raw.apps) {
+    if (blocked.has(app.slug)) continue;
     try {
-      // Check if app already exists by slug or by id
-      const existing = await sql.query<{ id: string; slug: string }>(
-        "select id, slug from apps where slug = $1 or id = $2 limit 1",
+      const existing = await sql.query<{ id: string }>(
+        "select id from apps where slug = $1 or id = $2 limit 1",
         [app.slug, app.id],
       );
-
       if (existing.length > 0) continue;
       await sql.query(
         `insert into apps (
@@ -139,6 +159,33 @@ async function ensureSeed(sql: Sql) {
     } catch (err) {
       console.error(`ensureSeed failed for app ${app.slug}:`, err);
     }
+  }
+}
+
+async function ensureSeed(sql: Sql) {
+  try {
+    await ensureTombstones(sql);
+  } catch (err) {
+    console.error("app tombstones table failed:", err);
+  }
+  try {
+    const flagRows = await sql.query<{ value: string }>("select value from settings where key = 'apps_seeded'");
+    const seeded = flagRows[0]?.value ?? null;
+    if (seeded !== "1") {
+      const countRows = await sql.query<{ count: string }>("select count(*)::text as count from apps");
+      const guideRows = await sql.query<{ count: string }>("select count(*)::text as count from guides");
+      const count = Number(countRows[0]?.count ?? 0);
+      const guides = Number(guideRows[0]?.count ?? 0);
+      if (shouldSeedCatalogApps(seeded, count, guides > 0)) {
+        await seedCatalogApps(sql);
+      }
+      await sql.query(
+        `insert into settings (key, value) values ('apps_seeded', '1')
+         on conflict (key) do update set value = excluded.value`,
+      );
+    }
+  } catch (err) {
+    console.error("ensureSeed apps failed:", err);
   }
   for (const post of raw.posts) {
     try {
@@ -404,7 +451,18 @@ export async function saveApp(input: {
 export async function deleteApp(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<{ slug: string }>("delete from apps where id = $1 returning slug", [id]);
-  if (rows[0]) await audit(sql, "delete-app", rows[0].slug);
+  const slug = rows[0]?.slug;
+  if (!slug) return;
+  try {
+    await sql.query(
+      `insert into app_tombstones (slug) values ($1)
+       on conflict (slug) do update set deleted_at = now()`,
+      [slug],
+    );
+  } catch (err) {
+    console.error("app tombstone failed:", err);
+  }
+  await audit(sql, "delete-app", slug);
 }
 
 export async function listGuides() {

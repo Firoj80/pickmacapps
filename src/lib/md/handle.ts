@@ -3,6 +3,7 @@ import { indexNowKey } from "@/lib/indexnow"
 import { abs } from "@/lib/md/format"
 import { markdownHttp, optionsHttp, prefersMarkdown, textHttp } from "@/lib/md/http"
 import { contentPathFromMarkdown, isContentPath, renderMarkdown, runWithDirectory } from "@/lib/md/registry"
+import { posts } from "@/lib/catalog"
 
 const SKIP_PREFIXES = ["/_next/", "/.well-known/", "/__grok/"]
 
@@ -76,8 +77,8 @@ async function withPublishedDirectory<T>(fn: () => T): Promise<T> {
     const directory = await publishedDirectory()
     return runWithDirectory({ apps: directory.apps, posts: directory.posts }, fn)
   } catch (error) {
-    console.error("[directory] markdown used the bundled catalog", error)
-    return fn()
+    console.error("[directory] markdown used no bundled app list", error)
+    return runWithDirectory({ apps: [], posts }, fn)
   }
 }
 

@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
-import { apps, getPost, posts } from "@/lib/catalog";
+import { getPost, posts } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
@@ -51,7 +52,7 @@ function BlogPost() {
   const { slug } = Route.useParams();
   const { directory } = Route.useRouteContext();
   const guideList = directory?.posts ?? posts;
-  const appList = directory?.apps ?? apps;
+  const appList = publishedApps(directory);
   const post = guideList.find((item) => item.slug === slug) ?? null;
   if (!post) return null;
 

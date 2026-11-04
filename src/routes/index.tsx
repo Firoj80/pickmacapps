@@ -1,7 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
-import { apps, shelfApps } from "@/lib/catalog";
+import { shelfApps } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
@@ -62,7 +63,7 @@ export const Route = createFileRoute("/")({
       imageAlt: homeImageAlt,
     });
     const directory = matches[0]?.context.directory;
-    const list = directory?.apps ?? apps;
+    const list = publishedApps(directory);
     const script = jsonLdScript(
       homeGraph(origin, filtered ? null : shelfApps(list), homeFaqs, { name: homeH1, description: homeDescription }),
     );
@@ -78,7 +79,7 @@ function Home() {
   const { q = "", cat = "all" } = Route.useSearch();
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
-  const list = directory?.apps ?? apps;
+  const list = publishedApps(directory);
   const fan = list.slice(0, 9);
 
   return (
@@ -94,6 +95,9 @@ function Home() {
           <p className="mx-auto mt-3 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
             Browse the best Mac apps on this shelf by the job they do.
           </p>
+          {directory ? null : (
+            <p className="mx-auto mt-4 max-w-xl text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
+          )}
           {featuresScanMyDisk(list.map((app) => app.name)) ? (
             <div className="mx-auto mt-6 max-w-xl">
               <ScanMyDiskNote />

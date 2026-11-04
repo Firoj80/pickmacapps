@@ -18,13 +18,13 @@ export function indexNowEnabled() {
 }
 
 export function urlsForAppChange(origin: string, slug: string) {
-  const app = getApp(slug);
-  if (!app) return [];
-  return [
-    absoluteUrl(origin, `/app/${app.slug}`),
-    absoluteUrl(origin, `/category/${app.category}`),
-    absoluteUrl(origin, "/"),
-  ];
+  const clean = slug.trim();
+  if (!clean) return [];
+  const app = getApp(clean);
+  const urls = [absoluteUrl(origin, `/app/${app?.slug ?? clean}`)];
+  if (app) urls.push(absoluteUrl(origin, `/category/${app.category}`));
+  urls.push(absoluteUrl(origin, "/"));
+  return urls;
 }
 
 export function urlsForGuideChange(origin: string, slug: string) {

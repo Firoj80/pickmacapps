@@ -12,15 +12,18 @@ import {
 import { compareGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
+import { publishedApps } from "@/lib/app-seed";
 
 const ARCHIVE = "public, s-maxage=86400, stale-while-revalidate=604800";
 
 export const Route = createFileRoute("/compare/$slug")({
   headers: () => ({ "Cache-Control": ARCHIVE }),
   beforeLoad: ({ params, context }) => {
-    const source = context.directory
-      ? { apps: context.directory.apps, posts: context.directory.posts }
-      : undefined;
+    const directory = context.directory;
+    const source = {
+      apps: [...publishedApps(directory)],
+      posts: directory?.posts ?? [],
+    };
     const hit = resolveCompareSlug(params.slug, source);
     if (hit.status === "redirect") throw redirect({ href: hit.to, statusCode: 308 });
     if (hit.status === "hub") throw redirect({ href: "/compare", statusCode: 308 });
@@ -29,7 +32,10 @@ export const Route = createFileRoute("/compare/$slug")({
   component: ComparePage,
   head: ({ params, matches }) => {
     const directory = matches[0]?.context.directory;
-    const source = directory ? { apps: directory.apps, posts: directory.posts } : undefined;
+    const source = {
+      apps: [...publishedApps(directory)],
+      posts: directory?.posts ?? [],
+    };
     const hit = resolveCompareSlug(params.slug, source);
     if (hit.status !== "ok") {
       const missing = buildMetadata({
@@ -61,7 +67,10 @@ export const Route = createFileRoute("/compare/$slug")({
 function ComparePage() {
   const { slug } = Route.useParams();
   const { directory } = Route.useRouteContext();
-  const source = directory ? { apps: directory.apps, posts: directory.posts } : undefined;
+  const source = {
+    apps: [...publishedApps(directory)],
+    posts: directory?.posts ?? [],
+  };
   const hit = resolveCompareSlug(slug, source);
   if (hit.status !== "ok") return null;
   const { pair } = hit;

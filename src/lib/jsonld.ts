@@ -46,13 +46,13 @@ function organizationNode(origin: string) {
   };
 }
 
-function websiteNode(origin: string, withSearch: boolean, description = site.description) {
+function websiteNode(origin: string, withSearch: boolean, description?: string) {
   return {
     "@type": "WebSite",
     "@id": siteId(origin),
     name: site.name,
     url: absoluteUrl(origin, "/"),
-    description,
+    description: description || site.description,
     publisher: { "@id": orgId(origin) },
     ...(withSearch
       ? {

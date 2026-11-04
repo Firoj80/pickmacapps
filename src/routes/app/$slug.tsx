@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { ScanMyDiskNote } from "@/components/scanmydisk-note";
-import { apps, getApp, isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { publishedApps } from "@/lib/app-seed";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
@@ -37,15 +38,13 @@ export function appMetaDescription(app: AppItem): string {
 
 export const Route = createFileRoute("/app/$slug")({
   beforeLoad: ({ params, context }) => {
-    const directory = context.directory;
-    const found = directory ? directory.apps.some((app) => app.slug === params.slug) : Boolean(getApp(params.slug));
+    const found = publishedApps(context.directory).some((app) => app.slug === params.slug);
     if (!found) throw notFound();
   },
   component: AppPage,
   notFoundComponent: () => <Missing title="App not found" body="That Mac app isn't in the directory." />,
   head: ({ params, matches }) => {
-    const directory = matches[0]?.context.directory;
-    const app = directory ? directory.apps.find((item) => item.slug === params.slug) : getApp(params.slug);
+    const app = publishedApps(matches[0]?.context.directory).find((item) => item.slug === params.slug);
     if (!app) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -78,13 +77,13 @@ export const Route = createFileRoute("/app/$slug")({
 function AppPage() {
   const { slug } = Route.useParams();
   const { directory } = Route.useRouteContext();
-  const app = directory ? directory.apps.find((item) => item.slug === slug) ?? null : getApp(slug);
+  const app = publishedApps(directory).find((item) => item.slug === slug) ?? null;
   if (!app) return null;
 
-  const allOtherApps = (directory?.apps ?? apps).filter((item) => item.slug !== app.slug);
+  const allOtherApps = publishedApps(directory).filter((item) => item.slug !== app.slug);
   const explicitRelated = app.related
     .map((item) => allOtherApps.find((a) => a.slug === item))
-    .filter((item): item is AppItem => Boolean(item));
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
   const sameCategory = allOtherApps.filter(
     (item) => item.category === app.category && !explicitRelated.some((r) => r.slug === item.slug),
   );
