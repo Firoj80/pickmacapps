@@ -3,6 +3,7 @@ import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note
 import { AppGrid } from "@/components/app-grid";
 import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
+import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
@@ -43,45 +44,12 @@ const homeFaqs = [
   },
 ];
 
-const heroCategories = [
-  { id: "all", label: "All" },
-  { id: "pick", label: "Supply Pick" },
-  { id: "productivity", label: "Productivity" },
-  { id: "video", label: "Video" },
-  { id: "utility", label: "Utility" },
-  { id: "ai", label: "AI" },
-  { id: "writing", label: "Writing" },
-  { id: "dev", label: "Dev" },
-  { id: "design", label: "Design" },
-  { id: "audio", label: "Audio" },
-  { id: "marketing", label: "Marketing" },
-  { id: "photography", label: "Photography" },
-  { id: "finance", label: "Finance" },
-  { id: "lifestyle", label: "Lifestyle" },
-  { id: "business", label: "Business" },
-  { id: "entertainment", label: "Entertainment" },
-  { id: "communication", label: "Communication" },
-  { id: "analytics", label: "Analytics" },
-] as const;
-
-type HeroCategory = (typeof heroCategories)[number]["id"];
 type HeroSort = "hot" | "new" | "trending";
-
-const videoSlugs = new Set(["screen-charm", "screentoast", "boom"]);
-const writingSlugs = new Set(["anytype", "ia-writer"]);
-const aiSlugs = new Set(["macwhisper", "holdspeak", "precis", "voicera"]);
 
 function inHeroCategory(app: AppItem, category: string) {
   if (category === "all") return true;
   if (category === "pick") return isEditorChoice(app);
-  if (category === "productivity") return app.category === "productivity";
-  if (category === "utility") return app.category === "utilities";
-  if (category === "dev") return app.category === "developer-tools";
-  if (category === "design") return app.category === "design";
-  if (category === "video") return videoSlugs.has(app.slug);
-  if (category === "writing") return writingSlugs.has(app.slug);
-  if (category === "ai") return aiSlugs.has(app.slug);
-  return false;
+  return normalizeCategorySlug(app.category) === category;
 }
 
 function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
@@ -145,7 +113,13 @@ function Home() {
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
-  const category = heroCategories.some((item) => item.id === cat) ? (cat as HeroCategory) : "all";
+  const chipCategories = directory?.categories?.length ? directory.categories : shelfCategories;
+  const heroCategories = [
+    { id: "all", label: "All" },
+    { id: "pick", label: "Supply Pick" },
+    ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
+  ];
+  const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
   const shown = arrangeHero(
     list.filter((app) => inHeroCategory(app, category)),
     sort,
@@ -210,10 +184,10 @@ function Home() {
                       key={item.id}
                       type="button"
                       onClick={() => updateSearch({ cat: item.id })}
-                      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-3 py-1 text-xs font-medium transition ${
+                      className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[14px] font-normal tracking-[-0.016em] transition-colors ${
                         active
-                          ? "border-ink bg-ink text-canvas"
-                          : "border-line bg-canvas text-muted hover:border-ink/40 hover:text-ink"
+                          ? "bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]"
+                          : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-white/10 dark:text-[#f5f5f7] dark:hover:bg-white/[0.16]"
                       }`}
                     >
                       {item.id === "pick" ? (
@@ -227,7 +201,7 @@ function Home() {
                 })}
               </div>
             </div>
-            <div className="flex shrink-0 items-center self-start rounded-full border border-line bg-canvas p-0.5 md:self-auto">
+            <div className="inline-flex h-9 shrink-0 items-center self-start rounded-full bg-[#e8e8ed] p-0.5 dark:bg-white/10 md:self-auto">
               {(
                 [
                   ["hot", "Hot"],
@@ -239,8 +213,10 @@ function Home() {
                   key={id}
                   type="button"
                   onClick={() => updateSearch({ sort: id })}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition ${
-                    sort === id ? "bg-ink text-canvas" : "text-muted hover:text-ink"
+                  className={`h-8 rounded-full px-3.5 text-[13px] tracking-[-0.01em] transition-colors ${
+                    sort === id
+                      ? "bg-white font-medium text-[#1d1d1f] shadow-[0_1px_2px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#1d1d1f] dark:text-white"
+                      : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"
                   }`}
                 >
                   {label}

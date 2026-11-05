@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
-import { categories } from "@/lib/catalog";
+import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -49,7 +49,7 @@ function SubmitPage() {
   const [icon, setIcon] = useState("");
   const [demo, setDemo] = useState("");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
-  const [category, setCategory] = useState<string>(categories[0]?.slug ?? "utilities");
+  const [category, setCategory] = useState("productivity");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
 
@@ -478,7 +478,7 @@ function SubmitPage() {
                             onChange={(e) => setCategory(e.target.value)}
                             className={field}
                           >
-                            {categories.map((cat) => (
+                            {shelfCategories.map((cat) => (
                               <option key={cat.slug} value={cat.slug}>
                                 {cat.emoji} {cat.name}
                               </option>

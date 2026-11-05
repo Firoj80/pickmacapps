@@ -1,14 +1,13 @@
 import { AsyncLocalStorage } from "node:async_hooks"
 import {
   apps,
-  categories,
   isEditorChoice,
-  getCategory,
   posts,
   sortApps,
   type AppItem,
   type Post,
 } from "@/lib/catalog"
+import { findShelfCategory, normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories"
 import {
   comparePairs,
   hubIntro,
@@ -48,7 +47,7 @@ export const markdownSkip = [
 ] as const
 
 const usedCategories = (list: AppItem[] = liveApps()) =>
-  categories.filter((category) => list.some((app) => app.category === category.slug))
+  shelfCategories.filter((category) => list.some((app) => normalizeCategorySlug(app.category) === category.slug))
 
 export type DirectorySlice = { apps: AppItem[]; posts: Post[] }
 
@@ -200,7 +199,7 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
     app.demo ? `![${app.name}](${abs(origin, app.demo)})` : "",
     "",
     `- Price model: ${app.pricing === "free" ? "Free" : app.pricing === "paid" ? "Paid" : "Freemium"}`,
-    `- Category: [${app.categoryName}](${abs(origin, `/category/${app.category}`)})`,
+    `- Category: [${findShelfCategory(app.category)?.name ?? app.categoryName}](${abs(origin, `/category/${normalizeCategorySlug(app.category)}`)})`,
     choice ? "- Editor’s Choice" : "",
     `- Added: ${app.createdAt.slice(0, 10)}`,
     "",
@@ -218,15 +217,15 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
     updated: app.createdAt.slice(0, 10),
     body: lines.join("\n"),
     related: [
-      { label: app.categoryName, href: abs(origin, `/category/${app.category}`) },
+      { label: findShelfCategory(app.category)?.name ?? app.categoryName, href: abs(origin, `/category/${normalizeCategorySlug(app.category)}`) },
       ...related.map((item) => ({ label: item.name, href: abs(origin, `/app/${item.slug}`) })),
     ],
   })
 }
 
 function renderCategory(origin: string, slug: string): MarkdownPage | null {
-  const category = getCategory(slug)
-  const listed = liveApps().filter((app) => app.category === slug)
+  const category = findShelfCategory(slug)
+  const listed = liveApps().filter((app) => normalizeCategorySlug(app.category) === slug)
   if (!category || listed.length === 0) return null
   const body = [
     ...category.paragraphs,

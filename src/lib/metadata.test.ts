@@ -32,7 +32,7 @@ test("parseAppMetadataFromHtml extracts app title, tagline, description, icon, d
   assert.equal(meta.icon, "https://shottr.cc/icons/apple-touch-icon-180.png");
   assert.equal(meta.demo, "https://shottr.cc/images/shottr-demo.png");
   assert.equal(meta.pricing, "freemium"); // download free + pro license $12
-  assert.equal(meta.category, "utilities"); // screenshot, menu bar, utility
+  assert.equal(meta.category, "utility"); // screenshot, menu bar, utility
 });
 
 test("parseAppMetadataFromHtml detects developer tools and JSON-LD", () => {
@@ -64,7 +64,7 @@ test("parseAppMetadataFromHtml detects developer tools and JSON-LD", () => {
   assert.equal(meta.name, "DevHub");
   assert.equal(meta.tagline, "Git & Terminal Dashboard");
   assert.equal(meta.icon, "https://cdn.example.com/icon.png");
-  assert.equal(meta.category, "developer-tools");
+  assert.equal(meta.category, "dev");
   assert.equal(meta.pricing, "free");
 });
 

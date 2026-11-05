@@ -23,7 +23,7 @@ test("IndexNow stays quiet without a production key and builds the right URL lis
   const appUrls = urlsForAppChange(origin, "helumi")
   assert.deepEqual(appUrls, [
     `${origin}/app/helumi`,
-    `${origin}/category/developer-tools`,
+    `${origin}/category/dev`,
     `${origin}/`,
   ])
   const guideUrls = urlsForGuideChange(origin, "best-paste-alternative-mac")

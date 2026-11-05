@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import raw from "@/data/catalog.json";
 import { shouldSeedCatalogApps } from "@/lib/app-seed";
+import { findShelfCategory, shelfCategories, type ShelfCategory } from "@/lib/shelf-categories";
 import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
@@ -162,11 +163,73 @@ async function seedCatalogApps(sql: Sql) {
   }
 }
 
+async function ensureShelfCategories(sql: Sql) {
+  await sql.query(
+    `create table if not exists categories (
+      slug text primary key,
+      name text not null,
+      emoji text not null default '',
+      paragraphs jsonb not null default '[]'::jsonb,
+      tips jsonb not null default '[]'::jsonb,
+      sort_order integer not null default 0
+    )`,
+  );
+  await sql.query(
+    `update apps set category = 'utility', category_name = 'Utility', category_icon = $1 where category = 'utilities'`,
+    ["🔧"],
+  );
+  await sql.query(
+    `update apps set category = 'dev', category_name = 'Dev', category_icon = $1 where category = 'developer-tools'`,
+    ["🛠️"],
+  );
+  const flagRows = await sql.query<{ value: string }>("select value from settings where key = 'categories_seeded'");
+  const countRows = await sql.query<{ count: string }>("select count(*)::text as count from categories");
+  const count = Number(countRows[0]?.count ?? 0);
+  if (flagRows[0]?.value === "1" && count > 0) return;
+  for (const [index, category] of shelfCategories.entries()) {
+    await sql.query(
+      `insert into categories (slug, name, emoji, paragraphs, tips, sort_order)
+       values ($1,$2,$3,$4::jsonb,$5::jsonb,$6)
+       on conflict (slug) do nothing`,
+      [
+        category.slug,
+        category.name,
+        category.emoji,
+        JSON.stringify(category.paragraphs),
+        JSON.stringify(category.tips),
+        index,
+      ],
+    );
+  }
+  await sql.query(
+    `insert into settings (key, value) values ('categories_seeded', '1')
+     on conflict (key) do update set value = excluded.value`,
+  );
+}
+
+function asStringList(value: unknown) {
+  if (Array.isArray(value)) return value.map((item) => String(item));
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value) as unknown;
+      return Array.isArray(parsed) ? parsed.map((item) => String(item)) : [];
+    } catch {
+      return [];
+    }
+  }
+  return [];
+}
+
 async function ensureSeed(sql: Sql) {
   try {
     await ensureTombstones(sql);
   } catch (err) {
     console.error("app tombstones table failed:", err);
+  }
+  try {
+    await ensureShelfCategories(sql);
+  } catch (err) {
+    console.error("ensureSeed categories failed:", err);
   }
   try {
     const flagRows = await sql.query<{ value: string }>("select value from settings where key = 'apps_seeded'");
@@ -246,10 +309,30 @@ export async function publishedDirectory() {
   const appRows = await sql.query<AppRow>("select * from apps where status = 'published' order by created_at desc");
   const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
   const apps = appRows.map(toApp);
+  let categories: ShelfCategory[] = [];
+  try {
+    const categoryRows = await sql.query<{
+      slug: string;
+      name: string;
+      emoji: string;
+      paragraphs: unknown;
+      tips: unknown;
+    }>("select slug, name, emoji, paragraphs, tips from categories order by sort_order asc, name asc");
+    categories = categoryRows.map((row) => ({
+      slug: row.slug,
+      name: row.name,
+      emoji: row.emoji,
+      paragraphs: asStringList(row.paragraphs),
+      tips: asStringList(row.tips),
+    }));
+  } catch (err) {
+    console.error("published categories failed:", err);
+  }
   return {
     apps,
     posts: guideRows.map(toPost),
     editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
+    categories,
   };
 }
 
@@ -410,10 +493,11 @@ export async function saveApp(input: {
     }
   }
 
-  const category = raw.categories.find((item) => item.slug === input.category) ?? {
-    slug: row.category,
-    name: row.category_name,
-    emoji: row.category_icon,
+  const foundCategory = findShelfCategory(input.category);
+  const category = {
+    slug: foundCategory?.slug ?? row.category,
+    name: foundCategory?.name ?? row.category_name,
+    emoji: foundCategory?.emoji ?? row.category_icon,
   };
   const cleanSlug = input.slug.trim();
   const slugConflict = await sql.query<AppRow>(
@@ -595,7 +679,7 @@ export async function submitListing(
   const demo = input.demo.trim();
   const email = input.email.trim();
   const xHandle = cleanXHandle(input.xHandle ?? "");
-  const category = raw.categories.find((item) => item.slug === input.category);
+  const category = findShelfCategory(input.category);
   if (!name || !website || !tagline || !description || !icon || !email.includes("@") || !xHandle || !category) {
     return { ok: false as const, message: "Name, website, tagline, description, icon, category, email, and X handle are required." };
   }
@@ -721,10 +805,12 @@ export async function approveSubmission(id: string) {
       .slice(0, 80) || appId.slice(0, 8);
   const taken = await sql.query("select id from apps where slug = $1", [slug]);
   if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
-  const category = raw.categories.find((item) => item.slug === submission.category) ?? {
-    slug: "utilities",
-    name: "Utilities",
+  const category = findShelfCategory(submission.category) ?? {
+    slug: "utility",
+    name: "Utility",
     emoji: "🔧",
+    paragraphs: [],
+    tips: [],
   };
   await sql.query(
     `insert into apps (

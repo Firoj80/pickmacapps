@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppCard } from "@/components/app-card";
-import { categories, shelfApps, type AppItem } from "@/lib/catalog";
+import { shelfApps, type AppItem } from "@/lib/catalog";
+import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
 
@@ -63,7 +64,7 @@ export function AppGrid({
           <>
             <Select label="Filter by category" value={category} onChange={onCategory}>
               <option value="all">All categories</option>
-              {categories.map((item) => (
+              {shelfCategories.map((item) => (
                 <option key={item.slug} value={item.slug}>
                   {item.name}
                 </option>

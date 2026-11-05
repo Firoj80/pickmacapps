@@ -1,26 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
-
-type Theme = "light" | "dark" | "system";
-
-function applyTheme(theme: Theme) {
-  const dark = theme === "dark" || (theme === "system" && window.matchMedia("(prefers-color-scheme: dark)").matches);
-  document.documentElement.dataset.theme = theme;
-  document.documentElement.classList.toggle("dark", dark);
-  localStorage.setItem("theme", theme);
-}
 
 export function SiteHeader() {
-  const [themeOpen, setThemeOpen] = useState(false);
-
-  useEffect(() => {
-    function onKey(event: KeyboardEvent) {
-      if (event.key === "Escape") setThemeOpen(false);
-    }
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/80 backdrop-blur-xl">
       <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:px-6">
@@ -43,49 +23,9 @@ export function SiteHeader() {
           >
             Submit
           </Link>
-          <div className="relative">
-            <button
-              type="button"
-              aria-label="Change theme"
-              aria-haspopup="menu"
-              aria-expanded={themeOpen}
-              title="Theme"
-              onClick={() => setThemeOpen((open) => !open)}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-body transition-colors hover:bg-surface-2 hover:text-ink"
-            >
-              <SunIcon />
-            </button>
-            {themeOpen ? (
-              <div role="menu" className="absolute top-11 right-0 z-50 w-36 rounded-xl border border-line bg-canvas p-1 shadow-lg">
-                {(["light", "dark", "system"] as const).map((theme) => (
-                  <button
-                    key={theme}
-                    type="button"
-                    role="menuitem"
-                    className="block w-full rounded-lg px-3 py-2 text-left text-sm text-ink capitalize hover:bg-surface-2"
-                    onClick={() => {
-                      applyTheme(theme);
-                      setThemeOpen(false);
-                    }}
-                  >
-                    {theme}
-                  </button>
-                ))}
-              </div>
-            ) : null}
-          </div>
         </nav>
       </div>
     </header>
-  );
-}
-
-function SunIcon() {
-  return (
-    <svg className="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="12" r="4" />
-      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
-    </svg>
   );
 }
 

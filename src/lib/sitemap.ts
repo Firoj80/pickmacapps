@@ -1,5 +1,6 @@
-import { apps, categories, posts, type AppItem, type Post } from "@/lib/catalog";
+import { apps, posts, type AppItem, type Post } from "@/lib/catalog";
 import { comparePairs, hubLastmod, pairLastmod } from "@/lib/compare";
+import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { site } from "@/lib/site";
 
 export const SITEMAP_SECTIONS = ["pages", "apps", "guides", "categories", "compare"] as const;
@@ -85,11 +86,11 @@ export function sectionUrls(
     }));
   }
   if (section === "categories") {
-    return categories
-      .filter((category) => list.some((app) => app.category === category.slug))
+    return shelfCategories
+      .filter((category) => list.some((app) => normalizeCategorySlug(app.category) === category.slug))
       .map((category) => {
         const newest = list
-          .filter((app) => app.category === category.slug)
+          .filter((app) => normalizeCategorySlug(app.category) === category.slug)
           .map((app) => app.createdAt)
           .sort()
           .at(-1);

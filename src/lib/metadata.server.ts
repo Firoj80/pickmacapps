@@ -1,4 +1,5 @@
 import { publicUrl } from "@/lib/badge";
+import { normalizeCategorySlug } from "@/lib/shelf-categories";
 
 export type FetchedMetadata = {
   name: string;
@@ -8,7 +9,7 @@ export type FetchedMetadata = {
   icon: string;
   demo: string;
   pricing: "free" | "freemium" | "paid";
-  category: "design" | "developer-tools" | "productivity" | "utilities";
+  category: string;
   xHandle?: string;
 };
 
@@ -423,7 +424,7 @@ export function parseAppMetadataFromHtml(html: string, pageUrl: string): Fetched
     icon: icon.slice(0, 400),
     demo: demo.slice(0, 400),
     pricing,
-    category: bestCategory,
+    category: normalizeCategorySlug(bestCategory),
     ...(xHandle ? { xHandle } : {}),
   };
 }

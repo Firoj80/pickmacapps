@@ -1,4 +1,5 @@
 import { getApp, getPost } from "@/lib/catalog";
+import { normalizeCategorySlug } from "@/lib/shelf-categories";
 import { absoluteUrl } from "@/lib/sitemap";
 
 const ENDPOINT = "https://api.indexnow.org/indexnow";
@@ -22,7 +23,7 @@ export function urlsForAppChange(origin: string, slug: string) {
   if (!clean) return [];
   const app = getApp(clean);
   const urls = [absoluteUrl(origin, `/app/${app?.slug ?? clean}`)];
-  if (app) urls.push(absoluteUrl(origin, `/category/${app.category}`));
+  if (app) urls.push(absoluteUrl(origin, `/category/${normalizeCategorySlug(app.category)}`));
   urls.push(absoluteUrl(origin, "/"));
   return urls;
 }

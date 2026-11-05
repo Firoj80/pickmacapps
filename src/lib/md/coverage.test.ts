@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { apps, appsInCategory, categories, getPost, posts } from "../catalog.ts"
+import { apps, getPost, posts } from "../catalog.ts"
+import { normalizeCategorySlug, shelfCategories } from "../shelf-categories.ts"
 import { htmlToMarkdown } from "./format.ts"
 import { prefersMarkdown } from "./http.ts"
 import { listMarkdownRoutes, markdownSkip, renderMarkdown } from "./registry.ts"
@@ -10,8 +11,9 @@ test("every public content route has a markdown renderer", () => {
   for (const path of ["/", "/blog", "/submit", "/privacy"]) assert.ok(paths.has(path), path)
   for (const app of apps) assert.ok(paths.has(`/app/${app.slug}`), app.slug)
   for (const post of posts) assert.ok(paths.has(`/blog/${post.slug}`), post.slug)
-  for (const category of categories) {
-    if (appsInCategory(category.slug).length === 0) continue
+  for (const category of shelfCategories) {
+    const listed = apps.filter((app) => normalizeCategorySlug(app.category) === category.slug)
+    if (listed.length === 0) continue
     assert.ok(paths.has(`/category/${category.slug}`), category.slug)
   }
   for (const route of listMarkdownRoutes()) {

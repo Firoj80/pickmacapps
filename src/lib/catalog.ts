@@ -1,4 +1,5 @@
 import raw from "@/data/catalog.json";
+import { normalizeCategorySlug } from "@/lib/shelf-categories";
 
 export type Pricing = "free" | "paid" | "freemium";
 
@@ -134,7 +135,7 @@ export function shelfApps(
 ) {
   const needle = query.trim().toLowerCase();
   const filtered = list.filter((app) => {
-    const inCategory = category === "all" || app.category === category;
+    const inCategory = category === "all" || normalizeCategorySlug(app.category) === normalizeCategorySlug(category);
     const matches =
       !needle || app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle);
     return inCategory && matches;

@@ -1,6 +1,6 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
-import { categories } from "@/lib/catalog";
+import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { fetchAdminApp, requireAdmin } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -75,8 +75,8 @@ function EditApp() {
             </select>
           </Field>
           <Field label="Category">
-            <select name="category" defaultValue={app.category} className={fieldClass}>
-              {categories.map((category) => (
+            <select name="category" defaultValue={normalizeCategorySlug(app.category)} className={fieldClass}>
+              {shelfCategories.map((category) => (
                 <option key={category.slug} value={category.slug}>
                   {category.name}
                 </option>
