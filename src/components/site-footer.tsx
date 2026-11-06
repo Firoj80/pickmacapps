@@ -8,9 +8,7 @@ export function SiteFooter() {
   const { directory } = useRouteContext({ from: "__root__" });
   const list = publishedApps(directory);
   const categories = [...(directory?.categories ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-  const featured = [...list]
-    .sort((a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)) || a.name.localeCompare(b.name))
-    .slice(0, 8);
+  const featured = list.filter((app) => isEditorChoice(app));
 
   return (
     <footer className="mt-auto border-t border-line bg-canvas">
@@ -43,8 +41,11 @@ export function SiteFooter() {
                   <Link
                     to="/category/$slug"
                     params={{ slug: category.slug }}
-                    className="text-[13px] text-muted transition-colors hover:text-ink"
+                    className="inline-flex items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
                   >
+                    <span aria-hidden="true" className="w-4 text-center text-[14px] leading-none">
+                      {category.emoji}
+                    </span>
                     {category.name}
                   </Link>
                 </li>
@@ -54,13 +55,29 @@ export function SiteFooter() {
           <div className="lg:col-span-4">
             <p className="text-[13px] font-semibold text-ink">Featured</p>
             <ul className="mt-3.5 space-y-2.5">
-              {featured.map((app) => (
-                <li key={app.slug}>
-                  <Link to="/app/$slug" params={{ slug: app.slug }} className="text-[13px] text-muted transition-colors hover:text-ink">
-                    {app.name}
-                  </Link>
-                </li>
-              ))}
+              {featured.length === 0 ? (
+                <li className="text-[13px] text-muted">No Editor’s Choice apps right now.</li>
+              ) : (
+                featured.map((app) => (
+                  <li key={app.slug}>
+                    <Link
+                      to="/app/$slug"
+                      params={{ slug: app.slug }}
+                      className="inline-flex items-center gap-2.5 text-[13px] text-muted transition-colors hover:text-ink"
+                    >
+                      <img
+                        alt=""
+                        src={app.icon}
+                        onError={(event) => {
+                          event.currentTarget.src = "/site-favicon.svg";
+                        }}
+                        className="h-6 w-6 shrink-0 rounded-md object-cover ring-1 ring-line"
+                      />
+                      {app.name}
+                    </Link>
+                  </li>
+                ))
+              )}
             </ul>
           </div>
         </div>

@@ -108,6 +108,34 @@ export const Route = createFileRoute("/")({
   },
 });
 
+function ChoiceIcons({ apps }: { apps: AppItem[] }) {
+  if (apps.length === 0) return null;
+  const tilts = [-8, -3, 4, 8, -5, 3, -2];
+  return (
+    <div className="mt-8 flex items-center pl-1">
+      {apps.map((app, index) => (
+        <Link
+          key={app.slug}
+          to="/app/$slug"
+          params={{ slug: app.slug }}
+          title={app.name}
+          style={{ zIndex: index + 1, marginLeft: index === 0 ? 0 : -16, transform: `rotate(${tilts[index % tilts.length]}deg)` }}
+          className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_6px_16px_rgba(0,0,0,0.12)] ring-2 ring-white transition hover:z-20 hover:scale-105"
+        >
+          <img
+            alt=""
+            src={app.icon}
+            onError={(event) => {
+              event.currentTarget.src = "/site-favicon.svg";
+            }}
+            className="h-full w-full object-cover"
+          />
+        </Link>
+      ))}
+    </div>
+  );
+}
+
 function Home() {
   const { q = "", cat = "all", sort = "hot" } = Route.useSearch();
   const navigate = useNavigate();
@@ -174,6 +202,7 @@ function Home() {
               Submit an app
             </Link>
           </div>
+          <ChoiceIcons apps={list.filter((app) => isEditorChoice(app)).slice(0, 7)} />
           <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
             <div className="-mx-4 min-w-0 md:mx-0 md:flex-1">
               <div className="flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">

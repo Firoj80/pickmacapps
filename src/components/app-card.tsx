@@ -2,33 +2,65 @@ import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { addedLabel, isEditorChoice, pricingLabel, type AppItem } from "@/lib/catalog";
 
+function coverSrc(demo: string) {
+  const clean = demo.trim();
+  if (!clean || /\.mp4($|\?)/i.test(clean)) return "";
+  return clean;
+}
+
 export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
   const choice = isEditorChoice(app);
+  const cover = coverSrc(app.demo);
   return (
     <Link
       to="/app/$slug"
       params={{ slug: app.slug }}
-      className={`group flex flex-col rounded-xl border p-5 transition-colors duration-200 ${choice ? "card-silver" : "border-line bg-surface hover:border-line-2"}`}
+      className={`group flex flex-col overflow-hidden rounded-xl border transition-colors duration-200 ${choice ? "card-silver" : "border-line bg-surface hover:border-line-2"}`}
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-center gap-3">
+      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f5f7] dark:bg-white/5">
+        {cover ? (
           <img
             alt=""
-            src={app.icon}
+            src={cover}
             onError={(event) => {
-              event.currentTarget.src = "/site-favicon.svg";
+              event.currentTarget.style.display = "none";
             }}
-            className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-line"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
           />
-          <h3 className="min-w-0 truncate text-xl font-[550] tracking-[-0.025em] text-ink">{app.name}</h3>
-        </div>
-        {choice ? <span className="silver-tag shrink-0 rounded-md border px-2 py-1 text-[11px] font-medium">Editor’s Choice</span> : null}
+        ) : (
+          <div className="flex h-full items-center justify-center">
+            <img
+              alt=""
+              src={app.icon}
+              onError={(event) => {
+                event.currentTarget.src = "/site-favicon.svg";
+              }}
+              className="h-16 w-16 rounded-[18px] object-cover shadow-sm"
+            />
+          </div>
+        )}
       </div>
-      <p className="clamp-2 mt-4 min-h-[2.75rem] text-[14px] leading-[1.45] text-body">{app.tagline}</p>
-      <div className="mt-4 flex flex-col gap-2">
-        <Spec label="Category" value={app.categoryName} icon={<LayersIcon />} />
-        <Spec label="Pricing" value={pricingLabel[app.pricing]} icon={<TagIcon />} />
-        <Spec label="Added" value={addedLabel(app.createdAt)} icon={<ClockIcon />} />
+      <div className="flex flex-col p-5">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <img
+              alt=""
+              src={app.icon}
+              onError={(event) => {
+                event.currentTarget.src = "/site-favicon.svg";
+              }}
+              className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-line"
+            />
+            <h3 className="min-w-0 truncate text-xl font-[550] tracking-[-0.025em] text-ink">{app.name}</h3>
+          </div>
+          {choice ? <span className="silver-tag shrink-0 rounded-md border px-2 py-1 text-[11px] font-medium">Editor’s Choice</span> : null}
+        </div>
+        <p className="clamp-2 mt-4 min-h-[2.75rem] text-[14px] leading-[1.45] text-body">{app.tagline}</p>
+        <div className="mt-4 flex flex-col gap-2">
+          <Spec label="Category" value={app.categoryName} icon={<LayersIcon />} />
+          <Spec label="Pricing" value={pricingLabel[app.pricing]} icon={<TagIcon />} />
+          <Spec label="Added" value={addedLabel(app.createdAt)} icon={<ClockIcon />} />
+        </div>
       </div>
     </Link>
   );
