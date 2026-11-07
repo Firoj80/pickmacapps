@@ -7,11 +7,17 @@ import { pageCopy } from "@/lib/site";
 const featured = [
   "Premium featured badge",
   "Approved within 24 hours",
-  "Hero spot on the homepage",
-  "Social mention",
+  "Top hero spot on the homepage",
+  "Permanent listing in directory",
+  "Social shoutout to Mac enthusiasts",
 ];
 
-const story = [...featured, "Special article on my Medium profile"];
+const story = [
+  ...featured,
+  "Dedicated in-depth Medium review article",
+  "High-authority SEO backlink to your app",
+  "Priority placement across alternative tables",
+];
 
 export const Route = createFileRoute("/sponsor")({
   component: SponsorPage,
@@ -34,106 +40,198 @@ export const Route = createFileRoute("/sponsor")({
 
 function SponsorPage() {
   return (
-    <main>
-      <section className="mx-auto grid max-w-[1100px] gap-12 px-4 py-14 sm:px-6 lg:grid-cols-[1.1fr_0.9fr] lg:py-20">
-        <div>
-          <p className="text-[13px] font-medium text-muted">Sponsor</p>
-          <h1 className="mt-3 max-w-[16ch] text-[40px] leading-[1.05] font-semibold tracking-[-0.04em] text-ink sm:text-5xl">
-            Feature your app
-          </h1>
-          <p className="mt-5 max-w-xl text-[17px] leading-7 text-body">
-            PickMacApps is a hand-picked shelf of Mac apps. A sponsorship puts your app in a hero spot on the homepage,
-            with a premium featured badge, after it is reviewed.
-          </p>
-          <dl className="mt-10 space-y-6">
-            <Included title="Premium featured badge" body="The listing is marked as a paid featured placement, not a test score." />
-            <Included title="Approved within 24 hours" body="A submitted app is reviewed by hand. A listing that is accepted is published within 24 hours." />
-            <Included title="Hero spot on the homepage" body="Featured apps are the icons and cards at the top of the shelf. At most 3 published apps hold that spot." />
-            <Included title="Social mention" body="A mention from @hiii_firoj on X when the app is published." />
-            <Included title="Medium article" body="The $120 package also includes a special article on Firoj’s Medium profile." />
-          </dl>
+    <main className="relative overflow-hidden">
+      {/* Background ambient colorful glowing orbs */}
+      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[550px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-violet-600/20 via-fuchsia-500/20 to-amber-400/20 blur-[130px]" />
+      <div className="pointer-events-none absolute top-1/3 -right-40 -z-10 h-[450px] w-[500px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-indigo-500/15 to-transparent blur-[120px]" />
+
+      {/* Hero Header Section */}
+      <section className="mx-auto max-w-[1240px] px-4 pt-12 pb-6 text-center sm:px-6 md:pt-16 md:pb-10">
+        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-xs font-semibold text-violet-600 dark:text-violet-400 backdrop-blur-md">
+          <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
+          Reach 15,000+ Mac Enthusiasts & Power Users
         </div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
-          <Plan
-            name="Featured"
-            price={99}
-            items={featured}
-            tier="featured"
-            note="One-time. No subscription."
-          />
-          <Plan
-            name="Featured + article"
-            price={120}
-            items={story}
-            tier="article"
-            highlighted
-            note="One-time. Includes the Medium article."
-          />
+
+        <h1 className="mt-5 text-[38px] font-bold tracking-tight text-ink sm:text-[56px] md:text-[64px] leading-[1.08]">
+          Put your Mac app in the{" "}
+          <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
+            Spotlight
+          </span>
+        </h1>
+
+        <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px]">
+          Get immediate visibility, high-intent traffic, and trusted editorial placement on PickMacApps. 
+          Limited to only 3 featured hero slots at a time.
+        </p>
+
+        {/* Live Metrics Bar */}
+        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3 rounded-2xl border border-line bg-surface/80 p-3 sm:p-4 backdrop-blur-xl shadow-sm">
+          <div>
+            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">24h</p>
+            <p className="text-[12px] text-muted">Review turnaround</p>
+          </div>
+          <div className="border-x border-line px-2">
+            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 3</p>
+            <p className="text-[12px] text-muted">Hero spots capped</p>
+          </div>
+          <div>
+            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">100%</p>
+            <p className="text-[12px] text-muted">Curated guarantee</p>
+          </div>
         </div>
       </section>
 
-      <section className="border-t border-line">
-        <div className="mx-auto grid max-w-[1100px] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-2">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-ink">How it works</h2>
-            <ol className="mt-6 space-y-4 text-[15px] leading-6 text-body">
-              <li>1. Choose a package and continue to the submit page.</li>
-              <li>2. Send the app details. You can also submit first, then come back to this page.</li>
-              <li>3. The app is reviewed by hand. An accepted listing is published within 24 hours.</li>
-              <li>4. The app keeps the featured badge and a hero spot, then stays listed.</li>
-            </ol>
-          </div>
-          <div>
-            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Questions</h2>
-            <div className="mt-6 space-y-3">
-              <Faq q="What is the difference between the two prices?">
-                $99 includes the premium badge, 24-hour review, a hero spot, and a social mention. $120 includes those and a special article on Firoj’s Medium profile.
-              </Faq>
-              <Faq q="What if my app isn’t a good fit?">
-                Every app is reviewed by hand. If it is not accepted, it is not published. The listing rules are on{" "}
-                <Link to="/how-we-pick" className="text-ink underline underline-offset-2">
-                  How we pick
-                </Link>
-                .
-              </Faq>
-              <Faq q="Do I need to submit the app first?">
-                Either order works. Start here, or{" "}
-                <Link to="/submit" className="text-ink underline underline-offset-2">
-                  submit the app
-                </Link>{" "}
-                and choose the package after.
-              </Faq>
-              <Faq q="What happens after the featured spot?">
-                The app stays in the directory. The premium badge and hero spot are the paid placement, capped at 3 published apps.
-              </Faq>
+      {/* Pricing Cards Section */}
+      <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 lg:py-12">
+        <div className="grid gap-8 lg:grid-cols-2 lg:gap-8 max-w-4xl mx-auto">
+          {/* Card 1: Featured */}
+          <div className="relative flex flex-col justify-between rounded-3xl border border-line bg-surface/90 p-7 sm:p-9 shadow-lg backdrop-blur-xl transition hover:border-violet-500/40 hover:shadow-xl">
+            <div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-ink">Featured Placement</h3>
+                  <p className="text-sm text-muted mt-0.5">Homepage hero and featured badge</p>
+                </div>
+                <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-600 dark:text-violet-400">
+                  Popular
+                </span>
+              </div>
+
+              <div className="mt-6 flex items-baseline gap-2">
+                <span className="text-5xl font-extrabold tracking-tight text-ink">$99</span>
+                <span className="text-sm font-medium text-muted">one-time payment</span>
+              </div>
+
+              <p className="mt-2 text-xs text-muted">No recurring fees. App stays listed permanently.</p>
+
+              <hr className="my-6 border-line" />
+
+              <ul className="space-y-3.5 text-sm">
+                {featured.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-body">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 text-xs font-bold">
+                      ✓
+                    </span>
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
-        </div>
-      </section>
 
-      <section className="border-t border-line">
-        <div className="mx-auto flex max-w-[1100px] flex-col gap-4 px-4 py-14 sm:flex-row sm:items-end sm:justify-between sm:px-6">
-          <div>
-            <h2 className="text-2xl font-semibold tracking-[-0.03em] text-ink">Ready to get featured?</h2>
-            <p className="mt-2 max-w-xl text-[15px] leading-6 text-body">
-              Premium badge, hero spot, and a social mention. Add a Medium article for $120.
-            </p>
-          </div>
-          <div className="flex flex-col gap-2 sm:flex-row">
             <Link
               to="/submit"
               search={{ tier: "featured" }}
-              className="inline-flex items-center justify-center rounded-full border border-line px-5 py-3 text-sm font-medium text-ink hover:bg-surface-2"
+              className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
             >
-              Continue — $99
+              Get Featured — $99
             </Link>
+          </div>
+
+          {/* Card 2: Featured + Article (Vibrant Gradient Card) */}
+          <div className="relative flex flex-col justify-between rounded-3xl border-2 border-fuchsia-500/70 bg-gradient-to-b from-[#181228] to-[#110e1c] p-7 sm:p-9 text-white shadow-2xl transition hover:shadow-fuchsia-500/20">
+            {/* Glowing Accent Ribbon */}
+            <div className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-400 px-4 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md">
+              Best Exposure 🔥
+            </div>
+
+            <div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-white">Featured + Medium Article</h3>
+                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Maximum reach & organic SEO backlinks</p>
+                </div>
+              </div>
+
+              <div className="mt-6 flex items-baseline gap-2">
+                <span className="text-5xl font-extrabold tracking-tight text-white">$120</span>
+                <span className="text-sm font-medium text-fuchsia-200/70">one-time payment</span>
+              </div>
+
+              <p className="mt-2 text-xs text-fuchsia-200/60">Complete package with full editorial story.</p>
+
+              <hr className="my-6 border-white/10" />
+
+              <ul className="space-y-3.5 text-sm">
+                {story.map((item) => (
+                  <li key={item} className="flex items-start gap-3 text-white/90">
+                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-amber-400 text-white text-xs font-bold shadow-xs">
+                      ✓
+                    </span>
+                    <span className={item.includes("Medium") ? "font-semibold text-amber-300" : ""}>{item}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
             <Link
               to="/submit"
               search={{ tier: "article" }}
-              className="inline-flex items-center justify-center rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas hover:opacity-90"
+              className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
-              Continue — $120
+              Claim Spot + Article — $120 🚀
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Feature Breakdown Grid */}
+      <section className="mx-auto max-w-[1240px] px-4 py-12 sm:px-6">
+        <div className="text-center">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">What is included with sponsorship</h2>
+          <p className="mt-2 text-sm text-muted">Everything designed to drive qualified Mac users to your product</p>
+        </div>
+
+        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
+          <FeatureCard
+            icon="🏆"
+            title="Editor's Choice Badge"
+            description="Your card receives the verified Editor's Choice badge, establishing instant trust with high-intent buyers."
+          />
+          <FeatureCard
+            icon="⚡"
+            title="24-Hour Express Review"
+            description="Skip the general queue. Your listing is personally evaluated and published live within 24 hours of submission."
+          />
+          <FeatureCard
+            icon="🌟"
+            title="Homepage Hero Carousel"
+            description="Your app icon appears in the curved hero arc at the very top of the homepage, seen by every visitor."
+          />
+          <FeatureCard
+            icon="📣"
+            title="Social Media Broadcast"
+            description="Shoutout from @hiii_firoj on X (Twitter) directly reaching an audience of founders, builders, and developers."
+          />
+          <FeatureCard
+            icon="✍️"
+            title="Medium Profile Deep-Dive"
+            description="With the $120 tier, receive a comprehensive dedicated review article published on Firoj's Medium profile."
+          />
+          <FeatureCard
+            icon="🔗"
+            title="Permanent Listing & SEO"
+            description="Even after the hero spotlight rotation, your dedicated app review page stays live permanently with dofollow link."
+          />
+        </div>
+      </section>
+
+      {/* FAQ Accordion Section */}
+      <section className="border-t border-line/60 bg-surface/40 py-16">
+        <div className="mx-auto max-w-3xl px-4 sm:px-6">
+          <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
+          <div className="mt-8 space-y-3">
+            <Faq q="What is the difference between the $99 and $120 tiers?">
+              The $99 tier gives you all the core benefits: premium badge, 24h review, top hero placement, and a social shoutout. The $120 tier adds a dedicated, in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and strong backlinks.
+            </Faq>
+            <Faq q="What if my app isn't accepted?">
+              All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
+            </Faq>
+            <Faq q="Do I need to submit the app first or pay first?">
+              You can start right from the packages above. You will be guided through entering your app name, URL, screenshot, and details before checkout.
+            </Faq>
+            <Faq q="How long does the hero spotlight last?">
+              Featured apps hold the top hero spot and Editor's Choice placement across the directory, capped at 3 active apps to ensure each sponsor receives prime visibility.
+            </Faq>
           </div>
         </div>
       </section>
@@ -141,64 +239,28 @@ function SponsorPage() {
   );
 }
 
-function Plan({
-  name,
-  price,
-  items,
-  tier,
-  note,
-  highlighted = false,
-}: {
-  name: string;
-  price: number;
-  items: string[];
-  tier: "featured" | "article";
-  note: string;
-  highlighted?: boolean;
-}) {
+function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
   return (
-    <article className={`rounded-3xl border p-6 ${highlighted ? "border-ink bg-ink text-canvas" : "border-line bg-canvas text-ink"}`}>
-      <p className={`text-[13px] font-medium ${highlighted ? "text-white/70" : "text-muted"}`}>{name}</p>
-      <p className="mt-3 flex items-baseline gap-1">
-        <span className="text-4xl font-semibold tracking-[-0.04em]">${price}</span>
-        <span className={`text-sm ${highlighted ? "text-white/70" : "text-muted"}`}>one-time</span>
-      </p>
-      <p className={`mt-2 text-[13px] ${highlighted ? "text-white/70" : "text-muted"}`}>{note}</p>
-      <ul className="mt-6 space-y-2.5">
-        {items.map((item) => (
-          <li key={item} className="flex gap-2 text-[14px] leading-5">
-            <span aria-hidden="true">✓</span>
-            {item}
-          </li>
-        ))}
-      </ul>
-      <Link
-        to="/submit"
-        search={{ tier }}
-        className={`mt-6 inline-flex w-full items-center justify-center rounded-full px-4 py-3 text-sm font-medium ${
-          highlighted ? "bg-white text-[#1d1d1f]" : "bg-ink text-canvas"
-        }`}
-      >
-        Continue — ${price}
-      </Link>
-    </article>
-  );
-}
-
-function Included({ title, body }: { title: string; body: string }) {
-  return (
-    <div>
-      <dt className="text-[15px] font-medium text-ink">{title}</dt>
-      <dd className="mt-1 text-[14px] leading-6 text-body">{body}</dd>
+    <div className="rounded-2xl border border-line bg-surface p-6 shadow-xs transition hover:border-line-2 hover:shadow-md">
+      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-xl">
+        {icon}
+      </div>
+      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
+      <p className="mt-2 text-sm leading-relaxed text-body">{description}</p>
     </div>
   );
 }
 
 function Faq({ q, children }: { q: string; children: ReactNode }) {
   return (
-    <details className="rounded-2xl border border-line px-4 py-3">
-      <summary className="cursor-pointer text-[15px] font-medium text-ink">{q}</summary>
-      <p className="mt-2 text-[14px] leading-6 text-body">{children}</p>
+    <details className="group rounded-2xl border border-line bg-surface p-5 transition open:bg-surface-2">
+      <summary className="flex cursor-pointer items-center justify-between font-medium text-ink list-none">
+        <span className="text-[15px]">{q}</span>
+        <span className="ml-4 shrink-0 text-muted transition-transform group-open:rotate-180">
+          ↓
+        </span>
+      </summary>
+      <p className="mt-3 text-sm leading-relaxed text-body">{children}</p>
     </details>
   );
 }
