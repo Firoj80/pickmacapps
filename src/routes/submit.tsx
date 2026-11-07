@@ -610,9 +610,11 @@ function SubmitPage() {
                               </p>
                             )}
                             {tier === "article" ? (
-                              <p className="mt-1 text-xs text-body">Featured + article is listed at $120 and includes a Medium article.</p>
+                              <p className="mt-1 text-xs text-body">
+                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article ($120):</strong> Approved within 2 hours with dedicated review article.
+                              </p>
                             ) : tier === "featured" ? (
-                              <p className="mt-1 text-xs text-body">Featured is listed at $99.</p>
+                              <p className="mt-1 text-xs text-body">Featured is listed at $99 (approved within 24 hours).</p>
                             ) : null}
                           </div>
                           <Radio selected={!slots.isFull && plan === "choice"} />
@@ -622,7 +624,7 @@ function SubmitPage() {
                             <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
                             <span>
                               <strong className="font-semibold text-ink">Top 3 placement</strong> on our directory for 1 week
-                              {tier === "article" ? ". Includes a special article on Firoj’s Medium profile." : ""}
+                              {tier === "article" ? " — express approved within 2 hours and includes an article on Firoj’s Medium profile." : ""}
                             </span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">

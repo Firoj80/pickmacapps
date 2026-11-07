@@ -13,9 +13,13 @@ const featured = [
 ];
 
 const story = [
-  ...featured,
+  "Premium featured badge",
+  "⚡ Approved within 2 hours (Express)",
+  "Top hero spot on the homepage",
+  "Permanent listing in directory",
   "Dedicated in-depth Medium review article",
   "High-authority SEO backlink to your app",
+  "Social shoutout to Mac enthusiasts",
   "Priority placement across alternative tables",
 ];
 
@@ -67,7 +71,7 @@ function SponsorPage() {
         {/* Live Metrics Bar */}
         <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3 rounded-2xl border border-line bg-surface/80 p-3 sm:p-4 backdrop-blur-xl shadow-sm">
           <div>
-            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">24h</p>
+            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">2h – 24h</p>
             <p className="text-[12px] text-muted">Review turnaround</p>
           </div>
           <div className="border-x border-line px-2">
@@ -157,7 +161,7 @@ function SponsorPage() {
                     <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-amber-400 text-white text-xs font-bold shadow-xs">
                       ✓
                     </span>
-                    <span className={item.includes("Medium") ? "font-semibold text-amber-300" : ""}>{item}</span>
+                    <span className={item.includes("Medium") || item.includes("2 hours") ? "font-semibold text-amber-300" : ""}>{item}</span>
                   </li>
                 ))}
               </ul>
@@ -189,8 +193,8 @@ function SponsorPage() {
           />
           <FeatureCard
             icon="⚡"
-            title="24-Hour Express Review"
-            description="Skip the general queue. Your listing is personally evaluated and published live within 24 hours of submission."
+            title="Fast Review (2h - 24h)"
+            description="Skip the general queue. Featured listings are evaluated in 24 hours, and the Featured + Medium package is approved within 2 hours."
           />
           <FeatureCard
             icon="🌟"
@@ -221,7 +225,7 @@ function SponsorPage() {
           <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
           <div className="mt-8 space-y-3">
             <Faq q="What is the difference between the $99 and $120 tiers?">
-              The $99 tier gives you all the core benefits: premium badge, 24h review, top hero placement, and a social shoutout. The $120 tier adds a dedicated, in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and strong backlinks.
+              The $99 tier gives you all core benefits: premium badge, 24h review, top hero placement, and a social shoutout. The $120 tier gives you express approval within 2 hours, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
             </Faq>
             <Faq q="What if my app isn't accepted?">
               All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
