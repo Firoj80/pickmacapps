@@ -341,6 +341,7 @@ export async function publishedDirectory() {
 }
 
 export const MAX_EDITOR_CHOICE_SLOTS = 6;
+export const MAX_TIER_SLOTS = 3; // 3 Blue (Featured) + 3 Gold (Article)
 
 export function getNextCycleLabel(now = new Date()): string {
   const d = new Date(now);
@@ -348,6 +349,22 @@ export function getNextCycleLabel(now = new Date()): string {
   const dayNum = d.getDate();
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${dayNum} ${months[d.getMonth()]}`;
+}
+
+export async function countActiveTierApps(tier: "featured" | "article", excludeId?: string): Promise<number> {
+  const sql = await directorySql();
+  if (excludeId) {
+    const rows = await sql.query<{ count: string }>(
+      "select count(*)::text as count from apps where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = $1 and id <> $2",
+      [tier, excludeId],
+    );
+    return Number(rows[0]?.count ?? 0);
+  }
+  const rows = await sql.query<{ count: string }>(
+    "select count(*)::text as count from apps where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = $1",
+    [tier],
+  );
+  return Number(rows[0]?.count ?? 0);
 }
 
 export async function countActiveEditorChoiceApps(excludeId?: string): Promise<number> {
@@ -378,6 +395,8 @@ export type PublicOffer = {
   featuredCompareCents: number;
   articlePriceCents: number;
   articleCompareCents: number;
+  featuredSlots: EditorChoiceSlotsInfo;
+  articleSlots: EditorChoiceSlotsInfo;
   slots: EditorChoiceSlotsInfo;
   priceCents: number;
   compareCents: number;
@@ -412,40 +431,73 @@ export async function publicOffer(): Promise<PublicOffer> {
     );
   }
 
-  const active = await countActiveEditorChoiceApps();
-  const remaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - active);
+  const [activeTotal, activeFeatured, activeArticle] = await Promise.all([
+    countActiveEditorChoiceApps(),
+    countActiveTierApps("featured"),
+    countActiveTierApps("article"),
+  ]);
+
+  const nextDate = getNextCycleLabel();
+  const featuredRemaining = Math.max(0, MAX_TIER_SLOTS - activeFeatured);
+  const articleRemaining = Math.max(0, MAX_TIER_SLOTS - activeArticle);
+  const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
+
+  const featuredSlots: EditorChoiceSlotsInfo = {
+    total: MAX_TIER_SLOTS,
+    active: activeFeatured,
+    remaining: featuredRemaining,
+    isFull: featuredRemaining === 0,
+    nextDate,
+  };
+
+  const articleSlots: EditorChoiceSlotsInfo = {
+    total: MAX_TIER_SLOTS,
+    active: activeArticle,
+    remaining: articleRemaining,
+    isFull: articleRemaining === 0,
+    nextDate,
+  };
+
   return {
     featuredPriceCents,
     featuredCompareCents,
     articlePriceCents,
     articleCompareCents,
+    featuredSlots,
+    articleSlots,
     priceCents: featuredPriceCents,
     compareCents: featuredCompareCents,
     slots: {
       total: MAX_EDITOR_CHOICE_SLOTS,
-      active,
-      remaining,
-      isFull: remaining === 0,
-      nextDate: getNextCycleLabel(),
+      active: activeTotal,
+      remaining: totalRemaining,
+      isFull: totalRemaining === 0,
+      nextDate,
     },
   };
 }
 
 export async function adminStats() {
   const sql = await directorySql();
-  const apps = await sql.query<{ pricing: string; status: string; editor_choice: boolean }>(
-    "select pricing, status, editor_choice from apps",
+  const apps = await sql.query<{ pricing: string; status: string; editor_choice: boolean; featured_tier: string | null }>(
+    "select pricing, status, editor_choice, featured_tier from apps",
   );
   const guides = await sql.query<{ status: string }>("select status from guides");
   const revenue = await sql.query<{ cents: string }>(
     "select coalesce(sum(amount_cents), 0)::text as cents from payments where status = 'paid'",
   );
   const live = apps.filter((app) => app.status === "published");
+  const blueChoice = live.filter(
+    (app) => app.editor_choice && (app.featured_tier === "featured" || !app.featured_tier),
+  ).length;
+  const goldChoice = live.filter((app) => app.editor_choice && app.featured_tier === "article").length;
   return {
     free: live.filter((app) => app.pricing === "free").length,
     paid: live.filter((app) => app.pricing === "paid").length,
     freemium: live.filter((app) => app.pricing === "freemium").length,
     editorChoice: live.filter((app) => app.editor_choice).length,
+    blueChoice,
+    goldChoice,
     pendingApps: apps.filter((app) => app.status === "pending").length,
     guides: guides.filter((guide) => guide.status === "published").length,
     draftGuides: guides.filter((guide) => guide.status !== "published").length,
@@ -472,11 +524,19 @@ export async function getAppRow(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>("select * from apps where id = $1", [id]);
   if (!rows[0]) return null;
-  const otherCount = await countActiveEditorChoiceApps(id);
+  const [otherTotal, otherFeatured, otherArticle] = await Promise.all([
+    countActiveEditorChoiceApps(id),
+    countActiveTierApps("featured", id),
+    countActiveTierApps("article", id),
+  ]);
   return {
     ...toApp(rows[0]),
-    otherEditorChoiceCount: otherCount,
-    editorChoiceSlotsFull: otherCount >= MAX_EDITOR_CHOICE_SLOTS,
+    otherEditorChoiceCount: otherTotal,
+    editorChoiceSlotsFull: otherTotal >= MAX_EDITOR_CHOICE_SLOTS,
+    otherFeaturedCount: otherFeatured,
+    featuredSlotsFull: otherFeatured >= MAX_TIER_SLOTS,
+    otherArticleCount: otherArticle,
+    articleSlotsFull: otherArticle >= MAX_TIER_SLOTS,
   };
 }
 
@@ -511,11 +571,14 @@ export async function saveApp(input: {
   if (!row) throw new Error("App not found");
   const status = cleanStatus(input.status);
 
-  if (input.editorChoice && status === "published") {
-    const otherCount = await countActiveEditorChoiceApps(input.id);
-    if (otherCount >= MAX_EDITOR_CHOICE_SLOTS) {
+  const tier = input.editorChoice ? (input.featuredTier === "article" ? "article" : "featured") : null;
+
+  if (input.editorChoice && status === "published" && tier) {
+    const tierActive = await countActiveTierApps(tier, input.id);
+    if (tierActive >= MAX_TIER_SLOTS) {
+      const tierName = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
       throw new Error(
-        `Cannot enable Editor’s Choice: All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice slots are already taken by other published apps (${otherCount}/${MAX_EDITOR_CHOICE_SLOTS} active). Please uncheck Editor’s Choice on another app first.`
+        `Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken by other published apps (${tierActive}/${MAX_TIER_SLOTS} active). Please uncheck this tier on another app first.`
       );
     }
   }
@@ -534,7 +597,6 @@ export async function saveApp(input: {
   if (slugConflict.length > 0) {
     throw new Error(`The slug "${cleanSlug}" is already in use by another app.`);
   }
-  const tier = input.editorChoice ? (input.featuredTier || "featured") : null;
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
@@ -735,11 +797,12 @@ export async function submitListing(
     return { ok: false as const, message: "Name, website, tagline, description, icon, category, email, and X handle are required." };
   }
   if (plan === "choice") {
-    const activeSlots = await countActiveEditorChoiceApps();
-    if (activeSlots >= MAX_EDITOR_CHOICE_SLOTS) {
+    const activeTierSlots = await countActiveTierApps(tier);
+    if (activeTierSlots >= MAX_TIER_SLOTS) {
+      const tierLabel = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
       return {
         ok: false as const,
-        message: `All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice spots are currently full for this 30-day cycle. Please submit using the Free plan or check back later.`,
+        message: `All ${MAX_TIER_SLOTS} spots for ${tierLabel} are currently full for this 30-day cycle. Please choose the other tier or submit using the Free plan.`,
       };
     }
   }
@@ -844,10 +907,12 @@ export async function approveSubmission(id: string) {
     if (submission.status !== "paid") {
       throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
     }
-    const active = await countActiveEditorChoiceApps();
-    if (active >= MAX_EDITOR_CHOICE_SLOTS) {
+    const targetTier = submission.tier === "article" ? "article" : "featured";
+    const activeTier = await countActiveTierApps(targetTier);
+    if (activeTier >= MAX_TIER_SLOTS) {
+      const tierLabel = targetTier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
       throw new Error(
-        `Cannot approve as Editor’s Choice: All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice slots are currently full (${active}/${MAX_EDITOR_CHOICE_SLOTS} active). Please unpublish or remove Editor’s Choice from another app before approving.`
+        `Cannot approve as ${tierLabel}: All ${MAX_TIER_SLOTS} slots for this tier are currently full (${activeTier}/${MAX_TIER_SLOTS} active). Please unpublish or remove another app from this tier before approving.`
       );
     }
   }

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS } from "./directory.server.ts";
+import { getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
 import { featuredTierWeight, type AppItem } from "./catalog.ts";
 
 test("getNextCycleLabel returns the 30-day rollover date", () => {
@@ -15,8 +15,10 @@ test("getNextCycleLabel returns the 30-day rollover date", () => {
   assert.equal(labelNov, "1 Dec");
 });
 
-test("MAX_EDITOR_CHOICE_SLOTS is strictly 6", () => {
+test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is strictly 3 per tier", () => {
   assert.equal(MAX_EDITOR_CHOICE_SLOTS, 6);
+  assert.equal(MAX_TIER_SLOTS, 3);
+  assert.equal(MAX_TIER_SLOTS * 2, MAX_EDITOR_CHOICE_SLOTS);
 });
 
 test("featuredTierWeight prioritizes Gold (article) over Blue (featured) over standard", () => {

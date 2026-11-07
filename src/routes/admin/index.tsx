@@ -37,7 +37,7 @@ function AdminHome() {
     ["Revenue", money(data.stats.revenueCents)],
     ["Waiting", waiting],
     ["Published apps", data.stats.free + data.stats.paid + data.stats.freemium],
-    ["Editor’s Choice", `${data.stats.editorChoice}/6 slots`],
+    ["Editor’s Choice", `${data.stats.editorChoice}/6 (${data.stats.blueChoice ?? 0}/3 Blue · ${data.stats.goldChoice ?? 0}/3 Gold)`],
     ["Free apps", data.stats.free],
     ["Paid apps", data.stats.paid],
     ["Freemium", data.stats.freemium],
@@ -98,10 +98,22 @@ function AdminHome() {
                     <td className="px-3 py-3">
                       {item.plan === "choice" ? (
                         <div className="flex flex-col items-start gap-0.5">
-                          <Pill tone="choice">{item.plan === "choice" ? "Editor’s Choice" : "Free"}</Pill>
-                          {data.stats.editorChoice >= 6 && (item.status === "pending" || item.status === "paid") ? (
-                            <span className="text-[10px] font-semibold text-rose-600">6/6 full</span>
-                          ) : null}
+                          <Pill tone="choice">
+                            {item.tier === "article" ? "🌟 Gold ($120)" : "🔹 Blue ($99)"}
+                          </Pill>
+                          {item.tier === "article" ? (
+                            (data.stats.goldChoice ?? 0) >= 3 && (item.status === "pending" || item.status === "paid") ? (
+                              <span className="text-[10px] font-semibold text-rose-600">Gold full (3/3)</span>
+                            ) : (
+                              <span className="text-[10px] font-medium text-emerald-600">{Math.max(0, 3 - (data.stats.goldChoice ?? 0))}/3 Gold free</span>
+                            )
+                          ) : (
+                            (data.stats.blueChoice ?? 0) >= 3 && (item.status === "pending" || item.status === "paid") ? (
+                              <span className="text-[10px] font-semibold text-rose-600">Blue full (3/3)</span>
+                            ) : (
+                              <span className="text-[10px] font-medium text-emerald-600">{Math.max(0, 3 - (data.stats.blueChoice ?? 0))}/3 Blue free</span>
+                            )
+                          )}
                         </div>
                       ) : (
                         <Pill tone="off">Free</Pill>
@@ -145,13 +157,23 @@ function AdminHome() {
             <h2 className="text-sm font-semibold text-ink flex items-center gap-1.5">
               <span>🔹</span> Featured Placement ($99 Tier)
             </h2>
-            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
-              Blue Badge
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+                Blue Badge
+              </span>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                (data.stats.blueChoice ?? 0) >= 3 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
+              }`}>
+                {data.stats.blueChoice ?? 0}/3 slots
+              </span>
+            </div>
           </div>
           <p className="mt-1 text-sm leading-relaxed text-body">
             Charged by Dodo: <strong>{money(data.offer.featuredPriceCents ?? data.offer.priceCents)}</strong>, shown marked down from {money(data.offer.featuredCompareCents ?? data.offer.compareCents)}.
           </p>
+          <div className="mt-2 text-xs text-muted">
+            Capacity: <strong>{data.stats.blueChoice ?? 0} active</strong> / 3 max ({Math.max(0, 3 - (data.stats.blueChoice ?? 0))} available)
+          </div>
           <form method="post" action="/api/admin/price" className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <input type="hidden" name="tier" value="featured" />
             <label className="text-[13px] font-medium text-ink">
@@ -174,13 +196,23 @@ function AdminHome() {
             <h2 className="text-sm font-semibold text-ink flex items-center gap-1.5">
               <span>🌟</span> Featured + Medium Article ($120 Tier)
             </h2>
-            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
-              Gold Badge
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+                Gold Badge
+              </span>
+              <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                (data.stats.goldChoice ?? 0) >= 3 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
+              }`}>
+                {data.stats.goldChoice ?? 0}/3 slots
+              </span>
+            </div>
           </div>
           <p className="mt-1 text-sm leading-relaxed text-body">
             Charged by Dodo: <strong>{money(data.offer.articlePriceCents ?? 12000)}</strong>, shown marked down from {money(data.offer.articleCompareCents ?? 24900)}.
           </p>
+          <div className="mt-2 text-xs text-muted">
+            Capacity: <strong>{data.stats.goldChoice ?? 0} active</strong> / 3 max ({Math.max(0, 3 - (data.stats.goldChoice ?? 0))} available)
+          </div>
           <form method="post" action="/api/admin/price" className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
             <input type="hidden" name="tier" value="article" />
             <label className="text-[13px] font-medium text-ink">
