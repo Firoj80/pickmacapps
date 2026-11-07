@@ -67,9 +67,9 @@ function SubmitPage() {
   const price = (offer.priceCents / 100).toFixed(0);
   const compare = (offer.compareCents / 100).toFixed(0);
   const slots = offer.slots ?? {
-    total: 3,
+    total: 6,
     active: 0,
-    remaining: 3,
+    remaining: 6,
     isFull: false,
     nextDate: "next week",
   };
@@ -606,7 +606,7 @@ function SubmitPage() {
                               </p>
                             ) : (
                               <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
-                                * All 3 Editor's Choice spots are currently full for next week
+                                * All 6 Editor's Choice spots are currently full for next week
                               </p>
                             )}
                             {tier === "article" ? (
@@ -623,7 +623,7 @@ function SubmitPage() {
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
                             <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
                             <span>
-                              <strong className="font-semibold text-ink">Top 3 placement</strong> on our directory for 1 week
+                              <strong className="font-semibold text-ink">Top 6 placement</strong> on our directory for 1 week
                               {tier === "article" ? " — express approved within 2 hours and includes an article on Firoj’s Medium profile." : ""}
                             </span>
                           </li>
@@ -808,7 +808,7 @@ function SubmitPage() {
                   A free listing needs our badge, and the link back to your site is nofollow.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 3 spots</strong> at any time to guarantee maximum visibility. You receive Top 3 placement on our directory for 1 week, and after that 1 week your app remains listed permanently with a high-quality follow backlink.
+                  <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 6 spots</strong> at any time to guarantee maximum visibility. You receive Top 6 placement on our directory for 1 week, and after that 1 week your app remains listed permanently with a high-quality follow backlink.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
                   Editor’s Choice costs ${price}, marked down from ${compare} one-time. The amount is charged securely by Dodo from the server.

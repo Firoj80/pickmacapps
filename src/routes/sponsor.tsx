@@ -65,7 +65,7 @@ function SponsorPage() {
 
         <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px]">
           Get immediate visibility, high-intent traffic, and trusted editorial placement on PickMacApps. 
-          Limited to only 3 featured hero slots at a time.
+          Limited to only 6 featured hero slots at a time.
         </p>
 
         {/* Live Metrics Bar */}
@@ -75,7 +75,7 @@ function SponsorPage() {
             <p className="text-[12px] text-muted">Review turnaround</p>
           </div>
           <div className="border-x border-line px-2">
-            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 3</p>
+            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 6</p>
             <p className="text-[12px] text-muted">Hero spots capped</p>
           </div>
           <div>
@@ -234,7 +234,7 @@ function SponsorPage() {
               You can start right from the packages above. You will be guided through entering your app name, URL, screenshot, and details before checkout.
             </Faq>
             <Faq q="How long does the hero spotlight last?">
-              Featured apps hold the top hero spot and Editor's Choice placement across the directory, capped at 3 active apps to ensure each sponsor receives prime visibility.
+              Featured apps hold the top hero spot and Editor's Choice placement across the directory, capped at 6 active apps to ensure each sponsor receives prime visibility.
             </Faq>
           </div>
         </div>

@@ -44,9 +44,11 @@ function AboutPage() {
       </header>
 
       <section className="mt-8 flex items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:p-8">
-        <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-ink text-xl font-bold text-canvas shadow-md">
-          FA
-        </div>
+        <img
+          src="/firoj.jpg"
+          alt="Firoj Alam"
+          className="h-16 w-16 shrink-0 rounded-2xl object-cover shadow-md"
+        />
         <div className="min-w-0">
           <h2 className="text-xl font-semibold text-ink">Firoj Alam</h2>
           <p className="text-sm text-accent font-medium">Curator · Indie Developer · macOS Enthusiast</p>

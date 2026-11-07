@@ -336,7 +336,7 @@ export async function publishedDirectory() {
   };
 }
 
-export const MAX_EDITOR_CHOICE_SLOTS = 3;
+export const MAX_EDITOR_CHOICE_SLOTS = 6;
 
 export function getNextCycleLabel(now = new Date()): string {
   const d = new Date(now);

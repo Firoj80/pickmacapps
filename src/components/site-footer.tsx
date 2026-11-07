@@ -30,7 +30,7 @@ export function SiteFooter() {
                 className="group inline-flex items-center gap-2.5 rounded-full border border-line bg-surface py-1 pr-4 pl-1.5 shadow-xs transition-all hover:border-line-2 hover:bg-surface-2"
               >
                 <img
-                  src="/user1.jpg"
+                  src="/firoj.jpg"
                   alt="Firoj Alam"
                   className="h-6 w-6 shrink-0 rounded-full object-cover"
                 />
