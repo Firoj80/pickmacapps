@@ -207,31 +207,9 @@ function Home() {
             />
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href="/#apps"
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-canvas shadow-sm transition hover:opacity-90"
-            >
-              <MacLogo className="h-[15px] w-[15px]" />
-              Browse the collection
-            </a>
-            <Link
-              to="/submit"
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/80 backdrop-blur-sm px-6 py-3 text-sm font-medium text-ink shadow-sm transition hover:bg-surface-2"
-            >
-              Submit an app
-            </Link>
-          </div>
-
           {directory ? null : (
             <p className="mt-4 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
           )}
-
-          {featuresScanMyDisk(list.map((app) => app.name)) ? (
-            <div className="mt-6 w-full max-w-lg text-left">
-              <ScanMyDiskNote />
-            </div>
-          ) : null}
         </div>
       </section>
 
