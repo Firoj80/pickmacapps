@@ -40,23 +40,23 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
           </div>
         )}
       </div>
-      <div className="flex flex-col p-5">
+      <div className="flex flex-col p-4 sm:p-4.5">
         <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-3">
+          <div className="flex min-w-0 items-center gap-2.5">
             <img
               alt=""
               src={app.icon}
               onError={(event) => {
                 event.currentTarget.src = "/site-favicon.svg";
               }}
-              className="h-10 w-10 shrink-0 rounded-lg object-cover ring-1 ring-line"
+              className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-line"
             />
-            <h3 className="min-w-0 truncate text-xl font-[550] tracking-[-0.025em] text-ink">{app.name}</h3>
+            <h3 className="min-w-0 truncate text-[18px] font-[550] tracking-[-0.025em] text-ink">{app.name}</h3>
           </div>
-          {choice ? <span className="silver-tag shrink-0 rounded-md border px-2 py-1 text-[11px] font-medium">Editor’s Choice</span> : null}
+          {choice ? <span className="silver-tag shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium">Editor’s Choice</span> : null}
         </div>
-        <p className="clamp-2 mt-4 min-h-[2.75rem] text-[14px] leading-[1.45] text-body">{app.tagline}</p>
-        <div className="mt-4 flex flex-col gap-2">
+        <p className="clamp-2 mt-3 min-h-[2.5rem] text-[13.5px] leading-[1.4] text-body">{app.tagline}</p>
+        <div className="mt-3 flex flex-col gap-1.5">
           <Spec label="Category" value={app.categoryName} icon={<LayersIcon />} />
           <Spec label="Pricing" value={pricingLabel[app.pricing]} icon={<TagIcon />} />
           <Spec label="Added" value={addedLabel(app.createdAt)} icon={<ClockIcon />} />

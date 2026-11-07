@@ -115,7 +115,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   const mid = (count - 1) / 2;
 
   return (
-    <div className="relative mt-8 flex items-center justify-center pt-4 pb-2">
+    <div className="relative mt-4 flex items-center justify-center pt-2 pb-1">
       <div className="flex items-center justify-center">
         {apps.map((app, index) => {
           const offset = index - mid;
@@ -135,7 +135,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                 marginLeft: index === 0 ? 0 : -14,
                 transform: `translateY(${translateY}px) rotate(${rotate}deg)`,
               }}
-              className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-[18px] bg-surface shadow-[0_10px_25px_rgba(0,0,0,0.18)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.3)] sm:h-16 sm:w-16 sm:rounded-[20px]"
+              className="group relative h-13 w-13 shrink-0 overflow-hidden rounded-[16px] bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.14)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)] sm:h-15 sm:w-15 sm:rounded-[18px]"
             >
               <img
                 alt={app.name}
@@ -183,19 +183,19 @@ function Home() {
   return (
     <main className="flex-1">
       {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-line px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 hero-grid">
+      <section className="relative overflow-hidden border-b border-line px-4 pt-8 pb-7 sm:px-6 md:pt-12 md:pb-10 hero-grid">
         <div className="mx-auto flex w-full max-w-[860px] flex-col items-center text-center">
-          <h1 className="text-[44px] leading-[1.08] font-bold tracking-[-0.035em] text-ink sm:text-[60px] md:text-[68px]">
+          <h1 className="text-[38px] leading-[1.08] font-bold tracking-[-0.035em] text-ink sm:text-[52px] md:text-[60px]">
             {homeH1.split("Mac")[0]}
             <MacLogo className="mx-1 inline h-[0.76em] w-[0.76em] -translate-y-[0.06em]" />
             Mac{homeH1.split("Mac")[1]}
           </h1>
-          <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px] md:leading-8">
+          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-body sm:text-[17px] md:leading-7">
             A curated shelf of hand-picked Mac apps. Browse the best Mac apps on this shelf by the job they do.
           </p>
 
           {/* Curved app icons stack like reference image */}
-          <div className="mt-4 w-full">
+          <div className="mt-3 w-full">
             <ChoiceIcons
               apps={(() => {
                 const editors = list.filter((app) => isEditorChoice(app));
@@ -207,15 +207,15 @@ function Home() {
           </div>
 
           {directory ? null : (
-            <p className="mt-4 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
+            <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
           )}
         </div>
       </section>
 
       {/* Filter and Content section */}
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 lg:py-7">
         {/* Category dropdown & sorting controls bar */}
-        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex flex-wrap items-center gap-3">
             {/* Category Dropdown */}
             <div className="relative">
@@ -223,7 +223,7 @@ function Home() {
                 aria-label="Filter by category"
                 value={category}
                 onChange={(e) => updateSearch({ cat: e.target.value })}
-                className="h-10 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-9 pl-3.5 text-[14px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
+                className="h-9 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-8 pl-3 text-[13.5px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
               >
                 {heroCategories.map((item) => (
                   <option key={item.id} value={item.id}>
@@ -232,7 +232,7 @@ function Home() {
                 ))}
               </select>
               <svg
-                className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted"
+                className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -247,7 +247,7 @@ function Home() {
           </div>
 
           {/* Sort Tabs */}
-          <div className="inline-flex h-10 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-1 dark:bg-white/10">
+          <div className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-0.5 dark:bg-white/10">
             {(
               [
                 ["hot", "Hot"],
@@ -259,7 +259,7 @@ function Home() {
                 key={id}
                 type="button"
                 onClick={() => updateSearch({ sort: id })}
-                className={`h-8 rounded-lg px-3.5 text-[13px] tracking-[-0.01em] transition-all ${
+                className={`h-7.5 rounded-lg px-3 text-[12.5px] tracking-[-0.01em] transition-all ${
                   sort === id
                     ? "bg-white font-medium text-[#1d1d1f] shadow-sm dark:bg-[#1d1d1f] dark:text-white"
                     : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"

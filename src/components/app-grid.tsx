@@ -44,8 +44,8 @@ export function AppGrid({
 
   return (
     <section id="apps" className="scroll-mt-20">
-      <div className="mb-6 flex items-center gap-5">
-        <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Browse every Mac app</h2>
+      <div className="mb-4 flex items-center gap-4">
+        <h2 className="shrink-0 text-[18px] font-[550] tracking-[-0.025em] text-ink">Browse every Mac app</h2>
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
       </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
@@ -57,7 +57,7 @@ export function AppGrid({
             onChange={(event) => onQuery(event.target.value)}
             placeholder="Search apps..."
             aria-label="Search apps"
-            className="h-11 w-full rounded-lg border border-line bg-surface pr-3.5 pl-10 text-[13.5px] text-ink transition-colors placeholder:text-muted hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
+            className="h-10 w-full rounded-lg border border-line bg-surface pr-3.5 pl-10 text-[13.5px] text-ink transition-colors placeholder:text-muted hover:border-line-2 focus-visible:border-accent focus-visible:ring-1 focus-visible:ring-accent focus-visible:outline-none"
           />
         </div>
         {filters === "all" ? (
