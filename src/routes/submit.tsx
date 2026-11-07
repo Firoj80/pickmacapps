@@ -9,6 +9,10 @@ import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/submit")({
+  validateSearch: (search: Record<string, unknown>): { tier?: "featured" | "article" } => {
+    if (search.tier === "featured" || search.tier === "article") return { tier: search.tier };
+    return {};
+  },
   loader: () => fetchOffer(),
   component: SubmitPage,
   head: ({ matches }) => {
@@ -33,7 +37,8 @@ const field =
   "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
 
 function SubmitPage() {
-  const [plan, setPlan] = useState<"free" | "choice">("free");
+  const { tier } = Route.useSearch();
+  const [plan, setPlan] = useState<"free" | "choice">(tier ? "choice" : "free");
   const [copied, setCopied] = useState(false);
   const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
@@ -604,6 +609,11 @@ function SubmitPage() {
                                 * All 3 Editor's Choice spots are currently full for next week
                               </p>
                             )}
+                            {tier === "article" ? (
+                              <p className="mt-1 text-xs text-body">Featured + article is listed at $120 and includes a Medium article.</p>
+                            ) : tier === "featured" ? (
+                              <p className="mt-1 text-xs text-body">Featured is listed at $99.</p>
+                            ) : null}
                           </div>
                           <Radio selected={!slots.isFull && plan === "choice"} />
                         </div>
@@ -612,6 +622,7 @@ function SubmitPage() {
                             <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
                             <span>
                               <strong className="font-semibold text-ink">Top 3 placement</strong> on our directory for 1 week
+                              {tier === "article" ? ". Includes a special article on Firoj’s Medium profile." : ""}
                             </span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">

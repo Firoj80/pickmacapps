@@ -1,31 +1,99 @@
 import { Link } from "@tanstack/react-router";
+import { useState } from "react";
 
 export function SiteHeader() {
+  const [open, setOpen] = useState(false);
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-        <Link to="/" className="shrink-0 text-[18px] font-medium text-ink transition-opacity hover:opacity-75 sm:text-[20px]">
+      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
+        <Link to="/" className="shrink-0 text-[18px] font-medium text-ink transition-opacity hover:opacity-75 sm:text-[20px]" onClick={() => setOpen(false)}>
           PickMacApps
         </Link>
-        <nav className="flex items-center gap-0.5 overflow-x-auto sm:gap-2">
-          <a href="/#apps" className="hidden shrink-0 items-center rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink sm:inline-flex">
+        <nav className="hidden items-center gap-1 md:flex">
+          <a href="/#apps" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
             Apps
           </a>
-          <Link to="/compare" className="inline-flex shrink-0 items-center rounded-lg px-2 py-2 text-sm text-body transition-colors hover:text-ink sm:px-3">
+          <Link to="/compare" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
             Alternatives
           </Link>
-          <Link to="/blog" className="inline-flex shrink-0 items-center rounded-lg px-2 py-2 text-sm text-body transition-colors hover:text-ink sm:px-3">
+          <Link to="/blog" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
             Blog
           </Link>
-          <Link
-            to="/submit"
-            className="inline-flex items-center rounded-lg border border-line-2 bg-surface px-3.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-2"
-          >
-            Submit
+          <Link to="/sponsor" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
+            Sponsor
           </Link>
         </nav>
+        <div className="flex items-center gap-2">
+          <a href="/#apps" className="hidden rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink sm:inline-flex" aria-label="Search apps">
+            Search
+          </a>
+          <Link
+            to="/submit"
+            className="inline-flex items-center rounded-full bg-ink px-3.5 py-2 text-sm font-medium text-canvas transition hover:opacity-90"
+          >
+            <span className="sm:hidden">Submit</span>
+            <span className="hidden sm:inline">Submit an app</span>
+          </Link>
+          <button
+            type="button"
+            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink md:hidden"
+            aria-expanded={open}
+            aria-label={open ? "Close menu" : "Open menu"}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <CloseIcon /> : <MenuIcon />}
+          </button>
+        </div>
       </div>
+      {open ? (
+        <nav className="border-t border-line bg-canvas px-4 py-3 md:hidden">
+          <ul className="space-y-1">
+            <li>
+              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+                Apps
+              </a>
+            </li>
+            <li>
+              <Link to="/compare" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+                Alternatives
+              </Link>
+            </li>
+            <li>
+              <Link to="/blog" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+                Blog
+              </Link>
+            </li>
+            <li>
+              <Link to="/sponsor" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+                Sponsor
+              </Link>
+            </li>
+            <li>
+              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+                Search
+              </a>
+            </li>
+          </ul>
+        </nav>
+      ) : null}
     </header>
+  );
+}
+
+function MenuIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M4 7h16M4 12h16M4 17h16" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
+      <path d="M6 6l12 12M18 6 6 18" />
+    </svg>
   );
 }
 

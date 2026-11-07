@@ -35,6 +35,11 @@ export const pageCopy = {
     description:
       "Apps are added by hand. Editor’s Choice is a paid placement, not a test score. Listings link to the developer.",
   },
+  sponsor: {
+    title: "Sponsor a Mac App Listing | PickMacApps",
+    description:
+      "Feature a Mac app on PickMacApps. Two one-time placements: $99, or $120 with a special Medium article.",
+  },
   notFound: {
     title: "Page not found",
     description:

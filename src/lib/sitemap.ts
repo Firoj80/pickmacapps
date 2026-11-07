@@ -70,6 +70,7 @@ export function sectionUrls(
       { loc: absoluteUrl(origin, "/about"), lastmod: asLastmod(site.policyUpdated, today) },
       { loc: absoluteUrl(origin, "/how-we-pick"), lastmod: asLastmod(site.policyUpdated, today) },
       { loc: absoluteUrl(origin, "/submit"), lastmod: asLastmod(site.policyUpdated, today) },
+      { loc: absoluteUrl(origin, "/sponsor"), lastmod: asLastmod(site.policyUpdated, today) },
       { loc: absoluteUrl(origin, "/privacy"), lastmod: asLastmod(site.policyUpdated, today) },
     ];
   }

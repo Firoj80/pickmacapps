@@ -94,6 +94,9 @@ export function SiteFooter() {
           <Link to="/compare" className="text-[13px] text-muted transition-colors hover:text-ink">
             Alternatives
           </Link>
+          <Link to="/sponsor" className="text-[13px] text-muted transition-colors hover:text-ink">
+            Sponsor
+          </Link>
           <Link to="/submit" className="text-[13px] text-muted transition-colors hover:text-ink">
             Submit an app
           </Link>

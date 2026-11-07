@@ -18,6 +18,7 @@ import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as RobotsDottxtRouteImport } from './routes/robots[.]txt'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
@@ -85,6 +86,11 @@ const RobotsDottxtRoute = RobotsDottxtRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorRoute = SponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SubmitRoute = SubmitRouteImport.update({
@@ -213,6 +219,7 @@ export interface FileRoutesByFullPath {
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
@@ -247,6 +254,7 @@ export interface FileRoutesByTo {
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
@@ -282,6 +290,7 @@ export interface FileRoutesById {
   '/privacy': typeof PrivacyRoute
   '/robots.txt': typeof RobotsDottxtRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
   '/app/$slug': typeof AppSlugRoute
@@ -318,6 +327,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsor'
     | '/submit'
     | '/admin/login'
     | '/app/$slug'
@@ -352,6 +362,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsor'
     | '/submit'
     | '/admin/login'
     | '/app/$slug'
@@ -386,6 +397,7 @@ export interface FileRouteTypes {
     | '/privacy'
     | '/robots.txt'
     | '/sitemap.xml'
+    | '/sponsor'
     | '/submit'
     | '/admin/login'
     | '/app/$slug'
@@ -421,6 +433,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   RobotsDottxtRoute: typeof RobotsDottxtRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  SponsorRoute: typeof SponsorRoute
   SubmitRoute: typeof SubmitRoute
   AdminLoginRoute: typeof AdminLoginRoute
   AppSlugRoute: typeof AppSlugRoute
@@ -509,6 +522,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsor': {
+      id: '/sponsor'
+      path: '/sponsor'
+      fullPath: '/sponsor'
+      preLoaderRoute: typeof SponsorRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/submit': {
@@ -685,6 +705,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   RobotsDottxtRoute: RobotsDottxtRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  SponsorRoute: SponsorRoute,
   SubmitRoute: SubmitRoute,
   AdminLoginRoute: AdminLoginRoute,
   AppSlugRoute: AppSlugRoute,
