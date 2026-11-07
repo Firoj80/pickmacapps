@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { GuideForm } from "@/components/guide-form";
+import { RichGuideEditor } from "@/components/rich-guide-editor";
 import { AdminShell, Notice, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminGuide, ensureAdminSession } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -37,10 +37,17 @@ function EditGuide() {
     );
   }
   return (
-    <AdminShell title={guide.title} active="guides">
+    <AdminShell title={`Edit: ${guide.title}`} active="guides">
       <Notice {...notice} />
-      <div className="max-w-3xl rounded-2xl border border-line bg-white p-5">
-        <GuideForm isNew={false} slug={guide.slug} title={guide.title} excerpt={guide.excerpt} html={guide.html} status={guide.status} />
+      <div className="max-w-5xl">
+        <RichGuideEditor
+          isNew={false}
+          slug={guide.slug}
+          title={guide.title}
+          excerpt={guide.excerpt}
+          html={guide.html}
+          status={guide.status}
+        />
       </div>
     </AdminShell>
   );

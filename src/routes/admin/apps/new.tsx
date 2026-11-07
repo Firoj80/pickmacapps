@@ -44,7 +44,7 @@ function NewAppPage() {
     <AdminShell
       title="Add New App"
       lede="Direct admin publication. Admin-created apps are permanently exempt from free-listing badge checks."
-      active="apps"
+      active="add_app"
       actions={
         <Link
           to="/admin/apps"

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { GuideForm } from "@/components/guide-form";
+import { RichGuideEditor } from "@/components/rich-guide-editor";
 import { AdminShell } from "@/components/admin-shell";
 import { ensureAdminSession } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -16,7 +16,7 @@ export const Route = createFileRoute("/admin/guides/new")({
   head: ({ matches }) => {
     const seo = buildMetadata({
       title: "New guide",
-      description: "Add a PickMacApps guide.",
+      description: "Add a PickMacApps editorial guide.",
       path: "/admin/guides/new",
       origin: originFrom(matches),
       noindex: true,
@@ -27,9 +27,13 @@ export const Route = createFileRoute("/admin/guides/new")({
 
 function NewGuide() {
   return (
-    <AdminShell title="New guide" lede="Write it as HTML. It stays a draft until you publish." active="guides">
-      <div className="max-w-3xl rounded-2xl border border-line bg-white p-5">
-        <GuideForm isNew slug="" title="" excerpt="" html="<p></p>" status="draft" />
+    <AdminShell
+      title="Write New Guide"
+      lede="Author a comprehensive editorial guide with rich formatting, live reader preview, and image attachments."
+      active="add_guide"
+    >
+      <div className="max-w-5xl">
+        <RichGuideEditor isNew slug="" title="" excerpt="" html="" status="draft" />
       </div>
     </AdminShell>
   );

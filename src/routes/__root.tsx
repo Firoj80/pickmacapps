@@ -116,7 +116,11 @@ function Frame() {
 }
 
 export const Route = createRootRoute({
-  beforeLoad: async () => {
+  beforeLoad: async ({ location }) => {
+    // For admin pages, resolve instantly without querying public directory
+    if (location.pathname.startsWith("/admin")) {
+      return { origin: "", directory: null };
+    }
     let origin = "";
     try {
       origin = await getCachedOrigin();

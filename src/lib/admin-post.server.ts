@@ -1,3 +1,6 @@
+import { randomUUID } from "node:crypto";
+import fs from "node:fs";
+import path from "node:path";
 import { adminCookie, adminSessionOk, clearAdminCookie, passwordsMatch } from "@/lib/admin-auth.server";
 import {
   approveSubmission,
@@ -34,6 +37,32 @@ export async function handleAdminPost(request: Request) {
   }
   if (!adminSessionOk(request.headers.get("cookie"))) return redirect("/admin/login");
   try {
+    if (action === "upload") {
+      const file = form.get("file");
+      if (!file || typeof file === "string" || !(file instanceof Blob)) {
+        return new Response(JSON.stringify({ error: "No image file provided" }), {
+          status: 400,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      const bytes = Buffer.from(await file.arrayBuffer());
+      const mime = file.type || "image/png";
+      let ext = "png";
+      if (mime.includes("jpeg") || mime.includes("jpg")) ext = "jpg";
+      else if (mime.includes("webp")) ext = "webp";
+      else if (mime.includes("gif")) ext = "gif";
+      else if (mime.includes("svg")) ext = "svg";
+
+      const filename = `${randomUUID()}.${ext}`;
+      const uploadDir = path.resolve(process.cwd(), "public", "uploads");
+      await fs.promises.mkdir(uploadDir, { recursive: true });
+      await fs.promises.writeFile(path.join(uploadDir, filename), bytes);
+
+      return new Response(JSON.stringify({ ok: true, url: `/uploads/${filename}` }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
     if (action === "apps") {
       const intent = String(form.get("intent") ?? "save");
       if (intent === "delete") {
