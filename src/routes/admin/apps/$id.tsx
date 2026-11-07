@@ -92,7 +92,7 @@ function EditApp() {
             <option value="rejected">Rejected</option>
           </select>
         </Field>
-        <div className="rounded-xl border border-line bg-[#faf9f5] p-3.5 space-y-2">
+        <div className="rounded-xl border border-line bg-[#faf9f5] p-3.5 space-y-3">
           <label className="flex items-center gap-2 text-sm text-ink cursor-pointer">
             <input
               type="checkbox"
@@ -101,20 +101,39 @@ function EditApp() {
               disabled={app.editorChoiceSlotsFull && !app.editorChoice}
               className="h-4 w-4 rounded border-line text-ink focus:ring-accent"
             />
-            <span className="font-medium">Editor’s Choice</span>
-            <span className="text-xs text-muted">— follow link, no badge check</span>
+            <span className="font-medium">Editor’s Choice / Featured Placement</span>
+            <span className="text-xs text-muted">— follow link, top hero rotation</span>
           </label>
-          <div className="flex flex-wrap items-center justify-between gap-1 text-xs">
+
+          <div className="pt-2 border-t border-line/60">
+            <label htmlFor="featured_tier" className="block text-xs font-medium text-body mb-1.5">
+              Featured Tier & Badge Style
+            </label>
+            <select
+              id="featured_tier"
+              name="featured_tier"
+              defaultValue={app.featuredTier ?? "featured"}
+              className="w-full rounded-lg border border-line bg-white px-3 py-1.5 text-xs text-ink focus:border-accent focus:outline-none"
+            >
+              <option value="featured">🔹 Blue Badge — Featured Placement ($99 Tier)</option>
+              <option value="article">🌟 Golden Badge — Featured + Medium Article ($120 Tier)</option>
+            </select>
+            <p className="mt-1 text-[11px] text-muted">
+              Gold badge apps appear with highest priority at the top, followed by Blue badge apps.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center justify-between gap-1 text-xs pt-1 border-t border-line/60">
             <span className="text-muted">
-              Capacity: {app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0)} / 3 active slots
+              Capacity: {app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0)} / 6 active slots (30-day placement)
             </span>
             {app.editorChoiceSlotsFull && !app.editorChoice ? (
               <span className="font-semibold text-rose-600 dark:text-rose-400">
-                Slots full (3/3). Uncheck another published app to enable.
+                Slots full (6/6). Uncheck another published app to enable.
               </span>
             ) : (
               <span className="text-emerald-700 dark:text-emerald-400 font-medium">
-                {3 - (app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0))} slots available
+                {6 - (app.otherEditorChoiceCount + (app.editorChoice ? 1 : 0))} slots available
               </span>
             )}
           </div>

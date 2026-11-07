@@ -34,6 +34,7 @@ export const submitListingFn = createServerFn({ method: "POST" })
       email: String(data.email ?? "").slice(0, 180),
       xHandle: String(data.xHandle ?? data.x_handle ?? "").slice(0, 80),
       plan: data.plan === "choice" ? "choice" : "free",
+      tier: data.tier === "article" ? "article" : "featured",
     };
   })
   .handler(async ({ data }) => {

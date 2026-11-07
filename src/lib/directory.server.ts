@@ -6,7 +6,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
 import { cleanXHandle } from "@/lib/metadata.server";
-import type { AppItem, Post, Pricing } from "@/lib/catalog";
+import type { AppItem, FeaturedTier, Post, Pricing } from "@/lib/catalog";
 
 type AppRow = {
   id: string;
@@ -21,6 +21,8 @@ type AppRow = {
   category_name: string;
   category_icon: string;
   editor_choice: boolean;
+  featured_tier?: string | null;
+  featured_until?: string | Date | null;
   created_at: string | Date;
   demo: string;
   related: string[] | string;
@@ -80,6 +82,8 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     categoryIcon: row.category_icon,
     featured: false,
     editorChoice: asBool(row.editor_choice),
+    featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
+    featuredUntil: row.featured_until ? iso(row.featured_until) : null,
     createdAt: iso(row.created_at),
     demo: row.demo,
     related: asJson(row.related, []),
@@ -340,9 +344,7 @@ export const MAX_EDITOR_CHOICE_SLOTS = 6;
 
 export function getNextCycleLabel(now = new Date()): string {
   const d = new Date(now);
-  const day = d.getDay(); // 0 is Sunday, 1 is Monday...
-  const daysUntilSunday = (7 - day) % 7 || 7;
-  d.setDate(d.getDate() + daysUntilSunday);
+  d.setDate(d.getDate() + 30);
   const dayNum = d.getDate();
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${dayNum} ${months[d.getMonth()]}`;
@@ -476,6 +478,7 @@ export async function saveApp(input: {
   pricing: string;
   category: string;
   editorChoice: boolean;
+  featuredTier?: FeaturedTier | null;
   status: string;
 }) {
   const sql = await directorySql();
@@ -507,10 +510,13 @@ export async function saveApp(input: {
   if (slugConflict.length > 0) {
     throw new Error(`The slug "${cleanSlug}" is already in use by another app.`);
   }
+  const tier = input.editorChoice ? (input.featuredTier || "featured") : null;
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
-      category = $8, category_name = $9, category_icon = $10, editor_choice = $11, status = $12,
-      icon = $13, demo = $14, updated_at = now()
+      category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
+      featured_tier = $12,
+      featured_until = case when $11 then coalesce(featured_until, now() + interval '30 days') else null end,
+      status = $13, icon = $14, demo = $15, updated_at = now()
      where id = $1`,
     [
       input.id,
@@ -524,6 +530,7 @@ export async function saveApp(input: {
       category.name,
       category.emoji,
       input.editorChoice,
+      tier,
       status,
       input.icon.trim(),
       input.demo.trim(),
@@ -667,10 +674,12 @@ export async function submitListing(
     email: string;
     xHandle?: string;
     plan: string;
+    tier?: string;
   },
   origin: string,
 ) {
   const plan = input.plan === "choice" ? "choice" : "free";
+  const tier = input.tier === "article" ? "article" : "featured";
   const name = input.name.trim();
   const website = input.website.trim();
   const tagline = input.tagline.trim();
@@ -688,7 +697,7 @@ export async function submitListing(
     if (activeSlots >= MAX_EDITOR_CHOICE_SLOTS) {
       return {
         ok: false as const,
-        message: `All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice spots are currently full for next week. Please submit using the Free plan or check back next week.`,
+        message: `All ${MAX_EDITOR_CHOICE_SLOTS} Editor’s Choice spots are currently full for this 30-day cycle. Please submit using the Free plan or check back later.`,
       };
     }
   }
@@ -699,8 +708,8 @@ export async function submitListing(
   const sql = await directorySql();
   const id = randomUUID();
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, badge_ok, status, description, icon, demo, pricing, category)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
     [
       id,
       name,
@@ -709,6 +718,7 @@ export async function submitListing(
       email,
       xHandle,
       plan,
+      tier,
       plan === "free",
       plan === "choice" ? "awaiting_payment" : "pending",
       description,
@@ -780,6 +790,7 @@ export async function approveSubmission(id: string) {
     email: string;
     x_handle?: string;
     plan: string;
+    tier?: string;
     status: string;
   }>("select * from submissions where id = $1", [id]);
   const submission = rows[0];
@@ -812,11 +823,13 @@ export async function approveSubmission(id: string) {
     paragraphs: [],
     tips: [],
   };
+  const isChoice = submission.plan === "choice";
+  const tier = isChoice ? (submission.tier === "article" ? "article" : "featured") : null;
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, demo, status, submitter_email, submitter_x
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,'published',$14,$15)`,
+      editor_choice, featured_tier, featured_until, demo, status, submitter_email, submitter_x
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,'published',$15,$16)`,
     [
       appId,
       submission.app_name,
@@ -825,11 +838,12 @@ export async function approveSubmission(id: string) {
       submission.description || submission.tagline,
       submission.icon || "",
       submission.website,
-      cleanPricing(submission.pricing || (submission.plan === "choice" ? "paid" : "free")),
+      cleanPricing(submission.pricing || (isChoice ? "paid" : "free")),
       category.slug,
       category.name,
       category.emoji,
-      submission.plan === "choice",
+      isChoice,
+      tier,
       submission.demo || "",
       submission.email,
       submission.x_handle || "",

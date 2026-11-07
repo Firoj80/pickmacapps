@@ -221,6 +221,7 @@ function SubmitPage() {
                           email: email.trim(),
                           xHandle: xHandle.trim(),
                           plan,
+                          tier: tier === "article" ? "article" : "featured",
                         },
                       });
                       if (result.checkoutUrl) {
@@ -602,19 +603,21 @@ function SubmitPage() {
                             </div>
                             {!slots.isFull ? (
                               <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
-                                * Only {slots.remaining} {slots.remaining === 1 ? "spot" : "spots"} remaining for next week ( {slots.nextDate} )
+                                * Only {slots.remaining} {slots.remaining === 1 ? "spot" : "spots"} remaining for this 30-day cycle (until {slots.nextDate})
                               </p>
                             ) : (
                               <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
-                                * All 6 Editor's Choice spots are currently full for next week
+                                * All 6 Editor's Choice spots are currently full for this 30-day cycle
                               </p>
                             )}
                             {tier === "article" ? (
                               <p className="mt-1 text-xs text-body">
-                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article ($120):</strong> Approved within 2 hours with dedicated review article.
+                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article ($120):</strong> Approved within 2 hours with dedicated review article and gold badge.
                               </p>
                             ) : tier === "featured" ? (
-                              <p className="mt-1 text-xs text-body">Featured is listed at $99 (approved within 24 hours).</p>
+                              <p className="mt-1 text-xs text-body">
+                                <strong className="text-sky-600 dark:text-sky-400">Featured Placement ($99):</strong> Approved within 24 hours with blue featured badge.
+                              </p>
                             ) : null}
                           </div>
                           <Radio selected={!slots.isFull && plan === "choice"} />
@@ -623,14 +626,14 @@ function SubmitPage() {
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
                             <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
                             <span>
-                              <strong className="font-semibold text-ink">Top 6 placement</strong> on our directory for 1 week
-                              {tier === "article" ? " — express approved within 2 hours and includes an article on Firoj’s Medium profile." : ""}
+                              <strong className="font-semibold text-ink">Top 6 placement</strong> on our directory for 30 days
+                              {tier === "article" ? " — express approved within 2 hours, gold badge, and includes an article on Firoj’s Medium profile." : " with verified blue featured badge."}
                             </span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
                             <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
                             <span>
-                              After 1 week, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory
+                              After 30 days, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory
                             </span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
@@ -808,7 +811,7 @@ function SubmitPage() {
                   A free listing needs our badge, and the link back to your site is nofollow.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 6 spots</strong> at any time to guarantee maximum visibility. You receive Top 6 placement on our directory for 1 week, and after that 1 week your app remains listed permanently with a high-quality follow backlink.
+                  <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 6 spots</strong> at any time to guarantee maximum visibility. You receive Top 6 placement on our directory for 30 days, and after that 30-day period your app remains listed permanently with a high-quality follow backlink.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
                   Editor’s Choice costs ${price}, marked down from ${compare} one-time. The amount is charged securely by Dodo from the server.

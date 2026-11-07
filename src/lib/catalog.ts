@@ -3,6 +3,8 @@ import { normalizeCategorySlug } from "@/lib/shelf-categories";
 
 export type Pricing = "free" | "paid" | "freemium";
 
+export type FeaturedTier = "article" | "featured";
+
 export type AppItem = {
   id: string;
   name: string;
@@ -17,6 +19,8 @@ export type AppItem = {
   categoryIcon: string;
   featured: boolean;
   editorChoice?: boolean;
+  featuredTier?: FeaturedTier | null;
+  featuredUntil?: string | null;
   createdAt: string;
   demo: string;
   related: string[];
@@ -127,6 +131,16 @@ export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
   return next;
 }
 
+export function isEditorChoice(app: AppItem) {
+  return app.editorChoice === true;
+}
+
+export function featuredTierWeight(app: AppItem): number {
+  if (!isEditorChoice(app)) return 0;
+  if (app.featuredTier === "article") return 2; // Priority 1: Gold badge (Featured + Medium Article)
+  return 1; // Priority 2: Blue badge (Featured Placement)
+}
+
 export function shelfApps(
   list: AppItem[] = apps,
   query = "",
@@ -140,11 +154,11 @@ export function shelfApps(
       !needle || app.name.toLowerCase().includes(needle) || app.tagline.toLowerCase().includes(needle);
     return inCategory && matches;
   });
-  return [...sortApps(filtered, order)].sort((a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)));
-}
-
-export function isEditorChoice(app: AppItem) {
-  return app.editorChoice === true;
+  return [...sortApps(filtered, order)].sort((a, b) => {
+    const diff = featuredTierWeight(b) - featuredTierWeight(a);
+    if (diff !== 0) return diff;
+    return 0;
+  });
 }
 
 const homeJobs: { id: string; title: string; line: string; slugs: string[]; guideHref?: string }[] = [
@@ -192,7 +206,7 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[]; guid
 
 /** Editor’s Choice stays its own row. Every other app is grouped by job. */
 export function homeGroups(list: AppItem[], order: "newest" | "name" | "free" = "newest") {
-  const choice = list.filter(isEditorChoice);
+  const choice = [...list.filter(isEditorChoice)].sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
   const rest = new Map(list.filter((app) => !isEditorChoice(app)).map((app) => [app.slug, app]));
   const groups = homeJobs.flatMap((job) => {
     const apps = sortApps(

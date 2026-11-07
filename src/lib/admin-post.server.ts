@@ -48,6 +48,7 @@ export async function handleAdminPost(request: Request) {
         pricing: String(form.get("pricing") ?? ""),
         category: String(form.get("category") ?? ""),
         editorChoice: form.get("editor_choice") === "on",
+        featuredTier: (form.get("featured_tier") as "article" | "featured") || "featured",
         status: String(form.get("status") ?? ""),
       });
       return redirect(`/admin/apps/${form.get("id")}?saved=1`);

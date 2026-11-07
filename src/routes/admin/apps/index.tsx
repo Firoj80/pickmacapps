@@ -94,7 +94,15 @@ function AppsPage() {
                   <td className="px-3 py-3">
                     <div className="flex flex-wrap gap-1.5">
                       <Pill tone={statusTone(app.status)}>{app.status}</Pill>
-                      {app.editorChoice ? <Pill tone="choice">Editor’s Choice</Pill> : null}
+                      {app.editorChoice ? (
+                        app.featuredTier === "article" ? (
+                          <Pill tone="choice">🌟 Gold (Article)</Pill>
+                        ) : (
+                          <span className="inline-flex items-center rounded-full bg-sky-100 px-2 py-0.5 text-[11px] font-medium text-sky-800 dark:bg-sky-950/60 dark:text-sky-300">
+                            🔹 Blue (Featured)
+                          </span>
+                        )
+                      ) : null}
                     </div>
                   </td>
                   <td className="px-3 py-3 text-xs text-muted">{app.editorChoice ? "Not required" : app.badgeStatus}</td>

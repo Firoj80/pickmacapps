@@ -69,13 +69,21 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
             <h3 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-ink group-hover:text-accent">
               {app.name}
             </h3>
-            {/* Verified / Editor badge icon */}
+            {/* Verified / Editor badge icon: Gold for Article, Blue for Featured */}
             {choice ? (
-              <span title="Editor’s Choice" className="flex shrink-0 items-center text-amber-500">
-                <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </span>
+              app.featuredTier === "article" ? (
+                <span title="Editor’s Choice (Featured + Article)" className="flex shrink-0 items-center text-amber-500">
+                  <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                  </svg>
+                </span>
+              ) : (
+                <span title="Featured App" className="flex shrink-0 items-center text-sky-500">
+                  <svg className="h-4 w-4 fill-sky-500" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                  </svg>
+                </span>
+              )
             ) : null}
           </div>
           <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">

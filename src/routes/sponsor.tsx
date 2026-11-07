@@ -5,20 +5,20 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 const featured = [
-  "Premium featured badge",
+  "Blue verified featured badge 🔹",
   "Approved within 24 hours",
-  "Top hero spot on the homepage",
+  "Top hero spot for 30 days",
   "Permanent listing in directory",
   "Social shoutout to Mac enthusiasts",
 ];
 
 const story = [
-  "Premium featured badge",
+  "Golden verified choice badge 🌟",
   "⚡ Approved within 2 hours (Express)",
-  "Top hero spot on the homepage",
-  "Permanent listing in directory",
+  "#1 priority hero spot for 30 days",
   "Dedicated in-depth Medium review article",
   "High-authority SEO backlink to your app",
+  "Permanent listing in directory",
   "Social shoutout to Mac enthusiasts",
   "Priority placement across alternative tables",
 ];
@@ -225,7 +225,7 @@ function SponsorPage() {
           <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
           <div className="mt-8 space-y-3">
             <Faq q="What is the difference between the $99 and $120 tiers?">
-              The $99 tier gives you all core benefits: premium badge, 24h review, top hero placement, and a social shoutout. The $120 tier gives you express approval within 2 hours, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
+              The $99 tier gives you the Blue featured badge, 24h review, top hero placement for 30 days, and a social shoutout. The $120 tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 30 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
             </Faq>
             <Faq q="What if my app isn't accepted?">
               All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
@@ -234,7 +234,7 @@ function SponsorPage() {
               You can start right from the packages above. You will be guided through entering your app name, URL, screenshot, and details before checkout.
             </Faq>
             <Faq q="How long does the hero spotlight last?">
-              Featured apps hold the top hero spot and Editor's Choice placement across the directory, capped at 6 active apps to ensure each sponsor receives prime visibility.
+              Featured apps hold the top hero spot and featured placement across the directory for a full 30 days, capped at 6 active apps to ensure each sponsor receives prime visibility. After 30 days, your app stays listed permanently in the directory.
             </Faq>
           </div>
         </div>

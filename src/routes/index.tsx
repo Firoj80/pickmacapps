@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
-import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
+import { featuredTierWeight, isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
@@ -55,13 +55,19 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
   const next = [...list];
   if (sort === "new") {
-    next.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name));
+    next.sort((a, b) => {
+      const diff = featuredTierWeight(b) - featuredTierWeight(a);
+      if (diff !== 0) return diff;
+      return b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name);
+    });
     return next;
   }
   if (sort === "trending") {
-    next.sort(
-      (a, b) => Number(isEditorChoice(b)) - Number(isEditorChoice(a)) || b.createdAt.localeCompare(a.createdAt),
-    );
+    next.sort((a, b) => {
+      const diff = featuredTierWeight(b) - featuredTierWeight(a);
+      if (diff !== 0) return diff;
+      return b.createdAt.localeCompare(a.createdAt);
+    });
     return next;
   }
   return shelfApps(next);
@@ -194,9 +200,9 @@ function Home() {
             A curated shelf of hand-picked Mac apps. Browse the best Mac apps on this shelf by the job they do.
           </p>
 
-          {/* Curved app icons stack - ONLY Editor's Choice apps */}
+          {/* Curved app icons stack - ONLY Editor's Choice apps sorted by tier */}
           <div className="mt-3 w-full">
-            <ChoiceIcons apps={list.filter((app) => isEditorChoice(app))} />
+            <ChoiceIcons apps={[...list.filter((app) => isEditorChoice(app))].sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a))} />
           </div>
 
           {directory ? null : (
