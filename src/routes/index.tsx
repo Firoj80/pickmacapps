@@ -160,8 +160,8 @@ function Home() {
   const list = publishedApps(directory);
   const chipCategories = directory?.categories?.length ? directory.categories : shelfCategories;
   const heroCategories = [
-    { id: "all", label: "All Categories" },
-    ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
+    { id: "all", label: "All Categories", emoji: "✨" },
+    ...chipCategories.map((item) => ({ id: item.slug, label: item.name, emoji: item.emoji })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
   const shown = arrangeHero(
@@ -207,9 +207,9 @@ function Home() {
 
       {/* Filter and Content section */}
       <div className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 lg:py-7">
-        {/* Controls bar: Category dropdown on left, immediately followed by Hot / Latest / Trending */}
-        <div className="mb-5 flex flex-wrap items-center gap-3">
-          {/* Category Dropdown */}
+        {/* Controls bar shifted to the RIGHT side */}
+        <div className="mb-5 flex flex-wrap items-center justify-end gap-3">
+          {/* Category Dropdown with emoji icon */}
           <div className="relative">
             <select
               aria-label="Filter by category"
@@ -219,7 +219,7 @@ function Home() {
             >
               {heroCategories.map((item) => (
                 <option key={item.id} value={item.id}>
-                  {item.label}
+                  {item.emoji ? `${item.emoji} ` : ""}{item.label}
                 </option>
               ))}
             </select>
@@ -237,7 +237,7 @@ function Home() {
             </svg>
           </div>
 
-          {/* Sort Tabs (right next to category dropdown) */}
+          {/* Sort Tabs */}
           <div className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-0.5 dark:bg-white/10">
             {(
               [
