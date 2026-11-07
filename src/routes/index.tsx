@@ -288,32 +288,7 @@ function Home() {
             ))}
           </div>
         </div>
-              {(
-                [
-                  ["hot", "Hot"],
-                  ["new", "Latest"],
-                  ["trending", "Trending"],
-                ] as const
-              ).map(([id, label]) => (
-                <button
-                  key={id}
-                  type="button"
-                  onClick={() => updateSearch({ sort: id })}
-                  className={`h-8 rounded-full px-3.5 text-[13px] tracking-[-0.01em] transition-colors ${
-                    sort === id
-                      ? "bg-white font-medium text-[#1d1d1f] shadow-[0_1px_2px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#1d1d1f] dark:text-white"
-                      : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"
-                  }`}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
         <AppGrid
           apps={shown}
           query={q}
