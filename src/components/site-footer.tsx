@@ -21,17 +21,25 @@ export function SiteFooter() {
             <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-muted">
               A curated shelf of hand-picked Mac apps.
             </p>
-            <a
-              href={creatorUrl}
-              target="_blank"
-              rel="noreferrer"
-              className="mt-4 inline-flex text-[13px] text-ink underline decoration-line underline-offset-4 transition-colors hover:decoration-ink"
-            >
-              Created by @hiii_firoj
-            </a>
-            <p className="mt-6 max-w-[36ch] text-[13px] leading-relaxed text-muted">
-              New listings are added by hand. Follow updates on X.
-            </p>
+            {/* Curated by badge pill */}
+            <div className="mt-4">
+              <a
+                href={creatorUrl}
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-2.5 rounded-full border border-line bg-surface py-1 pr-4 pl-1.5 shadow-xs transition-all hover:border-line-2 hover:bg-surface-2"
+              >
+                <img
+                  src="/user1.jpg"
+                  alt="Firoj Alam"
+                  className="h-6 w-6 shrink-0 rounded-full object-cover"
+                />
+                <div className="flex items-center gap-1.5 text-[13px]">
+                  <span className="text-muted">Curated by</span>
+                  <span className="font-semibold text-ink group-hover:underline">Firoj Alam</span>
+                </div>
+              </a>
+            </div>
           </div>
           <div className="lg:col-span-4">
             <p className="text-[13px] font-semibold text-ink">Categories</p>
