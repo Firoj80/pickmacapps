@@ -4,37 +4,78 @@ import { useState } from "react";
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
+  const handleSearchClick = (e: React.MouseEvent) => {
+    const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement | null;
+    if (searchInput) {
+      e.preventDefault();
+      searchInput.focus();
+      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  };
+
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/80 backdrop-blur-xl">
-      <div className="mx-auto flex h-14 max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
-        <Link to="/" className="shrink-0 text-[18px] font-medium text-ink transition-opacity hover:opacity-75 sm:text-[20px]" onClick={() => setOpen(false)}>
-          PickMacApps
-        </Link>
-        <nav className="hidden items-center gap-1 md:flex">
-          <a href="/#apps" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
-            Apps
+      <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6">
+        {/* Left: Brand Logo + Primary Nav links */}
+        <div className="flex items-center gap-7">
+          <Link
+            to="/"
+            className="flex items-center gap-2 text-[17px] font-bold tracking-tight text-ink transition hover:opacity-80"
+            onClick={() => setOpen(false)}
+          >
+            <span>PickMac</span>
+            <span className="inline-flex items-center justify-center text-[18px]">💻</span>
+            <span>Apps</span>
+          </Link>
+
+          <nav className="hidden items-center gap-5 text-[14px] text-body md:flex">
+            <a href="/#apps" className="transition-colors hover:text-ink">
+              Apps
+            </a>
+            <Link to="/compare" className="transition-colors hover:text-ink">
+              Alternatives
+            </Link>
+            <Link to="/blog" className="transition-colors hover:text-ink">
+              Blog
+            </Link>
+          </nav>
+        </div>
+
+        {/* Right side: Sponsor link, Search pill button, and Submit Action */}
+        <div className="flex items-center gap-3">
+          <Link
+            to="/sponsor"
+            className="hidden items-center gap-1.5 text-[14px] font-medium text-body transition-colors hover:text-ink sm:inline-flex"
+          >
+            <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 text-[10px]">
+              ✔
+            </span>
+            <span>Sponsor</span>
+          </Link>
+
+          {/* Search Pill with Cmd+K style icon */}
+          <a
+            href="/#apps"
+            onClick={handleSearchClick}
+            className="hidden items-center gap-2.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-[13px] text-muted transition hover:border-line-2 hover:text-ink sm:inline-flex"
+            aria-label="Search apps"
+          >
+            <SearchSmallIcon />
+            <span className="text-[13px]">Search</span>
+            <kbd className="rounded border border-line-2 bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted">
+              ⌘K
+            </kbd>
           </a>
-          <Link to="/compare" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
-            Alternatives
-          </Link>
-          <Link to="/blog" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
-            Blog
-          </Link>
-          <Link to="/sponsor" className="rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink">
-            Sponsor
-          </Link>
-        </nav>
-        <div className="flex items-center gap-2">
-          <a href="/#apps" className="hidden rounded-lg px-3 py-2 text-sm text-body transition-colors hover:text-ink sm:inline-flex" aria-label="Search apps">
-            Search
-          </a>
+
+          {/* Submit App Primary Action Button */}
           <Link
             to="/submit"
-            className="inline-flex items-center rounded-full bg-ink px-3.5 py-2 text-sm font-medium text-canvas transition hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-full bg-ink px-4 py-2 text-[13.5px] font-medium text-canvas shadow-sm transition hover:opacity-90"
           >
-            <span className="sm:hidden">Submit</span>
-            <span className="hidden sm:inline">Submit an app</span>
+            <span>Submit an app</span>
           </Link>
+
+          {/* Mobile Menu Toggle Button */}
           <button
             type="button"
             className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-ink md:hidden"
@@ -46,31 +87,34 @@ export function SiteHeader() {
           </button>
         </div>
       </div>
+
+      {/* Mobile navigation panel */}
       {open ? (
         <nav className="border-t border-line bg-canvas px-4 py-3 md:hidden">
           <ul className="space-y-1">
             <li>
-              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Apps
               </a>
             </li>
             <li>
-              <Link to="/compare" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+              <Link to="/compare" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Alternatives
               </Link>
             </li>
             <li>
-              <Link to="/blog" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+              <Link to="/blog" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Blog
               </Link>
             </li>
             <li>
-              <Link to="/sponsor" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
-                Sponsor
+              <Link to="/sponsor" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base text-ink">
+                <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 text-[10px]">✔</span>
+                <span>Sponsor</span>
               </Link>
             </li>
             <li>
-              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-3 text-base text-ink">
+              <a href="/#apps" onClick={(e) => { setOpen(false); handleSearchClick(e); }} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Search
               </a>
             </li>
@@ -78,6 +122,15 @@ export function SiteHeader() {
         </nav>
       ) : null}
     </header>
+  );
+}
+
+function SearchSmallIcon() {
+  return (
+    <svg className="h-3.5 w-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="11" cy="11" r="7" />
+      <path d="m20 20-3.5-3.5" />
+    </svg>
   );
 }
 
