@@ -16,7 +16,7 @@ export function SiteFooter() {
 
   return (
     <footer className="mt-auto border-t border-line bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
+      <div className="mx-auto max-w-[1360px] px-4 py-12 sm:px-6 lg:py-16">
         {/* 4-Column Main Layout matching Macapp Supply reference */}
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-12 lg:gap-10">
           {/* Column 1: Brand & Creator */}
