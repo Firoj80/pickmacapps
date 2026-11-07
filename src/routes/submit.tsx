@@ -38,7 +38,9 @@ const field =
 
 function SubmitPage() {
   const { tier } = Route.useSearch();
-  const [plan, setPlan] = useState<"free" | "choice">(tier ? "choice" : "free");
+  const [selectedPlan, setSelectedPlan] = useState<"free" | "featured" | "article">(
+    tier === "article" ? "article" : tier === "featured" ? "featured" : "featured"
+  );
   const [copied, setCopied] = useState(false);
   const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
@@ -64,17 +66,12 @@ function SubmitPage() {
   const [fetchMessage, setFetchMessage] = useState("");
 
   const offer = Route.useLoaderData();
-  const isArticle = tier === "article";
-  const price = (
-    (isArticle
-      ? (offer.articlePriceCents ?? 12000)
-      : (offer.featuredPriceCents ?? offer.priceCents)) / 100
-  ).toFixed(0);
-  const compare = (
-    (isArticle
-      ? (offer.articleCompareCents ?? 24900)
-      : (offer.featuredCompareCents ?? offer.compareCents)) / 100
-  ).toFixed(0);
+  const featuredPrice = ((offer.featuredPriceCents ?? offer.priceCents) / 100).toFixed(0);
+  const featuredCompare = ((offer.featuredCompareCents ?? offer.compareCents) / 100).toFixed(0);
+  const articlePrice = ((offer.articlePriceCents ?? 12000) / 100).toFixed(0);
+  const articleCompare = ((offer.articleCompareCents ?? 24900) / 100).toFixed(0);
+
+  const currentPrice = selectedPlan === "article" ? articlePrice : featuredPrice;
   const slots = offer.slots ?? {
     total: 6,
     active: 0,
@@ -82,7 +79,7 @@ function SubmitPage() {
     isFull: false,
     nextDate: "next week",
   };
-  const paid = plan === "choice";
+  const paid = selectedPlan === "featured" || selectedPlan === "article";
 
   // Always use the real canonical website URL for external badge embeds
   const siteOrigin = "https://www.picmacapps.store";
@@ -214,7 +211,7 @@ function SubmitPage() {
                       setBadgeMessage("Both email and X handle are mandatory to submit.");
                       return;
                     }
-                    if (plan === "free" && badge !== "ok") return;
+                    if (selectedPlan === "free" && badge !== "ok") return;
                     setSending(true);
                     try {
                       const result = await submitListingFn({
@@ -229,8 +226,8 @@ function SubmitPage() {
                           category,
                           email: email.trim(),
                           xHandle: xHandle.trim(),
-                          plan,
-                          tier: tier === "article" ? "article" : "featured",
+                          plan: paid ? "choice" : "free",
+                          tier: selectedPlan === "article" ? "article" : "featured",
                         },
                       });
                       if (result.checkoutUrl) {
@@ -546,22 +543,23 @@ function SubmitPage() {
                   <div className="rounded-xl border border-line bg-surface p-4">
                     <h2 className="mb-3 text-base font-[550] tracking-[-0.025em] text-ink">Listing</h2>
                     <div className="space-y-2.5">
+                      {/* Option 1: Free */}
                       <button
                         type="button"
-                        onClick={() => setPlan("free")}
+                        onClick={() => setSelectedPlan("free")}
                         className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
-                          plan === "free" ? "border-accent bg-accent/5" : "border-line hover:border-line-2"
+                          selectedPlan === "free" ? "border-accent bg-accent/5" : "border-line hover:border-line-2"
                         }`}
                       >
                         <span className="absolute -top-2 left-3 rounded-full bg-ink px-2 py-0.5 text-[10px] font-medium text-canvas">
-                          Popular
+                          Free
                         </span>
                         <div className="flex items-center justify-between">
                           <div className="flex items-baseline gap-1.5">
                             <span className="text-lg font-bold text-ink">Free</span>
                             <span className="text-xs text-muted">after review</span>
                           </div>
-                          <Radio selected={plan === "free"} />
+                          <Radio selected={selectedPlan === "free"} />
                         </div>
                         <ul className="mt-2.5 space-y-1 border-t border-line pt-2.5">
                           {[
@@ -576,26 +574,28 @@ function SubmitPage() {
                           ))}
                         </ul>
                       </button>
+
+                      {/* Option 2: Featured Placement ($99) */}
                       <button
                         type="button"
                         onClick={() => {
                           if (slots.isFull) {
-                            setPlan("free");
+                            setSelectedPlan("free");
                             return;
                           }
-                          setPlan("choice");
+                          setSelectedPlan("featured");
                         }}
                         className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
                           slots.isFull
                             ? "border-line bg-surface-2 opacity-80 cursor-not-allowed"
-                            : plan === "choice"
-                              ? "border-accent bg-accent/5"
+                            : selectedPlan === "featured"
+                              ? "border-sky-500 bg-sky-500/5 ring-1 ring-sky-500/30"
                               : "border-line hover:border-line-2"
                         }`}
                       >
                         <div className="absolute -top-2 left-3 flex items-center gap-1.5">
-                          <span className="rounded-full bg-surface-2 border border-line px-2 py-0.5 text-[10px] font-medium text-body">
-                            Editor's Choice
+                          <span className="rounded-full bg-sky-500/10 border border-sky-500/30 px-2 py-0.5 text-[10px] font-semibold text-sky-600 dark:text-sky-400">
+                            🔹 Blue Badge · Featured Placement
                           </span>
                           {slots.isFull ? (
                             <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
@@ -606,68 +606,111 @@ function SubmitPage() {
                         <div className="flex items-center justify-between">
                           <div>
                             <div className="flex items-baseline gap-1.5">
-                              <span className="text-lg font-bold text-ink">${price}</span>
-                              <span className="text-xs text-muted line-through">${compare}</span>
+                              <span className="text-lg font-bold text-ink">${featuredPrice}</span>
+                              <span className="text-xs text-muted line-through">${featuredCompare}</span>
                               <span className="text-xs text-muted">one-time</span>
                             </div>
+                            <p className="mt-0.5 text-xs font-medium text-sky-700 dark:text-sky-300">
+                              Approved within 24 hours · Blue verified badge
+                            </p>
                             {!slots.isFull ? (
                               <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                                 * Only {slots.remaining} {slots.remaining === 1 ? "spot" : "spots"} remaining for this 30-day cycle (until {slots.nextDate})
                               </p>
-                            ) : (
-                              <p className="mt-1 text-xs font-semibold text-rose-600 dark:text-rose-400">
-                                * All 6 Editor's Choice spots are currently full for this 30-day cycle
-                              </p>
-                            )}
-                            {tier === "article" ? (
-                              <p className="mt-1 text-xs text-body">
-                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article (${price}):</strong> Approved within 2 hours with dedicated review article and gold badge.
-                              </p>
-                            ) : tier === "featured" ? (
-                              <p className="mt-1 text-xs text-body">
-                                <strong className="text-sky-600 dark:text-sky-400">Featured Placement (${price}):</strong> Approved within 24 hours with blue featured badge.
-                              </p>
                             ) : null}
                           </div>
-                          <Radio selected={!slots.isFull && plan === "choice"} />
+                          <Radio selected={!slots.isFull && selectedPlan === "featured"} />
                         </div>
                         <ul className="mt-2.5 space-y-1.5 border-t border-line pt-2.5">
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <strong className="font-semibold text-ink">Top 6 placement</strong> on our directory for 30 days
-                              {tier === "article" ? " — express approved within 2 hours, gold badge, and includes an article on Firoj’s Medium profile." : " with verified blue featured badge."}
-                            </span>
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-sky-500" />
+                            <span><strong className="font-semibold text-ink">Top 6 placement</strong> on our directory for 30 days</span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              After 30 days, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory
-                            </span>
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-sky-500" />
+                            <span>After 30 days, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory</span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <strong className="font-semibold text-ink">Featured at the top</strong> of alternative pages
-                            </span>
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-sky-500" />
+                            <span><strong className="font-semibold text-ink">High-quality follow backlink</strong> to boost your SEO</span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <strong className="font-semibold text-ink">Dedicated blog post</strong> for your app, including competitor comparisons
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-sky-500" />
+                            <span><strong className="font-semibold text-ink">Featured at the top</strong> of alternative pages</span>
+                          </li>
+                        </ul>
+                      </button>
+
+                      {/* Option 3: Featured + Medium Article ($120) */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (slots.isFull) {
+                            setSelectedPlan("free");
+                            return;
+                          }
+                          setSelectedPlan("article");
+                        }}
+                        className={`relative w-full rounded-lg border-2 px-3.5 py-3 text-left transition-all ${
+                          slots.isFull
+                            ? "border-line bg-surface-2 opacity-80 cursor-not-allowed"
+                            : selectedPlan === "article"
+                              ? "border-amber-500 bg-amber-500/5 ring-1 ring-amber-500/30"
+                              : "border-line hover:border-line-2"
+                        }`}
+                      >
+                        <div className="absolute -top-2 left-3 flex items-center gap-1.5">
+                          <span className="rounded-full bg-gradient-to-r from-amber-500 to-fuchsia-500 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs">
+                            🌟 Gold Badge · Best Exposure 🔥
+                          </span>
+                          {slots.isFull ? (
+                            <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-bold text-white uppercase tracking-wider">
+                              Sold out
                             </span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-baseline gap-1.5">
+                              <span className="text-lg font-bold text-ink">${articlePrice}</span>
+                              <span className="text-xs text-muted line-through">${articleCompare}</span>
+                              <span className="text-xs text-muted">one-time</span>
+                            </div>
+                            <p className="mt-0.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                              ⚡ Express approved within 2 hours · Full Medium review article
+                            </p>
+                            {!slots.isFull ? (
+                              <p className="mt-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                                * Only {slots.remaining} {slots.remaining === 1 ? "spot" : "spots"} remaining for this 30-day cycle (until {slots.nextDate})
+                              </p>
+                            ) : null}
+                          </div>
+                          <Radio selected={!slots.isFull && selectedPlan === "article"} />
+                        </div>
+                        <ul className="mt-2.5 space-y-1.5 border-t border-line pt-2.5">
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span><strong className="font-semibold text-ink">#1 Priority Top Spot</strong> on our directory for 30 days</span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <strong className="font-semibold text-ink">High-quality backlink</strong> to boost your SEO
-                            </span>
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span><strong className="font-semibold text-ink">Express 2-hour review turnaround</strong> and approval</span>
                           </li>
                           <li className="flex items-start gap-1.5 text-[11px] text-body">
-                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-ink" />
-                            <span>
-                              <strong className="font-semibold text-ink">Hundreds of monthly visitors</strong> discovering your app
-                            </span>
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span><strong className="font-semibold text-ink">Dedicated in-depth review article</strong> on Firoj Alam's Medium profile</span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span><strong className="font-semibold text-ink">High-authority SEO backlink</strong> to boost your SEO</span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span>After 30 days, you get <strong className="font-semibold text-ink">listed permanently</strong> on the directory</span>
+                          </li>
+                          <li className="flex items-start gap-1.5 text-[11px] text-body">
+                            <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-amber-500" />
+                            <span><strong className="font-semibold text-ink">Featured at the top</strong> of alternative pages</span>
                           </li>
                         </ul>
                       </button>
@@ -801,9 +844,9 @@ function SubmitPage() {
                           : !hasXHandle
                             ? "Enter your X handle to submit"
                             : paid && slots.isFull
-                              ? "Editor’s Choice slots are full · Select Free"
+                              ? "Slots are full · Select Free"
                               : paid
-                                ? `Continue to payment · $${price}`
+                                ? `Continue to payment · $${currentPrice}`
                                 : badge === "ok"
                                   ? "Submit your app"
                                   : "Verify your badge to submit"}
@@ -823,7 +866,7 @@ function SubmitPage() {
                   <strong className="font-semibold text-ink">Editor’s Choice is strictly limited to 6 spots</strong> at any time to guarantee maximum visibility. You receive Top 6 placement on our directory for 30 days, and after that 30-day period your app remains listed permanently with a high-quality follow backlink.
                 </p>
                 <p className="text-[15px] leading-relaxed text-body">
-                  Editor’s Choice costs ${price}, marked down from ${compare} one-time. The amount is charged securely by Dodo from the server.
+                  Paid placement starts at ${featuredPrice}, marked down from ${featuredCompare} one-time. The amount is charged securely by Dodo from the server.
                 </p>
               </div>
             </div>
