@@ -527,8 +527,8 @@ export async function publicOffer(): Promise<PublicOffer> {
 
 export async function adminStats() {
   const sql = await directorySql();
-  const apps = await sql.query<{ pricing: string; status: string; editor_choice: boolean; featured_tier: string | null }>(
-    "select pricing, status, editor_choice, featured_tier from apps",
+  const apps = await sql.query<{ pricing: string; status: string; editor_choice: boolean; featured_tier: string | null; is_hot?: boolean }>(
+    "select pricing, status, editor_choice, featured_tier, is_hot from apps",
   );
   const guides = await sql.query<{ status: string }>("select status from guides");
   const revenue = await sql.query<{ cents: string }>(
@@ -539,6 +539,76 @@ export async function adminStats() {
     (app) => app.editor_choice && (app.featured_tier === "featured" || !app.featured_tier),
   ).length;
   const goldChoice = live.filter((app) => app.editor_choice && app.featured_tier === "article").length;
+  const hotCount = live.filter((app) => app.is_hot).length;
+
+  let views7d = 0;
+  let views30d = 0;
+  let topApps7d: { id: string; name: string; slug: string; icon: string; views: number }[] = [];
+  try {
+    const v7 = await sql.query<{ total: string }>(
+      `select coalesce(sum(views), 0)::text as total from app_views_daily where view_date >= current_date - interval '7 days'`,
+    );
+    views7d = Number(v7[0]?.total ?? 0);
+
+    const v30 = await sql.query<{ total: string }>(
+      `select coalesce(sum(views), 0)::text as total from app_views_daily where view_date >= current_date - interval '30 days'`,
+    );
+    views30d = Number(v30[0]?.total ?? 0);
+
+    const top = await sql.query<{ id: string; name: string; slug: string; icon: string; views: string }>(
+      `select a.id, a.name, a.slug, a.icon, coalesce(sum(v.views), 0)::text as views
+       from apps a
+       join app_views_daily v on v.app_id = a.id
+       where v.view_date >= current_date - interval '7 days'
+       group by a.id, a.name, a.slug, a.icon
+       order by sum(v.views) desc
+       limit 5`,
+    );
+    topApps7d = top.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      views: Number(r.views),
+    }));
+  } catch (err) {
+    console.error("adminStats views query error:", err);
+  }
+
+  let hotApps: { id: string; name: string; slug: string; icon: string }[] = [];
+  let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
+  let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
+  try {
+    const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string }>(
+      "select id, name, slug, icon from apps where status = 'published' and is_hot = true order by updated_at desc limit 12",
+    );
+    hotApps = hotRows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, icon: r.icon }));
+
+    const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by created_at desc",
+    );
+    blueOccupants = blueRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      featuredUntil: r.featured_until ? String(r.featured_until) : null,
+    }));
+
+    const goldRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and featured_tier = 'article' order by created_at desc",
+    );
+    goldOccupants = goldRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      featuredUntil: r.featured_until ? String(r.featured_until) : null,
+    }));
+  } catch (err) {
+    console.error("adminStats occupants query error:", err);
+  }
+
   return {
     free: live.filter((app) => app.pricing === "free").length,
     paid: live.filter((app) => app.pricing === "paid").length,
@@ -546,11 +616,34 @@ export async function adminStats() {
     editorChoice: live.filter((app) => app.editor_choice).length,
     blueChoice,
     goldChoice,
+    hotCount,
+    views7d,
+    views30d,
+    topApps7d,
+    hotApps,
+    blueOccupants,
+    goldOccupants,
     pendingApps: apps.filter((app) => app.status === "pending").length,
     guides: guides.filter((guide) => guide.status === "published").length,
     draftGuides: guides.filter((guide) => guide.status !== "published").length,
     revenueCents: Number(revenue[0]?.cents ?? 0),
   };
+}
+
+export async function toggleAppHot(id: string) {
+  const sql = await directorySql();
+  const rows = await sql.query<{ id: string; is_hot: boolean }>(
+    "select id, is_hot from apps where id = $1 limit 1",
+    [id],
+  );
+  if (!rows[0]) return null;
+  const nextHot = !rows[0].is_hot;
+  await sql.query(
+    "update apps set is_hot = $1, updated_at = now() where id = $2",
+    [nextHot, id],
+  );
+  await audit(sql, nextHot ? "mark_hot" : "unmark_hot", id, `Hot set to ${nextHot}`);
+  return { id, isHot: nextHot };
 }
 
 async function audit(sql: Sql, action: string, target: string, detail = "") {

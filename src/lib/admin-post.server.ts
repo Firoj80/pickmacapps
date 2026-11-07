@@ -9,6 +9,7 @@ import {
   saveGuide,
   setChoicePrice,
   setPackagePrice,
+  toggleAppHot,
 } from "@/lib/directory.server";
 
 function redirect(location: string, cookie?: string) {
@@ -87,6 +88,14 @@ export async function handleAdminPost(request: Request) {
     if (action === "approve") {
       await approveSubmission(String(form.get("id") ?? ""));
       return redirect("/admin?saved=approved");
+    }
+    if (action === "toggle-hot") {
+      const id = String(form.get("id") ?? "");
+      const returnTo = String(form.get("return_to") ?? "/admin/apps");
+      if (id) {
+        await toggleAppHot(id);
+      }
+      return redirect(returnTo);
     }
     if (action === "reject") {
       await rejectSubmission(String(form.get("id") ?? ""));

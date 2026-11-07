@@ -1,13 +1,13 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { GuideForm } from "@/components/guide-form";
 import { AdminShell, Notice, useAdminNotice } from "@/components/admin-shell";
-import { fetchAdminGuide, requireAdmin } from "@/lib/directory.fn";
+import { fetchAdminGuide, ensureAdminSession } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/guides/$slug")({
   beforeLoad: async () => {
     try {
-      await requireAdmin();
+      await ensureAdminSession();
     } catch {
       throw redirect({ href: "/admin/login" });
     }

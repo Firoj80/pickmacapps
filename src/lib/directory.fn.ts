@@ -50,10 +50,62 @@ async function adminOnly() {
   if (!requestIsAdmin()) throw new Error("ADMIN_REQUIRED");
 }
 
+let _adminSessionOk = false;
+let _adminCheckedAt = 0;
+let _adminCheckPromise: Promise<boolean> | null = null;
+const ADMIN_CHECK_TTL_MS = 3 * 60 * 1000; // 3 minutes
+
+export async function ensureAdminSession(): Promise<boolean> {
+  // Always verify on the server side
+  if (typeof window === "undefined") {
+    await requireAdmin();
+    return true;
+  }
+  // Client-side cache: if verified recently, return instantly
+  const now = Date.now();
+  if (_adminSessionOk && now - _adminCheckedAt < ADMIN_CHECK_TTL_MS) {
+    return true;
+  }
+  if (_adminCheckPromise) return _adminCheckPromise;
+  _adminCheckPromise = requireAdmin()
+    .then((res) => {
+      _adminSessionOk = true;
+      _adminCheckedAt = Date.now();
+      _adminCheckPromise = null;
+      return res;
+    })
+    .catch((err) => {
+      _adminSessionOk = false;
+      _adminCheckedAt = 0;
+      _adminCheckPromise = null;
+      throw err;
+    });
+  return _adminCheckPromise;
+}
+
+export function invalidateAdminSessionCache() {
+  _adminSessionOk = false;
+  _adminCheckedAt = 0;
+  _adminCheckPromise = null;
+}
+
 export const requireAdmin = createServerFn({ method: "GET" }).handler(async () => {
   await adminOnly();
   return true;
 });
+
+export const toggleAppHotFn = createServerFn({ method: "POST" })
+  .validator((input: unknown) => {
+    const data = typeof input === "object" && input ? (input as Record<string, unknown>) : {};
+    return {
+      id: String(data.id ?? ""),
+    };
+  })
+  .handler(async ({ data }) => {
+    await adminOnly();
+    const { toggleAppHot } = await import("./directory.server");
+    return toggleAppHot(data.id);
+  });
 
 export const fetchAdminHome = createServerFn({ method: "GET" }).handler(async () => {
   await adminOnly();

@@ -78,11 +78,20 @@ export function AdminShell({
   actions?: ReactNode;
   children: ReactNode;
 }) {
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
+
   return (
     <div className="min-h-screen bg-[#f4f3ef] lg:grid lg:grid-cols-[232px_minmax(0,1fr)]">
+      {isLoading ? (
+        <div
+          role="status"
+          aria-label="Loading page"
+          className="fixed top-0 left-0 right-0 z-50 h-[3px] bg-gradient-to-r from-accent via-amber-400 to-sky-500 animate-pulse shadow-xs"
+        />
+      ) : null}
       <aside className="border-b border-line bg-white lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r lg:border-b-0">
         <div className="px-5 pt-5 pb-3">
-          <Link to="/admin" className="font-display text-[17px] font-semibold tracking-tight text-ink">
+          <Link to="/admin" preload="intent" className="font-display text-[17px] font-semibold tracking-tight text-ink">
             PickMacApps
           </Link>
           <p className="text-[11px] font-medium tracking-[0.16em] text-muted uppercase">Admin</p>
@@ -92,14 +101,19 @@ export function AdminShell({
             <Link
               key={item.id}
               to={item.to}
-              className={`block rounded-lg px-3 py-2 text-sm whitespace-nowrap ${
+              preload="intent"
+              className={`block rounded-lg px-3 py-2 text-sm whitespace-nowrap transition-colors ${
                 active === item.id ? "bg-ink font-medium text-canvas" : "text-body hover:bg-[#f4f3ef]"
               }`}
             >
               {item.label}
             </Link>
           ))}
-          <Link to="/" className="block rounded-lg px-3 py-2 text-sm whitespace-nowrap text-muted hover:bg-[#f4f3ef]">
+          <Link
+            to="/"
+            preload="intent"
+            className="block rounded-lg px-3 py-2 text-sm whitespace-nowrap text-muted transition-colors hover:bg-[#f4f3ef]"
+          >
             View site
           </Link>
         </nav>

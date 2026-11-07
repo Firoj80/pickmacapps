@@ -6,6 +6,8 @@ import { routeTree } from "./routeTree.gen";
 export function getRouter() {
   return createRouter({
     routeTree,
+    defaultPreload: "intent",
+    defaultPreloadStaleTime: 30_000,
     defaultErrorComponent: AppErrorComponent,
     defaultNotFoundComponent: () => (
       <Missing title="Page not found" body="That page isn't part of the directory." />
