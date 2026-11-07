@@ -206,7 +206,7 @@ function Home() {
       </section>
 
       {/* Filter and Content section */}
-      <div className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 lg:py-7">
+      <div className="mx-auto w-full max-w-[1360px] px-4 py-5 sm:px-6 lg:py-7">
         {/* Controls bar shifted to the RIGHT side */}
         <div className="mb-5 flex flex-wrap items-center justify-end gap-3">
           {/* Category Dropdown with emoji icon */}

@@ -82,7 +82,7 @@ export function AppGrid({
       {visible.length === 0 ? (
         <p className="mt-10 text-[15px] text-body">No apps match that.</p>
       ) : (
-        <div className="mt-6 grid grid-cols-1 gap-7 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {slice.map((app) => (
             <AppCard key={app.id} app={app} />
           ))}
