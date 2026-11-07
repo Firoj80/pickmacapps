@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
-import { featuredTierWeight, type AppItem } from "./catalog.ts";
+import { appPriorityWeight, featuredTierWeight, type AppItem } from "./catalog.ts";
 
 test("getNextCycleLabel returns the 30-day rollover date", () => {
   // 2026-10-31 + 30 days is Nov 30
@@ -31,4 +31,20 @@ test("featuredTierWeight prioritizes Gold (article) over Blue (featured) over st
   assert.equal(featuredTierWeight(standardApp), 0);
   assert.ok(featuredTierWeight(goldApp) > featuredTierWeight(blueApp));
   assert.ok(featuredTierWeight(blueApp) > featuredTierWeight(standardApp));
+});
+
+test("appPriorityWeight places Hot apps directly below Gold and Blue featured apps", () => {
+  const goldApp = { editorChoice: true, featuredTier: "article", isHot: false } as AppItem;
+  const blueApp = { editorChoice: true, featuredTier: "featured", isHot: false } as AppItem;
+  const hotApp = { editorChoice: false, isHot: true } as AppItem;
+  const standardApp = { editorChoice: false, isHot: false } as AppItem;
+
+  assert.equal(appPriorityWeight(goldApp), 3);
+  assert.equal(appPriorityWeight(blueApp), 2);
+  assert.equal(appPriorityWeight(hotApp), 1);
+  assert.equal(appPriorityWeight(standardApp), 0);
+
+  assert.ok(appPriorityWeight(goldApp) > appPriorityWeight(blueApp));
+  assert.ok(appPriorityWeight(blueApp) > appPriorityWeight(hotApp));
+  assert.ok(appPriorityWeight(hotApp) > appPriorityWeight(standardApp));
 });

@@ -21,6 +21,8 @@ export type AppItem = {
   editorChoice?: boolean;
   featuredTier?: FeaturedTier | null;
   featuredUntil?: string | null;
+  isHot?: boolean;
+  views7d?: number;
   createdAt: string;
   demo: string;
   related: string[];
@@ -141,6 +143,21 @@ export function featuredTierWeight(app: AppItem): number {
   return 1; // Priority 2: Blue badge (Featured Placement)
 }
 
+/**
+ * Priority ranking on default / Hot shelf:
+ * 1. Gold badge (weight 3)
+ * 2. Blue badge (weight 2)
+ * 3. Hot apps with fire icon (weight 1)
+ * 4. Standard catalog apps (weight 0)
+ */
+export function appPriorityWeight(app: AppItem): number {
+  if (isEditorChoice(app)) {
+    return app.featuredTier === "article" ? 3 : 2;
+  }
+  if (app.isHot) return 1;
+  return 0;
+}
+
 export function shelfApps(
   list: AppItem[] = apps,
   query = "",
@@ -155,7 +172,7 @@ export function shelfApps(
     return inCategory && matches;
   });
   return [...sortApps(filtered, order)].sort((a, b) => {
-    const diff = featuredTierWeight(b) - featuredTierWeight(a);
+    const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
     return 0;
   });

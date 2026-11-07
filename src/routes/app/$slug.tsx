@@ -4,6 +4,7 @@ import { Missing } from "@/components/missing";
 import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
+import { recordAppViewFn } from "@/lib/directory.fn";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
@@ -40,6 +41,9 @@ export const Route = createFileRoute("/app/$slug")({
   beforeLoad: ({ params, context }) => {
     const found = publishedApps(context.directory).some((app) => app.slug === params.slug);
     if (!found) throw notFound();
+  },
+  loader: ({ params }) => {
+    void recordAppViewFn({ data: { slug: params.slug } }).catch(() => {});
   },
   component: AppPage,
   notFoundComponent: () => <Missing title="App not found" body="That Mac app isn't in the directory." />,

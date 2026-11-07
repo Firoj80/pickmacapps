@@ -44,6 +44,13 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
           </div>
         )}
 
+        {/* Hot Badge on Preview Canvas */}
+        {app.isHot && !choice ? (
+          <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10.5px] font-bold text-white shadow-xs backdrop-blur-md">
+            <span>🔥 Hot</span>
+          </div>
+        ) : null}
+
         {/* Top-Right Arrow Action Circle Indicator */}
         <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
           <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -84,6 +91,11 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
                   </svg>
                 </span>
               )
+            ) : null}
+            {app.isHot ? (
+              <span title="Hot App" className="flex shrink-0 items-center text-sm" role="img" aria-label="Hot">
+                🔥
+              </span>
             ) : null}
           </div>
           <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">

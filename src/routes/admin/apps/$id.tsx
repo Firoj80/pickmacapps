@@ -160,6 +160,25 @@ function EditApp() {
             </div>
           </div>
         </div>
+
+        {/* Hot App Toggle */}
+        <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5 dark:border-rose-950 dark:bg-rose-950/20">
+          <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer">
+            <input
+              type="checkbox"
+              name="is_hot"
+              defaultChecked={app.isHot}
+              className="h-4 w-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500"
+            />
+            <span className="font-semibold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
+              <span>🔥 Mark as Hot App</span>
+            </span>
+            <span className="text-xs text-muted">
+              — displays fire badge on cards and ranks directly below paid featured apps
+            </span>
+          </label>
+        </div>
+
         <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
           Save listing
         </button>

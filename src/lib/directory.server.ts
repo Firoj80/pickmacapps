@@ -23,6 +23,8 @@ type AppRow = {
   editor_choice: boolean;
   featured_tier?: string | null;
   featured_until?: string | Date | null;
+  is_hot?: boolean;
+  views_7d?: number | string;
   created_at: string | Date;
   demo: string;
   related: string[] | string;
@@ -84,6 +86,8 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     editorChoice: asBool(row.editor_choice),
     featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
     featuredUntil: row.featured_until ? iso(row.featured_until) : null,
+    isHot: asBool(row.is_hot),
+    views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
     demo: row.demo,
     related: asJson(row.related, []),
@@ -294,6 +298,20 @@ async function ensureSeed(sql: Sql) {
   } catch (err) {
     console.error("ensureSeed settings failed:", err);
   }
+  try {
+    await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
+    await sql.query(
+      `create table if not exists app_views_daily (
+        app_id text not null,
+        view_date date not null default current_date,
+        views integer not null default 1,
+        primary key (app_id, view_date)
+      )`,
+    );
+    await sql.query("create index if not exists idx_app_views_daily_date on app_views_daily (view_date)");
+  } catch (err) {
+    console.error("ensureSeed is_hot & views failed:", err);
+  }
 }
 
 export async function directorySql() {
@@ -308,9 +326,39 @@ export async function directorySql() {
   return sql;
 }
 
+export async function recordAppView(slugOrId: string) {
+  if (!slugOrId) return;
+  try {
+    const sql = await directorySql();
+    await sql.query(
+      `insert into app_views_daily (app_id, view_date, views)
+       select id, current_date, 1
+       from apps
+       where slug = $1 or id = $1
+       limit 1
+       on conflict (app_id, view_date)
+       do update set views = app_views_daily.views + 1`,
+      [slugOrId],
+    );
+  } catch (err) {
+    console.error("recordAppView failed:", err);
+  }
+}
+
 export async function publishedDirectory() {
   const sql = await directorySql();
-  const appRows = await sql.query<AppRow>("select * from apps where status = 'published' order by created_at desc");
+  const appRows = await sql.query<AppRow>(
+    `select a.*, coalesce(v.views_7d, 0) as views_7d
+     from apps a
+     left join (
+       select app_id, sum(views)::int as views_7d
+       from app_views_daily
+       where view_date >= current_date - interval '7 days'
+       group by app_id
+     ) v on v.app_id = a.id
+     where a.status = 'published'
+     order by a.created_at desc`,
+  );
   const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
   const apps = appRows.map(toApp);
   let categories: ShelfCategory[] = [];
@@ -563,6 +611,7 @@ export async function saveApp(input: {
   category: string;
   editorChoice: boolean;
   featuredTier?: FeaturedTier | null;
+  isHot?: boolean;
   status: string;
 }) {
   const sql = await directorySql();
@@ -602,7 +651,7 @@ export async function saveApp(input: {
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
       featured_tier = $12,
       featured_until = case when $11 then coalesce(featured_until, now() + interval '30 days') else null end,
-      status = $13, icon = $14, demo = $15, updated_at = now()
+      status = $13, icon = $14, demo = $15, is_hot = $16, updated_at = now()
      where id = $1`,
     [
       input.id,
@@ -620,6 +669,7 @@ export async function saveApp(input: {
       status,
       input.icon.trim(),
       input.demo.trim(),
+      input.isHot === true,
     ],
   );
   await audit(sql, "save-app", input.slug, status);

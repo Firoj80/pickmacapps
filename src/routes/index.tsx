@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
-import { featuredTierWeight, isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
+import { appPriorityWeight, featuredTierWeight, isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
@@ -55,21 +55,31 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
   const next = [...list];
   if (sort === "new") {
+    // Latest: Featured apps on top, then all latest added apps by createdAt desc
     next.sort((a, b) => {
       const diff = featuredTierWeight(b) - featuredTierWeight(a);
       if (diff !== 0) return diff;
-      return b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name);
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeB - timeA || a.name.localeCompare(b.name);
     });
     return next;
   }
   if (sort === "trending") {
+    // Trending: Featured apps on top, then all most viewed apps in the last 7 days
     next.sort((a, b) => {
       const diff = featuredTierWeight(b) - featuredTierWeight(a);
       if (diff !== 0) return diff;
-      return b.createdAt.localeCompare(a.createdAt);
+      const vA = a.views7d ?? 0;
+      const vB = b.views7d ?? 0;
+      if (vB !== vA) return vB - vA;
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeB - timeA || a.name.localeCompare(b.name);
     });
     return next;
   }
+  // Hot tab: Gold apps (1st), Blue apps (2nd), Hot 🔥 apps (3rd), then standard apps
   return shelfApps(next);
 }
 
@@ -247,9 +257,9 @@ function Home() {
           <div className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-0.5 dark:bg-white/10">
             {(
               [
-                ["hot", "Hot"],
-                ["new", "Latest"],
-                ["trending", "Trending"],
+                ["hot", "🔥 Hot"],
+                ["new", "✨ Latest"],
+                ["trending", "📈 Trending"],
               ] as const
             ).map(([id, label]) => (
               <button

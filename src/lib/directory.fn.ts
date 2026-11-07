@@ -105,3 +105,14 @@ export const fetchAdminGuide = createServerFn({ method: "GET" })
     const { getGuide } = await import("./directory.server");
     return getGuide(data.slug);
   });
+
+export const recordAppViewFn = createServerFn({ method: "POST" })
+  .validator((input: unknown) => {
+    const slug = typeof input === "object" && input && "slug" in input ? String(input.slug) : "";
+    return { slug };
+  })
+  .handler(async ({ data }) => {
+    if (!data.slug) return;
+    const { recordAppView } = await import("./directory.server");
+    await recordAppView(data.slug);
+  });
