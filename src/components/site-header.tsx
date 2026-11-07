@@ -14,9 +14,7 @@ export function SiteHeader() {
             className="flex items-center gap-2 text-[17px] font-bold tracking-tight text-ink transition hover:opacity-80"
             onClick={() => setOpen(false)}
           >
-            <span>PickMac</span>
-            <span className="inline-flex items-center justify-center text-[18px]">💻</span>
-            <span>Apps</span>
+            <span>PickMacApps</span>
           </Link>
 
           <nav className="hidden items-center gap-5 text-[14px] text-body md:flex">

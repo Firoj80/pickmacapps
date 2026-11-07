@@ -44,7 +44,7 @@ const homeFaqs = [
   },
 ];
 
-type HeroSort = "hot" | "new" | "trending";
+type HeroSort = "hot" | "new" | "trending" | "free";
 
 function inHeroCategory(app: AppItem, category: string) {
   if (category === "all") return true;
@@ -55,7 +55,7 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
   const next = [...list];
   if (sort === "new") {
-    // Latest: Featured apps on top, then Hot apps, then all latest added apps by createdAt desc
+    // Latest/Newest: Featured apps on top, then Hot apps, then all latest added apps by createdAt desc
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
@@ -79,6 +79,17 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
     });
     return next;
   }
+  if (sort === "free") {
+    // Free: Featured apps (if free) on top, then Hot apps, then latest free apps
+    next.sort((a, b) => {
+      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
+      if (pDiff !== 0) return pDiff;
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeB - timeA || a.name.localeCompare(b.name);
+    });
+    return next;
+  }
   // Hot tab: Gold apps (1st), Blue apps (2nd), Hot 🔥 apps (3rd), then standard apps
   return shelfApps(next);
 }
@@ -96,7 +107,7 @@ export const Route = createFileRoute("/")({
     const next: { q?: string; cat?: string; sort?: HeroSort } = {};
     if (typeof search.q === "string" && search.q) next.q = search.q;
     if (typeof search.cat === "string" && search.cat && search.cat !== "all") next.cat = search.cat;
-    if (search.sort === "new" || search.sort === "trending") next.sort = search.sort;
+    if (search.sort === "new" || search.sort === "trending" || search.sort === "hot" || search.sort === "free") next.sort = search.sort;
     return next;
   },
   component: Home,
@@ -176,12 +187,16 @@ function Home() {
   const list = publishedApps(directory);
   const chipCategories = directory?.categories?.length ? directory.categories : shelfCategories;
   const heroCategories = [
-    { id: "all", label: "All Categories", emoji: "✨" },
+    { id: "all", label: "All categories", emoji: "✨" },
     ...chipCategories.map((item) => ({ id: item.slug, label: item.name, emoji: item.emoji })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
   const shown = arrangeHero(
-    list.filter((app) => inHeroCategory(app, category)),
+    list.filter((app) => {
+      if (!inHeroCategory(app, category)) return false;
+      if (sort === "free" && app.pricing !== "free") return false;
+      return true;
+    }),
     sort,
   );
 
@@ -222,70 +237,17 @@ function Home() {
       </section>
 
       {/* Filter and Content section */}
-      <div className="mx-auto w-full max-w-[1360px] px-4 py-5 sm:px-6 lg:py-7">
-        {/* Controls bar shifted to the RIGHT side */}
-        <div className="mb-5 flex flex-wrap items-center justify-end gap-3">
-          {/* Category Dropdown with emoji icon */}
-          <div className="relative">
-            <select
-              aria-label="Filter by category"
-              value={category}
-              onChange={(e) => updateSearch({ cat: e.target.value })}
-              className="h-9 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-8 pl-3 text-[13.5px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
-            >
-              {heroCategories.map((item) => (
-                <option key={item.id} value={item.id}>
-                  {item.emoji ? `${item.emoji} ` : ""}{item.label}
-                </option>
-              ))}
-            </select>
-            <svg
-              className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="m6 9 6 6 6-6" />
-            </svg>
-          </div>
-
-          {/* Sort Tabs */}
-          <div className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-0.5 dark:bg-white/10">
-            {(
-              [
-                ["hot", "🔥 Hot"],
-                ["new", "✨ Latest"],
-                ["trending", "📈 Trending"],
-              ] as const
-            ).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => updateSearch({ sort: id })}
-                className={`h-7.5 rounded-lg px-3 text-[12.5px] tracking-[-0.01em] transition-all ${
-                  sort === id
-                    ? "bg-white font-medium text-[#1d1d1f] shadow-sm dark:bg-[#1d1d1f] dark:text-white"
-                    : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"
-                }`}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>
-
+      <div className="mx-auto w-full max-w-[1360px] px-4 py-6 sm:px-6 lg:py-8">
         <AppGrid
           apps={shown}
           query={q}
-          category="all"
+          category={category}
+          sort={sort}
+          categories={heroCategories}
           arranged
-          filters="search"
           onQuery={(value) => updateSearch({ q: value })}
-          onCategory={() => {}}
+          onCategory={(value) => updateSearch({ cat: value })}
+          onSort={(value) => updateSearch({ sort: value })}
         />
 
         <section className="mt-20">

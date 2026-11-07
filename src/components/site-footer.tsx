@@ -23,9 +23,6 @@ export function SiteFooter() {
           <div className="col-span-2 sm:col-span-2 lg:col-span-4">
             <Link to="/" className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-tight text-ink">
               <span>PickMacApps</span>
-              <span className="text-base" role="img" aria-label="macapp">
-                💻
-              </span>
             </Link>
             <p className="mt-3 max-w-[28ch] text-[13px] leading-relaxed text-muted">
               A curated shelf of beautifully designed macOS apps.

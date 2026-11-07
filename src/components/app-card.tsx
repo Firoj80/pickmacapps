@@ -44,12 +44,26 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
           </div>
         )}
 
-        {/* Hot Badge on Preview Canvas */}
-        {app.isHot && !choice ? (
-          <div className="absolute top-3 left-3 flex items-center gap-1 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10.5px] font-bold text-white shadow-xs backdrop-blur-md">
-            <span>🔥 Hot</span>
-          </div>
-        ) : null}
+        {/* Badges on Preview Canvas (Top-Left) */}
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+          {app.isHot && !choice ? (
+            <div className="flex items-center gap-1 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10.5px] font-bold text-white shadow-xs backdrop-blur-md">
+              <span>🔥 Hot</span>
+            </div>
+          ) : null}
+
+          <span
+            className={`flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold tracking-tight shadow-xs backdrop-blur-md ${
+              app.pricing === "free"
+                ? "bg-emerald-600/90 text-white ring-1 ring-emerald-400/40"
+                : app.pricing === "freemium"
+                ? "bg-sky-600/90 text-white ring-1 ring-sky-400/40"
+                : "bg-black/65 text-white/90 ring-1 ring-white/20"
+            }`}
+          >
+            {pricingLabel(app.pricing)}
+          </span>
+        </div>
 
         {/* Top-Right Arrow Action Circle Indicator */}
         <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
@@ -72,31 +86,45 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
         />
 
         <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <h3 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-ink group-hover:text-accent">
-              {app.name}
-            </h3>
-            {/* Verified / Editor badge icon: Gold for Article, Blue for Featured */}
-            {choice ? (
-              app.featuredTier === "article" ? (
-                <span title="Editor’s Choice (Featured + Article)" className="flex shrink-0 items-center text-amber-500">
-                  <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
+          <div className="flex items-center justify-between gap-1.5">
+            <div className="flex min-w-0 items-center gap-1.5">
+              <h3 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-ink group-hover:text-accent">
+                {app.name}
+              </h3>
+              {/* Verified / Editor badge icon: Gold for Article, Blue for Featured */}
+              {choice ? (
+                app.featuredTier === "article" ? (
+                  <span title="Editor’s Choice (Featured + Article)" className="flex shrink-0 items-center text-amber-500">
+                    <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                  </span>
+                ) : (
+                  <span title="Featured App" className="flex shrink-0 items-center text-sky-500">
+                    <svg className="h-4 w-4 fill-sky-500" viewBox="0 0 24 24">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                    </svg>
+                  </span>
+                )
+              ) : null}
+              {app.isHot ? (
+                <span title="Hot App" className="flex shrink-0 items-center text-sm" role="img" aria-label="Hot">
+                  🔥
                 </span>
-              ) : (
-                <span title="Featured App" className="flex shrink-0 items-center text-sky-500">
-                  <svg className="h-4 w-4 fill-sky-500" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
-                </span>
-              )
-            ) : null}
-            {app.isHot ? (
-              <span title="Hot App" className="flex shrink-0 items-center text-sm" role="img" aria-label="Hot">
-                🔥
-              </span>
-            ) : null}
+              ) : null}
+            </div>
+
+            <span
+              className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none ${
+                app.pricing === "free"
+                  ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400"
+                  : app.pricing === "freemium"
+                  ? "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400"
+                  : "bg-surface-2 text-muted ring-1 ring-line"
+              }`}
+            >
+              {pricingLabel(app.pricing)}
+            </span>
           </div>
           <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">
             {app.tagline}
