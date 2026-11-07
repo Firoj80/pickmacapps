@@ -110,28 +110,45 @@ export const Route = createFileRoute("/")({
 
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
-  const tilts = [-8, -3, 4, 8, -5, 3, -2];
+  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread
+  const count = apps.length;
+  const mid = (count - 1) / 2;
+
   return (
-    <div className="mt-8 flex items-center pl-1">
-      {apps.map((app, index) => (
-        <Link
-          key={app.slug}
-          to="/app/$slug"
-          params={{ slug: app.slug }}
-          title={app.name}
-          style={{ zIndex: index + 1, marginLeft: index === 0 ? 0 : -16, transform: `rotate(${tilts[index % tilts.length]}deg)` }}
-          className="relative h-14 w-14 shrink-0 overflow-hidden rounded-[18px] bg-white shadow-[0_6px_16px_rgba(0,0,0,0.12)] ring-2 ring-white transition hover:z-20 hover:scale-105"
-        >
-          <img
-            alt=""
-            src={app.icon}
-            onError={(event) => {
-              event.currentTarget.src = "/site-favicon.svg";
-            }}
-            className="h-full w-full object-cover"
-          />
-        </Link>
-      ))}
+    <div className="relative mt-8 flex items-center justify-center pt-4 pb-2">
+      <div className="flex items-center justify-center">
+        {apps.map((app, index) => {
+          const offset = index - mid;
+          // Arc calculation: lift center up, curve down on sides
+          const translateY = Math.pow(Math.abs(offset), 1.35) * 4;
+          const rotate = offset * 4.5;
+          const zIndex = Math.round(50 - Math.abs(offset) * 2);
+
+          return (
+            <Link
+              key={app.slug}
+              to="/app/$slug"
+              params={{ slug: app.slug }}
+              title={app.name}
+              style={{
+                zIndex,
+                marginLeft: index === 0 ? 0 : -14,
+                transform: `translateY(${translateY}px) rotate(${rotate}deg)`,
+              }}
+              className="group relative h-14 w-14 shrink-0 overflow-hidden rounded-[18px] bg-surface shadow-[0_10px_25px_rgba(0,0,0,0.18)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.3)] sm:h-16 sm:w-16 sm:rounded-[20px]"
+            >
+              <img
+                alt={app.name}
+                src={app.icon}
+                onError={(event) => {
+                  event.currentTarget.src = "/site-favicon.svg";
+                }}
+                className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+              />
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -166,71 +183,111 @@ function Home() {
 
   return (
     <main className="flex-1">
-      <section className="px-4 pt-12 pb-8 sm:px-6 md:pt-20">
-        <div className="mx-auto w-full max-w-[1200px]">
-          <h1 className="max-w-5xl text-[42px] leading-[1.05] font-bold tracking-[-0.035em] text-ink md:text-[68px]">
+      {/* Hero Section */}
+      <section className="relative overflow-hidden border-b border-line px-4 pt-16 pb-14 sm:px-6 md:pt-24 md:pb-20 hero-grid">
+        <div className="mx-auto flex w-full max-w-[860px] flex-col items-center text-center">
+          <h1 className="text-[44px] leading-[1.08] font-bold tracking-[-0.035em] text-ink sm:text-[60px] md:text-[68px]">
             {homeH1.split("Mac")[0]}
-            <MacLogo className="mx-0.5 inline h-[0.78em] w-[0.78em] -translate-y-[0.04em]" />
+            <MacLogo className="mx-1 inline h-[0.76em] w-[0.76em] -translate-y-[0.06em]" />
             Mac{homeH1.split("Mac")[1]}
           </h1>
-          <p className="mt-6 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
-            A curated shelf of hand-picked Mac apps.
+          <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px] md:leading-8">
+            Skip the endless lists. Discover genuinely useful, beautifully built Mac apps curated for creators, developers, and power users.
           </p>
-          <p className="mt-3 max-w-xl text-base leading-6 text-body md:text-lg md:leading-7">
-            Browse the best Mac apps on this shelf by the job they do.
-          </p>
-          {directory ? null : (
-            <p className="mt-4 max-w-xl text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
-          )}
-          {featuresScanMyDisk(list.map((app) => app.name)) ? (
-            <div className="mt-6 max-w-xl">
-              <ScanMyDiskNote />
-            </div>
-          ) : null}
-          <div className="mt-10 flex flex-wrap items-center gap-3">
+
+          {/* Curved app icons stack like reference image */}
+          <div className="mt-4 w-full">
+            <ChoiceIcons
+              apps={(() => {
+                const editors = list.filter((app) => isEditorChoice(app));
+                if (editors.length >= 7) return editors.slice(0, 9);
+                const rest = list.filter((app) => !isEditorChoice(app));
+                return [...editors, ...rest].slice(0, 9);
+              })()}
+            />
+          </div>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <a
               href="/#apps"
-              className="inline-flex items-center gap-2 rounded-full bg-ink px-5 py-3 text-sm font-medium text-canvas transition hover:opacity-90"
+              className="inline-flex items-center gap-2 rounded-full bg-ink px-6 py-3 text-sm font-medium text-canvas shadow-sm transition hover:opacity-90"
             >
               <MacLogo className="h-[15px] w-[15px]" />
               Browse the collection
             </a>
             <Link
               to="/submit"
-              className="inline-flex items-center gap-2 rounded-full border border-line bg-canvas px-5 py-3 text-sm font-medium text-ink transition hover:bg-surface-2"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-surface/80 backdrop-blur-sm px-6 py-3 text-sm font-medium text-ink shadow-sm transition hover:bg-surface-2"
             >
               Submit an app
             </Link>
           </div>
-          <ChoiceIcons apps={list.filter((app) => isEditorChoice(app)).slice(0, 7)} />
-          <div className="mt-8 flex flex-col gap-3 md:flex-row md:items-center">
-            <div className="-mx-4 min-w-0 md:mx-0 md:flex-1">
-              <div className="flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
-                {heroCategories.map((item) => {
-                  const active = category === item.id;
-                  return (
-                    <button
-                      key={item.id}
-                      type="button"
-                      onClick={() => updateSearch({ cat: item.id })}
-                      className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[14px] font-normal tracking-[-0.016em] transition-colors ${
-                        active
-                          ? "bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]"
-                          : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-white/10 dark:text-[#f5f5f7] dark:hover:bg-white/[0.16]"
-                      }`}
-                    >
-                      {item.id === "pick" ? (
-                        <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-                          <path d="M12 2.2 14.7 8l6.3.6-4.8 4.1 1.5 6.1L12 15.8 6.3 18.8l1.5-6.1L3 8.6 9.3 8 12 2.2z" />
-                        </svg>
-                      ) : null}
-                      {item.label}
-                    </button>
-                  );
-                })}
-              </div>
+
+          {directory ? null : (
+            <p className="mt-4 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
+          )}
+
+          {featuresScanMyDisk(list.map((app) => app.name)) ? (
+            <div className="mt-6 w-full max-w-lg text-left">
+              <ScanMyDiskNote />
             </div>
-            <div className="inline-flex h-9 shrink-0 items-center self-start rounded-full bg-[#e8e8ed] p-0.5 dark:bg-white/10 md:self-auto">
+          ) : null}
+        </div>
+      </section>
+
+      {/* Filter and Content section */}
+      <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
+        {/* Category chips and sorting bar */}
+        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center">
+          <div className="-mx-4 min-w-0 md:mx-0 md:flex-1">
+            <div className="flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
+              {heroCategories.map((item) => {
+                const active = category === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    type="button"
+                    onClick={() => updateSearch({ cat: item.id })}
+                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[14px] font-normal tracking-[-0.016em] transition-colors ${
+                      active
+                        ? "bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]"
+                        : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-white/10 dark:text-[#f5f5f7] dark:hover:bg-white/[0.16]"
+                    }`}
+                  >
+                    {item.id === "pick" ? (
+                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
+                        <path d="M12 2.2 14.7 8l6.3.6-4.8 4.1 1.5 6.1L12 15.8 6.3 18.8l1.5-6.1L3 8.6 9.3 8 12 2.2z" />
+                      </svg>
+                    ) : null}
+                    {item.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="inline-flex h-9 shrink-0 items-center self-start rounded-full bg-[#e8e8ed] p-0.5 dark:bg-white/10 md:self-auto">
+            {(
+              [
+                ["hot", "Hot"],
+                ["new", "Latest"],
+                ["trending", "Trending"],
+              ] as const
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => updateSearch({ sort: id })}
+                className={`h-8 rounded-full px-3.5 text-[13px] tracking-[-0.01em] transition-colors ${
+                  sort === id
+                    ? "bg-white font-medium text-[#1d1d1f] shadow-[0_1px_2px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#1d1d1f] dark:text-white"
+                    : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
               {(
                 [
                   ["hot", "Hot"],
