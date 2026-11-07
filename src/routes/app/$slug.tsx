@@ -2,7 +2,8 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { ScanMyDiskNote } from "@/components/scanmydisk-note";
-import { isEditorChoice, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { appPairs } from "@/lib/compare";
 import { publishedApps } from "@/lib/app-seed";
 import { recordAppViewFn } from "@/lib/directory.fn";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
@@ -97,6 +98,11 @@ function AppPage() {
   );
   const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 4);
   const choice = isEditorChoice(app);
+
+  const matchups = appPairs(app.slug, {
+    apps: allApps,
+    posts: directory?.posts ?? posts,
+  });
 
   return (
     <main className="flex-1">
@@ -243,6 +249,109 @@ function AppPage() {
             <div className="mt-8 whitespace-pre-line text-base leading-[1.75] text-body">
               {app.description}
             </div>
+
+            {/* Alternatives & Head-to-Head Comparisons Widget */}
+            <section className="mt-14 border-t border-line pt-8">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent/10 text-xs text-accent font-bold">
+                      ⚔️
+                    </span>
+                    <h2 className="text-lg font-[550] tracking-[-0.025em] text-ink sm:text-xl">
+                      {app.name} Alternatives & Comparisons
+                    </h2>
+                  </div>
+                  <p className="mt-1 text-xs text-muted sm:text-sm">
+                    Direct head-to-head comparisons against other popular {app.categoryName.toLowerCase()} tools for Mac.
+                  </p>
+                </div>
+                <Link
+                  to="/compare"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-accent hover:underline"
+                >
+                  All Comparisons <span>→</span>
+                </Link>
+              </div>
+
+              {matchups.length > 0 ? (
+                <div className="mt-5 space-y-3">
+                  {matchups.map((pair) => {
+                    const competitor = pair.left.slug === app.slug ? pair.right : pair.left;
+                    return (
+                      <Link
+                        key={pair.slug}
+                        to="/compare/$slug"
+                        params={{ slug: pair.slug }}
+                        className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line bg-surface p-4 transition-all duration-200 hover:border-accent/40 hover:bg-surface-2 hover:shadow-xs"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          {/* App icons comparison pill */}
+                          <div className="flex items-center -space-x-2 shrink-0">
+                            <img
+                              alt={app.name}
+                              src={app.icon}
+                              onError={(e) => {
+                                e.currentTarget.src = "/site-favicon.svg";
+                              }}
+                              className="h-10 w-10 rounded-xl object-cover ring-2 ring-surface"
+                            />
+                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-2 text-[10px] font-bold text-muted ring-2 ring-surface z-10">
+                              vs
+                            </div>
+                            <img
+                              alt={competitor.name}
+                              src={competitor.icon}
+                              onError={(e) => {
+                                e.currentTarget.src = "/site-favicon.svg";
+                              }}
+                              className="h-10 w-10 rounded-xl object-cover ring-2 ring-surface"
+                            />
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <h3 className="font-semibold text-sm text-ink group-hover:text-accent transition-colors">
+                                {app.name} vs {competitor.name}
+                              </h3>
+                              <span
+                                className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium capitalize ring-1 ring-inset ${pricingClass[competitor.pricing]}`}
+                              >
+                                {competitor.name}: {pricingLabel[competitor.pricing]}
+                              </span>
+                            </div>
+                            <p className="line-clamp-1 text-xs text-muted mt-0.5">
+                              {competitor.tagline}
+                            </p>
+                            {pair.guides[0] ? (
+                              <p className="text-[11px] text-muted/80 mt-1">
+                                Featured in: <span className="text-body font-medium">{pair.guides[0].title}</span>
+                              </p>
+                            ) : null}
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-end shrink-0 sm:self-center">
+                          <span className="inline-flex items-center gap-1 rounded-lg border border-line bg-canvas px-3 py-1.5 text-xs font-medium text-ink transition-colors group-hover:border-accent group-hover:bg-accent group-hover:text-white">
+                            Compare Side-by-Side <span>→</span>
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mt-4 rounded-xl border border-line bg-surface/50 p-4 text-xs text-muted">
+                  <p>
+                    No head-to-head battle published yet for {app.name}. Browse related {app.categoryName.toLowerCase()} alternatives below or check the{" "}
+                    <Link to="/compare" className="text-accent underline font-medium">
+                      Comparison Hub
+                    </Link>
+                    .
+                  </p>
+                </div>
+              )}
+            </section>
 
             {/* You might also like / Alternatives section */}
             {related.length > 0 ? (

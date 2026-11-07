@@ -109,6 +109,12 @@ export function relatedPairs(pair: ComparePair, source?: { apps: AppItem[]; post
   );
 }
 
+export function appPairs(appSlug: string, source?: { apps: AppItem[]; posts: Post[] }): ComparePair[] {
+  return comparePairs(source).filter(
+    (pair) => pair.left.slug === appSlug || pair.right.slug === appSlug,
+  );
+}
+
 export function pairLastmod(pair: ComparePair) {
   return [pair.left.createdAt, pair.right.createdAt, ...pair.guides.map((guide) => guide.date)].sort().at(-1);
 }

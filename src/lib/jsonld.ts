@@ -245,10 +245,11 @@ export function categoryGraph(
   origin: string,
   category: { name: string; slug: string },
   apps: { name: string; slug: string }[],
+  faqs?: { q: string; a: string }[],
 ) {
   const path = `/category/${category.slug}`;
   const name = `${category.name} Mac Apps`;
-  return graph(origin, [
+  const nodes: unknown[] = [
     organizationNode(origin),
     websiteNode(origin, false),
     breadcrumbNode(origin, path, [
@@ -268,7 +269,11 @@ export function categoryGraph(
       path,
       apps.map((app) => ({ name: app.name, path: `/app/${app.slug}` })),
     ),
-  ]);
+  ];
+  if (faqs && faqs.length > 0) {
+    nodes.push(faqNode(origin, path, faqs));
+  }
+  return graph(origin, nodes);
 }
 
 function faqNode(origin: string, path: string, faqs: { q: string; a: string }[]) {
