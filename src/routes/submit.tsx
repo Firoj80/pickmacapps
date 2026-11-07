@@ -23,7 +23,7 @@ export const Route = createFileRoute("/submit")({
       path: "/submit",
       origin,
     });
-    const script = jsonLdScript(crumbGraph(origin, "/submit", "Submit your Mac app"));
+    const script = jsonLdScript(crumbGraph(origin, "/submit", "Submit an app"));
     return {
       meta: seo.meta,
       links: [...seo.links, markdownAlternate(origin, "/submit")],

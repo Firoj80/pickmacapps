@@ -54,6 +54,38 @@ function websiteNode(origin: string, withSearch: boolean, description?: string) 
     url: absoluteUrl(origin, "/"),
     description: description || site.description,
     publisher: { "@id": orgId(origin) },
+    hasPart: [
+      {
+        "@type": "SiteNavigationElement",
+        name: "Sponsor",
+        description: "Feature your macOS app on PickMacApps for 30 days",
+        url: absoluteUrl(origin, "/sponsor"),
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Submit an app",
+        description: "Submit your beautifully designed macOS app to PickMacApps",
+        url: absoluteUrl(origin, "/submit"),
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Browse by category",
+        description: "Browse every macOS app on the shelf, sorted into categories",
+        url: absoluteUrl(origin, "/#apps"),
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Listing Guidelines",
+        description: "PickMacApps is a curated directory of beautifully designed macOS apps",
+        url: absoluteUrl(origin, "/how-we-pick"),
+      },
+      {
+        "@type": "SiteNavigationElement",
+        name: "Productivity",
+        description: "Discover the best productivity apps for Mac",
+        url: absoluteUrl(origin, "/category/productivity"),
+      },
+    ],
     ...(withSearch
       ? {
           potentialAction: {
@@ -388,15 +420,15 @@ export function howWePickGraph(origin: string) {
     organizationNode(origin),
     breadcrumbNode(origin, path, [
       { name: "Home", path: "/" },
-      { name: "How We Pick", path },
+      { name: "Listing Guidelines", path },
     ]),
     {
       "@type": "WebPage",
       "@id": `${absoluteUrl(origin, path)}#page`,
-      name: "How We Pick & Editorial Policy | PickMacApps",
+      name: "Listing Guidelines & Editorial Policy | PickMacApps",
       url: absoluteUrl(origin, path),
       description:
-        "Apps are added by hand. Editor’s Choice is a paid placement, not a test score. Listings link to the developer.",
+        "PickMacApps is a curated directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.",
     },
   ]);
 }

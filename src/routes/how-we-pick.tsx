@@ -30,7 +30,7 @@ function HowWePickPage() {
           Home
         </Link>
         <span>/</span>
-        <span className="text-ink">How we pick</span>
+        <span className="text-ink">Listing Guidelines</span>
       </nav>
 
       <header className="border-b border-line pb-8">

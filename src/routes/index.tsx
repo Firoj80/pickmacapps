@@ -7,10 +7,10 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "Best Mac Apps (2026): Hand-Picked Utilities | PickMacApps";
+const homeTitle = "PickMacApps — Beautifully designed macOS apps, curated";
 const homeDescription =
-  "Hand-picked best Mac apps for 2026. Browse utilities by job, compare alternatives side by side, and read short buying guides.";
-const homeImageAlt = "PickMacApps: Best Mac Apps, Hand-Picked";
+  "A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.";
+const homeImageAlt = "PickMacApps — Beautifully designed macOS apps, curated";
 const homeH1 = "The Best Mac Apps, Hand-Picked";
 
 const homeGuides = [

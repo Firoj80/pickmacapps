@@ -81,7 +81,7 @@ export function SiteFooter() {
               </li>
               <li>
                 <Link to="/how-we-pick" className="text-muted transition-colors hover:text-ink">
-                  How we pick
+                  Listing Guidelines
                 </Link>
               </li>
               <li>
