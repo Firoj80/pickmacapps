@@ -54,6 +54,23 @@ function AdminHome() {
       active="overview"
       actions={
         <div className="flex flex-wrap items-center gap-2">
+          {(data.stats.unpublishedApps ?? 0) > 0 ? (
+            <form method="post" action="/api/admin/publish-all">
+              <button
+                type="submit"
+                className="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 cursor-pointer"
+              >
+                Publish All Unpublished ({data.stats.unpublishedApps})
+              </button>
+            </form>
+          ) : null}
+          <Link
+            to="/admin/apps/new"
+            preload="intent"
+            className="rounded-xl bg-ink px-3.5 py-2 text-xs font-medium text-canvas transition hover:opacity-90"
+          >
+            + Add App
+          </Link>
           <form method="post" action="/api/admin/badges">
             <button
               type="submit"
@@ -65,7 +82,7 @@ function AdminHome() {
           <Link
             to="/admin/guides/new"
             preload="intent"
-            className="rounded-xl bg-ink px-3.5 py-2 text-xs font-medium text-canvas transition hover:opacity-90"
+            className="rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-medium text-ink transition hover:bg-stone-50"
           >
             + New Guide
           </Link>
@@ -691,7 +708,7 @@ function AdminHome() {
             <div>
               <h2 className="text-sm font-semibold text-ink">Free-Listing Badges</h2>
               <p className="mt-1 text-sm leading-relaxed text-body">
-                Editor’s Choice is not checked. A free listing is unpublished after two checks find the page up and the badge gone.
+                Only user-submitted free listings are checked. All admin-added catalog apps are permanently exempt from badge checks.
               </p>
             </div>
             <form method="post" action="/api/admin/badges">

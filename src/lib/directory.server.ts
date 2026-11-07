@@ -24,6 +24,7 @@ type AppRow = {
   featured_tier?: string | null;
   featured_until?: string | Date | null;
   is_hot?: boolean;
+  is_user_submitted?: boolean;
   views_7d?: number | string;
   created_at: string | Date;
   demo: string;
@@ -87,6 +88,7 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
     featuredUntil: row.featured_until ? iso(row.featured_until) : null,
     isHot: asBool(row.is_hot),
+    isUserSubmitted: asBool(row.is_user_submitted),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
     demo: row.demo,
@@ -300,6 +302,7 @@ async function ensureSeed(sql: Sql) {
   }
   try {
     await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
+    await sql.query("alter table apps add column if not exists is_user_submitted boolean not null default false");
     await sql.query(
       `create table if not exists app_views_daily (
         app_id text not null,
@@ -624,6 +627,7 @@ export async function adminStats() {
     blueOccupants,
     goldOccupants,
     pendingApps: apps.filter((app) => app.status === "pending").length,
+    unpublishedApps: apps.filter((app) => app.status === "unpublished").length,
     guides: guides.filter((guide) => guide.status === "published").length,
     draftGuides: guides.filter((guide) => guide.status !== "published").length,
     revenueCents: Number(revenue[0]?.cents ?? 0),
@@ -632,18 +636,100 @@ export async function adminStats() {
 
 export async function toggleAppHot(id: string) {
   const sql = await directorySql();
-  const rows = await sql.query<{ id: string; is_hot: boolean }>(
+  const rows = await sql.query<{ id: string; is_hot: unknown }>(
     "select id, is_hot from apps where id = $1 limit 1",
     [id],
   );
   if (!rows[0]) return null;
-  const nextHot = !rows[0].is_hot;
+  const currentHot = asBool(rows[0].is_hot);
+  const nextHot = !currentHot;
   await sql.query(
     "update apps set is_hot = $1, updated_at = now() where id = $2",
     [nextHot, id],
   );
   await audit(sql, nextHot ? "mark_hot" : "unmark_hot", id, `Hot set to ${nextHot}`);
   return { id, isHot: nextHot };
+}
+
+export async function publishAllUnpublishedApps() {
+  const sql = await directorySql();
+  const res = await sql.query<{ id: string }>(
+    "update apps set status = 'published', updated_at = now() where status = 'unpublished' or status = 'pending' returning id",
+  );
+  await audit(sql, "publish_all", "apps", `Published ${res.length} unpublished/pending apps`);
+  return res.length;
+}
+
+export async function createAdminApp(input: {
+  name: string;
+  slug?: string;
+  tagline: string;
+  description: string;
+  icon?: string;
+  demo?: string;
+  website: string;
+  pricing: string;
+  category: string;
+  editorChoice?: boolean;
+  featuredTier?: FeaturedTier | null;
+  isHot?: boolean;
+  status?: string;
+}) {
+  const sql = await directorySql();
+  const id = randomUUID();
+  let slug = (input.slug?.trim() || input.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")).replace(/^-+|-+$/g, "");
+  if (!slug) slug = `app-${id.slice(0, 8)}`;
+
+  const existing = await sql.query<{ id: string }>("select id from apps where slug = $1 limit 1", [slug]);
+  if (existing.length > 0) {
+    slug = `${slug}-${id.slice(0, 4)}`;
+  }
+
+  const status = cleanStatus(input.status || "published");
+  const isChoice = input.editorChoice === true;
+  const tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : null;
+
+  if (isChoice && status === "published" && tier) {
+    const tierActive = await countActiveTierApps(tier);
+    if (tierActive >= MAX_TIER_SLOTS) {
+      const tierName = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
+      throw new Error(`Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken (${tierActive}/${MAX_TIER_SLOTS} active).`);
+    }
+  }
+
+  const foundCategory = findShelfCategory(input.category);
+  const category = {
+    slug: foundCategory?.slug ?? "utility",
+    name: foundCategory?.name ?? "Utility",
+    emoji: foundCategory?.emoji ?? "🔧",
+  };
+
+  await sql.query(
+    `insert into apps (
+      id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
+      editor_choice, featured_tier, featured_until, is_hot, status, demo, is_user_submitted, created_at, updated_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '30 days' else null end, $14, $15, $16, false, now(), now())`,
+    [
+      id,
+      input.name.trim(),
+      slug,
+      input.tagline.trim(),
+      input.description.trim() || input.tagline.trim(),
+      input.icon?.trim() || "",
+      input.website.trim(),
+      cleanPricing(input.pricing),
+      category.slug,
+      category.name,
+      category.emoji,
+      isChoice,
+      tier,
+      input.isHot === true,
+      status,
+      input.demo?.trim() || "",
+    ],
+  );
+  await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
+  return { id, slug };
 }
 
 async function audit(sql: Sql, action: string, target: string, detail = "") {
@@ -1080,8 +1166,8 @@ export async function approveSubmission(id: string) {
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, demo, status, submitter_email, submitter_x
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,'published',$15,$16)`,
+      editor_choice, featured_tier, featured_until, demo, status, submitter_email, submitter_x, is_user_submitted
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,'published',$15,$16,true)`,
     [
       appId,
       submission.app_name,
@@ -1108,7 +1194,7 @@ export async function approveSubmission(id: string) {
 export async function runBadgeChecks() {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>(
-    "select * from apps where status = 'published' and editor_choice = false",
+    "select * from apps where status = 'published' and editor_choice = false and is_user_submitted = true",
   );
   const results: { slug: string; result: string; detail: string }[] = [];
   for (const row of rows) {

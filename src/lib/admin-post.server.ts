@@ -1,8 +1,10 @@
 import { adminCookie, adminSessionOk, clearAdminCookie, passwordsMatch } from "@/lib/admin-auth.server";
 import {
   approveSubmission,
+  createAdminApp,
   deleteApp,
   deleteGuide,
+  publishAllUnpublishedApps,
   rejectSubmission,
   runBadgeChecks,
   saveApp,
@@ -38,6 +40,24 @@ export async function handleAdminPost(request: Request) {
         await deleteApp(String(form.get("id") ?? ""));
         return redirect("/admin/apps");
       }
+      if (intent === "create" || !form.get("id")) {
+        const { id } = await createAdminApp({
+          name: String(form.get("name") ?? ""),
+          slug: String(form.get("slug") ?? ""),
+          tagline: String(form.get("tagline") ?? ""),
+          description: String(form.get("description") ?? ""),
+          icon: String(form.get("icon") ?? ""),
+          demo: String(form.get("demo") ?? ""),
+          website: String(form.get("website") ?? ""),
+          pricing: String(form.get("pricing") ?? "free"),
+          category: String(form.get("category") ?? "utility"),
+          editorChoice: form.get("editor_choice") === "on",
+          featuredTier: (form.get("featured_tier") as "article" | "featured") || "featured",
+          isHot: form.get("is_hot") === "on" || form.get("is_hot") === "true",
+          status: String(form.get("status") ?? "published"),
+        });
+        return redirect(`/admin/apps/${id}?saved=created`);
+      }
       await saveApp({
         id: String(form.get("id") ?? ""),
         name: String(form.get("name") ?? ""),
@@ -55,6 +75,10 @@ export async function handleAdminPost(request: Request) {
         status: String(form.get("status") ?? ""),
       });
       return redirect(`/admin/apps/${form.get("id")}?saved=1`);
+    }
+    if (action === "publish-all") {
+      const count = await publishAllUnpublishedApps();
+      return redirect(`/admin?saved=published_all&count=${count}`);
     }
     if (action === "guides") {
       const intent = String(form.get("intent") ?? "save");

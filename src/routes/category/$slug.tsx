@@ -1,6 +1,7 @@
 import { createFileRoute, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
+import { appPriorityWeight } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -24,7 +25,12 @@ export const Route = createFileRoute("/category/$slug")({
     const slug = normalizeCategorySlug(params.slug);
     const directory = matches[0]?.context.directory;
     const category = categoryFrom(directory, slug);
-    const listed = publishedApps(directory).filter((app) => normalizeCategorySlug(app.category) === slug);
+    const rawListed = publishedApps(directory).filter((app) => normalizeCategorySlug(app.category) === slug);
+  const listed = [...rawListed].sort((a, b) => {
+    const diff = appPriorityWeight(b) - appPriorityWeight(a);
+    if (diff !== 0) return diff;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || a.name.localeCompare(b.name);
+  });
     if (!category) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,
@@ -57,7 +63,12 @@ function CategoryPage() {
   const { directory } = Route.useRouteContext();
   const category = categoryFrom(directory, slug);
   if (!category) return null;
-  const listed = publishedApps(directory).filter((app) => normalizeCategorySlug(app.category) === slug);
+  const rawListed = publishedApps(directory).filter((app) => normalizeCategorySlug(app.category) === slug);
+  const listed = [...rawListed].sort((a, b) => {
+    const diff = appPriorityWeight(b) - appPriorityWeight(a);
+    if (diff !== 0) return diff;
+    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || a.name.localeCompare(b.name);
+  });
   const label = category.name.toLowerCase();
 
   return (

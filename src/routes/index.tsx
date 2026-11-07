@@ -55,10 +55,10 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
   const next = [...list];
   if (sort === "new") {
-    // Latest: Featured apps on top, then all latest added apps by createdAt desc
+    // Latest: Featured apps on top, then Hot apps, then all latest added apps by createdAt desc
     next.sort((a, b) => {
-      const diff = featuredTierWeight(b) - featuredTierWeight(a);
-      if (diff !== 0) return diff;
+      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
+      if (pDiff !== 0) return pDiff;
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
       return timeB - timeA || a.name.localeCompare(b.name);
@@ -66,10 +66,10 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
     return next;
   }
   if (sort === "trending") {
-    // Trending: Featured apps on top, then all most viewed apps in the last 7 days
+    // Trending: Featured apps on top, then Hot apps, then all most viewed apps in the last 7 days
     next.sort((a, b) => {
-      const diff = featuredTierWeight(b) - featuredTierWeight(a);
-      if (diff !== 0) return diff;
+      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
+      if (pDiff !== 0) return pDiff;
       const vA = a.views7d ?? 0;
       const vB = b.views7d ?? 0;
       if (vB !== vA) return vB - vA;

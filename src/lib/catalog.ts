@@ -22,6 +22,7 @@ export type AppItem = {
   featuredTier?: FeaturedTier | null;
   featuredUntil?: string | null;
   isHot?: boolean;
+  isUserSubmitted?: boolean;
   views7d?: number;
   createdAt: string;
   demo: string;

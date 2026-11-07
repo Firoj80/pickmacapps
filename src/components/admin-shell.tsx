@@ -51,6 +51,8 @@ const savedCopy: Record<string, string> = {
   badges: "Badge check finished.",
   approved: "Listing approved and published.",
   rejected: "Submission rejected.",
+  published_all: "All unpublished listings have been published.",
+  created: "New app created and published successfully.",
 };
 
 export function Notice({ error, saved }: { error: string; saved: string }) {

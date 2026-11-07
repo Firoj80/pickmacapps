@@ -19,13 +19,23 @@ import appCss from "../styles.css?url";
 // client-side SPA navigations reuse the already-fetched data instantly.
 // SSR always fetches fresh (no module cache persists between requests).
 // ---------------------------------------------------------------------------
-const STALE_MS = 5 * 60 * 1000; // 5 minutes
+const STALE_MS = 15 * 1000; // 15 seconds
 
 // --- Directory cache ---
 type DirectoryResult = Awaited<ReturnType<typeof fetchDirectory>>;
 let _directoryCache: DirectoryResult | null = null;
 let _directoryCachedAt = 0;
 let _directoryPromise: Promise<DirectoryResult | null> | null = null;
+
+export function invalidateDirectoryCache() {
+  _directoryCache = null;
+  _directoryCachedAt = 0;
+  _directoryPromise = null;
+}
+
+if (typeof window !== "undefined") {
+  (window as unknown as { __invalidateDirectoryCache?: () => void }).__invalidateDirectoryCache = invalidateDirectoryCache;
+}
 
 async function getCachedDirectory(): Promise<DirectoryResult | null> {
   // Server-side: never share cache between requests

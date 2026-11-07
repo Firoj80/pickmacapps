@@ -35,6 +35,7 @@ import { Route as SitemapGuidesDotxmlRouteImport } from './routes/sitemap/guides
 import { Route as SitemapPagesDotxmlRouteImport } from './routes/sitemap/pages[.]xml'
 import { Route as AdminAppsIndexRouteImport } from './routes/admin/apps/index'
 import { Route as AdminAppsIdRouteImport } from './routes/admin/apps/$id'
+import { Route as AdminAppsNewRouteImport } from './routes/admin/apps/new'
 import { Route as AdminGuidesIndexRouteImport } from './routes/admin/guides/index'
 import { Route as AdminGuidesSlugRouteImport } from './routes/admin/guides/$slug'
 import { Route as AdminGuidesNewRouteImport } from './routes/admin/guides/new'
@@ -173,6 +174,11 @@ const AdminAppsIdRoute = AdminAppsIdRouteImport.update({
   path: '/admin/apps/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAppsNewRoute = AdminAppsNewRouteImport.update({
+  id: '/admin/apps/new',
+  path: '/admin/apps/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminGuidesIndexRoute = AdminGuidesIndexRouteImport.update({
   id: '/admin/guides/',
   path: '/admin/guides/',
@@ -235,6 +241,7 @@ export interface FileRoutesByFullPath {
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/apps/new': typeof AdminAppsNewRoute
   '/admin/guides/$slug': typeof AdminGuidesSlugRoute
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
@@ -270,6 +277,7 @@ export interface FileRoutesByTo {
   '/blog': typeof BlogIndexRoute
   '/compare': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/apps/new': typeof AdminAppsNewRoute
   '/admin/guides/$slug': typeof AdminGuidesSlugRoute
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
@@ -306,6 +314,7 @@ export interface FileRoutesById {
   '/blog/': typeof BlogIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
+  '/admin/apps/new': typeof AdminAppsNewRoute
   '/admin/guides/$slug': typeof AdminGuidesSlugRoute
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
@@ -343,6 +352,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/compare/'
     | '/admin/apps/$id'
+    | '/admin/apps/new'
     | '/admin/guides/$slug'
     | '/admin/guides/new'
     | '/api/admin/$'
@@ -378,6 +388,7 @@ export interface FileRouteTypes {
     | '/blog'
     | '/compare'
     | '/admin/apps/$id'
+    | '/admin/apps/new'
     | '/admin/guides/$slug'
     | '/admin/guides/new'
     | '/api/admin/$'
@@ -413,6 +424,7 @@ export interface FileRouteTypes {
     | '/blog/'
     | '/compare/'
     | '/admin/apps/$id'
+    | '/admin/apps/new'
     | '/admin/guides/$slug'
     | '/admin/guides/new'
     | '/api/admin/$'
@@ -449,6 +461,7 @@ export interface RootRouteChildren {
   BlogIndexRoute: typeof BlogIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
   AdminAppsIdRoute: typeof AdminAppsIdRoute
+  AdminAppsNewRoute: typeof AdminAppsNewRoute
   AdminGuidesSlugRoute: typeof AdminGuidesSlugRoute
   AdminGuidesNewRoute: typeof AdminGuidesNewRoute
   ApiAdminSplatRoute: typeof ApiAdminSplatRoute
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAppsIdRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/apps/new': {
+      id: '/admin/apps/new'
+      path: '/admin/apps/new'
+      fullPath: '/admin/apps/new'
+      preLoaderRoute: typeof AdminAppsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/guides/': {
       id: '/admin/guides/'
       path: '/admin/guides'
@@ -721,6 +741,7 @@ const rootRouteChildren: RootRouteChildren = {
   BlogIndexRoute: BlogIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
   AdminAppsIdRoute: AdminAppsIdRoute,
+  AdminAppsNewRoute: AdminAppsNewRoute,
   AdminGuidesSlugRoute: AdminGuidesSlugRoute,
   AdminGuidesNewRoute: AdminGuidesNewRoute,
   ApiAdminSplatRoute: ApiAdminSplatRoute,

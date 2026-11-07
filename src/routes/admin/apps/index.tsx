@@ -62,12 +62,34 @@ function AppsPage() {
   const hotCount = useMemo(() => apps.filter((a) => a.isHot).length, [apps]);
   const blueCount = useMemo(() => apps.filter((a) => a.editorChoice && a.featuredTier !== "article").length, [apps]);
   const goldCount = useMemo(() => apps.filter((a) => a.editorChoice && a.featuredTier === "article").length, [apps]);
+  const unpublishedCount = useMemo(() => apps.filter((a) => a.status === "unpublished" || a.status === "pending").length, [apps]);
 
   return (
     <AdminShell
       title="Apps"
       lede={`${apps.length} listings. Edit metadata, manage tier placements, and toggle Hot featured apps.`}
       active="apps"
+      actions={
+        <div className="flex flex-wrap items-center gap-2">
+          {unpublishedCount > 0 ? (
+            <form method="post" action="/api/admin/publish-all">
+              <button
+                type="submit"
+                className="rounded-xl bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white shadow-xs transition hover:bg-emerald-700 cursor-pointer"
+              >
+                Publish All Unpublished ({unpublishedCount})
+              </button>
+            </form>
+          ) : null}
+          <Link
+            to="/admin/apps/new"
+            preload="intent"
+            className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-canvas transition hover:opacity-90"
+          >
+            + Add App
+          </Link>
+        </div>
+      }
     >
       <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <input

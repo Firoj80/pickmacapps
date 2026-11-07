@@ -120,7 +120,7 @@ export const fetchAdminHome = createServerFn({ method: "GET" }).handler(async ()
     stats,
     offer,
     submissions,
-    badges: badges.filter((app) => !app.editorChoice),
+    badges: badges.filter((app) => !app.editorChoice && app.isUserSubmitted),
   };
 });
 
