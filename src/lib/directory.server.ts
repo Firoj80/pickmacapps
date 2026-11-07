@@ -873,8 +873,8 @@ export async function deleteApp(id: string) {
 
 export async function listGuides() {
   const sql = await directorySql();
-  return sql.query<{ slug: string; title: string; status: string; date: string }>(
-    "select slug, title, status, date from guides order by date desc",
+  return sql.query<{ slug: string; title: string; excerpt?: string; status: string; date: string; minutes?: number }>(
+    "select slug, title, excerpt, status, date, minutes from guides order by date desc",
   );
 }
 
