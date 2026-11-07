@@ -1,0 +1,16 @@
+{
+  "name": "PickMacApps",
+  "short_name": "PickMacApps",
+  "description": "Hand-picked best Mac apps directory",
+  "start_url": "/",
+  "display": "browser",
+  "background_color": "#ffffff",
+  "theme_color": "#111113",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

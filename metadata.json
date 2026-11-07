@@ -1,6 +1,0 @@
-{
-  "name": "PickMacApps",
-  "description": "Curated macOS app directory, side-by-side comparisons, and buying guides for Mac utilities.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
