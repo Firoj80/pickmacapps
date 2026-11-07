@@ -8,6 +8,7 @@ import {
   saveApp,
   saveGuide,
   setChoicePrice,
+  setPackagePrice,
 } from "@/lib/directory.server";
 
 function redirect(location: string, cookie?: string) {
@@ -73,9 +74,10 @@ export async function handleAdminPost(request: Request) {
     if (action === "price") {
       const dollars = Number(form.get("dollars"));
       const compare = Number(form.get("compare"));
+      const tier = form.get("tier") === "article" ? "article" : "featured";
       if (!Number.isFinite(dollars) || !Number.isFinite(compare)) return redirect("/admin?error=price");
-      await setChoicePrice(Math.round(dollars * 100), Math.round(compare * 100));
-      return redirect("/admin?saved=price");
+      await setPackagePrice(tier, Math.round(dollars * 100), Math.round(compare * 100));
+      return redirect(`/admin?saved=price`);
     }
     if (action === "badges") {
       await runBadgeChecks();

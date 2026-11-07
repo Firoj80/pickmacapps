@@ -139,26 +139,66 @@ function AdminHome() {
       </section>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-white p-5">
-          <h2 className="text-sm font-semibold text-ink">Editor’s Choice price</h2>
+        {/* Tier 1: Featured Placement */}
+        <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-ink flex items-center gap-1.5">
+              <span>🔹</span> Featured Placement ($99 Tier)
+            </h2>
+            <span className="rounded-full bg-sky-100 px-2.5 py-0.5 text-[11px] font-semibold text-sky-800 dark:bg-sky-950 dark:text-sky-300">
+              Blue Badge
+            </span>
+          </div>
           <p className="mt-1 text-sm leading-relaxed text-body">
-            Charged by Dodo: {money(data.offer.priceCents)}, shown as marked down from {money(data.offer.compareCents)}.
-            The browser cannot set the amount.
+            Charged by Dodo: <strong>{money(data.offer.featuredPriceCents ?? data.offer.priceCents)}</strong>, shown marked down from {money(data.offer.featuredCompareCents ?? data.offer.compareCents)}.
           </p>
           <form method="post" action="/api/admin/price" className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+            <input type="hidden" name="tier" value="featured" />
             <label className="text-[13px] font-medium text-ink">
-              Charge
-              <input name="dollars" defaultValue={(data.offer.priceCents / 100).toFixed(2)} className={fieldClass} />
+              Charge ($)
+              <input name="dollars" defaultValue={((data.offer.featuredPriceCents ?? data.offer.priceCents) / 100).toFixed(2)} className={fieldClass} />
             </label>
             <label className="text-[13px] font-medium text-ink">
-              Compare-at
-              <input name="compare" defaultValue={(data.offer.compareCents / 100).toFixed(2)} className={fieldClass} />
+              Compare-at ($)
+              <input name="compare" defaultValue={((data.offer.featuredCompareCents ?? data.offer.compareCents) / 100).toFixed(2)} className={fieldClass} />
             </label>
-            <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas">
-              Save price
+            <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas hover:opacity-90">
+              Save Featured
             </button>
           </form>
         </section>
+
+        {/* Tier 2: Featured + Medium Article */}
+        <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
+          <div className="flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-ink flex items-center gap-1.5">
+              <span>🌟</span> Featured + Medium Article ($120 Tier)
+            </h2>
+            <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">
+              Gold Badge
+            </span>
+          </div>
+          <p className="mt-1 text-sm leading-relaxed text-body">
+            Charged by Dodo: <strong>{money(data.offer.articlePriceCents ?? 12000)}</strong>, shown marked down from {money(data.offer.articleCompareCents ?? 24900)}.
+          </p>
+          <form method="post" action="/api/admin/price" className="mt-4 grid gap-3 sm:grid-cols-[1fr_1fr_auto] sm:items-end">
+            <input type="hidden" name="tier" value="article" />
+            <label className="text-[13px] font-medium text-ink">
+              Charge ($)
+              <input name="dollars" defaultValue={((data.offer.articlePriceCents ?? 12000) / 100).toFixed(2)} className={fieldClass} />
+            </label>
+            <label className="text-[13px] font-medium text-ink">
+              Compare-at ($)
+              <input name="compare" defaultValue={((data.offer.articleCompareCents ?? 24900) / 100).toFixed(2)} className={fieldClass} />
+            </label>
+            <button type="submit" className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:opacity-95">
+              Save Article
+            </button>
+          </form>
+        </section>
+      </div>
+
+      <div className="mt-6">
         <section className="rounded-2xl border border-line bg-white p-5">
           <div className="flex items-start justify-between gap-3">
             <div>

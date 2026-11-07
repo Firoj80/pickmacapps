@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import type { ReactNode } from "react";
+import { fetchOffer } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -24,6 +25,7 @@ const story = [
 ];
 
 export const Route = createFileRoute("/sponsor")({
+  loader: () => fetchOffer(),
   component: SponsorPage,
   head: ({ matches }) => {
     const origin = originFrom(matches);
@@ -43,6 +45,10 @@ export const Route = createFileRoute("/sponsor")({
 });
 
 function SponsorPage() {
+  const offer = Route.useLoaderData();
+  const featuredPrice = ((offer.featuredPriceCents ?? offer.priceCents) / 100).toFixed(0);
+  const articlePrice = ((offer.articlePriceCents ?? 12000) / 100).toFixed(0);
+
   return (
     <main className="relative overflow-hidden">
       {/* Background ambient colorful glowing orbs */}
@@ -102,7 +108,7 @@ function SponsorPage() {
               </div>
 
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-5xl font-extrabold tracking-tight text-ink">$99</span>
+                <span className="text-5xl font-extrabold tracking-tight text-ink">${featuredPrice}</span>
                 <span className="text-sm font-medium text-muted">one-time payment</span>
               </div>
 
@@ -127,7 +133,7 @@ function SponsorPage() {
               search={{ tier: "featured" }}
               className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
             >
-              Get Featured — $99
+              Get Featured — ${featuredPrice}
             </Link>
           </div>
 
@@ -147,7 +153,7 @@ function SponsorPage() {
               </div>
 
               <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-5xl font-extrabold tracking-tight text-white">$120</span>
+                <span className="text-5xl font-extrabold tracking-tight text-white">${articlePrice}</span>
                 <span className="text-sm font-medium text-fuchsia-200/70">one-time payment</span>
               </div>
 
@@ -172,7 +178,7 @@ function SponsorPage() {
               search={{ tier: "article" }}
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
-              Claim Spot + Article — $120 🚀
+              Claim Spot + Article — ${articlePrice} 🚀
             </Link>
           </div>
         </div>
@@ -224,8 +230,8 @@ function SponsorPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
           <div className="mt-8 space-y-3">
-            <Faq q="What is the difference between the $99 and $120 tiers?">
-              The $99 tier gives you the Blue featured badge, 24h review, top hero placement for 30 days, and a social shoutout. The $120 tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 30 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
+            <Faq q="What is the difference between the packages?">
+              The ${featuredPrice} tier gives you the Blue featured badge, 24h review, top hero placement for 30 days, and a social shoutout. The ${articlePrice} tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 30 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
             </Faq>
             <Faq q="What if my app isn't accepted?">
               All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.

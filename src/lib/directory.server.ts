@@ -373,30 +373,54 @@ export type EditorChoiceSlotsInfo = {
   nextDate: string;
 };
 
-export async function publicOffer(): Promise<{
+export type PublicOffer = {
+  featuredPriceCents: number;
+  featuredCompareCents: number;
+  articlePriceCents: number;
+  articleCompareCents: number;
+  slots: EditorChoiceSlotsInfo;
   priceCents: number;
   compareCents: number;
-  slots: EditorChoiceSlotsInfo;
-}> {
+};
+
+export async function publicOffer(): Promise<PublicOffer> {
   const sql = await directorySql();
   const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
   const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
-  let priceCents = Number(map.choice_price_cents ?? 9900);
-  const compareCents = Number(map.choice_compare_cents ?? 19900);
-  const live = await readDodoPrice();
-  if (live != null && live !== priceCents) {
-    priceCents = live;
+  let featuredPriceCents = Number(map.featured_price_cents ?? map.choice_price_cents ?? 9900);
+  const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
+  let articlePriceCents = Number(map.article_price_cents ?? 12000);
+  const articleCompareCents = Number(map.article_compare_cents ?? 24900);
+
+  const liveFeatured = await readDodoPrice("featured");
+  if (liveFeatured != null && liveFeatured !== featuredPriceCents) {
+    featuredPriceCents = liveFeatured;
     await sql.query(
-      `insert into settings (key, value) values ('choice_price_cents', $1)
+      `insert into settings (key, value) values ('featured_price_cents', $1), ('choice_price_cents', $1)
        on conflict (key) do update set value = excluded.value`,
-      [String(live)],
+      [String(liveFeatured)],
     );
   }
+
+  const liveArticle = await readDodoPrice("article");
+  if (liveArticle != null && liveArticle !== articlePriceCents) {
+    articlePriceCents = liveArticle;
+    await sql.query(
+      `insert into settings (key, value) values ('article_price_cents', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(liveArticle)],
+    );
+  }
+
   const active = await countActiveEditorChoiceApps();
   const remaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - active);
   return {
-    priceCents,
-    compareCents,
+    featuredPriceCents,
+    featuredCompareCents,
+    articlePriceCents,
+    articleCompareCents,
+    priceCents: featuredPriceCents,
+    compareCents: featuredCompareCents,
     slots: {
       total: MAX_EDITOR_CHOICE_SLOTS,
       active,
@@ -615,26 +639,44 @@ export async function deleteGuide(slug: string) {
   await audit(sql, "delete-guide", slug);
 }
 
-export async function setChoicePrice(amountCents: number, compareCents: number) {
+export async function setPackagePrice(tier: "featured" | "article", amountCents: number, compareCents: number) {
   if (!Number.isInteger(amountCents) || amountCents < 100 || amountCents > 100_000_00) {
     throw new Error("Price must be a whole number of cents from the server form.");
   }
   if (!Number.isInteger(compareCents) || compareCents < 0 || compareCents > 100_000_00) {
     throw new Error("Compare-at price must be a whole number of cents.");
   }
-  await updateDodoPrice(amountCents);
+  try {
+    await updateDodoPrice(amountCents, tier);
+  } catch (err) {
+    console.warn(`Dodo API price update for ${tier} skipped or failed:`, err);
+  }
   const sql = await directorySql();
+  const priceKey = tier === "article" ? "article_price_cents" : "featured_price_cents";
+  const compareKey = tier === "article" ? "article_compare_cents" : "featured_compare_cents";
+
   await sql.query(
-    `insert into settings (key, value) values ('choice_price_cents', $1)
+    `insert into settings (key, value) values ($1, $2)
      on conflict (key) do update set value = excluded.value`,
-    [String(amountCents)],
+    [priceKey, String(amountCents)],
   );
   await sql.query(
-    `insert into settings (key, value) values ('choice_compare_cents', $1)
+    `insert into settings (key, value) values ($1, $2)
      on conflict (key) do update set value = excluded.value`,
-    [String(compareCents)],
+    [compareKey, String(compareCents)],
   );
-  await audit(sql, "price", "choice", String(amountCents));
+  if (tier === "featured") {
+    await sql.query(
+      `insert into settings (key, value) values ('choice_price_cents', $1), ('choice_compare_cents', $2)
+       on conflict (key) do update set value = excluded.value`,
+      [String(amountCents), String(compareCents)],
+    );
+  }
+  await audit(sql, "price", tier, String(amountCents));
+}
+
+export async function setChoicePrice(amountCents: number, compareCents: number) {
+  return setPackagePrice("featured", amountCents, compareCents);
 }
 
 export async function listSubmissions() {
@@ -735,13 +777,15 @@ export async function submitListing(
       email,
       name,
       returnUrl: `${origin}/submit?submitted=1`,
+      tier: tier === "article" ? "article" : "featured",
     });
     if (checkout.paymentId) {
       const offer = await publicOffer();
+      const amountCents = tier === "article" ? offer.articlePriceCents : offer.featuredPriceCents;
       await sql.query(
         `insert into payments (id, submission_id, provider_payment_id, amount_cents, currency, status)
          values ($1,$2,$3,$4,'USD','pending')`,
-        [randomUUID(), id, checkout.paymentId, offer.priceCents],
+        [randomUUID(), id, checkout.paymentId, amountCents],
       );
     }
     return { ok: true as const, checkoutUrl: checkout.checkoutUrl, message: "Continue to checkout." };

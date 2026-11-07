@@ -64,8 +64,17 @@ function SubmitPage() {
   const [fetchMessage, setFetchMessage] = useState("");
 
   const offer = Route.useLoaderData();
-  const price = (offer.priceCents / 100).toFixed(0);
-  const compare = (offer.compareCents / 100).toFixed(0);
+  const isArticle = tier === "article";
+  const price = (
+    (isArticle
+      ? (offer.articlePriceCents ?? 12000)
+      : (offer.featuredPriceCents ?? offer.priceCents)) / 100
+  ).toFixed(0);
+  const compare = (
+    (isArticle
+      ? (offer.articleCompareCents ?? 24900)
+      : (offer.featuredCompareCents ?? offer.compareCents)) / 100
+  ).toFixed(0);
   const slots = offer.slots ?? {
     total: 6,
     active: 0,
@@ -612,11 +621,11 @@ function SubmitPage() {
                             )}
                             {tier === "article" ? (
                               <p className="mt-1 text-xs text-body">
-                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article ($120):</strong> Approved within 2 hours with dedicated review article and gold badge.
+                                <strong className="text-amber-600 dark:text-amber-400">Featured + Medium Article (${price}):</strong> Approved within 2 hours with dedicated review article and gold badge.
                               </p>
                             ) : tier === "featured" ? (
                               <p className="mt-1 text-xs text-body">
-                                <strong className="text-sky-600 dark:text-sky-400">Featured Placement ($99):</strong> Approved within 24 hours with blue featured badge.
+                                <strong className="text-sky-600 dark:text-sky-400">Featured Placement (${price}):</strong> Approved within 24 hours with blue featured badge.
                               </p>
                             ) : null}
                           </div>

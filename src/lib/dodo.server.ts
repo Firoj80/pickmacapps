@@ -6,8 +6,17 @@ export function dodoBase() {
     : "https://test.dodopayments.com";
 }
 
-export function dodoConfigured() {
-  return Boolean(process.env.DODO_PAYMENTS_API_KEY?.trim() && process.env.DODO_PRODUCT_ID?.trim());
+export function getDodoProductId(tier: "featured" | "article" = "featured"): string | null {
+  if (tier === "article") {
+    return process.env.DODO_PRODUCT_ID_ARTICLE?.trim() || process.env.DODO_PRODUCT_ID?.trim() || null;
+  }
+  return process.env.DODO_PRODUCT_ID_FEATURED?.trim() || process.env.DODO_PRODUCT_ID?.trim() || null;
+}
+
+export function dodoConfigured(tier?: "featured" | "article") {
+  const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
+  const productId = tier ? getDodoProductId(tier) : (process.env.DODO_PRODUCT_ID?.trim() || process.env.DODO_PRODUCT_ID_FEATURED?.trim() || process.env.DODO_PRODUCT_ID_ARTICLE?.trim());
+  return Boolean(apiKey && productId);
 }
 
 function webhookKey() {
@@ -42,11 +51,18 @@ export function verifyDodoSignature(input: {
   });
 }
 
-export async function createChoiceCheckout(input: { submissionId: string; email: string; name: string; returnUrl: string }) {
+export async function createChoiceCheckout(input: {
+  submissionId: string;
+  email: string;
+  name: string;
+  returnUrl: string;
+  tier?: "featured" | "article";
+}) {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
-  const productId = process.env.DODO_PRODUCT_ID?.trim();
+  const tier = input.tier === "article" ? "article" : "featured";
+  const productId = getDodoProductId(tier);
   if (!apiKey || !productId) {
-    throw new Error("Dodo is not configured. Set DODO_PAYMENTS_API_KEY and DODO_PRODUCT_ID.");
+    throw new Error(`Dodo is not configured. Set DODO_PAYMENTS_API_KEY and DODO_PRODUCT_ID_${tier.toUpperCase()} (or DODO_PRODUCT_ID).`);
   }
   const response = await fetch(`${dodoBase()}/checkouts`, {
     method: "POST",
@@ -58,7 +74,7 @@ export async function createChoiceCheckout(input: { submissionId: string; email:
       product_cart: [{ product_id: productId, quantity: 1 }],
       customer: { email: input.email, name: input.name },
       return_url: input.returnUrl,
-      metadata: { submission_id: input.submissionId },
+      metadata: { submission_id: input.submissionId, tier },
     }),
   });
   const text = await response.text();
@@ -88,9 +104,9 @@ function dodoFailure(action: string, status: number, body: string) {
 }
 
 /** The amount Dodo will charge, in cents. Null when the product cannot be read. */
-export async function readDodoPrice() {
+export async function readDodoPrice(tier: "featured" | "article" = "featured") {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
-  const productId = process.env.DODO_PRODUCT_ID?.trim();
+  const productId = getDodoProductId(tier);
   if (!apiKey || !productId) return null;
   try {
     const response = await fetch(`${dodoBase()}/products/${productId}`, {
@@ -108,11 +124,11 @@ export async function readDodoPrice() {
 }
 
 /** Updates the Dodo product. The amount is the server setting, never a browser field. */
-export async function updateDodoPrice(amountCents: number) {
+export async function updateDodoPrice(amountCents: number, tier: "featured" | "article" = "featured") {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
-  const productId = process.env.DODO_PRODUCT_ID?.trim();
+  const productId = getDodoProductId(tier);
   if (!apiKey || !productId) {
-    throw new Error("Dodo is not configured. The price was not changed.");
+    throw new Error(`Dodo is not configured for ${tier} tier. Set DODO_PAYMENTS_API_KEY and DODO_PRODUCT_ID_${tier.toUpperCase()} (or DODO_PRODUCT_ID).`);
   }
   const response = await fetch(`${dodoBase()}/products/${productId}`, {
     method: "PATCH",
@@ -131,5 +147,5 @@ export async function updateDodoPrice(amountCents: number) {
     }),
   });
   const text = await response.text();
-  if (!response.ok) throw new Error(dodoFailure("the price change", response.status, text));
+  if (!response.ok) throw new Error(dodoFailure(`the ${tier} price change`, response.status, text));
 }
