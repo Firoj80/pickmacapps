@@ -11,13 +11,15 @@ function coverSrc(demo: string) {
 export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
   const choice = isEditorChoice(app);
   const cover = coverSrc(app.demo);
+
   return (
     <Link
       to="/app/$slug"
       params={{ slug: app.slug }}
-      className={`group flex flex-col overflow-hidden rounded-xl border transition-colors duration-200 ${choice ? "card-silver" : "border-line bg-surface hover:border-line-2"}`}
+      className="group flex flex-col transition-transform duration-200"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-[#f5f5f7] dark:bg-white/5">
+      {/* Visual Screen Preview Card (Black/Dark Canvas with rounded corners) */}
+      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-line/60 bg-[#0f0f11] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)] dark:bg-[#141416]">
         {cover ? (
           <img
             alt=""
@@ -25,41 +27,60 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
             onError={(event) => {
               event.currentTarget.style.display = "none";
             }}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
           />
         ) : (
-          <div className="flex h-full items-center justify-center">
+          <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
             <img
               alt=""
               src={app.icon}
               onError={(event) => {
                 event.currentTarget.src = "/site-favicon.svg";
               }}
-              className="h-16 w-16 rounded-[18px] object-cover shadow-sm"
+              className="h-16 w-16 rounded-[18px] object-cover shadow-lg ring-1 ring-white/10"
             />
+            <p className="mt-3 text-sm font-semibold text-white/90">{app.name}</p>
+            <p className="mt-1 line-clamp-2 max-w-[240px] text-xs text-white/60">{app.tagline}</p>
           </div>
         )}
-      </div>
-      <div className="flex flex-col p-4 sm:p-4.5">
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-center gap-2.5">
-            <img
-              alt=""
-              src={app.icon}
-              onError={(event) => {
-                event.currentTarget.src = "/site-favicon.svg";
-              }}
-              className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-line"
-            />
-            <h3 className="min-w-0 truncate text-[18px] font-[550] tracking-[-0.025em] text-ink">{app.name}</h3>
-          </div>
-          {choice ? <span className="silver-tag shrink-0 rounded-md border px-2 py-0.5 text-[11px] font-medium">Editor’s Choice</span> : null}
+
+        {/* Top-Right Arrow Action Circle Indicator */}
+        <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
+          <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="7" y1="17" x2="17" y2="7" />
+            <polyline points="7 7 17 7 17 17" />
+          </svg>
         </div>
-        <p className="clamp-2 mt-3 min-h-[2.5rem] text-[13.5px] leading-[1.4] text-body">{app.tagline}</p>
-        <div className="mt-3 flex flex-col gap-1.5">
-          <Spec label="Category" value={app.categoryName} icon={<LayersIcon />} />
-          <Spec label="Pricing" value={pricingLabel[app.pricing]} icon={<TagIcon />} />
-          <Spec label="Added" value={addedLabel(app.createdAt)} icon={<ClockIcon />} />
+      </div>
+
+      {/* Footer Info: App icon on left + Name with Badge & Tagline underneath */}
+      <div className="mt-3.5 flex items-start gap-3 px-1">
+        <img
+          alt=""
+          src={app.icon}
+          onError={(event) => {
+            event.currentTarget.src = "/site-favicon.svg";
+          }}
+          className="h-10 w-10 shrink-0 rounded-[11px] object-cover shadow-sm ring-1 ring-line"
+        />
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <h3 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-ink group-hover:text-accent">
+              {app.name}
+            </h3>
+            {/* Verified / Editor badge icon */}
+            {choice ? (
+              <span title="Editor’s Choice" className="flex shrink-0 items-center text-amber-500">
+                <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">
+            {app.tagline}
+          </p>
         </div>
       </div>
     </Link>
