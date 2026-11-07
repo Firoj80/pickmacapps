@@ -214,39 +214,37 @@ function Home() {
 
       {/* Filter and Content section */}
       <div className="mx-auto w-full max-w-[1200px] px-4 py-5 sm:px-6 lg:py-7">
-        {/* Category dropdown & sorting controls bar */}
-        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Category Dropdown */}
-            <div className="relative">
-              <select
-                aria-label="Filter by category"
-                value={category}
-                onChange={(e) => updateSearch({ cat: e.target.value })}
-                className="h-9 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-8 pl-3 text-[13.5px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
-              >
-                {heroCategories.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-              <svg
-                className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </div>
+        {/* Controls bar: Category dropdown on left, immediately followed by Hot / Latest / Trending */}
+        <div className="mb-5 flex flex-wrap items-center gap-3">
+          {/* Category Dropdown */}
+          <div className="relative">
+            <select
+              aria-label="Filter by category"
+              value={category}
+              onChange={(e) => updateSearch({ cat: e.target.value })}
+              className="h-9 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-8 pl-3 text-[13.5px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
+            >
+              {heroCategories.map((item) => (
+                <option key={item.id} value={item.id}>
+                  {item.label}
+                </option>
+              ))}
+            </select>
+            <svg
+              className="pointer-events-none absolute top-1/2 right-2.5 h-3.5 w-3.5 -translate-y-1/2 text-muted"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="m6 9 6 6 6-6" />
+            </svg>
           </div>
 
-          {/* Sort Tabs */}
+          {/* Sort Tabs (right next to category dropdown) */}
           <div className="inline-flex h-9 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-0.5 dark:bg-white/10">
             {(
               [
