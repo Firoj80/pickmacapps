@@ -160,8 +160,7 @@ function Home() {
   const list = publishedApps(directory);
   const chipCategories = directory?.categories?.length ? directory.categories : shelfCategories;
   const heroCategories = [
-    { id: "all", label: "All" },
-    { id: "pick", label: "Supply Pick" },
+    { id: "all", label: "All Categories" },
     ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
@@ -215,35 +214,40 @@ function Home() {
 
       {/* Filter and Content section */}
       <div className="mx-auto w-full max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
-        {/* Category chips and sorting bar */}
-        <div className="mb-8 flex flex-col gap-3 md:flex-row md:items-center">
-          <div className="-mx-4 min-w-0 md:mx-0 md:flex-1">
-            <div className="flex gap-2 overflow-x-auto px-4 [scrollbar-width:none] md:px-0 [&::-webkit-scrollbar]:hidden">
-              {heroCategories.map((item) => {
-                const active = category === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    type="button"
-                    onClick={() => updateSearch({ cat: item.id })}
-                    className={`inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full px-4 text-[14px] font-normal tracking-[-0.016em] transition-colors ${
-                      active
-                        ? "bg-[#1d1d1f] text-white dark:bg-white dark:text-[#1d1d1f]"
-                        : "bg-[#f5f5f7] text-[#1d1d1f] hover:bg-[#e8e8ed] dark:bg-white/10 dark:text-[#f5f5f7] dark:hover:bg-white/[0.16]"
-                    }`}
-                  >
-                    {item.id === "pick" ? (
-                      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden="true">
-                        <path d="M12 2.2 14.7 8l6.3.6-4.8 4.1 1.5 6.1L12 15.8 6.3 18.8l1.5-6.1L3 8.6 9.3 8 12 2.2z" />
-                      </svg>
-                    ) : null}
+        {/* Category dropdown & sorting controls bar */}
+        <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Category Dropdown */}
+            <div className="relative">
+              <select
+                aria-label="Filter by category"
+                value={category}
+                onChange={(e) => updateSearch({ cat: e.target.value })}
+                className="h-10 cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-9 pl-3.5 text-[14px] font-medium text-ink shadow-sm transition-colors hover:border-line-2 focus-visible:border-accent focus-visible:outline-none"
+              >
+                {heroCategories.map((item) => (
+                  <option key={item.id} value={item.id}>
                     {item.label}
-                  </button>
-                );
-              })}
+                  </option>
+                ))}
+              </select>
+              <svg
+                className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
             </div>
           </div>
-          <div className="inline-flex h-9 shrink-0 items-center self-start rounded-full bg-[#e8e8ed] p-0.5 dark:bg-white/10 md:self-auto">
+
+          {/* Sort Tabs */}
+          <div className="inline-flex h-10 shrink-0 items-center rounded-xl bg-[#e8e8ed] p-1 dark:bg-white/10">
             {(
               [
                 ["hot", "Hot"],
@@ -255,9 +259,9 @@ function Home() {
                 key={id}
                 type="button"
                 onClick={() => updateSearch({ sort: id })}
-                className={`h-8 rounded-full px-3.5 text-[13px] tracking-[-0.01em] transition-colors ${
+                className={`h-8 rounded-lg px-3.5 text-[13px] tracking-[-0.01em] transition-all ${
                   sort === id
-                    ? "bg-white font-medium text-[#1d1d1f] shadow-[0_1px_2px_rgba(0,0,0,0.12),0_0_0_0.5px_rgba(0,0,0,0.04)] dark:bg-[#1d1d1f] dark:text-white"
+                    ? "bg-white font-medium text-[#1d1d1f] shadow-sm dark:bg-[#1d1d1f] dark:text-white"
                     : "font-normal text-[#6e6e73] hover:text-[#1d1d1f] dark:text-[#a1a1a6] dark:hover:text-white"
                 }`}
               >
