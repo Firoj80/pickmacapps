@@ -192,7 +192,7 @@ function Home() {
             Mac{homeH1.split("Mac")[1]}
           </h1>
           <p className="mt-5 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px] md:leading-8">
-            Skip the endless lists. Discover genuinely useful, beautifully built Mac apps curated for creators, developers, and power users.
+            A curated shelf of hand-picked Mac apps. Browse the best Mac apps on this shelf by the job they do.
           </p>
 
           {/* Curved app icons stack like reference image */}
