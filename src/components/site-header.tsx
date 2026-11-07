@@ -4,15 +4,6 @@ import { useState } from "react";
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
 
-  const handleSearchClick = (e: React.MouseEvent) => {
-    const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement | null;
-    if (searchInput) {
-      e.preventDefault();
-      searchInput.focus();
-      searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  };
-
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/80 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1240px] items-center justify-between gap-4 px-4 sm:px-6">
@@ -41,8 +32,8 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        {/* Right side: Sponsor link, Search pill button, and Submit Action */}
-        <div className="flex items-center gap-3">
+        {/* Right side: Sponsor link and Submit Action */}
+        <div className="flex items-center gap-4">
           <Link
             to="/sponsor"
             className="hidden items-center gap-1.5 text-[14px] font-medium text-body transition-colors hover:text-ink sm:inline-flex"
@@ -52,20 +43,6 @@ export function SiteHeader() {
             </span>
             <span>Sponsor</span>
           </Link>
-
-          {/* Search Pill with Cmd+K style icon */}
-          <a
-            href="/#apps"
-            onClick={handleSearchClick}
-            className="hidden items-center gap-2.5 rounded-full border border-line bg-surface px-3.5 py-1.5 text-[13px] text-muted transition hover:border-line-2 hover:text-ink sm:inline-flex"
-            aria-label="Search apps"
-          >
-            <SearchSmallIcon />
-            <span className="text-[13px]">Search</span>
-            <kbd className="rounded border border-line-2 bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted">
-              ⌘K
-            </kbd>
-          </a>
 
           {/* Submit App Primary Action Button */}
           <Link
@@ -113,24 +90,10 @@ export function SiteHeader() {
                 <span>Sponsor</span>
               </Link>
             </li>
-            <li>
-              <a href="/#apps" onClick={(e) => { setOpen(false); handleSearchClick(e); }} className="block rounded-xl px-3 py-2.5 text-base text-ink">
-                Search
-              </a>
-            </li>
           </ul>
         </nav>
       ) : null}
     </header>
-  );
-}
-
-function SearchSmallIcon() {
-  return (
-    <svg className="h-3.5 w-3.5 text-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="m20 20-3.5-3.5" />
-    </svg>
   );
 }
 
