@@ -8,21 +8,31 @@ export function SiteFooter() {
   const { directory } = useRouteContext({ from: "__root__" });
   const list = publishedApps(directory);
   const categories = [...(directory?.categories ?? [])].sort((a, b) => a.name.localeCompare(b.name));
-  const featured = list.filter((app) => isEditorChoice(app));
+
+  // Editor's Choice apps first, backfilled with top published apps up to 8 items
+  const editorApps = list.filter((app) => isEditorChoice(app));
+  const otherApps = list.filter((app) => !isEditorChoice(app));
+  const featured = [...editorApps, ...otherApps].slice(0, 8);
 
   return (
     <footer className="mt-auto border-t border-line bg-canvas">
-      <div className="mx-auto max-w-[1200px] px-4 py-14 sm:px-6">
-        <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <Link to="/" className="text-[19px] font-medium text-ink">
-              PickMacApps
+      <div className="mx-auto max-w-[1200px] px-4 py-12 sm:px-6 lg:py-16">
+        {/* 4-Column Main Layout matching Macapp Supply reference */}
+        <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-12 lg:gap-10">
+          {/* Column 1: Brand & Creator */}
+          <div className="col-span-2 sm:col-span-2 lg:col-span-4">
+            <Link to="/" className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-tight text-ink">
+              <span>PickMacApps</span>
+              <span className="text-base" role="img" aria-label="macapp">
+                💻
+              </span>
             </Link>
-            <p className="mt-3 max-w-[34ch] text-[13px] leading-relaxed text-muted">
-              A curated shelf of hand-picked Mac apps.
+            <p className="mt-3 max-w-[28ch] text-[13px] leading-relaxed text-muted">
+              A curated shelf of beautifully designed macOS apps.
             </p>
+
             {/* Curated by badge pill */}
-            <div className="mt-4">
+            <div className="mt-5">
               <a
                 href={creatorUrl}
                 target="_blank"
@@ -41,37 +51,91 @@ export function SiteFooter() {
               </a>
             </div>
           </div>
-          <div className="lg:col-span-4">
-            <p className="text-[13px] font-semibold text-ink">Categories</p>
-            <ul className="mt-3.5 grid grid-cols-2 gap-x-6 gap-y-2.5">
+
+          {/* Column 2: Menu */}
+          <div className="col-span-1 lg:col-span-2">
+            <p className="text-[14px] font-semibold text-ink mb-3.5">Menu</p>
+            <ul className="space-y-2.5 text-[13px]">
+              <li>
+                <Link to="/" className="text-muted transition-colors hover:text-ink">
+                  Home
+                </Link>
+              </li>
+              <li>
+                <Link to="/compare" className="text-muted transition-colors hover:text-ink">
+                  Alternatives
+                </Link>
+              </li>
+              <li>
+                <Link to="/submit" className="text-muted transition-colors hover:text-ink">
+                  Submit an app
+                </Link>
+              </li>
+              <li>
+                <Link
+                  to="/sponsor"
+                  className="group inline-flex items-center gap-1.5 text-muted transition-colors hover:text-ink"
+                >
+                  <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500 text-[9px] font-bold text-white shadow-xs">
+                    ✓
+                  </span>
+                  <span className="font-medium text-ink group-hover:text-amber-600">Sponsor</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/how-we-pick" className="text-muted transition-colors hover:text-ink">
+                  How we pick
+                </Link>
+              </li>
+              <li>
+                <Link to="/blog" className="text-muted transition-colors hover:text-ink">
+                  Blog
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="text-muted transition-colors hover:text-ink">
+                  About
+                </Link>
+              </li>
+              <li>
+                <Link to="/privacy" className="text-muted transition-colors hover:text-ink">
+                  Privacy
+                </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Column 3: Categories */}
+          <div className="col-span-1 lg:col-span-2">
+            <p className="text-[14px] font-semibold text-ink mb-3.5">Categories</p>
+            <ul className="space-y-2.5 text-[13px]">
               {categories.map((category) => (
                 <li key={category.slug}>
                   <Link
                     to="/category/$slug"
                     params={{ slug: category.slug }}
-                    className="inline-flex items-center gap-2 text-[13px] text-muted transition-colors hover:text-ink"
+                    className="block text-muted transition-colors hover:text-ink truncate"
                   >
-                    <span aria-hidden="true" className="w-4 text-center text-[14px] leading-none">
-                      {category.emoji}
-                    </span>
                     {category.name}
                   </Link>
                 </li>
               ))}
             </ul>
           </div>
-          <div className="lg:col-span-4">
-            <p className="text-[13px] font-semibold text-ink">Featured</p>
-            <ul className="mt-3.5 space-y-2.5">
+
+          {/* Column 4: Featured Apps */}
+          <div className="col-span-2 sm:col-span-2 lg:col-span-4">
+            <p className="text-[14px] font-semibold text-ink mb-3.5">Featured</p>
+            <ul className="space-y-3 text-[13px]">
               {featured.length === 0 ? (
-                <li className="text-[13px] text-muted">No Editor’s Choice apps right now.</li>
+                <li className="text-muted">No featured apps right now.</li>
               ) : (
                 featured.map((app) => (
                   <li key={app.slug}>
                     <Link
                       to="/app/$slug"
                       params={{ slug: app.slug }}
-                      className="inline-flex items-center gap-2.5 text-[13px] text-muted transition-colors hover:text-ink"
+                      className="group flex items-center gap-2.5 text-muted transition-colors hover:text-ink"
                     >
                       <img
                         alt=""
@@ -79,9 +143,9 @@ export function SiteFooter() {
                         onError={(event) => {
                           event.currentTarget.src = "/site-favicon.svg";
                         }}
-                        className="h-6 w-6 shrink-0 rounded-md object-cover ring-1 ring-line"
+                        className="h-5 w-5 shrink-0 rounded-md object-cover ring-1 ring-line group-hover:ring-accent"
                       />
-                      {app.name}
+                      <span className="truncate group-hover:text-ink">{app.name}</span>
                     </Link>
                   </li>
                 ))
@@ -89,33 +153,29 @@ export function SiteFooter() {
             </ul>
           </div>
         </div>
-        <div className="mt-12 flex flex-wrap gap-x-5 gap-y-2 border-t border-line pt-6">
-          <Link to="/about" className="text-[13px] text-muted transition-colors hover:text-ink">
-            About
-          </Link>
-          <Link to="/how-we-pick" className="text-[13px] text-muted transition-colors hover:text-ink">
-            How we pick
-          </Link>
-          <Link to="/blog" className="text-[13px] text-muted transition-colors hover:text-ink">
-            Blog
-          </Link>
-          <Link to="/compare" className="text-[13px] text-muted transition-colors hover:text-ink">
-            Alternatives
-          </Link>
-          <Link to="/sponsor" className="text-[13px] text-muted transition-colors hover:text-ink">
-            Sponsor
-          </Link>
-          <Link to="/submit" className="text-[13px] text-muted transition-colors hover:text-ink">
-            Submit an app
-          </Link>
-          <Link to="/privacy" className="text-[13px] text-muted transition-colors hover:text-ink">
-            Privacy
-          </Link>
+
+        {/* Bottom Bar matching reference layout */}
+        <div className="mt-14 flex flex-col gap-4 border-t border-line/70 pt-8 sm:flex-row sm:items-center sm:justify-between text-[12px] text-muted">
+          <div className="flex flex-wrap items-center gap-3">
+            <span>© {new Date().getFullYear()} PickMacApps. All rights reserved.</span>
+            <a
+              href="/sitemap.xml"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-medium text-muted transition-colors hover:border-line-2 hover:text-ink"
+            >
+              <svg className="h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="6.18" cy="17.82" r="2.18" />
+                <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z" />
+              </svg>
+              <span>RSS</span>
+            </a>
+          </div>
+
+          <p className="max-w-xl text-[11.5px] leading-relaxed text-muted sm:text-right">
+            A manually curated collection. Some outbound links may be affiliate links. Not affiliated with Apple Inc. — all app marks belong to their respective owners.
+          </p>
         </div>
-        <p className="mt-6 max-w-3xl text-[13px] leading-relaxed text-muted">
-          A hand-picked directory. Not affiliated with Apple Inc. — all app marks belong to their respective owners.
-        </p>
-        <p className="mt-3 text-[13px] text-muted">© {new Date().getFullYear()} PickMacApps</p>
       </div>
     </footer>
   );
