@@ -77,10 +77,11 @@ export const Route = createFileRoute("/app/$slug")({
 function AppPage() {
   const { slug } = Route.useParams();
   const { directory } = Route.useRouteContext();
-  const app = publishedApps(directory).find((item) => item.slug === slug) ?? null;
+  const allApps = publishedApps(directory);
+  const app = allApps.find((item) => item.slug === slug) ?? null;
   if (!app) return null;
 
-  const allOtherApps = publishedApps(directory).filter((item) => item.slug !== app.slug);
+  const allOtherApps = allApps.filter((item) => item.slug !== app.slug);
   const explicitRelated = app.related
     .map((item) => allOtherApps.find((a) => a.slug === item))
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
@@ -90,90 +91,188 @@ function AppPage() {
   const others = allOtherApps.filter(
     (item) => !explicitRelated.some((r) => r.slug === item.slug) && !sameCategory.some((c) => c.slug === item.slug),
   );
-  const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 3);
+  const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 4);
   const choice = isEditorChoice(app);
 
   return (
-    <main>
-      <div className="mx-auto w-full max-w-[1200px] px-4 pt-10 sm:px-6">
-        {app.demo ? (
-          <div className="mb-8 overflow-hidden rounded-2xl border border-line/80">
-            {app.demo.endsWith(".mp4") ? (
-              <video src={app.demo} controls muted loop playsInline className="aspect-[1200/630] w-full object-cover" />
-            ) : (
-              <img
-                alt={`${app.name} for Mac screenshot`}
-                src={app.demo}
-                onError={(e) => {
-                  (e.currentTarget as HTMLElement).style.display = "none";
-                }}
-                className="aspect-[1200/630] w-full object-cover"
-              />
-            )}
-          </div>
-        ) : null}
-        <div className="flex flex-col gap-6 pb-8 sm:flex-row sm:items-end sm:justify-between">
-          <div className="flex items-start gap-5">
-            <img
-              alt={`${app.name} for Mac icon`}
-              src={app.icon}
-              onError={(e) => {
-                e.currentTarget.src = "/site-favicon.svg";
-              }}
-              className="h-20 w-20 rounded-2xl object-cover ring-1 ring-line sm:h-24 sm:w-24"
-            />
-            <div>
-              {choice ? (
-                <p className="text-[12px] font-semibold tracking-[0.14em] text-accent uppercase">
-                  Editor’s Choice
-                </p>
-              ) : (
-                <p className="text-[12px] font-semibold tracking-[0.14em] text-muted uppercase">{app.categoryName}</p>
-              )}
-              <h1 className="font-display mt-1 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">{app.name} for Mac</h1>
-              <p className="mt-2 max-w-xl text-[16px] text-body">{app.tagline}</p>
-              {app.slug === "scanmydisk" ? (
-                <div className="mt-3">
-                  <ScanMyDiskNote />
+    <main className="flex-1">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 lg:py-12">
+        <div className="flex gap-10 lg:gap-14">
+          {/* Left sticky sidebar: curated app list */}
+          <aside className="hidden w-48 shrink-0 lg:block">
+            <nav className="sticky top-20 max-h-[calc(100vh-6rem)] overflow-y-auto pr-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+              <p className="mb-2 px-2.5 text-[11px] font-semibold uppercase tracking-wider text-muted">
+                Explore Apps
+              </p>
+              <ul className="space-y-1">
+                {allApps.slice(0, 25).map((sidebarApp) => {
+                  const isActive = sidebarApp.slug === app.slug;
+                  return (
+                    <li key={sidebarApp.slug}>
+                      <Link
+                        to="/app/$slug"
+                        params={{ slug: sidebarApp.slug }}
+                        className={`flex items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-sm transition-colors ${
+                          isActive
+                            ? "bg-surface-2 font-medium text-ink shadow-xs"
+                            : "text-muted hover:bg-surface hover:text-ink"
+                        }`}
+                      >
+                        <img
+                          alt=""
+                          src={sidebarApp.icon}
+                          onError={(e) => {
+                            e.currentTarget.src = "/site-favicon.svg";
+                          }}
+                          className="h-6 w-6 shrink-0 rounded-md object-cover ring-1 ring-line/70"
+                        />
+                        <span className="truncate">{sidebarApp.name}</span>
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </nav>
+          </aside>
+
+          {/* Main article content */}
+          <article className="min-w-0 flex-1 max-w-3xl">
+            {/* Header: Icon, Name, Tagline & CTA button */}
+            <div className="flex items-start justify-between gap-4">
+              <div className="flex items-center gap-4 sm:gap-5">
+                <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line sm:h-20 sm:w-20 sm:rounded-[20px]">
+                  <img
+                    alt={app.name}
+                    src={app.icon}
+                    onError={(e) => {
+                      e.currentTarget.src = "/site-favicon.svg";
+                    }}
+                    className="h-full w-full object-cover"
+                  />
                 </div>
-              ) : null}
-              <div className="mt-4 flex flex-wrap gap-2">
-                <span className={`rounded-full px-2.5 py-1 text-xs font-medium ring-1 ring-inset ${pricingClass[app.pricing]}`}>
-                  {pricingLabel[app.pricing]}
-                </span>
-                <Link
-                  to="/category/$slug"
-                  params={{ slug: app.category }}
-                  className="rounded-full border border-line px-2.5 py-1 text-xs text-body hover:text-ink"
-                >
-                  {app.categoryIcon} {app.categoryName}
-                </Link>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <h1 className="text-xl font-[550] tracking-[-0.025em] text-ink sm:text-2xl">
+                      {app.name}
+                    </h1>
+                    {choice ? (
+                      <span title="Editor’s Choice" className="flex items-center text-amber-500">
+                        <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
+                          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                        </svg>
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-1 text-sm text-body sm:text-base leading-snug">{app.tagline}</p>
+                </div>
               </div>
+
+              {/* Desktop CTA */}
+              <a
+                href={app.website}
+                target="_blank"
+                rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:inline-flex"
+              >
+                Try the app
+                <span className="text-xs">↗</span>
+              </a>
             </div>
-          </div>
-          <a
-            href={app.website}
-            target="_blank"
-            rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
-            className="inline-flex shrink-0 items-center justify-center rounded-lg border border-line-2 bg-surface px-4 py-2.5 text-sm font-medium text-ink hover:bg-surface-2"
-          >
-            Try the app ↗
-          </a>
+
+            {/* Badges row & Mobile CTA */}
+            <div className="mt-5 flex flex-wrap items-center gap-2">
+              <span className={`rounded-md px-2.5 py-1 text-xs font-medium capitalize ring-1 ring-inset ${pricingClass[app.pricing]}`}>
+                {pricingLabel[app.pricing]}
+              </span>
+              <Link
+                to="/category/$slug"
+                params={{ slug: app.category }}
+                className="rounded-md border border-line-2 bg-surface px-2.5 py-1 text-xs font-medium text-body transition-colors hover:bg-surface-2 hover:text-ink"
+              >
+                {app.categoryIcon} {app.categoryName}
+              </Link>
+              {/* Mobile CTA */}
+              <a
+                href={app.website}
+                target="_blank"
+                rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:hidden"
+              >
+                Try the app
+                <span className="text-xs">↗</span>
+              </a>
+            </div>
+
+            {/* App Screenshot / Demo */}
+            {app.demo ? (
+              <div className="mt-8 overflow-hidden rounded-xl border border-line bg-surface">
+                {app.demo.endsWith(".mp4") ? (
+                  <video src={app.demo} controls muted loop playsInline className="aspect-[16/10] w-full object-cover" />
+                ) : (
+                  <img
+                    alt={`${app.name} screenshot`}
+                    src={app.demo}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = "none";
+                    }}
+                    className="aspect-[16/10] w-full object-cover"
+                  />
+                )}
+              </div>
+            ) : null}
+
+            {app.slug === "scanmydisk" ? (
+              <div className="mt-6">
+                <ScanMyDiskNote />
+              </div>
+            ) : null}
+
+            {/* Description Body */}
+            <div className="mt-8 whitespace-pre-line text-base leading-[1.75] text-body">
+              {app.description}
+            </div>
+
+            {/* You might also like / Alternatives section */}
+            {related.length > 0 ? (
+              <section className="mt-14 border-t border-line pt-8">
+                <h2 className="mb-5 text-lg font-[550] tracking-[-0.025em] text-ink">You might also like</h2>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                  {related.map((item) => (
+                    <Link
+                      key={item.id}
+                      to="/app/$slug"
+                      params={{ slug: item.slug }}
+                      className="group flex items-start gap-4 rounded-xl border border-line bg-surface p-4 transition-colors duration-200 hover:border-line-2 hover:bg-surface-2"
+                    >
+                      <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-line">
+                        <img
+                          alt={item.name}
+                          src={item.icon}
+                          onError={(e) => {
+                            e.currentTarget.src = "/site-favicon.svg";
+                          }}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="flex min-w-0 flex-1 flex-col gap-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <h3 className="truncate text-sm font-[550] tracking-[-0.025em] text-ink group-hover:text-accent">
+                            {item.name}
+                          </h3>
+                          <span className={`shrink-0 rounded-md px-2 py-0.5 text-[10px] font-medium capitalize ring-1 ring-inset ${pricingClass[item.pricing]}`}>
+                            {pricingLabel[item.pricing]}
+                          </span>
+                        </div>
+                        <p className="line-clamp-1 text-xs text-muted">{item.tagline}</p>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ) : null}
+          </article>
         </div>
       </div>
-      <article className="mx-auto max-w-[720px] px-4 py-10 sm:px-6">
-        <div className="text-[16.5px] leading-[1.75] whitespace-pre-line text-body">{app.description}</div>
-        {related.length > 0 ? (
-          <section className="mt-14 border-t border-line pt-8">
-            <h2 className="font-display text-2xl font-semibold text-ink">Alternatives</h2>
-            <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item) => (
-                <AppCard key={item.id} app={item} />
-              ))}
-            </div>
-          </section>
-        ) : null}
-      </article>
     </main>
   );
 }
