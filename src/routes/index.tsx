@@ -185,25 +185,18 @@ function Home() {
       {/* Hero Section */}
       <section className="relative overflow-hidden border-b border-line px-4 pt-8 pb-7 sm:px-6 md:pt-12 md:pb-10 hero-grid">
         <div className="mx-auto flex w-full max-w-[860px] flex-col items-center text-center">
-          <h1 className="text-[38px] leading-[1.08] font-bold tracking-[-0.035em] text-ink sm:text-[52px] md:text-[60px]">
+          <h1 className="text-[30px] leading-[1.12] font-bold tracking-[-0.03em] text-ink sm:text-[40px] md:text-[46px]">
             {homeH1.split("Mac")[0]}
             <MacLogo className="mx-1 inline h-[0.76em] w-[0.76em] -translate-y-[0.06em]" />
             Mac{homeH1.split("Mac")[1]}
           </h1>
-          <p className="mt-3 max-w-2xl text-[15px] leading-relaxed text-body sm:text-[17px] md:leading-7">
+          <p className="mt-2.5 max-w-2xl text-[14.5px] leading-relaxed text-body sm:text-[16px] md:leading-6">
             A curated shelf of hand-picked Mac apps. Browse the best Mac apps on this shelf by the job they do.
           </p>
 
-          {/* Curved app icons stack like reference image */}
+          {/* Curved app icons stack - ONLY Editor's Choice apps */}
           <div className="mt-3 w-full">
-            <ChoiceIcons
-              apps={(() => {
-                const editors = list.filter((app) => isEditorChoice(app));
-                if (editors.length >= 7) return editors.slice(0, 9);
-                const rest = list.filter((app) => !isEditorChoice(app));
-                return [...editors, ...rest].slice(0, 9);
-              })()}
-            />
+            <ChoiceIcons apps={list.filter((app) => isEditorChoice(app))} />
           </div>
 
           {directory ? null : (
