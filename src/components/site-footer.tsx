@@ -156,20 +156,8 @@ export function SiteFooter() {
 
         {/* Bottom Bar matching reference layout */}
         <div className="mt-14 flex flex-col gap-4 border-t border-line/70 pt-8 sm:flex-row sm:items-center sm:justify-between text-[12px] text-muted">
-          <div className="flex flex-wrap items-center gap-3">
+          <div>
             <span>© {new Date().getFullYear()} PickMacApps. All rights reserved.</span>
-            <a
-              href="/sitemap.xml"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-2.5 py-0.5 text-[11px] font-medium text-muted transition-colors hover:border-line-2 hover:text-ink"
-            >
-              <svg className="h-3 w-3 text-amber-500" viewBox="0 0 24 24" fill="currentColor">
-                <circle cx="6.18" cy="17.82" r="2.18" />
-                <path d="M4 4.44v2.83c7.03 0 12.73 5.7 12.73 12.73h2.83c0-8.59-6.97-15.56-15.56-15.56zm0 5.66v2.83c3.9 0 7.07 3.17 7.07 7.07h2.83c0-5.47-4.43-9.9-9.9-9.9z" />
-              </svg>
-              <span>RSS</span>
-            </a>
           </div>
 
           <p className="max-w-xl text-[11.5px] leading-relaxed text-muted sm:text-right">
