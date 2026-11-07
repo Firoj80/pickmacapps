@@ -61,7 +61,7 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
                 : "bg-black/65 text-white/90 ring-1 ring-white/20"
             }`}
           >
-            {pricingLabel(app.pricing)}
+            {pricingLabel[app.pricing] || "Free"}
           </span>
         </div>
 
@@ -123,7 +123,7 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
                   : "bg-surface-2 text-muted ring-1 ring-line"
               }`}
             >
-              {pricingLabel(app.pricing)}
+              {pricingLabel[app.pricing] || "Free"}
             </span>
           </div>
           <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">
