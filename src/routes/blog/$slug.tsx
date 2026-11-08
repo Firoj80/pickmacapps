@@ -2,7 +2,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { getPost, posts } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
-import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -186,12 +185,6 @@ function BlogPost() {
         ) : null}
 
         <div className="blog-body" dangerouslySetInnerHTML={{ __html: post.html }} />
-
-        {featuresScanMyDisk(mentioned.map((app) => app.name).concat(post.html.includes("ScanMyDisk") ? ["ScanMyDisk"] : [])) ? (
-          <div className="mt-8">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Visible FAQ Section */}
         {enhancement.faqs.length > 0 ? (

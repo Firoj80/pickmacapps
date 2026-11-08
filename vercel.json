@@ -1,4 +1,17 @@
 {
   "installCommand": "npm install --omit=dev --no-audit --no-fund",
-  "crons": [{ "path": "/api/cron/badges", "schedule": "0 8 * * *" }]
+  "crons": [{ "path": "/api/cron/badges", "schedule": "0 8 * * *" }],
+  "redirects": [
+    {
+      "source": "/:path*",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pickmacapps.store"
+        }
+      ],
+      "destination": "https://pickmacapps.store/:path*",
+      "permanent": true
+    }
+  ]
 }

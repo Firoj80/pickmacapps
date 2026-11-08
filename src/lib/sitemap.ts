@@ -1,7 +1,9 @@
 import { apps, posts, type AppItem, type Post } from "@/lib/catalog";
 import { comparePairs, hubLastmod, pairLastmod } from "@/lib/compare";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
-import { site } from "@/lib/site";
+import { PRIMARY_ORIGIN, site } from "@/lib/site";
+
+export { PRIMARY_ORIGIN };
 
 export const SITEMAP_SECTIONS = ["pages", "apps", "guides", "categories", "compare"] as const;
 export type SitemapSection = (typeof SITEMAP_SECTIONS)[number];
@@ -76,38 +78,38 @@ export function sectionUrls(
     ];
   }
   if (section === "apps") {
-    return list.map((app) => ({
-      loc: absoluteUrl(origin, `/app/${app.slug}`),
-      lastmod: asLastmod(app.createdAt, today),
-    }));
+    return list
+      .filter((app) => (app as AppItem & { status?: string }).status !== "unpublished" && app.slug !== "scanmydisk")
+      .map((app) => {
+        // Only emit lastmod when an actual modification timestamp exists (not creation date)
+        const hasRealUpdate = Boolean(app.updatedAt && app.updatedAt.slice(0, 10) !== app.createdAt.slice(0, 10));
+        return {
+          loc: absoluteUrl(origin, `/app/${app.slug}`),
+          ...(hasRealUpdate ? { lastmod: asLastmod(app.updatedAt, today) } : {}),
+        };
+      });
   }
   if (section === "guides") {
-    return guideList.map((post) => ({
-      loc: absoluteUrl(origin, `/blog/${post.slug}`),
-      lastmod: asLastmod(post.date, today),
-    }));
+    return guideList
+      .filter((post) => (post as Post & { status?: string }).status !== "unpublished")
+      .map((post) => ({
+        loc: absoluteUrl(origin, `/blog/${post.slug}`),
+        lastmod: asLastmod(post.updatedAt || post.date, today),
+      }));
   }
   if (section === "categories") {
     return shelfCategories
       .filter((category) => list.some((app) => normalizeCategorySlug(app.category) === category.slug))
-      .map((category) => {
-        const newest = list
-          .filter((app) => normalizeCategorySlug(app.category) === category.slug)
-          .map((app) => app.createdAt)
-          .sort()
-          .at(-1);
-        return {
-          loc: absoluteUrl(origin, `/category/${category.slug}`),
-          lastmod: asLastmod(newest, today),
-        };
-      });
+      .map((category) => ({
+        loc: absoluteUrl(origin, `/category/${category.slug}`),
+      }));
   }
-  const pairs = comparePairs(source);
+  // Exclude thin comparison pages: only include pairs backed by curated editorial guides
+  const pairs = comparePairs(source).filter((pair) => pair.guides && pair.guides.length > 0);
   return [
-    { loc: absoluteUrl(origin, "/compare"), lastmod: asLastmod(hubLastmod(), today) },
+    { loc: absoluteUrl(origin, "/compare") },
     ...pairs.map((pair) => ({
       loc: absoluteUrl(origin, `/compare/${pair.slug}`),
-      lastmod: asLastmod(pairLastmod(pair), today),
     })),
   ];
 }
@@ -130,7 +132,11 @@ function xml(body: string, status = 200) {
 }
 
 export async function sitemapResponse(kind: "index" | SitemapSection, origin: string) {
-  const key = `${origin}:${kind}`;
+  const canonicalOrigin =
+    origin && !origin.includes("localhost") && !origin.includes("127.0.0.1") && !origin.includes("vercel.app")
+      ? origin
+      : PRIMARY_ORIGIN;
+  const key = `${canonicalOrigin}:${kind}`;
   let source: { apps: AppItem[]; posts: Post[] } | undefined;
   try {
     const { publishedDirectory } = await import("@/lib/directory.server");
@@ -144,8 +150,8 @@ export async function sitemapResponse(kind: "index" | SitemapSection, origin: st
     const today = todayUtc();
     const body =
       kind === "index"
-        ? sitemapIndex(indexLocs(origin, today, source))
-        : urlSet(sectionUrls(kind, origin, today, source));
+        ? sitemapIndex(indexLocs(canonicalOrigin, today, source))
+        : urlSet(sectionUrls(kind, canonicalOrigin, today, source));
     if (!body.includes("<loc>")) {
       return new Response("Not found\n", { status: 404, headers: { "Content-Type": "text/plain; charset=utf-8" } });
     }

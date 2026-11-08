@@ -1,6 +1,5 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { appPriorityWeight, posts } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
@@ -205,12 +204,6 @@ function CategoryPage() {
             </div>
           )}
         </section>
-
-        {featuresScanMyDisk(listed.map((app) => app.name)) ? (
-          <div className="mt-8">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Editorial Guide: What to look for */}
         {category.tips.length > 0 ? (

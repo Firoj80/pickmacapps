@@ -16,7 +16,7 @@
     "preview:stop": "node scripts/preview.mjs stop",
     "typecheck": "tsc --noEmit",
     "indexnow": "node --experimental-strip-types --import ./scripts/alias-register.mjs scripts/ping-indexnow.mjs",
-    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts && node --experimental-strip-types --import ./scripts/alias-register.mjs --test src/lib/app-seed.test.ts src/lib/md/coverage.test.ts src/lib/seo-metadata.test.ts src/lib/jsonld.test.ts src/lib/sitemap.test.ts src/lib/indexnow.test.ts src/lib/compare.test.ts src/lib/payments.test.ts src/lib/home-shelves.test.ts",
+    "test": "node --test 'scripts/**/*.test.mjs' && node --experimental-strip-types --test src/lib/auth/gate-identity.test.ts src/lib/auth/sign-in-gate.test.ts && node --experimental-strip-types --import ./scripts/alias-register.mjs --test src/lib/app-seed.test.ts src/lib/md/coverage.test.ts src/lib/seo-metadata.test.ts src/lib/jsonld.test.ts src/lib/sitemap.test.ts src/lib/indexnow.test.ts src/lib/compare.test.ts src/lib/payments.test.ts src/lib/home-shelves.test.ts src/lib/editor-choice-slots.test.ts",
     "lint": "eslint .",
     "format": "prettier --write ."
   },

@@ -25,6 +25,7 @@ export type AppItem = {
   isUserSubmitted?: boolean;
   views7d?: number;
   createdAt: string;
+  updatedAt?: string;
   demo: string;
   related: string[];
 };
@@ -54,6 +55,7 @@ export type Post = {
   excerpt: string;
   date: string;
   dateLabel: string;
+  updatedAt?: string;
   minutes: number;
   tags: string[];
   toc: TocItem[];
@@ -157,6 +159,41 @@ export function appPriorityWeight(app: AppItem): number {
   }
   if (app.isHot) return 1;
   return 0;
+}
+
+/**
+ * Hero app icons logic for homepage hero section (capped at 6 apps):
+ * Priority 1: Paid apps (Editor's Choice, sorted by featuredTier weight: Gold article first, then Blue featured).
+ * If 6 paid apps are NOT available, then toggle/include the top Hot apps (isHot: true) to fill the remaining slots up to 6.
+ * If 6 paid apps ARE available, only the paid apps are shown (no hot apps toggled).
+ */
+export function getHeroAppIcons(list: readonly AppItem[], max = 6): AppItem[] {
+  const paidApps = [...list.filter((app) => isEditorChoice(app))].sort(
+    (a, b) => featuredTierWeight(b) - featuredTierWeight(a),
+  );
+
+  // If 6 or more paid apps are available, use strictly the paid apps
+  if (paidApps.length >= max) {
+    return paidApps.slice(0, max);
+  }
+
+  // If 6 paid apps are not available, toggle on the top hot apps to fill the remaining slots
+  const remainingSlots = max - paidApps.length;
+  const paidSlugs = new Set(paidApps.map((a) => a.slug));
+
+  const hotApps = list
+    .filter((app) => app.isHot && !paidSlugs.has(app.slug))
+    .sort((a, b) => {
+      const vA = a.views7d ?? 0;
+      const vB = b.views7d ?? 0;
+      if (vB !== vA) return vB - vA;
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeB - timeA || a.name.localeCompare(b.name);
+    })
+    .slice(0, remainingSlots);
+
+  return [...paidApps, ...hotApps];
 }
 
 export function shelfApps(

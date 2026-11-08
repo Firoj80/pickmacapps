@@ -82,9 +82,7 @@ function AboutPage() {
           link to the developer. The site is not affiliated with Apple Inc.
         </p>
         <p>
-          ScanMyDisk is built by the author of this site. When that app is on a page, the page says so. Editor’s Choice
-          on that listing, or any other, is a paid placement. It is not a test score. At most 3 published apps can have
-          the label. The price is the one on the submit page.
+          Editor’s Choice is a paid placement. It is not a test score. At most 3 published apps can have the label. The price is the one on the submit page.
         </p>
 
         <h2 className="font-display mt-10 text-2xl font-semibold text-ink">What a page will not claim</h2>

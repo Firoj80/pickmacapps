@@ -1,7 +1,6 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
-import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appPairs } from "@/lib/compare";
 import { publishedApps } from "@/lib/app-seed";
@@ -260,12 +259,6 @@ function AppPage() {
                     className="aspect-[16/10] w-full object-cover"
                   />
                 )}
-              </div>
-            ) : null}
-
-            {app.slug === "scanmydisk" ? (
-              <div className="mt-6">
-                <ScanMyDiskNote />
               </div>
             ) : null}
 

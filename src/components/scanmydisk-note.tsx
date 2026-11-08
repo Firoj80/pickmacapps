@@ -1,7 +1,7 @@
-export function featuresScanMyDisk(names: string[]) {
-  return names.some((name) => name.trim().toLowerCase() === "scanmydisk");
+export function featuresScanMyDisk(_names: string[]) {
+  return false;
 }
 
 export function ScanMyDiskNote() {
-  return <p className="text-[13px] leading-relaxed text-muted">ScanMyDisk is built by the author of this site.</p>;
+  return null;
 }

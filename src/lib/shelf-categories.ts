@@ -63,7 +63,7 @@ export const shelfCategories: ShelfCategory[] = [
     faqs: [
       {
         q: "What is the best Mac disk space analyzer in 2026?",
-        a: "Visual analyzers like ScanMyDisk, Mole, and ByteSweep allow you to spot bloated folders, lingering application caches, and unused iOS backups quickly, giving you complete manual control over what gets deleted.",
+        a: "Visual analyzers like Mole and ByteSweep allow you to spot bloated folders, lingering application caches, and unused iOS backups quickly, giving you complete manual control over what gets deleted.",
       },
       {
         q: "Do I need a Mac cleaner app?",
@@ -203,7 +203,7 @@ export const shelfCategories: ShelfCategory[] = [
       },
       {
         q: "How do I keep my Mac clean during software development?",
-        a: "Use disk utilities like ScanMyDisk, Mole, or ByteSweep to clean orphaned Docker build caches, old Xcode derived data, and unused node_modules folders safely.",
+        a: "Use disk utilities like Mole or ByteSweep to clean orphaned Docker build caches, old Xcode derived data, and unused node_modules folders safely.",
       },
       {
         q: "Where should developer tools store sensitive API tokens?",

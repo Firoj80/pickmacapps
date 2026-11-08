@@ -1,6 +1,5 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import {
   pairFaqs,
   pairHeading,
@@ -227,12 +226,6 @@ function ComparePage() {
             <AppCard app={pair.right} />
           </div>
         </section>
-
-        {pair.left.slug === "scanmydisk" || pair.right.slug === "scanmydisk" ? (
-          <div className="mb-8">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Side-by-Side Specification Matrix */}
         <section className="mb-12">

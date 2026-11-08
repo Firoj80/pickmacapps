@@ -102,7 +102,8 @@ function NewAppPage() {
         );
       } else {
         setFetchStatus("error");
-        setFetchMessage(result.message || "Could not extract metadata from this site. Enter details manually.");
+        const errMsg = (result as { message?: string; error?: string }).message || (result as { message?: string; error?: string }).error;
+        setFetchMessage(errMsg || "Could not extract metadata from this site. Enter details manually.");
       }
     } catch {
       setFetchStatus("error");
