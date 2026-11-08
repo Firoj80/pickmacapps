@@ -46,6 +46,7 @@ function AdminHome() {
   const goldOccupants = data.stats.goldOccupants ?? [];
   const topApps = data.stats.topApps7d ?? [];
   const hotApps = data.stats.hotApps ?? [];
+  const trafficSources = data.stats.trafficSources7d ?? [];
 
   return (
     <AdminShell
@@ -489,6 +490,70 @@ function AdminHome() {
                 ))}
               </div>
             )}
+            {/* Traffic Referrers & Sources breakdown */}
+            <div className="mt-5 rounded-xl border border-line bg-stone-50/60 p-3.5">
+              <div className="flex items-center justify-between text-xs border-b border-line/60 pb-2 mb-2.5">
+                <span className="font-semibold text-ink flex items-center gap-1.5">
+                  <span>🧭</span> Traffic Referrers & Sources (Last 7 Days)
+                </span>
+                <span className="text-[11px] text-muted">
+                  {trafficSources.reduce((acc, curr) => acc + curr.views, 0).toLocaleString()} total tracked
+                </span>
+              </div>
+              {trafficSources.length === 0 ? (
+                <p className="text-[11px] text-muted py-1">
+                  No source referrals categorized yet. Source origins are logged automatically when visitors arrive.
+                </p>
+              ) : (
+                <div className="space-y-2">
+                  {trafficSources.map((item) => {
+                    const totalViews = trafficSources.reduce((acc, curr) => acc + curr.views, 0) || 1;
+                    const pct = Math.round((item.views / totalViews) * 100);
+                    const sourceIcons: Record<string, { label: string; icon: string }> = {
+                      direct: { label: "Direct / Internal", icon: "🔗" },
+                      google: { label: "Google Search", icon: "🔍" },
+                      bing: { label: "Bing Search", icon: "🌐" },
+                      x: { label: "X (Twitter)", icon: "🐦" },
+                      threads: { label: "Threads / Instagram", icon: "🧵" },
+                      reddit: { label: "Reddit", icon: "💬" },
+                      producthunt: { label: "Product Hunt", icon: "🐱" },
+                      hacker_news: { label: "Hacker News", icon: "🔶" },
+                      bot: { label: "Bot / Crawler / Audit Tool", icon: "🤖" },
+                      other: { label: "Other Referral", icon: "🌍" },
+                    };
+                    const meta = sourceIcons[item.source] ?? { label: item.source, icon: "🌍" };
+
+                    return (
+                      <div key={item.source} className="text-xs">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="flex items-center gap-1.5 font-medium text-ink">
+                            <span>{meta.icon}</span>
+                            <span>{meta.label}</span>
+                          </span>
+                          <span className="text-muted">
+                            <span className="font-semibold text-ink">{item.views.toLocaleString()}</span> ({pct}%)
+                          </span>
+                        </div>
+                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
+                          <div
+                            className={`h-full rounded-full ${
+                              item.source === "bot"
+                                ? "bg-stone-400"
+                                : item.source === "google"
+                                ? "bg-emerald-500"
+                                : item.source === "x"
+                                ? "bg-sky-500"
+                                : "bg-indigo-500"
+                            }`}
+                            style={{ width: `${Math.max(4, pct)}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
           </div>
         </section>
       </div>

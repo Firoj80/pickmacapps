@@ -165,6 +165,16 @@ export const recordAppViewFn = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     if (!data.slug) return;
+    let referrer = "";
+    let userAgent = "";
+    try {
+      const { getRequest } = await import("@tanstack/react-start/server");
+      const request = getRequest();
+      referrer = request.headers.get("referer") || request.headers.get("referrer") || "";
+      userAgent = request.headers.get("user-agent") || "";
+    } catch {
+      // In SSR or testing contexts without active request
+    }
     const { recordAppView } = await import("./directory.server");
-    await recordAppView(data.slug);
+    await recordAppView(data.slug, referrer, userAgent);
   });
