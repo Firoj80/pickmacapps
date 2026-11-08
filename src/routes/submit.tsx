@@ -1,19 +1,22 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
-import { trackGoal, identifyUser } from "@/lib/analytics";
+import { trackGoal, identifyUser, getAttribution, appendAttributionToUrl } from "@/lib/analytics";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/submit")({
-  validateSearch: (search: Record<string, unknown>): { tier?: "featured" | "article" } => {
-    if (search.tier === "featured" || search.tier === "article") return { tier: search.tier };
-    return {};
-  },
+  validateSearch: (search: Record<string, unknown>) => ({
+    tier: search.tier === "featured" || search.tier === "article" ? search.tier : undefined,
+    submitted: search.submitted ? String(search.submitted) : undefined,
+    payment_id: search.payment_id ? String(search.payment_id) : undefined,
+    subscription_id: search.subscription_id ? String(search.subscription_id) : undefined,
+    status: search.status ? String(search.status) : undefined,
+  }),
   loader: () => fetchOffer(),
   component: SubmitPage,
   head: ({ matches }) => {
@@ -43,7 +46,8 @@ const field =
 
 function SubmitPage() {
   const offer = Route.useLoaderData();
-  const { tier } = Route.useSearch();
+  const search = Route.useSearch();
+  const { tier, payment_id, submitted } = search;
 
   const featuredPrice = ((offer.featuredPriceCents ?? offer.priceCents) / 100).toFixed(0);
   const featuredCompare = ((offer.featuredCompareCents ?? offer.compareCents) / 100).toFixed(0);
@@ -77,8 +81,15 @@ function SubmitPage() {
   const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
   const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
   const [badgeMessage, setBadgeMessage] = useState("");
-  const [sent, setSent] = useState(false);
+  const [sent, setSent] = useState(() => Boolean(submitted || payment_id));
   const [sending, setSending] = useState(false);
+
+  useEffect(() => {
+    if (payment_id) {
+      trackGoal("payment_completed", { payment_id, status: search.status ?? "success" });
+      setSent(true);
+    }
+  }, [payment_id, search.status]);
 
   // App details form state (editable & populated by auto-fetch)
   const [website, setWebsite] = useState("");
@@ -319,6 +330,8 @@ function SubmitPage() {
                     <div className="mt-6 pt-3 border-t border-line/60">
                       <button
                         type="button"
+                        data-ml-goal="pricing_cta"
+                        data-ml-goal-plan="free"
                         className={`w-full py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                           selectedPlan === "free"
                             ? "bg-ink text-canvas shadow-xs"
@@ -410,6 +423,8 @@ function SubmitPage() {
                       <button
                         type="button"
                         disabled={featuredSlots.isFull}
+                        data-ml-goal="pricing_cta"
+                        data-ml-goal-plan="featured"
                         className={`w-full py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                           featuredSlots.isFull
                             ? "bg-surface-2 text-muted cursor-not-allowed"
@@ -511,6 +526,8 @@ function SubmitPage() {
                       <button
                         type="button"
                         disabled={articleSlots.isFull}
+                        data-ml-goal="pricing_cta"
+                        data-ml-goal-plan="article"
                         className={`w-full py-2 px-3 rounded-xl text-xs font-semibold transition-all ${
                           articleSlots.isFull
                             ? "bg-surface-2 text-muted cursor-not-allowed"
@@ -592,12 +609,14 @@ function SubmitPage() {
                       }
                       if (selectedPlan === "free" && badge !== "ok") return;
                       setSending(true);
+                      const attr = getAttribution();
                       identifyUser({
+                        user_id: email.trim(),
                         email: email.trim(),
                         name: name.trim(),
                         xHandle: xHandle.trim(),
                       });
-                      trackGoal("submit_listing_attempt", {
+                      trackGoal(paid ? "checkout_click" : "signup_click", {
                         plan: selectedPlan,
                         price: currentPrice,
                         paid,
@@ -618,6 +637,8 @@ function SubmitPage() {
                             xHandle: xHandle.trim(),
                             plan: paid ? "choice" : "free",
                             tier: selectedPlan === "article" ? "article" : "featured",
+                            mlVisitorId: attr.ml_visitor_id,
+                            mlSessionId: attr.ml_session_id,
                           },
                         });
                         if (result.checkoutUrl) {
@@ -626,11 +647,11 @@ function SubmitPage() {
                             price: currentPrice,
                             appName: name.trim(),
                           });
-                          window.location.href = result.checkoutUrl;
+                          window.location.href = appendAttributionToUrl(result.checkoutUrl);
                           return;
                         }
                         if (result.ok) {
-                          trackGoal("submit_listing_success", {
+                          trackGoal("signup_completed", {
                             plan: selectedPlan,
                             price: currentPrice,
                             appName: name.trim(),
@@ -1075,7 +1096,8 @@ function SubmitPage() {
                     <button
                       type="submit"
                       disabled={!canSubmit}
-                      data-ml-goal="submit_listing"
+                      data-ml-goal={paid ? "checkout_click" : "signup_click"}
+                      data-ml-goal-plan={selectedPlan}
                       className={`w-full rounded-xl px-6 py-3.5 text-sm font-semibold transition-all shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${
                         selectedPlan === "article"
                           ? "bg-gradient-to-r from-amber-500 to-fuchsia-600 text-white"

@@ -35,6 +35,8 @@ export const submitListingFn = createServerFn({ method: "POST" })
       xHandle: String(data.xHandle ?? data.x_handle ?? "").slice(0, 80),
       plan: data.plan === "choice" ? "choice" : "free",
       tier: data.tier === "article" ? "article" : "featured",
+      mlVisitorId: typeof data.mlVisitorId === "string" ? data.mlVisitorId.slice(0, 100) : undefined,
+      mlSessionId: typeof data.mlSessionId === "string" ? data.mlSessionId.slice(0, 100) : undefined,
     };
   })
   .handler(async ({ data }) => {
@@ -42,7 +44,12 @@ export const submitListingFn = createServerFn({ method: "POST" })
     const { getRequest } = await import("@tanstack/react-start/server");
     const request = getRequest();
     const origin = request ? new URL(request.url).origin : "";
-    return submitListing(data, origin);
+    const cookieHeader = request?.headers.get("cookie") ?? "";
+    const cookieVid = cookieHeader.match(/(?:^|;\s*)ml_vid=([^;]*)/)?.[1];
+    const cookieSid = cookieHeader.match(/(?:^|;\s*)ml_sid=([^;]*)/)?.[1];
+    const mlVisitorId = (cookieVid ? decodeURIComponent(cookieVid) : "") || data.mlVisitorId || "";
+    const mlSessionId = (cookieSid ? decodeURIComponent(cookieSid) : "") || data.mlSessionId || "";
+    return submitListing(data, origin, { mlVisitorId, mlSessionId });
   });
 
 async function adminOnly() {

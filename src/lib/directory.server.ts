@@ -948,6 +948,7 @@ export async function submitListing(
     tier?: string;
   },
   origin: string,
+  attribution?: { mlVisitorId?: string; mlSessionId?: string },
 ) {
   const plan = input.plan === "choice" ? "choice" : "free";
   const tier = input.tier === "article" ? "article" : "featured";
@@ -1008,6 +1009,8 @@ export async function submitListing(
       name,
       returnUrl: `${origin}/submit?submitted=1`,
       tier: tier === "article" ? "article" : "featured",
+      mlVisitorId: attribution?.mlVisitorId,
+      mlSessionId: attribution?.mlSessionId,
     });
     if (checkout.paymentId) {
       const offer = await publicOffer();

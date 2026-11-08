@@ -57,6 +57,9 @@ export async function createChoiceCheckout(input: {
   name: string;
   returnUrl: string;
   tier?: "featured" | "article";
+  mlVisitorId?: string;
+  mlSessionId?: string;
+  metadata?: Record<string, string>;
 }) {
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
   const tier = input.tier === "article" ? "article" : "featured";
@@ -74,7 +77,13 @@ export async function createChoiceCheckout(input: {
       product_cart: [{ product_id: productId, quantity: 1 }],
       customer: { email: input.email, name: input.name },
       return_url: input.returnUrl,
-      metadata: { submission_id: input.submissionId, tier },
+      metadata: {
+        submission_id: input.submissionId,
+        tier,
+        ml_visitor_id: input.mlVisitorId ?? "",
+        ml_session_id: input.mlSessionId ?? "",
+        ...(input.metadata ?? {}),
+      },
     }),
   });
   const text = await response.text();

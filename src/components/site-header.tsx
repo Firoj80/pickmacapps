@@ -37,7 +37,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-4">
           <Link
             to="/sponsor"
-            data-ml-goal="sponsor_nav_click"
+            data-ml-goal="pricing_cta"
             className="hidden items-center gap-1.5 text-[14px] font-medium text-body transition-colors hover:text-ink sm:inline-flex"
           >
             <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 text-[10px]">
@@ -49,7 +49,7 @@ export function SiteHeader() {
           {/* Submit App Primary Action Button */}
           <Link
             to="/submit"
-            data-ml-goal="submit_app_nav_click"
+            data-ml-goal="signup_click"
             className="inline-flex items-center justify-center rounded-full bg-ink px-3 py-1.5 sm:px-4 sm:py-2 text-[12.5px] sm:text-[13.5px] font-medium text-canvas shadow-sm transition hover:opacity-90"
           >
             <span>Submit an app</span>

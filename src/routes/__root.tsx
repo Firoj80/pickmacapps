@@ -170,6 +170,8 @@ export const Route = createRootRoute({
         { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
         { rel: "preconnect", href: "https://wsrv.nl", crossOrigin: "anonymous" },
         { rel: "dns-prefetch", href: "https://wsrv.nl" },
+        { rel: "preconnect", href: "https://minilytics.firojstats.workers.dev", crossOrigin: "anonymous" },
+        { rel: "dns-prefetch", href: "https://minilytics.firojstats.workers.dev" },
         { rel: "preconnect", href: "https://pub-621eb870dc3341c586576c494fa43fdc.r2.dev", crossOrigin: "anonymous" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
         { rel: "stylesheet", href: appCss },
