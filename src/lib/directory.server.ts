@@ -256,6 +256,9 @@ async function ensureSeed(sql: Sql) {
         `insert into settings (key, value) values ('apps_seeded', '1')
          on conflict (key) do update set value = excluded.value`,
       );
+    } else {
+      // Sync any new catalog apps that are not yet in the database
+      await seedCatalogApps(sql);
     }
   } catch (err) {
     console.error("ensureSeed apps failed:", err);
