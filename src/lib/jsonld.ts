@@ -149,7 +149,7 @@ export function homeGraph(
   faqs?: { q: string; a: string }[],
   copy?: { name: string; description: string },
 ) {
-  const pageName = copy?.name ?? "The Best Mac Apps, Hand-Picked";
+  const pageName = copy?.name ?? "Beautifully designed macOS apps, curated";
   const nodes: unknown[] = [
     organizationNode(origin),
     websiteNode(origin, true, copy?.description),

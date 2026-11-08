@@ -40,10 +40,10 @@ function HowWePickPage() {
       <header className="border-b border-line pb-8">
         <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">Editorial Guidelines</p>
         <h1 className="font-display mt-3 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
-          How We Review & Select Mac Apps
+          Listing Guidelines & Editorial Policy
         </h1>
         <p className="mt-4 text-lg text-body">
-          How a listing gets on the shelf, and what Editor’s Choice means. This page does not describe a lab test.
+          PickMacApps is a curated directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.
         </p>
       </header>
 

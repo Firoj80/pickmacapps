@@ -11,7 +11,7 @@ const homeTitle = "PickMacApps — Beautifully designed macOS apps, curated";
 const homeDescription =
   "A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.";
 const homeImageAlt = "PickMacApps — Beautifully designed macOS apps, curated";
-const homeH1 = "The Best Mac Apps, Hand-Picked";
+const homeH1 = "Beautifully designed Mac apps, curated";
 
 const homeGuides = [
   { slug: "must-have-mac-apps-2026", label: "must-have Mac apps" },
@@ -222,7 +222,7 @@ function Home() {
             Mac{homeH1.split("Mac")[1]}
           </h1>
           <p className="mt-2.5 max-w-2xl text-[14.5px] leading-relaxed text-body sm:text-[16px] md:leading-6">
-            A curated shelf of hand-picked Mac apps. Browse the best Mac apps on this shelf by the job they do.
+            A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
           </p>
 
           {/* Curved app icons stack - ONLY Editor's Choice apps sorted by tier */}
