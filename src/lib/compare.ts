@@ -22,26 +22,7 @@ export type CompareHit =
 
 function appsNamedIn(post: Post, list: AppItem[]) {
   const html = post.html.toLowerCase();
-  const targetApp = post.slug.match(/^best-([a-z0-9\-]+)-alternative/)?.[1];
-
-  return list.filter((app) => {
-    if (targetApp && (app.slug === targetApp || app.slug === targetApp.replace(/-/g, ""))) {
-      return false;
-    }
-    if (html.includes(`/app/${app.slug}`)) return true;
-
-    const nameLower = app.name.toLowerCase().trim();
-    if (nameLower.length < 3) return false;
-    const genericWords = new Set([
-      "here", "now", "type", "split", "current", "folders", "glance",
-      "usage", "dia", "cta", "layout", "mate", "ratio", "mac+", "paste", "app",
-      "cursor", "screen studio", "cleanshot x", "tidy", "mac"
-    ]);
-    if (genericWords.has(nameLower)) return false;
-
-    const escaped = app.name.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`\\b${escaped}\\b`, "i").test(post.html);
-  });
+  return list.filter((app) => html.includes(app.name.toLowerCase()));
 }
 
 function pairSlug(left: string, right: string) {

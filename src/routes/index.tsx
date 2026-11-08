@@ -133,8 +133,8 @@ export const Route = createFileRoute("/")({
 
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
-  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread
-  const shown = apps.slice(0, 7);
+  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (6 slots)
+  const shown = apps.slice(0, 6);
   const count = shown.length;
   const mid = (count - 1) / 2;
 
@@ -230,9 +230,19 @@ function Home() {
             A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
           </p>
 
-          {/* Curved app icons stack - ONLY Editor's Choice apps sorted by tier */}
+          {/* Curved app icons stack - Paid/Featured apps with fallback to Hot apps if unavailable */}
           <div className="mt-3 w-full">
-            <ChoiceIcons apps={[...list.filter((app) => isEditorChoice(app))].sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a))} />
+            {(() => {
+              const paidApps = [...list.filter((app) => isEditorChoice(app))].sort(
+                (a, b) => featuredTierWeight(b) - featuredTierWeight(a),
+              );
+              const hotApps = list.filter((app) => app.isHot && !isEditorChoice(app));
+              const heroApps =
+                paidApps.length > 0
+                  ? (paidApps.length < 6 ? [...paidApps, ...hotApps].slice(0, 6) : paidApps.slice(0, 6))
+                  : (hotApps.length > 0 ? hotApps.slice(0, 6) : list.slice(0, 6));
+              return <ChoiceIcons apps={heroApps} />;
+            })()}
           </div>
 
           {directory ? null : (

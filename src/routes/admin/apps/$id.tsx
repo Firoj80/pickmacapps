@@ -28,9 +28,10 @@ export const Route = createFileRoute("/admin/apps/$id")({
   },
 });
 
+type EditAppData = NonNullable<ReturnType<typeof Route.useLoaderData>>;
+
 function EditApp() {
   const app = Route.useLoaderData();
-  const notice = useAdminNotice();
 
   if (!app) {
     return (
@@ -39,6 +40,12 @@ function EditApp() {
       </AdminShell>
     );
   }
+
+  return <EditAppForm app={app} />;
+}
+
+function EditAppForm({ app }: { app: EditAppData }) {
+  const notice = useAdminNotice();
 
   // Controlled form state initialized from app data
   const [website, setWebsite] = useState(app.website || "");

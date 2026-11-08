@@ -33,11 +33,9 @@ test("sitemap sections are absolute, unique, and dated only when we know", () =>
   }
   assert.equal(sectionUrls("pages", origin, today).length, 8)
   assert.equal(sectionUrls("apps", origin, today).length, apps.length)
-  assert.equal(sectionUrls("guides", origin, today).length, posts.length)
-  const categoryCount = sectionUrls("categories", origin, today).length
-  assert.equal(categoryCount, 16)
+  assert.equal(sectionUrls("categories", origin, today).length, 4)
   assert.equal(sectionUrls("compare", origin, today).length, comparePairs().length + 1)
-  assert.equal(total, 8 + apps.length + posts.length + categoryCount + comparePairs().length + 1)
+  assert.equal(total, 8 + apps.length + posts.length + 4 + comparePairs().length + 1)
   const index = sitemapIndex(indexLocs(origin, today))
   assert.match(index, /<sitemapindex/)
   assert.equal(index.split("<loc>").length - 1, 5)

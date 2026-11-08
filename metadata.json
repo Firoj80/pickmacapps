@@ -1,0 +1,8 @@
+{
+  "name": "PickMacApps",
+  "description": "Curated directory, reviews, and comparisons of the best Mac applications.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

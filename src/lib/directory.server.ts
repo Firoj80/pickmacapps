@@ -256,9 +256,6 @@ async function ensureSeed(sql: Sql) {
         `insert into settings (key, value) values ('apps_seeded', '1')
          on conflict (key) do update set value = excluded.value`,
       );
-    } else {
-      // Sync any new catalog apps that are not yet in the database
-      await seedCatalogApps(sql);
     }
   } catch (err) {
     console.error("ensureSeed apps failed:", err);
@@ -513,10 +510,10 @@ export async function adminStats() {
   const goldChoice = live.filter((app) => app.editor_choice && app.featured_tier === "article").length;
   const hotCount = live.filter((app) => app.is_hot).length;
 
-  let views7d = 0;
-  let views30d = 0;
-  let topApps7d: { id: string; name: string; slug: string; icon: string; views: number }[] = [];
-  let trafficSources7d: { source: string; views: number }[] = [];
+  const views7d = 0;
+  const views30d = 0;
+  const topApps7d: { id: string; name: string; slug: string; icon: string; views: number }[] = [];
+  const trafficSources7d: { source: string; views: number }[] = [];
 
   let hotApps: { id: string; name: string; slug: string; icon: string }[] = [];
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
