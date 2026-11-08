@@ -9,7 +9,7 @@ import {
   relatedPairs,
   resolveCompareSlug,
 } from "@/lib/compare";
-import { pricingLabel } from "@/lib/catalog";
+import { isEditorChoice, pricingLabel } from "@/lib/catalog";
 import { appIconUrl } from "@/lib/image-opt";
 import { compareGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -313,7 +313,7 @@ function ComparePage() {
                     <a
                       href={pair.left.website}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel={isEditorChoice(pair.left) ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                       className="inline-flex items-center gap-1 font-semibold text-accent hover:underline text-xs"
                     >
                       <span>Visit site</span>
@@ -328,7 +328,7 @@ function ComparePage() {
                     <a
                       href={pair.right.website}
                       target="_blank"
-                      rel="noopener noreferrer"
+                      rel={isEditorChoice(pair.right) ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                       className="inline-flex items-center gap-1 font-semibold text-accent hover:underline text-xs"
                     >
                       <span>Visit site</span>

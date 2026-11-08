@@ -115,7 +115,7 @@ function SubmitPage() {
     (selectedPlan === "article" && articleSlots.isFull);
 
   // Always use the real canonical website URL for external badge embeds
-  const siteOrigin = "https://www.pickmacapps.store";
+  const siteOrigin = "https://pickmacapps.store";
 
   const badgeFile =
     badgeVariant === "classic"
