@@ -29,11 +29,18 @@ export const Route = createFileRoute("/blog/$slug")({
       });
       return { meta: missing.meta, links: missing.links };
     }
+    const guideImage = `/guides/${post.slug}.jpg`;
     const seo = buildMetadata({
       title: post.title,
       description: post.excerpt,
+      ogTitle: post.title,
+      ogDescription: post.excerpt,
+      twitterTitle: post.title,
+      twitterDescription: post.excerpt,
       path: `/blog/${params.slug}`,
       origin: originFrom(matches),
+      image: guideImage,
+      imageAlt: `${post.title} — PickMacApps Editorial Guide`,
       type: "article",
       publishedTime: post.date,
       modifiedTime: post.date,
@@ -117,6 +124,23 @@ function BlogPost() {
                 {tag}
               </span>
             ))}
+          </div>
+
+          {/* Editorial Cover Graphic Showcase */}
+          <div className="mt-7 overflow-hidden rounded-2xl border border-line bg-[#0c0c0e] shadow-sm">
+            <img
+              src={`/guides/${post.slug}.jpg`}
+              alt={post.title}
+              width={1200}
+              height={630}
+              loading="eager"
+              decoding="async"
+              className="h-full w-full object-cover"
+              onError={(e) => {
+                // If specific cover missing, collapse gracefully
+                e.currentTarget.style.display = "none";
+              }}
+            />
           </div>
         </header>
 
