@@ -183,7 +183,14 @@ export const Route = createRootRoute({
         described("/ai.txt"),
         ...(missingMeta?.links ?? []),
       ],
-      scripts: [{ children: THEME_SCRIPT }],
+      scripts: [
+        { children: THEME_SCRIPT },
+        {
+          src: "https://minilytics.firojstats.workers.dev/js/script.js",
+          defer: true,
+          "data-website-id": "5q3e1c3f5d0d1518",
+        },
+      ],
     };
   },
   component: () => (
