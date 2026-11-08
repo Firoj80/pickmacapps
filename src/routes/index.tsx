@@ -4,7 +4,7 @@ import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { appPriorityWeight, featuredTierWeight, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
-import { appIconUrl } from "@/lib/image-opt";
+import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -114,12 +114,18 @@ export const Route = createFileRoute("/")({
     });
     const directory = matches[0]?.context.directory;
     const list = publishedApps(directory);
+    const topApps = arrangeHero(list, "hot");
+    const lcpCover = topApps[0]?.demo ? appCoverUrl(topApps[0].demo) : "";
+    const lcpPreload = lcpCover
+      ? [{ rel: "preload", as: "image", href: lcpCover, fetchPriority: "high" }]
+      : [];
+
     const script = jsonLdScript(
       homeGraph(origin, filtered ? null : shelfApps(list), homeFaqs, { name: homeH1, description: homeDescription }),
     );
     return {
       meta: seo.meta,
-      links: [...seo.links, markdownAlternate(origin, "/")],
+      links: [...seo.links, ...lcpPreload, markdownAlternate(origin, "/")],
       ...(script ? { scripts: [script] } : {}),
     };
   },
