@@ -11,13 +11,13 @@ import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
 
-export function appShareImage(demo?: string) {
+function appShareImage(demo?: string) {
   const clean = demo?.trim() ?? "";
   if (!clean || /\.mp4($|\?)/i.test(clean)) return site.ogImage;
   return clean;
 }
 
-export function appMetaDescription(app: AppItem): string {
+function appMetaDescription(app: AppItem): string {
   const pricing = pricingLabel[app.pricing] || "Free";
   const tagline = app.tagline.trim().replace(/[.!?]+$/, "");
   const base = `${app.name} for Mac (${pricing}): ${tagline}.`;

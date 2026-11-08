@@ -1,5 +1,5 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
-import { isEditorChoice } from "@/lib/catalog";
+import { featuredTierWeight, isEditorChoice } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appIconUrl } from "@/lib/image-opt";
 
@@ -10,10 +10,10 @@ export function SiteFooter() {
   const list = publishedApps(directory);
   const categories = [...(directory?.categories ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
-  // Editor's Choice apps first, backfilled with top published apps up to 8 items
-  const editorApps = list.filter((app) => isEditorChoice(app));
-  const otherApps = list.filter((app) => !isEditorChoice(app));
-  const featured = [...editorApps, ...otherApps].slice(0, 8);
+  // Show only Editor's Choice apps, sorted by tier priority (Golden Article first, then Blue Featured)
+  const featured = list
+    .filter((app) => isEditorChoice(app))
+    .sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
 
   return (
     <footer className="mt-auto border-t border-line bg-canvas">
@@ -135,14 +135,14 @@ export function SiteFooter() {
             <p className="text-[14px] font-semibold text-ink mb-3.5">Featured</p>
             <ul className="space-y-3 text-[13px]">
               {featured.length === 0 ? (
-                <li className="text-muted">No featured apps right now.</li>
+                <li className="text-muted">No editor’s choice apps right now.</li>
               ) : (
                 featured.map((app) => (
                   <li key={app.slug}>
                     <Link
                       to="/app/$slug"
                       params={{ slug: app.slug }}
-                      className="group flex items-center gap-2.5 text-muted transition-colors hover:text-ink"
+                      className="group flex items-center gap-2 text-muted transition-colors hover:text-ink"
                     >
                       <img
                         alt=""
@@ -161,6 +161,25 @@ export function SiteFooter() {
                         className="h-5 w-5 shrink-0 rounded-md object-cover ring-1 ring-line group-hover:ring-accent"
                       />
                       <span className="truncate group-hover:text-ink">{app.name}</span>
+                      {app.featuredTier === "article" ? (
+                        <span
+                          title="Editor’s Choice (Golden Badge)"
+                          className="flex shrink-0 items-center text-amber-500"
+                        >
+                          <svg className="h-3.5 w-3.5 fill-amber-500" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                        </span>
+                      ) : (
+                        <span
+                          title="Featured (Blue Badge)"
+                          className="flex shrink-0 items-center text-sky-500"
+                        >
+                          <svg className="h-3.5 w-3.5 fill-sky-500" viewBox="0 0 24 24">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                          </svg>
+                        </span>
+                      )}
                     </Link>
                   </li>
                 ))

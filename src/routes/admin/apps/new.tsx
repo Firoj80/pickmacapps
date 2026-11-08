@@ -27,7 +27,7 @@ export const Route = createFileRoute("/admin/apps/new")({
   },
 });
 
-export function NewAppPage() {
+function NewAppPage() {
   const notice = useAdminNotice();
 
   // Controlled form state identical to public submit app page
