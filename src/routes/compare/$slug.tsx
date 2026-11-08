@@ -10,6 +10,7 @@ import {
   resolveCompareSlug,
 } from "@/lib/compare";
 import { pricingLabel } from "@/lib/catalog";
+import { appIconUrl } from "@/lib/image-opt";
 import { compareGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -119,10 +120,18 @@ function ComparePage() {
             <div className="flex items-center justify-between rounded-2xl border border-line bg-surface p-4 shadow-xs">
               <div className="flex items-center gap-3 min-w-0">
                 <img
-                  src={pair.left.icon}
+                  src={appIconUrl(pair.left.icon)}
                   alt={pair.left.name}
+                  loading="lazy"
+                  decoding="async"
+                  width={48}
+                  height={48}
                   onError={(e) => {
-                    e.currentTarget.src = "/site-favicon.svg";
+                    if (e.currentTarget.src !== pair.left.icon) {
+                      e.currentTarget.src = pair.left.icon;
+                    } else {
+                      e.currentTarget.src = "/site-favicon.svg";
+                    }
                   }}
                   className="h-12 w-12 shrink-0 rounded-xl object-cover shadow-xs ring-1 ring-line"
                 />
@@ -157,10 +166,18 @@ function ComparePage() {
             <div className="flex items-center justify-between rounded-2xl border border-line bg-surface p-4 shadow-xs">
               <div className="flex items-center gap-3 min-w-0">
                 <img
-                  src={pair.right.icon}
+                  src={appIconUrl(pair.right.icon)}
                   alt={pair.right.name}
+                  loading="lazy"
+                  decoding="async"
+                  width={48}
+                  height={48}
                   onError={(e) => {
-                    e.currentTarget.src = "/site-favicon.svg";
+                    if (e.currentTarget.src !== pair.right.icon) {
+                      e.currentTarget.src = pair.right.icon;
+                    } else {
+                      e.currentTarget.src = "/site-favicon.svg";
+                    }
                   }}
                   className="h-12 w-12 shrink-0 rounded-xl object-cover shadow-xs ring-1 ring-line"
                 />
@@ -371,19 +388,35 @@ function ComparePage() {
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <img
-                      src={item.left.icon}
+                      src={appIconUrl(item.left.icon)}
                       alt={item.left.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={32}
+                      height={32}
                       onError={(e) => {
-                        e.currentTarget.src = "/site-favicon.svg";
+                        if (e.currentTarget.src !== item.left.icon) {
+                          e.currentTarget.src = item.left.icon;
+                        } else {
+                          e.currentTarget.src = "/site-favicon.svg";
+                        }
                       }}
                       className="h-8 w-8 rounded-lg object-cover ring-1 ring-line shrink-0"
                     />
                     <span className="text-xs font-bold text-accent">vs</span>
                     <img
-                      src={item.right.icon}
+                      src={appIconUrl(item.right.icon)}
                       alt={item.right.name}
+                      loading="lazy"
+                      decoding="async"
+                      width={32}
+                      height={32}
                       onError={(e) => {
-                        e.currentTarget.src = "/site-favicon.svg";
+                        if (e.currentTarget.src !== item.right.icon) {
+                          e.currentTarget.src = item.right.icon;
+                        } else {
+                          e.currentTarget.src = "/site-favicon.svg";
+                        }
                       }}
                       className="h-8 w-8 rounded-lg object-cover ring-1 ring-line shrink-0"
                     />

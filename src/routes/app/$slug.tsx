@@ -7,6 +7,7 @@ import { appPairs } from "@/lib/compare";
 import { publishedApps } from "@/lib/app-seed";
 import { recordAppViewFn } from "@/lib/directory.fn";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
+import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
 
@@ -127,9 +128,17 @@ function AppPage() {
                       >
                         <img
                           alt=""
-                          src={sidebarApp.icon}
+                          src={appIconUrl(sidebarApp.icon)}
+                          loading="lazy"
+                          decoding="async"
+                          width={24}
+                          height={24}
                           onError={(e) => {
-                            e.currentTarget.src = "/site-favicon.svg";
+                            if (e.currentTarget.src !== sidebarApp.icon) {
+                              e.currentTarget.src = sidebarApp.icon;
+                            } else {
+                              e.currentTarget.src = "/site-favicon.svg";
+                            }
                           }}
                           className="h-6 w-6 shrink-0 rounded-md object-cover ring-1 ring-line/70"
                         />
@@ -150,9 +159,18 @@ function AppPage() {
                 <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-2xl ring-1 ring-line sm:h-20 sm:w-20 sm:rounded-[20px]">
                   <img
                     alt={app.name}
-                    src={app.icon}
+                    src={appIconUrl(app.icon)}
+                    loading="eager"
+                    fetchPriority="high"
+                    decoding="sync"
+                    width={80}
+                    height={80}
                     onError={(e) => {
-                      e.currentTarget.src = "/site-favicon.svg";
+                      if (e.currentTarget.src !== app.icon) {
+                        e.currentTarget.src = app.icon;
+                      } else {
+                        e.currentTarget.src = "/site-favicon.svg";
+                      }
                     }}
                     className="h-full w-full object-cover"
                   />
@@ -226,9 +244,17 @@ function AppPage() {
                 ) : (
                   <img
                     alt={`${app.name} screenshot`}
-                    src={app.demo}
+                    src={appCoverUrl(app.demo)}
+                    loading="lazy"
+                    decoding="async"
+                    width={800}
+                    height={500}
                     onError={(e) => {
-                      (e.currentTarget as HTMLElement).style.display = "none";
+                      if (e.currentTarget.src !== app.demo) {
+                        e.currentTarget.src = app.demo;
+                      } else {
+                        (e.currentTarget as HTMLElement).style.display = "none";
+                      }
                     }}
                     className="aspect-[16/10] w-full object-cover"
                   />
@@ -287,9 +313,17 @@ function AppPage() {
                           <div className="flex items-center -space-x-2 shrink-0">
                             <img
                               alt={app.name}
-                              src={app.icon}
+                              src={appIconUrl(app.icon)}
+                              loading="lazy"
+                              decoding="async"
+                              width={40}
+                              height={40}
                               onError={(e) => {
-                                e.currentTarget.src = "/site-favicon.svg";
+                                if (e.currentTarget.src !== app.icon) {
+                                  e.currentTarget.src = app.icon;
+                                } else {
+                                  e.currentTarget.src = "/site-favicon.svg";
+                                }
                               }}
                               className="h-10 w-10 rounded-xl object-cover ring-2 ring-surface"
                             />
@@ -298,9 +332,17 @@ function AppPage() {
                             </div>
                             <img
                               alt={competitor.name}
-                              src={competitor.icon}
+                              src={appIconUrl(competitor.icon)}
+                              loading="lazy"
+                              decoding="async"
+                              width={40}
+                              height={40}
                               onError={(e) => {
-                                e.currentTarget.src = "/site-favicon.svg";
+                                if (e.currentTarget.src !== competitor.icon) {
+                                  e.currentTarget.src = competitor.icon;
+                                } else {
+                                  e.currentTarget.src = "/site-favicon.svg";
+                                }
                               }}
                               className="h-10 w-10 rounded-xl object-cover ring-2 ring-surface"
                             />
@@ -365,9 +407,17 @@ function AppPage() {
                       <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-xl ring-1 ring-line">
                         <img
                           alt={item.name}
-                          src={item.icon}
+                          src={appIconUrl(item.icon)}
+                          loading="lazy"
+                          decoding="async"
+                          width={48}
+                          height={48}
                           onError={(e) => {
-                            e.currentTarget.src = "/site-favicon.svg";
+                            if (e.currentTarget.src !== item.icon) {
+                              e.currentTarget.src = item.icon;
+                            } else {
+                              e.currentTarget.src = "/site-favicon.svg";
+                            }
                           }}
                           className="h-full w-full object-cover"
                         />

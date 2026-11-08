@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { addedLabel, isEditorChoice, pricingLabel, type AppItem } from "@/lib/catalog";
+import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 
 function coverSrc(demo: string) {
   const clean = demo.trim();
@@ -8,9 +9,11 @@ function coverSrc(demo: string) {
   return clean;
 }
 
-export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
+export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" | "md" | "sm"; priority?: boolean }) {
   const choice = isEditorChoice(app);
   const cover = coverSrc(app.demo);
+  const optimizedCover = appCoverUrl(cover);
+  const optimizedIcon = appIconUrl(app.icon);
 
   return (
     <Link
@@ -22,20 +25,37 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
       <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-line/60 bg-[#0f0f11] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)] dark:bg-[#141416]">
         {cover ? (
           <img
-            alt=""
-            src={cover}
+            alt={`${app.name} preview`}
+            src={optimizedCover}
+            loading={priority ? "eager" : "lazy"}
+            decoding={priority ? "sync" : "async"}
+            fetchPriority={priority ? "high" : "auto"}
+            width={800}
+            height={500}
             onError={(event) => {
-              event.currentTarget.style.display = "none";
+              if (event.currentTarget.src !== cover) {
+                event.currentTarget.src = cover;
+              } else {
+                event.currentTarget.style.display = "none";
+              }
             }}
             className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
           />
         ) : (
           <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
             <img
-              alt=""
-              src={app.icon}
+              alt={`${app.name} icon`}
+              src={optimizedIcon}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              width={64}
+              height={64}
               onError={(event) => {
-                event.currentTarget.src = "/site-favicon.svg";
+                if (event.currentTarget.src !== app.icon) {
+                  event.currentTarget.src = app.icon;
+                } else {
+                  event.currentTarget.src = "/site-favicon.svg";
+                }
               }}
               className="h-16 w-16 rounded-[18px] object-cover shadow-lg ring-1 ring-white/10"
             />
@@ -77,10 +97,18 @@ export function AppCard({ app }: { app: AppItem; size?: "lg" | "md" | "sm" }) {
       {/* Footer Info: App icon on left + Name with Badge & Tagline underneath */}
       <div className="mt-3.5 flex items-start gap-3 px-1">
         <img
-          alt=""
-          src={app.icon}
+          alt={`${app.name} icon`}
+          src={optimizedIcon}
+          loading="lazy"
+          decoding="async"
+          width={40}
+          height={40}
           onError={(event) => {
-            event.currentTarget.src = "/site-favicon.svg";
+            if (event.currentTarget.src !== app.icon) {
+              event.currentTarget.src = app.icon;
+            } else {
+              event.currentTarget.src = "/site-favicon.svg";
+            }
           }}
           className="h-10 w-10 shrink-0 rounded-[11px] object-cover shadow-sm ring-1 ring-line"
         />

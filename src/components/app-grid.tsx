@@ -187,8 +187,8 @@ export function AppGrid({
         </div>
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {slice.map((app) => (
-            <AppCard key={app.id} app={app} />
+          {slice.map((app, index) => (
+            <AppCard key={app.id} app={app} priority={page === 0 && index < 2} />
           ))}
         </div>
       )}

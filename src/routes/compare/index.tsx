@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { comparePairs, hubFaqs, hubIntro, hubTitle, pairHeading } from "@/lib/compare";
 import { pricingLabel } from "@/lib/catalog";
+import { appIconUrl } from "@/lib/image-opt";
 import { publishedApps } from "@/lib/app-seed";
 import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { compareHubGraph, jsonLdScript } from "@/lib/jsonld";
@@ -224,10 +225,18 @@ function CompareHub() {
                       {/* Left App */}
                       <div className="flex flex-1 items-center gap-2.5 min-w-0">
                         <img
-                          src={pair.left.icon}
+                          src={appIconUrl(pair.left.icon)}
                           alt={pair.left.name}
+                          loading="lazy"
+                          decoding="async"
+                          width={44}
+                          height={44}
                           onError={(e) => {
-                            e.currentTarget.src = "/site-favicon.svg";
+                            if (e.currentTarget.src !== pair.left.icon) {
+                              e.currentTarget.src = pair.left.icon;
+                            } else {
+                              e.currentTarget.src = "/site-favicon.svg";
+                            }
                           }}
                           className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-xs ring-1 ring-line"
                         />
@@ -273,10 +282,18 @@ function CompareHub() {
                           </span>
                         </div>
                         <img
-                          src={pair.right.icon}
+                          src={appIconUrl(pair.right.icon)}
                           alt={pair.right.name}
+                          loading="lazy"
+                          decoding="async"
+                          width={44}
+                          height={44}
                           onError={(e) => {
-                            e.currentTarget.src = "/site-favicon.svg";
+                            if (e.currentTarget.src !== pair.right.icon) {
+                              e.currentTarget.src = pair.right.icon;
+                            } else {
+                              e.currentTarget.src = "/site-favicon.svg";
+                            }
                           }}
                           className="h-11 w-11 shrink-0 rounded-xl object-cover shadow-xs ring-1 ring-line"
                         />

@@ -4,6 +4,7 @@ import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { appPriorityWeight, featuredTierWeight, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
+import { appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -155,9 +156,17 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
             >
               <img
                 alt={app.name}
-                src={app.icon}
+                src={appIconUrl(app.icon)}
+                loading="eager"
+                decoding="async"
+                width={60}
+                height={60}
                 onError={(event) => {
-                  event.currentTarget.src = "/site-favicon.svg";
+                  if (event.currentTarget.src !== app.icon) {
+                    event.currentTarget.src = app.icon;
+                  } else {
+                    event.currentTarget.src = "/site-favicon.svg";
+                  }
                 }}
                 className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
               />
