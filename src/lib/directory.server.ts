@@ -257,6 +257,13 @@ async function ensureSeed(sql: Sql) {
          on conflict (key) do update set value = excluded.value`,
       );
     }
+    const validSlugs = raw.apps.map((app) => app.slug);
+    if (validSlugs.length > 0) {
+      await sql.query(
+        "delete from apps where not (slug = any($1::text[])) and (is_user_submitted is not true or is_user_submitted is null)",
+        [validSlugs],
+      );
+    }
   } catch (err) {
     console.error("ensureSeed apps failed:", err);
   }
