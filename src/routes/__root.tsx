@@ -160,6 +160,9 @@ export const Route = createRootRoute({
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#ffffff" },
+        ...((process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)
+          ? [{ name: "google-site-verification", content: (process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)! }]
+          : []),
         ...(missingMeta?.meta ?? []),
       ],
       links: [

@@ -66,6 +66,7 @@ export function sectionUrls(
     const latestSiteDate = [newestPostDate, newestAppDate, site.policyUpdated].filter(Boolean).sort().at(-1);
     return [
       { loc: absoluteUrl(origin, "/"), lastmod: asLastmod(latestSiteDate, today) },
+      { loc: absoluteUrl(origin, "/category"), lastmod: asLastmod(latestSiteDate, today) },
       { loc: absoluteUrl(origin, "/blog"), lastmod: asLastmod(newestPostDate, today) },
       { loc: absoluteUrl(origin, "/about"), lastmod: asLastmod(site.policyUpdated, today) },
       { loc: absoluteUrl(origin, "/how-we-pick"), lastmod: asLastmod(site.policyUpdated, today) },
