@@ -176,8 +176,8 @@ function Home() {
   const list = publishedApps(directory);
   const chipCategories = directory?.categories?.length ? directory.categories : shelfCategories;
   const heroCategories = [
-    { id: "all", label: "All categories", emoji: "✨" },
-    ...chipCategories.map((item) => ({ id: item.slug, label: item.name, emoji: item.emoji })),
+    { id: "all", label: "All categories" },
+    ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
   const shown = arrangeHero(

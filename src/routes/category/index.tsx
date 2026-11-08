@@ -49,7 +49,6 @@ function CategoriesHubPage() {
         <header className="border-b border-line pb-10">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
-              <span>🗂️</span>
               <span>Catalog Index</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
@@ -75,7 +74,6 @@ function CategoriesHubPage() {
               const appsInCategory = allApps.filter(
                 (app) => normalizeCategorySlug(app.category) === categorySlug,
               );
-              const previewApps = appsInCategory.slice(0, 3);
 
               return (
                 <Link
@@ -86,60 +84,20 @@ function CategoriesHubPage() {
                 >
                   <div>
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-2xl" aria-hidden="true">
-                          {category.emoji}
-                        </span>
-                        <h2 className="font-semibold text-ink group-hover:text-accent transition-colors">
-                          {category.name}
-                        </h2>
-                      </div>
+                      <h2 className="font-semibold text-ink group-hover:text-accent transition-colors">
+                        {category.name}
+                      </h2>
                       <span className="rounded-full border border-line bg-canvas px-2.5 py-0.5 text-xs font-medium text-muted">
                         {appsInCategory.length} {appsInCategory.length === 1 ? "app" : "apps"}
                       </span>
                     </div>
 
-                    <p className="mt-3 text-xs leading-relaxed text-muted line-clamp-2">
+                    <p className="mt-2.5 text-xs leading-relaxed text-muted line-clamp-2">
                       {category.paragraphs?.[0] || `${category.name} apps for Mac.`}
                     </p>
                   </div>
 
-                  {previewApps.length > 0 ? (
-                    <div className="mt-5 border-t border-line/60 pt-3">
-                      <p className="text-[11px] font-medium uppercase tracking-wider text-muted">
-                        Featured on shelf:
-                      </p>
-                      <div className="mt-2 flex items-center gap-2">
-                        {previewApps.map((app) => (
-                          <div
-                            key={app.id}
-                            title={app.name}
-                            className="relative h-7 w-7 overflow-hidden rounded-lg ring-1 ring-line/80 bg-surface"
-                          >
-                            <img
-                              alt={app.name}
-                              src={app.icon}
-                              onError={(e) => {
-                                e.currentTarget.src = "/site-favicon.svg";
-                              }}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        ))}
-                        {appsInCategory.length > 3 ? (
-                          <span className="text-[11px] text-muted font-medium">
-                            +{appsInCategory.length - 3} more
-                          </span>
-                        ) : null}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="mt-5 border-t border-line/60 pt-3 text-[11px] text-muted">
-                      No apps listed yet
-                    </div>
-                  )}
-
-                  <div className="mt-4 flex items-center justify-between text-xs font-semibold text-accent pt-1">
+                  <div className="mt-5 flex items-center justify-between text-xs font-semibold text-accent pt-2 border-t border-line/40">
                     <span>Explore {category.name} apps</span>
                     <span className="transition-transform group-hover:translate-x-1">→</span>
                   </div>

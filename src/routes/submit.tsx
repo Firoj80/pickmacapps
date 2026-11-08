@@ -861,7 +861,7 @@ function SubmitPage() {
                             >
                               {shelfCategories.map((cat) => (
                                 <option key={cat.slug} value={cat.slug}>
-                                  {cat.emoji} {cat.name}
+                                  {cat.name}
                                 </option>
                               ))}
                             </select>

@@ -348,7 +348,7 @@ export function NewAppPage() {
             >
               {shelfCategories.map((c) => (
                 <option key={c.slug} value={c.slug}>
-                  {c.emoji} {c.name}
+                  {c.name}
                 </option>
               ))}
             </select>

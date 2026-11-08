@@ -79,9 +79,9 @@ export const Route = createFileRoute("/category/$slug")({
     const seo = buildMetadata({
       title: `Best ${category.name} Mac Apps (2026) | PickMacApps`,
       description: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
-      ogTitle: `${category.emoji} Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      ogTitle: `Best ${category.name} Mac Apps (2026) — Curated Shelf`,
       ogDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
-      twitterTitle: `${category.emoji} Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      twitterTitle: `Best ${category.name} Mac Apps (2026) — Curated Shelf`,
       twitterDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
       path: `/category/${slug}`,
       origin,
@@ -135,7 +135,6 @@ function CategoryPage() {
         <header className="border-b border-line pb-10">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
-              <span>{category.emoji}</span>
               <span>Curated Shelf</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
