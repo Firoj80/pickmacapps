@@ -50,9 +50,14 @@ export const Route = createFileRoute("/compare/$slug")({
     }
     const origin = originFrom(matches);
     const description = pairIntro(hit.pair);
+    const socialDesc = `Compare ${hit.pair.left.name} vs ${hit.pair.right.name} (2026): Key differences, pricing, features, and alternatives for Mac users.`;
     const seo = buildMetadata({
       title: pairTitle(hit.pair),
       description,
+      ogTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} (2026) — Mac Comparison`,
+      ogDescription: socialDesc,
+      twitterTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} (2026) — Mac Comparison`,
+      twitterDescription: socialDesc,
       path: `/compare/${hit.pair.slug}`,
       origin,
     });

@@ -17,25 +17,18 @@ export function appShareImage(demo?: string) {
 }
 
 export function appMetaDescription(app: AppItem): string {
-  const summary = `${app.name} for Mac: ${app.tagline.trim().replace(/\.$/, "")}. ${app.description.replace(/\s+/g, " ").trim()}`;
-  if (summary.length >= 120 && summary.length <= 155) return summary;
-  if (summary.length > 155) {
-    const slice = summary.slice(0, 154);
-    const lastPeriod = slice.lastIndexOf(". ");
-    if (lastPeriod >= 115) {
-      return slice.slice(0, lastPeriod + 1).trim();
-    }
-    const lastSpace = slice.lastIndexOf(" ");
-    const trimmed = (lastSpace >= 110 ? slice.slice(0, lastSpace) : slice).replace(/[\s,;:-]+$/, "").trim();
-    return `${trimmed}.`;
-  }
-  const expanded = `${summary.replace(/\.$/, "")}. Check pricing, key features, and Mac alternatives on PickMacApps.`;
-  if (expanded.length > 155) {
-    const slice = expanded.slice(0, 154);
-    const lastSpace = slice.lastIndexOf(" ");
-    return (lastSpace >= 110 ? slice.slice(0, lastSpace) : slice).replace(/[\s,;:-]+$/, "").trim() + ".";
-  }
-  return expanded;
+  const pricing = pricingLabel[app.pricing] || "Free";
+  const tagline = app.tagline.trim().replace(/[.!?]+$/, "");
+  const base = `${app.name} for Mac (${pricing}): ${tagline}.`;
+  const expanded = `${base} Read hands-on review, key features, pricing, and top alternatives on PickMacApps.`;
+  if (expanded.length >= 110 && expanded.length <= 158) return expanded;
+  const compact = `${base} Check review, key features, pricing, and alternatives on PickMacApps.`;
+  if (compact.length >= 110 && compact.length <= 158) return compact;
+  const short = `${base} Review, pricing, and Mac alternatives on PickMacApps.`;
+  if (short.length >= 100 && short.length <= 158) return short;
+  const minimal = `${app.name} for Mac (${pricing}): ${tagline}. Alternatives on PickMacApps.`;
+  if (minimal.length <= 158) return minimal;
+  return `${app.name} for Mac: ${tagline}. Review and alternatives on PickMacApps.`;
 }
 
 export const Route = createFileRoute("/app/$slug")({
@@ -65,6 +58,10 @@ export const Route = createFileRoute("/app/$slug")({
     const seo = buildMetadata({
       title,
       description,
+      ogTitle: `${app.name} for Mac — Review & Alternatives`,
+      ogDescription: description,
+      twitterTitle: `${app.name} for Mac — Review & Alternatives`,
+      twitterDescription: description,
       path: `/app/${params.slug}`,
       origin: originFrom(matches),
       image: appShareImage(app.demo),

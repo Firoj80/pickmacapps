@@ -10,6 +10,10 @@ export const Route = createFileRoute("/how-we-pick")({
     const seo = buildMetadata({
       title: pageCopy.howWePick.title,
       description: pageCopy.howWePick.description,
+      ogTitle: "Listing Guidelines & Editorial Policy — PickMacApps",
+      ogDescription: pageCopy.howWePick.description,
+      twitterTitle: "Listing Guidelines & Editorial Policy — PickMacApps",
+      twitterDescription: pageCopy.howWePick.description,
       path: "/how-we-pick",
       origin,
     });

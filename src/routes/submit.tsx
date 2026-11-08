@@ -20,6 +20,10 @@ export const Route = createFileRoute("/submit")({
     const seo = buildMetadata({
       title: pageCopy.submit.title,
       description: pageCopy.submit.description,
+      ogTitle: "Submit Your macOS App — PickMacApps Directory",
+      ogDescription: pageCopy.submit.description,
+      twitterTitle: "Submit Your macOS App — PickMacApps Directory",
+      twitterDescription: pageCopy.submit.description,
       path: "/submit",
       origin,
     });

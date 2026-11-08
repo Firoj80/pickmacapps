@@ -175,9 +175,17 @@ export function buildMetadata(input: {
   publishedTime?: string;
   modifiedTime?: string;
   noindex?: boolean;
+  ogTitle?: string;
+  ogDescription?: string;
+  twitterTitle?: string;
+  twitterDescription?: string;
 }) {
   const title = fitTitle(input.title);
   const description = fitDescription(input.description);
+  const ogTitle = input.ogTitle ? fitTitle(input.ogTitle) : title;
+  const ogDescription = input.ogDescription ? fitDescription(input.ogDescription) : description;
+  const twitterTitle = input.twitterTitle ? fitTitle(input.twitterTitle) : title;
+  const twitterDescription = input.twitterDescription ? fitDescription(input.twitterDescription) : description;
   const path = canonicalPath(input.path);
   const origin = input.origin ?? "";
   const url = absoluteUrl(origin, path);
@@ -190,8 +198,8 @@ export function buildMetadata(input: {
     { title },
     { name: "description", content: description },
     { name: "ai-summary", content: description },
-    { property: "og:title", content: title },
-    { property: "og:description", content: description },
+    { property: "og:title", content: ogTitle },
+    { property: "og:description", content: ogDescription },
     { property: "og:url", content: url },
     { property: "og:type", content: input.type ?? "website" },
     { property: "og:site_name", content: site.name },
@@ -200,8 +208,10 @@ export function buildMetadata(input: {
     { property: "og:image:width", content: site.ogImageWidth },
     { property: "og:image:height", content: site.ogImageHeight },
     { name: "twitter:card", content: "summary_large_image" },
-    { name: "twitter:title", content: title },
-    { name: "twitter:description", content: description },
+    { name: "twitter:site", content: "@hiii_firoj" },
+    { name: "twitter:creator", content: "@hiii_firoj" },
+    { name: "twitter:title", content: twitterTitle },
+    { name: "twitter:description", content: twitterDescription },
     { name: "twitter:image", content: image },
     { name: "twitter:image:alt", content: imageAlt },
     { name: "apple-mobile-web-app-title", content: title },

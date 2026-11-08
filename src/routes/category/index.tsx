@@ -12,6 +12,10 @@ export const Route = createFileRoute("/category/")({
     const seo = buildMetadata({
       title: pageCopy.categories.title,
       description: pageCopy.categories.description,
+      ogTitle: "Browse macOS Apps by Category — PickMacApps",
+      ogDescription: pageCopy.categories.description,
+      twitterTitle: "Browse macOS Apps by Category — PickMacApps",
+      twitterDescription: pageCopy.categories.description,
       path: "/category",
       origin,
     });

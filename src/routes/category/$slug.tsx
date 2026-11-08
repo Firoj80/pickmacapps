@@ -79,6 +79,10 @@ export const Route = createFileRoute("/category/$slug")({
     const seo = buildMetadata({
       title: `Best ${category.name} Mac Apps (2026) | PickMacApps`,
       description: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
+      ogTitle: `${category.emoji} Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      ogDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
+      twitterTitle: `${category.emoji} Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      twitterDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
       path: `/category/${slug}`,
       origin,
     });

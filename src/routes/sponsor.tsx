@@ -32,6 +32,10 @@ export const Route = createFileRoute("/sponsor")({
     const seo = buildMetadata({
       title: pageCopy.sponsor.title,
       description: pageCopy.sponsor.description,
+      ogTitle: "Feature Your Mac App on PickMacApps (30 Days)",
+      ogDescription: pageCopy.sponsor.description,
+      twitterTitle: "Feature Your Mac App on PickMacApps (30 Days)",
+      twitterDescription: pageCopy.sponsor.description,
       path: "/sponsor",
       origin,
     });

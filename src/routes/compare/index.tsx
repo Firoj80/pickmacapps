@@ -23,6 +23,10 @@ export const Route = createFileRoute("/compare/")({
     const seo = buildMetadata({
       title: hubTitle(pairs.length),
       description,
+      ogTitle: `${pairs.length} Mac App Comparisons (2026) — Side-by-Side Battles`,
+      ogDescription: `Browse ${pairs.length} head-to-head macOS app comparisons. Compare pricing, native features, and top alternatives on PickMacApps.`,
+      twitterTitle: `${pairs.length} Mac App Comparisons (2026) — Side-by-Side Battles`,
+      twitterDescription: `Browse ${pairs.length} head-to-head macOS app comparisons. Compare pricing, native features, and top alternatives on PickMacApps.`,
       path: "/compare",
       origin,
     });
