@@ -9,6 +9,7 @@ import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
+import { trackGoal } from "@/lib/analytics";
 
 function appShareImage(demo?: string) {
   const clean = demo?.trim() ?? "";
@@ -201,6 +202,8 @@ function AppPage() {
                 href={app.website}
                 target="_blank"
                 rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                data-ml-goal="try_app"
+                onClick={() => trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website })}
                 className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:inline-flex"
               >
                 Try the app
@@ -225,6 +228,8 @@ function AppPage() {
                 href={app.website}
                 target="_blank"
                 rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                data-ml-goal="try_app"
+                onClick={() => trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website })}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:hidden"
               >
                 Try the app

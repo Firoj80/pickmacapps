@@ -135,6 +135,7 @@ function SponsorPage() {
             <Link
               to="/submit"
               search={{ tier: "featured" }}
+              data-ml-goal="sponsor_select_featured"
               className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
             >
               Get Featured — ${featuredPrice}
@@ -180,6 +181,7 @@ function SponsorPage() {
             <Link
               to="/submit"
               search={{ tier: "article" }}
+              data-ml-goal="sponsor_select_article"
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
               Claim Spot + Article — ${articlePrice} 🚀

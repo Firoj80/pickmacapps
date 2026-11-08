@@ -3,6 +3,7 @@ import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
+import { trackGoal, identifyUser } from "@/lib/analytics";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
@@ -259,7 +260,11 @@ function SubmitPage() {
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
                   {/* Option 1: Free Community */}
                   <div
-                    onClick={() => setSelectedPlan("free")}
+                    onClick={() => {
+                      setSelectedPlan("free");
+                      trackGoal("select_plan", { plan: "free" });
+                    }}
+                    data-ml-goal="select_free_plan"
                     className={`relative cursor-pointer rounded-2xl border-2 p-5 sm:p-6 transition-all flex flex-col justify-between ${
                       selectedPlan === "free"
                         ? "border-ink bg-surface shadow-md ring-2 ring-ink/10"
@@ -328,8 +333,12 @@ function SubmitPage() {
                   {/* Option 2: Featured Placement ($99 - Blue Badge) */}
                   <div
                     onClick={() => {
-                      if (!featuredSlots.isFull) setSelectedPlan("featured");
+                      if (!featuredSlots.isFull) {
+                        setSelectedPlan("featured");
+                        trackGoal("select_plan", { plan: "featured", price: featuredPrice });
+                      }
                     }}
+                    data-ml-goal="select_featured_plan"
                     className={`relative rounded-2xl border-2 p-5 sm:p-6 transition-all flex flex-col justify-between ${
                       featuredSlots.isFull
                         ? "border-line bg-surface-2/60 opacity-80 cursor-not-allowed"
@@ -421,8 +430,12 @@ function SubmitPage() {
                   {/* Option 3: Featured + Medium Article ($120 - Gold Badge) */}
                   <div
                     onClick={() => {
-                      if (!articleSlots.isFull) setSelectedPlan("article");
+                      if (!articleSlots.isFull) {
+                        setSelectedPlan("article");
+                        trackGoal("select_plan", { plan: "article", price: articlePrice });
+                      }
                     }}
+                    data-ml-goal="select_article_plan"
                     className={`relative rounded-2xl border-2 p-5 sm:p-6 transition-all flex flex-col justify-between ${
                       articleSlots.isFull
                         ? "border-line bg-surface-2/60 opacity-80 cursor-not-allowed"
@@ -579,6 +592,17 @@ function SubmitPage() {
                       }
                       if (selectedPlan === "free" && badge !== "ok") return;
                       setSending(true);
+                      identifyUser({
+                        email: email.trim(),
+                        name: name.trim(),
+                        xHandle: xHandle.trim(),
+                      });
+                      trackGoal("submit_listing_attempt", {
+                        plan: selectedPlan,
+                        price: currentPrice,
+                        paid,
+                        appName: name.trim(),
+                      });
                       try {
                         const result = await submitListingFn({
                           data: {
@@ -597,11 +621,22 @@ function SubmitPage() {
                           },
                         });
                         if (result.checkoutUrl) {
+                          trackGoal("checkout_redirect", {
+                            plan: selectedPlan,
+                            price: currentPrice,
+                            appName: name.trim(),
+                          });
                           window.location.href = result.checkoutUrl;
                           return;
                         }
-                        if (result.ok) setSent(true);
-                        else {
+                        if (result.ok) {
+                          trackGoal("submit_listing_success", {
+                            plan: selectedPlan,
+                            price: currentPrice,
+                            appName: name.trim(),
+                          });
+                          setSent(true);
+                        } else {
                           setBadge("fail");
                           setBadgeMessage(result.message);
                         }
@@ -1040,6 +1075,7 @@ function SubmitPage() {
                     <button
                       type="submit"
                       disabled={!canSubmit}
+                      data-ml-goal="submit_listing"
                       className={`w-full rounded-xl px-6 py-3.5 text-sm font-semibold transition-all shadow-sm hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 ${
                         selectedPlan === "article"
                           ? "bg-gradient-to-r from-amber-500 to-fuchsia-600 text-white"
