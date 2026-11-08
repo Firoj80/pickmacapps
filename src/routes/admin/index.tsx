@@ -44,9 +44,7 @@ function AdminHome() {
 
   const blueOccupants = data.stats.blueOccupants ?? [];
   const goldOccupants = data.stats.goldOccupants ?? [];
-  const topApps = data.stats.topApps7d ?? [];
   const hotApps = data.stats.hotApps ?? [];
-  const trafficSources = data.stats.trafficSources7d ?? [];
 
   return (
     <AdminShell
@@ -108,19 +106,19 @@ function AdminHome() {
           <p className="mt-1 text-[11px] text-muted">From Dodo Payments checkouts</p>
         </div>
 
-        {/* 7-Day & 30-Day Views */}
+        {/* Active Published Apps KPI */}
         <div className="group rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/20">
           <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-muted">7-Day Traffic</span>
-            <span className="rounded-md bg-indigo-50 px-1.5 py-0.5 text-[10px] font-semibold text-indigo-700">
-              App Views
+            <span className="text-[12px] font-medium text-muted">Catalog Volume</span>
+            <span className="rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-700">
+              Live Shelf
             </span>
           </div>
           <div className="mt-2 font-display text-[28px] font-semibold tracking-tight text-ink">
-            {(data.stats.views7d ?? 0).toLocaleString()}
+            {data.stats.free + data.stats.paid + data.stats.freemium}
           </div>
           <p className="mt-1 text-[11px] text-muted">
-            {(data.stats.views30d ?? 0).toLocaleString()} views in the last 30 days
+            {data.stats.free} free · {data.stats.paid + data.stats.freemium} paid apps
           </p>
         </div>
 
@@ -366,194 +364,65 @@ function AdminHome() {
           </div>
         </section>
 
-        {/* 7-Day Trending Leaderboard */}
+        {/* Featured Editorial Shelf & Hot Highlights */}
         <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between border-b border-line pb-3">
             <div>
-              <h2 className="text-sm font-semibold text-ink">📈 Trending Leaderboard</h2>
-              <p className="text-xs text-muted">Top 5 most viewed apps across the last 7 days.</p>
+              <h2 className="text-sm font-semibold text-ink">🔥 Hot & Featured Highlights</h2>
+              <p className="text-xs text-muted">Apps marked as Hot for top shelf placement.</p>
             </div>
-            <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-700">
-              Live Tracker
-            </span>
+            <Link
+              to="/admin/apps"
+              preload="intent"
+              className="text-xs font-medium text-ink underline hover:text-muted"
+            >
+              Toggle Hot in Apps →
+            </Link>
           </div>
 
           <div className="mt-4">
-            {topApps.length === 0 ? (
+            {hotApps.length === 0 ? (
               <div className="py-12 text-center text-xs text-muted">
-                <p className="text-2xl mb-1">📊</p>
-                No traffic recorded in the last 7 days yet.
-                <p className="mt-1">Views record automatically as visitors browse app pages.</p>
+                <p className="text-2xl mb-1">🔥</p>
+                No apps currently marked as Hot.
+                <p className="mt-1">Use the toggle button in the Apps table to feature hot apps.</p>
               </div>
             ) : (
-              <ul className="space-y-2">
-                {topApps.map((app, idx) => (
-                  <li
-                    key={app.id}
-                    className="flex items-center justify-between rounded-xl border border-line bg-white px-3.5 py-2.5 transition hover:bg-stone-50"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span
-                        className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold ${
-                          idx === 0
-                            ? "bg-amber-400 text-stone-900"
-                            : idx === 1
-                            ? "bg-stone-300 text-stone-800"
-                            : idx === 2
-                            ? "bg-amber-700/20 text-amber-900"
-                            : "bg-stone-100 text-stone-600"
-                        }`}
-                      >
-                        {idx + 1}
-                      </span>
-                      {app.icon ? (
-                        <img alt="" src={app.icon} className="h-8 w-8 rounded-lg object-cover" />
-                      ) : null}
-                      <div>
-                        <Link
-                          to="/app/$slug"
-                          params={{ slug: app.slug }}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-xs font-medium text-ink hover:underline"
-                        >
-                          {app.name} ↗
-                        </Link>
-                        <p className="text-[10px] text-muted">/{app.slug}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs font-semibold text-ink">
-                        {app.views.toLocaleString()} <span className="font-normal text-muted">views</span>
-                      </span>
-                      <Link
-                        to="/admin/apps/$id"
-                        params={{ id: app.id }}
-                        preload="intent"
-                        className="rounded-lg bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-stone-200"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-
-          {/* Currently Hot Apps Bar */}
-          <div className="mt-5 rounded-xl border border-rose-100 bg-rose-50/40 p-3">
-            <div className="flex items-center justify-between text-xs">
-              <span className="font-semibold text-rose-800 flex items-center gap-1">
-                <span>🔥</span> Active Hot Apps ({hotApps.length})
-              </span>
-              <Link
-                to="/admin/apps"
-                preload="intent"
-                className="text-[11px] font-medium text-rose-700 underline hover:text-rose-900"
-              >
-                Toggle Hot in Apps →
-              </Link>
-            </div>
-            {hotApps.length === 0 ? (
-              <p className="mt-2 text-[11px] text-muted">
-                No apps currently marked as Hot. Use the toggle button in the Apps table to feature hot apps.
-              </p>
-            ) : (
-              <div className="mt-2.5 flex flex-wrap gap-2">
+              <div className="grid gap-2 sm:grid-cols-2">
                 {hotApps.map((h) => (
                   <div
                     key={h.id}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-rose-200 bg-white px-2 py-1 text-xs shadow-2xs"
+                    className="flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50/30 p-2.5 text-xs"
                   >
-                    {h.icon ? <img alt="" src={h.icon} className="h-4 w-4 rounded-xs object-cover" /> : null}
-                    <Link
-                      to="/admin/apps/$id"
-                      params={{ id: h.id }}
-                      preload="intent"
-                      className="font-medium text-ink hover:underline"
-                    >
-                      {h.name}
-                    </Link>
+                    <div className="flex items-center gap-2.5">
+                      {h.icon ? <img alt="" src={h.icon} className="h-7 w-7 rounded-md object-cover" /> : null}
+                      <div>
+                        <Link
+                          to="/admin/apps/$id"
+                          params={{ id: h.id }}
+                          preload="intent"
+                          className="font-medium text-ink hover:underline"
+                        >
+                          {h.name}
+                        </Link>
+                        <p className="text-[10px] text-muted">/{h.slug}</p>
+                      </div>
+                    </div>
                     <form method="post" action="/api/admin/toggle-hot" className="inline">
                       <input type="hidden" name="id" value={h.id} />
                       <input type="hidden" name="return_to" value="/admin" />
                       <button
                         type="submit"
                         title="Remove Hot status"
-                        className="ml-1 text-rose-400 hover:text-rose-600 font-bold"
+                        className="rounded-lg bg-white px-2 py-1 text-[11px] font-medium text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50"
                       >
-                        ×
+                        Remove
                       </button>
                     </form>
                   </div>
                 ))}
               </div>
             )}
-            {/* Traffic Referrers & Sources breakdown */}
-            <div className="mt-5 rounded-xl border border-line bg-stone-50/60 p-3.5">
-              <div className="flex items-center justify-between text-xs border-b border-line/60 pb-2 mb-2.5">
-                <span className="font-semibold text-ink flex items-center gap-1.5">
-                  <span>🧭</span> Traffic Referrers & Sources (Last 7 Days)
-                </span>
-                <span className="text-[11px] text-muted">
-                  {trafficSources.reduce((acc, curr) => acc + curr.views, 0).toLocaleString()} total tracked
-                </span>
-              </div>
-              {trafficSources.length === 0 ? (
-                <p className="text-[11px] text-muted py-1">
-                  No source referrals categorized yet. Source origins are logged automatically when visitors arrive.
-                </p>
-              ) : (
-                <div className="space-y-2">
-                  {trafficSources.map((item) => {
-                    const totalViews = trafficSources.reduce((acc, curr) => acc + curr.views, 0) || 1;
-                    const pct = Math.round((item.views / totalViews) * 100);
-                    const sourceIcons: Record<string, { label: string; icon: string }> = {
-                      direct: { label: "Direct / Internal", icon: "🔗" },
-                      google: { label: "Google Search", icon: "🔍" },
-                      bing: { label: "Bing Search", icon: "🌐" },
-                      x: { label: "X (Twitter)", icon: "🐦" },
-                      threads: { label: "Threads / Instagram", icon: "🧵" },
-                      reddit: { label: "Reddit", icon: "💬" },
-                      producthunt: { label: "Product Hunt", icon: "🐱" },
-                      hacker_news: { label: "Hacker News", icon: "🔶" },
-                      bot: { label: "Bot / Crawler / Audit Tool", icon: "🤖" },
-                      other: { label: "Other Referral", icon: "🌍" },
-                    };
-                    const meta = sourceIcons[item.source] ?? { label: item.source, icon: "🌍" };
-
-                    return (
-                      <div key={item.source} className="text-xs">
-                        <div className="flex items-center justify-between mb-1">
-                          <span className="flex items-center gap-1.5 font-medium text-ink">
-                            <span>{meta.icon}</span>
-                            <span>{meta.label}</span>
-                          </span>
-                          <span className="text-muted">
-                            <span className="font-semibold text-ink">{item.views.toLocaleString()}</span> ({pct}%)
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full overflow-hidden rounded-full bg-stone-200">
-                          <div
-                            className={`h-full rounded-full ${
-                              item.source === "bot"
-                                ? "bg-stone-400"
-                                : item.source === "google"
-                                ? "bg-emerald-500"
-                                : item.source === "x"
-                                ? "bg-sky-500"
-                                : "bg-indigo-500"
-                            }`}
-                            style={{ width: `${Math.max(4, pct)}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
           </div>
         </section>
       </div>

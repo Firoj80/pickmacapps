@@ -303,26 +303,8 @@ async function ensureSeed(sql: Sql) {
   try {
     await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
     await sql.query("alter table apps add column if not exists is_user_submitted boolean not null default false");
-    await sql.query(
-      `create table if not exists app_views_daily (
-        app_id text not null,
-        view_date date not null default current_date,
-        views integer not null default 1,
-        primary key (app_id, view_date)
-      )`,
-    );
-    await sql.query("create index if not exists idx_app_views_daily_date on app_views_daily (view_date)");
-    await sql.query(
-      `create table if not exists traffic_sources_daily (
-        source text not null,
-        view_date date not null default current_date,
-        views integer not null default 1,
-        primary key (source, view_date)
-      )`,
-    );
-    await sql.query("create index if not exists idx_traffic_sources_date on traffic_sources_daily (view_date)");
   } catch (err) {
-    console.error("ensureSeed is_hot & views failed:", err);
+    console.error("ensureSeed is_hot & flags failed:", err);
   }
 }
 
@@ -338,45 +320,11 @@ export async function directorySql() {
   return sql;
 }
 
-export async function recordAppView(slugOrId: string, referrer = "", userAgent = "") {
-  if (!slugOrId) return;
-  try {
-    const { classifyReferrer } = await import("./traffic");
-    const source = classifyReferrer(referrer, userAgent);
-    const sql = await directorySql();
-    await sql.query(
-      `insert into app_views_daily (app_id, view_date, views)
-       select id, current_date, 1
-       from apps
-       where slug = $1 or id = $1
-       limit 1
-       on conflict (app_id, view_date)
-       do update set views = app_views_daily.views + 1`,
-      [slugOrId],
-    );
-    await sql.query(
-      `insert into traffic_sources_daily (source, view_date, views)
-       values ($1, current_date, 1)
-       on conflict (source, view_date)
-       do update set views = traffic_sources_daily.views + 1`,
-      [source],
-    );
-  } catch (err) {
-    console.error("recordAppView failed:", err);
-  }
-}
-
 export async function publishedDirectory() {
   const sql = await directorySql();
   const appRows = await sql.query<AppRow>(
-    `select a.*, coalesce(v.views_7d, 0) as views_7d
+    `select a.*, 0 as views_7d
      from apps a
-     left join (
-       select app_id, sum(views)::int as views_7d
-       from app_views_daily
-       where view_date >= current_date - interval '7 days'
-       group by app_id
-     ) v on v.app_id = a.id
      where a.status = 'published'
      order by a.created_at desc`,
   );
@@ -565,53 +513,7 @@ export async function adminStats() {
   let views7d = 0;
   let views30d = 0;
   let topApps7d: { id: string; name: string; slug: string; icon: string; views: number }[] = [];
-  try {
-    const v7 = await sql.query<{ total: string }>(
-      `select coalesce(sum(views), 0)::text as total from app_views_daily where view_date >= current_date - interval '7 days'`,
-    );
-    views7d = Number(v7[0]?.total ?? 0);
-
-    const v30 = await sql.query<{ total: string }>(
-      `select coalesce(sum(views), 0)::text as total from app_views_daily where view_date >= current_date - interval '30 days'`,
-    );
-    views30d = Number(v30[0]?.total ?? 0);
-
-    const top = await sql.query<{ id: string; name: string; slug: string; icon: string; views: string }>(
-      `select a.id, a.name, a.slug, a.icon, coalesce(sum(v.views), 0)::text as views
-       from apps a
-       join app_views_daily v on v.app_id = a.id
-       where v.view_date >= current_date - interval '7 days'
-       group by a.id, a.name, a.slug, a.icon
-       order by sum(v.views) desc
-       limit 5`,
-    );
-    topApps7d = top.map((r) => ({
-      id: r.id,
-      name: r.name,
-      slug: r.slug,
-      icon: r.icon,
-      views: Number(r.views),
-    }));
-  } catch (err) {
-    console.error("adminStats views query error:", err);
-  }
-
   let trafficSources7d: { source: string; views: number }[] = [];
-  try {
-    const srcRows = await sql.query<{ source: string; views: string }>(
-      `select source, coalesce(sum(views), 0)::text as views
-       from traffic_sources_daily
-       where view_date >= current_date - interval '7 days'
-       group by source
-       order by sum(views) desc`,
-    );
-    trafficSources7d = srcRows.map((r) => ({
-      source: r.source,
-      views: Number(r.views),
-    }));
-  } catch (err) {
-    console.error("adminStats traffic sources query error:", err);
-  }
 
   let hotApps: { id: string; name: string; slug: string; icon: string }[] = [];
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
