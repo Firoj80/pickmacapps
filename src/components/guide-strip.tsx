@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { Post } from "@/lib/catalog";
 
-const washes = ["#0f172a", "#1e1b4b", "#3f1d38", "#1f2937", "#3b1d1d", "#14261c"];
+export const guideWashes = ["#0f172a", "#1e1b4b", "#3f1d38", "#1f2937", "#3b1d1d", "#14261c"];
 
 export function GuideStrip({ posts }: { posts: Post[] }) {
   const shown = posts.slice(0, 6);
@@ -21,7 +21,7 @@ export function GuideStrip({ posts }: { posts: Post[] }) {
       </div>
       <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {shown.map((post, index) => (
-          <GuideCard key={post.slug} post={post} wash={washes[index % washes.length]} />
+          <GuideCard key={post.slug} post={post} wash={guideWashes[index % guideWashes.length]} />
         ))}
       </div>
     </section>

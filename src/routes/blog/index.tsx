@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { GuideCard } from "@/components/guide-strip";
+import { GuideCard, guideWashes } from "@/components/guide-strip";
 import { posts } from "@/lib/catalog";
 import { guidesGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -36,8 +36,8 @@ function BlogIndex() {
           <span aria-hidden="true" className="h-px flex-1 bg-line" />
         </div>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {list.map((post) => (
-            <GuideCard key={post.slug} post={post} />
+          {list.map((post, index) => (
+            <GuideCard key={post.slug} post={post} wash={guideWashes[index % guideWashes.length]} />
           ))}
         </div>
       </div>
