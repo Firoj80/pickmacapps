@@ -166,6 +166,14 @@ html.dark {
 
 .blog-body img {
   max-width: 100%;
+  height: auto;
+}
+
+.blog-body pre,
+.blog-body code {
+  max-width: 100%;
+  overflow-x: auto;
+  word-break: break-word;
 }
 
 @media (prefers-reduced-motion: reduce) {

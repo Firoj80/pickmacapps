@@ -156,7 +156,7 @@ function CompareHub() {
           </div>
 
           {/* Pricing Filter Buttons */}
-          <div className="inline-flex h-11 shrink-0 items-center gap-1 rounded-xl bg-surface-2 p-1 border border-line">
+          <div className="inline-flex h-11 shrink-0 items-center gap-1 rounded-xl bg-surface-2 p-1 border border-line overflow-x-auto max-w-full [scrollbar-width:none]">
             {(
               [
                 ["all", "All Matchups"],
@@ -169,7 +169,7 @@ function CompareHub() {
                 key={id}
                 type="button"
                 onClick={() => setFilter(id)}
-                className={`h-9 rounded-lg px-3 text-[13px] font-medium transition-all ${
+                className={`shrink-0 h-9 rounded-lg px-2.5 sm:px-3 text-xs sm:text-[13px] font-medium transition-all ${
                   filter === id
                     ? "bg-ink text-canvas shadow-xs font-semibold"
                     : "text-body hover:text-ink hover:bg-surface/60"

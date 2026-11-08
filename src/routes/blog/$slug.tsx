@@ -104,7 +104,7 @@ function BlogPost() {
             </div>
           </div>
 
-          <h1 className="font-display mt-5 text-4xl leading-tight font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
+          <h1 className="font-display mt-5 text-2xl sm:text-4xl lg:text-5xl leading-tight font-semibold tracking-[-0.03em] text-ink">
             {post.h1 ?? post.title}
           </h1>
 
@@ -148,7 +148,7 @@ function BlogPost() {
         {post.toc.length > 0 ? (
           <nav className="mt-8 rounded-xl border border-line bg-surface p-5">
             <p className="mb-4 text-xs font-semibold tracking-wide text-muted uppercase">In this guide</p>
-            <ol className="grid grid-cols-2 gap-x-4 gap-y-3">
+            <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-3">
               {post.toc.map((item, index) => (
                 <li key={item.id} className={index === 0 || index === 3 || index >= 6 ? "col-span-2" : undefined}>
                   <a href={`#${item.id}`} className="flex items-baseline gap-2.5 text-sm leading-snug text-body transition-colors hover:text-ink">

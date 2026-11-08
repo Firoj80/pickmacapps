@@ -222,7 +222,7 @@ function AppPage() {
                 params={{ slug: app.category }}
                 className="rounded-md border border-line-2 bg-surface px-2.5 py-1 text-xs font-medium text-body transition-colors hover:bg-surface-2 hover:text-ink"
               >
-                {app.categoryIcon} {app.categoryName}
+                {app.categoryName}
               </Link>
               {/* Mobile CTA */}
               <a

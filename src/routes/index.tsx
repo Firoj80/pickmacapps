@@ -134,13 +134,14 @@ export const Route = createFileRoute("/")({
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
   // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread
-  const count = apps.length;
+  const shown = apps.slice(0, 7);
+  const count = shown.length;
   const mid = (count - 1) / 2;
 
   return (
-    <div className="relative mt-4 flex items-center justify-center pt-2 pb-1">
+    <div className="relative mt-4 flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-2">
       <div className="flex items-center justify-center">
-        {apps.map((app, index) => {
+        {shown.map((app, index) => {
           const offset = index - mid;
           // Arc calculation: lift center up, curve down on sides
           const translateY = Math.pow(Math.abs(offset), 1.35) * 4;

@@ -28,7 +28,7 @@ export const Route = createFileRoute("/how-we-pick")({
 
 function HowWePickPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-14 lg:py-20">
+    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14 lg:py-20">
       <nav className="mb-8 flex items-center gap-2 text-sm text-muted">
         <Link to="/" className="transition-colors hover:text-ink">
           Home
@@ -39,7 +39,7 @@ function HowWePickPage() {
 
       <header className="border-b border-line pb-8">
         <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">Editorial Guidelines</p>
-        <h1 className="font-display mt-3 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">
+        <h1 className="font-display mt-3 text-2xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.03em] text-ink">
           Listing Guidelines & Editorial Policy
         </h1>
         <p className="mt-4 text-lg text-body">

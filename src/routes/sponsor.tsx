@@ -79,18 +79,18 @@ function SponsorPage() {
         </p>
 
         {/* Live Metrics Bar */}
-        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-3 rounded-2xl border border-line bg-surface/80 p-3 sm:p-4 backdrop-blur-xl shadow-sm">
+        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3 rounded-2xl border border-line bg-surface/80 p-3 sm:p-4 backdrop-blur-xl shadow-sm text-center">
           <div>
-            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">2h – 24h</p>
-            <p className="text-[12px] text-muted">Review turnaround</p>
+            <p className="text-lg sm:text-2xl font-bold text-ink tracking-tight">2h – 24h</p>
+            <p className="text-[11px] sm:text-[12px] text-muted">Review turnaround</p>
           </div>
-          <div className="border-x border-line px-2">
-            <p className="text-xl sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 6</p>
-            <p className="text-[12px] text-muted">Hero spots capped</p>
+          <div className="border-x border-line px-1 sm:px-2">
+            <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 6</p>
+            <p className="text-[11px] sm:text-[12px] text-muted">Hero spots capped</p>
           </div>
           <div>
-            <p className="text-xl sm:text-2xl font-bold text-ink tracking-tight">100%</p>
-            <p className="text-[12px] text-muted">Curated guarantee</p>
+            <p className="text-lg sm:text-2xl font-bold text-ink tracking-tight">100%</p>
+            <p className="text-[11px] sm:text-[12px] text-muted">Curated guarantee</p>
           </div>
         </div>
       </section>

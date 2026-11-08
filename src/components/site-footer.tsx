@@ -1,6 +1,7 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { isEditorChoice } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
+import { appIconUrl } from "@/lib/image-opt";
 
 const creatorUrl = "https://x.com/hiii_firoj";
 
@@ -145,9 +146,17 @@ export function SiteFooter() {
                     >
                       <img
                         alt=""
-                        src={app.icon}
+                        src={appIconUrl(app.icon)}
+                        loading="lazy"
+                        decoding="async"
+                        width={20}
+                        height={20}
                         onError={(event) => {
-                          event.currentTarget.src = "/site-favicon.svg";
+                          if (event.currentTarget.src !== app.icon) {
+                            event.currentTarget.src = app.icon;
+                          } else {
+                            event.currentTarget.src = "/site-favicon.svg";
+                          }
                         }}
                         className="h-5 w-5 shrink-0 rounded-md object-cover ring-1 ring-line group-hover:ring-accent"
                       />

@@ -143,7 +143,7 @@ function CategoryPage() {
             </span>
           </div>
 
-          <h1 className="mt-4 font-display text-3xl font-semibold tracking-[-0.03em] text-ink sm:text-4xl lg:text-5xl">
+          <h1 className="mt-4 font-display text-2xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.03em] text-ink">
             Best {category.name} Mac Apps (2026)
           </h1>
 
@@ -154,17 +154,17 @@ function CategoryPage() {
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="mt-8 flex flex-wrap items-center gap-6 text-xs text-muted">
+          <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-muted">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-ink text-sm">{listed.length}</span>
               <span>Curated Apps</span>
             </div>
-            <span className="text-line">•</span>
+            <span className="hidden sm:inline text-line">•</span>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-emerald-600 dark:text-emerald-400">100%</span>
               <span>Apple Gatekeeper Notarized</span>
             </div>
-            <span className="text-line">•</span>
+            <span className="hidden sm:inline text-line">•</span>
             <div className="flex items-center gap-2">
               <span className="font-semibold text-ink">Hand-Verified</span>
               <span>by Indie Devs</span>

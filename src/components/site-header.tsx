@@ -48,7 +48,7 @@ export function SiteHeader() {
           {/* Submit App Primary Action Button */}
           <Link
             to="/submit"
-            className="inline-flex items-center justify-center rounded-full bg-ink px-4 py-2 text-[13.5px] font-medium text-canvas shadow-sm transition hover:opacity-90"
+            className="inline-flex items-center justify-center rounded-full bg-ink px-3 py-1.5 sm:px-4 sm:py-2 text-[12.5px] sm:text-[13.5px] font-medium text-canvas shadow-sm transition hover:opacity-90"
           >
             <span>Submit an app</span>
           </Link>

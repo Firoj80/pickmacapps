@@ -43,10 +43,14 @@ function AboutPage() {
         </p>
       </header>
 
-      <section className="mt-8 flex items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:p-8">
+      <section className="mt-8 flex flex-col sm:flex-row items-start gap-5 rounded-2xl border border-line bg-surface p-6 sm:p-8">
         <img
           src="/firoj.jpg"
           alt="Firoj Alam"
+          loading="lazy"
+          decoding="async"
+          width={64}
+          height={64}
           className="h-16 w-16 shrink-0 rounded-2xl object-cover shadow-md"
         />
         <div className="min-w-0">

@@ -24,9 +24,9 @@ export const Route = createFileRoute("/privacy")({
 
 function PrivacyPage() {
   return (
-    <main className="mx-auto max-w-3xl px-6 py-14">
+    <main className="mx-auto max-w-3xl px-4 sm:px-6 py-10 sm:py-14">
       <p className="text-[12px] font-semibold tracking-[0.16em] text-accent uppercase">Privacy</p>
-      <h1 className="font-display mt-3 text-4xl font-semibold tracking-[-0.03em] text-ink sm:text-5xl">Privacy</h1>
+      <h1 className="font-display mt-3 text-3xl sm:text-4xl lg:text-5xl font-semibold tracking-[-0.03em] text-ink">Privacy</h1>
       <div className="mt-6 space-y-4 text-[16px] leading-relaxed text-body">
         <p>
           The submit form asks for an app name, website, tagline, description, icon, category, price model, and

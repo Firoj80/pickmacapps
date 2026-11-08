@@ -243,8 +243,8 @@ function ComparePage() {
             <span aria-hidden="true" className="h-px flex-1 bg-line" />
           </div>
 
-          <div className="overflow-hidden rounded-2xl border border-line bg-surface shadow-xs">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-2xl border border-line bg-surface shadow-xs [scrollbar-width:thin]">
+            <table className="w-full min-w-[500px] sm:min-w-0 text-left text-sm">
               <thead className="border-b border-line bg-surface-2/60 text-xs text-muted uppercase">
                 <tr>
                   <th scope="col" className="px-5 py-3.5 font-semibold">
