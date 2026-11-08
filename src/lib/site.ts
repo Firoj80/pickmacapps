@@ -42,6 +42,11 @@ export const pageCopy = {
     description:
       "Feature your macOS app on PickMacApps for 30 days. Reach thousands of active Mac power users, developers, and creators.",
   },
+  categories: {
+    title: "Browse by category — PickMacApps",
+    description:
+      "Browse by category. Every macOS app on the shelf, sorted into Productivity, Utility, Video, AI, Dev, and Design.",
+  },
   notFound: {
     title: "Page not found",
     description:

@@ -71,7 +71,7 @@ function websiteNode(origin: string, withSearch: boolean, description?: string) 
         "@type": "SiteNavigationElement",
         name: "Browse by category",
         description: "Browse every macOS app on the shelf, sorted into categories",
-        url: absoluteUrl(origin, "/#apps"),
+        url: absoluteUrl(origin, "/category"),
       },
       {
         "@type": "SiteNavigationElement",
@@ -269,6 +269,34 @@ export function guidesGraph(origin: string, posts: Post[]) {
       origin,
       path,
       posts.map((post) => ({ name: post.title, path: `/blog/${post.slug}` })),
+    ),
+  ]);
+}
+
+export function categoriesHubGraph(
+  origin: string,
+  categories: { slug: string; name: string }[],
+) {
+  const path = "/category";
+  return graph(origin, [
+    organizationNode(origin),
+    websiteNode(origin, false),
+    breadcrumbNode(origin, path, [
+      { name: "Home", path: "/" },
+      { name: "Browse by category", path },
+    ]),
+    {
+      "@type": "CollectionPage",
+      "@id": `${absoluteUrl(origin, path)}#page`,
+      name: "Browse macOS Apps by Category",
+      url: absoluteUrl(origin, path),
+      isPartOf: { "@id": siteId(origin) },
+      mainEntity: { "@id": `${absoluteUrl(origin, path)}#list` },
+    },
+    itemListNode(
+      origin,
+      path,
+      categories.map((c) => ({ name: `${c.name} Mac Apps`, path: `/category/${c.slug}` })),
     ),
   ]);
 }

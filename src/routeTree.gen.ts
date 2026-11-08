@@ -25,6 +25,7 @@ import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
+import { Route as CategoryIndexRouteImport } from './routes/category/index'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
@@ -122,6 +123,11 @@ const BlogIndexRoute = BlogIndexRouteImport.update({
 const BlogSlugRoute = BlogSlugRouteImport.update({
   id: '/blog/$slug',
   path: '/blog/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CategoryIndexRoute = CategoryIndexRouteImport.update({
+  id: '/category/',
+  path: '/category/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CategorySlugRoute = CategorySlugRouteImport.update({
@@ -239,6 +245,7 @@ export interface FileRoutesByFullPath {
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/category/': typeof CategoryIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
   '/admin/apps/new': typeof AdminAppsNewRoute
@@ -275,6 +282,7 @@ export interface FileRoutesByTo {
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/admin': typeof AdminIndexRoute
   '/blog': typeof BlogIndexRoute
+  '/category': typeof CategoryIndexRoute
   '/compare': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
   '/admin/apps/new': typeof AdminAppsNewRoute
@@ -312,6 +320,7 @@ export interface FileRoutesById {
   '/sitemap/pages.xml': typeof SitemapPagesDotxmlRoute
   '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
+  '/category/': typeof CategoryIndexRoute
   '/compare/': typeof CompareIndexRoute
   '/admin/apps/$id': typeof AdminAppsIdRoute
   '/admin/apps/new': typeof AdminAppsNewRoute
@@ -350,6 +359,7 @@ export interface FileRouteTypes {
     | '/sitemap/pages.xml'
     | '/admin/'
     | '/blog/'
+    | '/category/'
     | '/compare/'
     | '/admin/apps/$id'
     | '/admin/apps/new'
@@ -386,6 +396,7 @@ export interface FileRouteTypes {
     | '/sitemap/pages.xml'
     | '/admin'
     | '/blog'
+    | '/category'
     | '/compare'
     | '/admin/apps/$id'
     | '/admin/apps/new'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     | '/sitemap/pages.xml'
     | '/admin/'
     | '/blog/'
+    | '/category/'
     | '/compare/'
     | '/admin/apps/$id'
     | '/admin/apps/new'
@@ -459,6 +471,7 @@ export interface RootRouteChildren {
   SitemapPagesDotxmlRoute: typeof SitemapPagesDotxmlRoute
   AdminIndexRoute: typeof AdminIndexRoute
   BlogIndexRoute: typeof BlogIndexRoute
+  CategoryIndexRoute: typeof CategoryIndexRoute
   CompareIndexRoute: typeof CompareIndexRoute
   AdminAppsIdRoute: typeof AdminAppsIdRoute
   AdminAppsNewRoute: typeof AdminAppsNewRoute
@@ -584,6 +597,13 @@ declare module '@tanstack/react-router' {
       path: '/blog/$slug'
       fullPath: '/blog/$slug'
       preLoaderRoute: typeof BlogSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/category/': {
+      id: '/category/'
+      path: '/category'
+      fullPath: '/category/'
+      preLoaderRoute: typeof CategoryIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/category/$slug': {
@@ -739,6 +759,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapPagesDotxmlRoute: SitemapPagesDotxmlRoute,
   AdminIndexRoute: AdminIndexRoute,
   BlogIndexRoute: BlogIndexRoute,
+  CategoryIndexRoute: CategoryIndexRoute,
   CompareIndexRoute: CompareIndexRoute,
   AdminAppsIdRoute: AdminAppsIdRoute,
   AdminAppsNewRoute: AdminAppsNewRoute,

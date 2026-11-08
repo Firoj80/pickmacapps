@@ -59,6 +59,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/category" className="text-muted transition-colors hover:text-ink">
+                  Browse by category
+                </Link>
+              </li>
+              <li>
                 <Link to="/compare" className="text-muted transition-colors hover:text-ink">
                   Alternatives
                 </Link>

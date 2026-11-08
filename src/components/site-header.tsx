@@ -21,6 +21,9 @@ export function SiteHeader() {
             <a href="/#apps" className="transition-colors hover:text-ink">
               Apps
             </a>
+            <Link to="/category" className="transition-colors hover:text-ink">
+              Categories
+            </Link>
             <Link to="/compare" className="transition-colors hover:text-ink">
               Alternatives
             </Link>
@@ -71,6 +74,11 @@ export function SiteHeader() {
               <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Apps
               </a>
+            </li>
+            <li>
+              <Link to="/category" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+                Categories
+              </Link>
             </li>
             <li>
               <Link to="/compare" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
