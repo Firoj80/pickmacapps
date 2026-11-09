@@ -246,8 +246,8 @@ function Home() {
             <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
           </div>
 
-          {/* Direct Category Quick Links for Crawler & User Discovery */}
-          <nav aria-label="Top Categories" className="mt-5 flex flex-wrap items-center justify-center gap-2">
+          {/* Direct Category Quick Links for Crawler & User Discovery (hidden on mobile) */}
+          <nav aria-label="Top Categories" className="mt-5 hidden sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2">
             {chipCategories.map((c) => (
               <Link
                 key={c.slug}
