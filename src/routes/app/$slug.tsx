@@ -17,18 +17,7 @@ function appShareImage(demo?: string) {
 }
 
 function appMetaDescription(app: AppItem): string {
-  const pricing = pricingLabel[app.pricing] || "Free";
-  const tagline = app.tagline.trim().replace(/[.!?]+$/, "");
-  const base = `${app.name} for Mac (${pricing}): ${tagline}.`;
-  const expanded = `${base} Read hands-on review, key features, pricing, and top alternatives on PickMacApps.`;
-  if (expanded.length >= 110 && expanded.length <= 158) return expanded;
-  const compact = `${base} Check review, key features, pricing, and alternatives on PickMacApps.`;
-  if (compact.length >= 110 && compact.length <= 158) return compact;
-  const short = `${base} Review, pricing, and Mac alternatives on PickMacApps.`;
-  if (short.length >= 100 && short.length <= 158) return short;
-  const minimal = `${app.name} for Mac (${pricing}): ${tagline}. Alternatives on PickMacApps.`;
-  if (minimal.length <= 158) return minimal;
-  return `${app.name} for Mac: ${tagline}. Review and alternatives on PickMacApps.`;
+  return `Discover ${app.name} for Mac. Explore its features, pricing, compatibility and alternatives.`;
 }
 
 export const Route = createFileRoute("/app/$slug")({
@@ -50,19 +39,19 @@ export const Route = createFileRoute("/app/$slug")({
       });
       return { meta: missing.meta, links: missing.links };
     }
-    const title = `${app.name} for Mac: Review, Pricing and Alternatives | PickMacApps`;
+    const title = `${app.name} for Mac: Features & Pricing | PickMacApps`;
     const description = appMetaDescription(app);
     const seo = buildMetadata({
       title,
       description,
-      ogTitle: `${app.name} for Mac — Review & Alternatives`,
+      ogTitle: `${app.name} for Mac: Features & Pricing`,
       ogDescription: description,
-      twitterTitle: `${app.name} for Mac — Review & Alternatives`,
+      twitterTitle: `${app.name} for Mac: Features & Pricing`,
       twitterDescription: description,
       path: `/app/${params.slug}`,
       origin: originFrom(matches),
       image: appShareImage(app.demo),
-      imageAlt: `${app.name} for Mac review and alternatives`,
+      imageAlt: `${app.name} for Mac — Features & Pricing`,
     });
     const script = jsonLdScript(appGraph(originFrom(matches), app));
     return {
@@ -149,6 +138,25 @@ function AppPage() {
 
           {/* Main article content */}
           <article className="min-w-0 flex-1 max-w-3xl">
+            {/* Breadcrumb Navigation */}
+            <nav aria-label="Breadcrumb" className="mb-4 flex items-center gap-1.5 text-xs font-medium text-muted">
+              <Link to="/" className="transition-colors hover:text-ink">
+                Home
+              </Link>
+              <span aria-hidden="true" className="text-muted/60">/</span>
+              <Link
+                to="/category/$slug"
+                params={{ slug: app.category }}
+                className="transition-colors hover:text-ink capitalize"
+              >
+                {app.categoryName}
+              </Link>
+              <span aria-hidden="true" className="text-muted/60">/</span>
+              <span className="truncate text-ink font-semibold" aria-current="page">
+                {app.name}
+              </span>
+            </nav>
+
             {/* Header: Icon, Name, Tagline & CTA button */}
             <div className="flex items-start justify-between gap-4">
               <div className="flex items-center gap-4 sm:gap-5">
@@ -265,6 +273,74 @@ function AppPage() {
             {/* Description Body */}
             <div className="mt-8 whitespace-pre-line text-base leading-[1.75] text-body">
               {app.description}
+            </div>
+
+            {/* App Overview & Specifications (Optional Structured Fields) */}
+            <div className="mt-8 rounded-2xl border border-line bg-surface p-5 sm:p-6">
+              <h2 className="text-base font-semibold text-ink">App Overview & Compatibility</h2>
+              <dl className="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 text-xs">
+                <div>
+                  <dt className="text-muted">Platform</dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    {app.macosVersion ? `macOS ${app.macosVersion}` : "macOS Sequoia, Sonoma & Ventura"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Architecture</dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    {app.appleSilicon !== false && app.intelSupported !== false
+                      ? "Universal (Apple Silicon & Intel)"
+                      : app.appleSilicon !== false
+                      ? "Apple Silicon Native"
+                      : "Intel x86_64"}
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Category</dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    <Link to="/category/$slug" params={{ slug: app.category }} className="text-accent hover:underline">
+                      {app.categoryName}
+                    </Link>
+                  </dd>
+                </div>
+                <div>
+                  <dt className="text-muted">Pricing Model</dt>
+                  <dd className="mt-0.5 font-medium text-ink">
+                    {pricingLabel[app.pricing] || "Free"}
+                    {app.price ? ` (${typeof app.price === "number" ? `$${app.price}` : app.price})` : ""}
+                  </dd>
+                </div>
+                {app.developerName ? (
+                  <div>
+                    <dt className="text-muted">Developer</dt>
+                    <dd className="mt-0.5 font-medium text-ink">{app.developerName}</dd>
+                  </div>
+                ) : null}
+                <div>
+                  <dt className="text-muted">Official Website</dt>
+                  <dd className="mt-0.5 truncate font-medium text-accent hover:underline">
+                    <a href={app.website} target="_blank" rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}>
+                      {app.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} ↗
+                    </a>
+                  </dd>
+                </div>
+                {app.privacyPolicyUrl ? (
+                  <div>
+                    <dt className="text-muted">Privacy Policy</dt>
+                    <dd className="mt-0.5 truncate font-medium text-accent hover:underline">
+                      <a href={app.privacyPolicyUrl} target="_blank" rel="nofollow noopener noreferrer">
+                        Developer Privacy Policy ↗
+                      </a>
+                    </dd>
+                  </div>
+                ) : null}
+                {app.updatedAt && app.updatedAt !== app.createdAt ? (
+                  <div>
+                    <dt className="text-muted">Last Updated</dt>
+                    <dd className="mt-0.5 font-medium text-ink">{app.updatedAt}</dd>
+                  </div>
+                ) : null}
+              </dl>
             </div>
 
             {/* Alternatives & Head-to-Head Comparisons Widget */}

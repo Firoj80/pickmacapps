@@ -84,6 +84,7 @@ export const Route = createFileRoute("/category/$slug")({
       twitterDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
       path: `/category/${slug}`,
       origin,
+      noindex: listed.length === 0,
     });
     const script = jsonLdScript(categoryGraph(origin, category, listed, category.faqs));
     return {

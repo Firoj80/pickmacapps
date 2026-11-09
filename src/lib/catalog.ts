@@ -28,6 +28,16 @@ export type AppItem = {
   updatedAt?: string;
   demo: string;
   related: string[];
+  developerName?: string;
+  price?: string | number;
+  currency?: string;
+  macosVersion?: string;
+  appleSilicon?: boolean;
+  intelSupported?: boolean;
+  features?: string[];
+  pros?: string[];
+  cons?: string[];
+  privacyPolicyUrl?: string;
 };
 
 export type HeroIcon = {
@@ -254,7 +264,7 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[]; guid
     id: "disk",
     title: "Disk",
     line: "Uninstall an app, or see what fills the disk.",
-    slugs: ["scanmydisk", "mole", "plumby", "bytesweep"],
+    slugs: ["mole", "plumby", "bytesweep"],
     guideHref: "/blog/best-mac-disk-space-analyzer",
   },
 ];

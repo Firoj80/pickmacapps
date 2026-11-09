@@ -16,7 +16,7 @@ const origin = "https://pickmacapps.test"
 
 test("the comparison gate is the only source for pages, sitemap, and chips", () => {
   const pairs = comparePairs()
-  assert.equal(pairs.length, 30)
+  assert.equal(pairs.length, 27)
   const slugs = pairs.map((pair) => pair.slug)
   assert.equal(new Set(slugs).size, slugs.length)
   assert.equal(slugs.includes("better-shot-vs-boom"), true)

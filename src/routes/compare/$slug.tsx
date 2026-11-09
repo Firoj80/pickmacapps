@@ -49,17 +49,19 @@ export const Route = createFileRoute("/compare/$slug")({
       return { meta: missing.meta, links: missing.links };
     }
     const origin = originFrom(matches);
-    const description = pairIntro(hit.pair);
-    const socialDesc = `Compare ${hit.pair.left.name} vs ${hit.pair.right.name} (2026): Key differences, pricing, features, and alternatives for Mac users.`;
+    const isThin = hit.pair.guides.length === 0;
+    const title = `${hit.pair.left.name} vs ${hit.pair.right.name} for Mac: Which Should You Choose? | PickMacApps`;
+    const description = `Compare ${hit.pair.left.name} vs ${hit.pair.right.name} for macOS. See differences in features, pricing, pros and cons to decide which is better for you.`;
     const seo = buildMetadata({
-      title: pairTitle(hit.pair),
+      title,
       description,
-      ogTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} (2026) — Mac Comparison`,
-      ogDescription: socialDesc,
-      twitterTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} (2026) — Mac Comparison`,
-      twitterDescription: socialDesc,
+      ogTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} for Mac: Which Should You Choose?`,
+      ogDescription: description,
+      twitterTitle: `${hit.pair.left.name} vs ${hit.pair.right.name} for Mac: Which Should You Choose?`,
+      twitterDescription: description,
       path: `/compare/${hit.pair.slug}`,
       origin,
+      noindex: isThin,
     });
     const script = jsonLdScript(compareGraph(origin, hit.pair, pairFaqs(hit.pair)));
     return {

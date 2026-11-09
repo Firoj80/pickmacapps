@@ -8,11 +8,11 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "PickMacApps — Beautifully designed macOS apps, curated";
+const homeTitle = "Best Mac Apps in 2026 | Curated Mac Software";
 const homeDescription =
-  "A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.";
-const homeImageAlt = "PickMacApps — Beautifully designed macOS apps, curated";
-const homeH1 = "Beautifully designed Mac apps, curated";
+  "Discover the best Mac apps for productivity, development, design and everyday work. Explore curated macOS software, free apps and useful alternatives.";
+const homeImageAlt = "Best Mac Apps in 2026 | Curated Mac Software";
+const homeH1 = "Discover the Best Mac Apps Worth Installing";
 
 const homeFaqs = [
   {
@@ -238,13 +238,28 @@ function Home() {
             Mac{homeH1.split("Mac")[1]}
           </h1>
           <p className="mt-2.5 max-w-2xl text-[14.5px] leading-relaxed text-body sm:text-[16px] md:leading-6">
-            A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
+            {homeDescription}
           </p>
 
           {/* Curved app icons stack - Paid apps (up to 6), with top Hot apps toggled when < 6 paid apps available */}
           <div className="mt-3 w-full">
             <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
           </div>
+
+          {/* Direct Category Quick Links for Crawler & User Discovery */}
+          <nav aria-label="Top Categories" className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            {chipCategories.map((c) => (
+              <Link
+                key={c.slug}
+                to="/category/$slug"
+                params={{ slug: c.slug }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/80 px-3.5 py-1.5 text-xs font-medium text-body transition-all hover:border-accent hover:bg-surface hover:text-ink hover:shadow-xs"
+              >
+                <span>{c.emoji || "📁"}</span>
+                <span>{c.name}</span>
+              </Link>
+            ))}
+          </nav>
 
           {directory ? null : (
             <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
