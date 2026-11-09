@@ -165,7 +165,7 @@ async function seedCatalogApps(sql: Sql) {
           app.category,
           app.categoryName,
           app.categoryIcon,
-          app.editorChoice === true,
+          Boolean((app as { editorChoice?: boolean }).editorChoice),
           app.createdAt,
           app.demo,
           JSON.stringify(app.related ?? []),

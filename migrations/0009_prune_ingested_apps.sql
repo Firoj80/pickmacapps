@@ -5,6 +5,6 @@ where slug not in (
   'lounge', 'alcove', 'holdspeak', 'precis', 'voicera',
   'shottr', 'better-shot', 'dejashot', 'screen-charm', 'screentoast',
   'boom', 'tucket', 'clippio', 'maclip', 'notchdodo',
-  'droppy', 'mole', 'plumby', 'bytesweep', 'scanmydisk'
+  'droppy', 'mole', 'plumby', 'bytesweep'
 )
-and (is_user_submitted is not true or is_user_submitted is null);
+and (submitter_email is null or submitter_email = '');
