@@ -4,7 +4,6 @@ import { comparePairs, hubFaqs, hubIntro, hubTitle, pairHeading } from "@/lib/co
 import { pricingLabel } from "@/lib/catalog";
 import { appIconUrl } from "@/lib/image-opt";
 import { publishedApps } from "@/lib/app-seed";
-import { ScanMyDiskNote } from "@/components/scanmydisk-note";
 import { compareHubGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
@@ -180,12 +179,6 @@ function CompareHub() {
             ))}
           </div>
         </div>
-
-        {pairs.some((pair) => pair.left.slug === "scanmydisk" || pair.right.slug === "scanmydisk") ? (
-          <div className="mb-6">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Comparison Matchup Cards Grid */}
         {filtered.length === 0 ? (

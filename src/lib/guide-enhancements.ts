@@ -77,11 +77,11 @@ export const guideEnhancements: Record<string, GuideEnhancement> = {
   },
   "best-mac-disk-space-analyzer": {
     quickAnswer:
-      "ScanMyDisk is the visual disk space analyzer. The listing does not quote a dollar price. Mole also maps disk usage, and the site listed it at $19 once. ScanMyDisk is built by the author of this site.",
+      "Mole and ByteSweep are dedicated disk analyzers for Mac. Mole maps disk usage and cleans caches with a one-time license, while ByteSweep visualizes file sizes and lets you approve deletions with 7-day restore.",
     faqs: [
       {
-        q: "What does ScanMyDisk say it does?",
-        a: "It maps storage into an interactive visual breakdown so you can find oversized files and inspect hidden directories. The directory marks it Paid and does not record a dollar amount. It does not describe automatic deletion.",
+        q: "What do Mac visual disk analyzers do?",
+        a: "They map storage into an interactive visual breakdown so you can find oversized files and inspect hidden directories with complete control over what gets deleted.",
       },
       {
         q: "What does Mole cost, and what else does it do?",

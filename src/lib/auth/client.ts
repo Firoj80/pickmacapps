@@ -1,7 +1,41 @@
 import { genericOAuthClient } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
-import { runPreSignInSignOut, runSignOut } from "../../../scripts/sign-out-plan.mjs";
 import { GROK_PROVIDERS } from "./providers";
+
+async function runPreSignInSignOut(options: {
+  livePreview: boolean;
+  hasBearer: boolean;
+  requestSignOut: () => Promise<unknown>;
+  clearToken: () => void;
+}) {
+  options.clearToken();
+  try {
+    await Promise.race([
+      options.requestSignOut(),
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error("Sign-out timeout")), options.livePreview ? 1500 : 4000),
+      ),
+    ]);
+  } catch {
+    // Ignore timeout / errors during pre-sign-in cleanup
+  }
+}
+
+async function runSignOut(options: {
+  livePreview: boolean;
+  hasBearer: boolean;
+  requestSignOut: () => Promise<unknown>;
+  clearToken: () => void;
+  redirect: () => void;
+}) {
+  options.clearToken();
+  try {
+    await options.requestSignOut();
+  } catch (err) {
+    if (!options.livePreview) throw err;
+  }
+  options.redirect();
+}
 
 /**
  * Better Auth client for this React SPA (browser-side).

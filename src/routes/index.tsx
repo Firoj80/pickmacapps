@@ -1,19 +1,18 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
-import { appPriorityWeight, featuredTierWeight, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
+import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "PickMacApps — Beautifully designed macOS apps, curated";
+const homeTitle = "Best Mac Apps in 2026 | Curated Mac Software";
 const homeDescription =
-  "A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.";
-const homeImageAlt = "PickMacApps — Beautifully designed macOS apps, curated";
-const homeH1 = "Beautifully designed Mac apps, curated";
+  "Discover the best Mac apps for productivity, development, design and everyday work. Explore curated macOS software, free apps and useful alternatives.";
+const homeImageAlt = "Best Mac Apps in 2026 | Curated Mac Software";
+const homeH1 = "Discover the Best Mac Apps Worth Installing";
 
 const homeFaqs = [
   {
@@ -116,7 +115,7 @@ export const Route = createFileRoute("/")({
     const list = publishedApps(directory);
     const topApps = arrangeHero(list, "hot");
     const lcpCover = topApps[0]?.demo ? appCoverUrl(topApps[0].demo) : "";
-    const lcpPreload = lcpCover
+    const lcpPreload: Array<{ rel: "preload"; as: "image"; href: string; fetchPriority: "high" | "low" | "auto" }> = lcpCover
       ? [{ rel: "preload", as: "image", href: lcpCover, fetchPriority: "high" }]
       : [];
 
@@ -133,7 +132,7 @@ export const Route = createFileRoute("/")({
 
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
-  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (6 slots)
+  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (max 6 apps)
   const shown = apps.slice(0, 6);
   const count = shown.length;
   const mid = (count - 1) / 2;
@@ -147,36 +146,48 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
           const translateY = Math.pow(Math.abs(offset), 1.35) * 4;
           const rotate = offset * 4.5;
           const zIndex = Math.round(50 - Math.abs(offset) * 2);
+          const isHot = Boolean(app.isHot && !isEditorChoice(app));
 
           return (
             <Link
               key={app.slug}
               to="/app/$slug"
               params={{ slug: app.slug }}
-              title={app.name}
+              title={isHot ? `${app.name} 🔥 Hot` : app.name}
               style={{
                 zIndex,
                 marginLeft: index === 0 ? 0 : -14,
                 transform: `translateY(${translateY}px) rotate(${rotate}deg)`,
               }}
-              className="group relative h-13 w-13 shrink-0 overflow-hidden rounded-[16px] bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.14)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)] sm:h-15 sm:w-15 sm:rounded-[18px]"
+              className="group relative h-13 w-13 shrink-0 rounded-[16px] bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.14)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)] sm:h-15 sm:w-15 sm:rounded-[18px]"
             >
-              <img
-                alt={app.name}
-                src={appIconUrl(app.icon)}
-                loading="eager"
-                decoding="async"
-                width={60}
-                height={60}
-                onError={(event) => {
-                  if (event.currentTarget.src !== app.icon) {
-                    event.currentTarget.src = app.icon;
-                  } else {
-                    event.currentTarget.src = "/site-favicon.svg";
-                  }
-                }}
-                className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-              />
+              <div className="h-full w-full overflow-hidden rounded-[16px] sm:rounded-[18px]">
+                <img
+                  alt={app.name}
+                  src={appIconUrl(app.icon)}
+                  loading="eager"
+                  decoding="async"
+                  width={60}
+                  height={60}
+                  onError={(event) => {
+                    if (event.currentTarget.src !== app.icon) {
+                      event.currentTarget.src = app.icon;
+                    } else {
+                      event.currentTarget.src = "/site-favicon.svg";
+                    }
+                  }}
+                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                />
+              </div>
+              {isHot ? (
+                <span
+                  title="Hot App"
+                  aria-label="Hot App"
+                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-600 text-[10px] shadow-md ring-1.5 ring-surface"
+                >
+                  🔥
+                </span>
+              ) : null}
             </Link>
           );
         })}
@@ -227,23 +238,28 @@ function Home() {
             Mac{homeH1.split("Mac")[1]}
           </h1>
           <p className="mt-2.5 max-w-2xl text-[14.5px] leading-relaxed text-body sm:text-[16px] md:leading-6">
-            A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
+            {homeDescription}
           </p>
 
-          {/* Curved app icons stack - Paid/Featured apps with fallback to Hot apps if unavailable */}
+          {/* Curved app icons stack - Paid apps (up to 6), with top Hot apps toggled when < 6 paid apps available */}
           <div className="mt-3 w-full">
-            {(() => {
-              const paidApps = [...list.filter((app) => isEditorChoice(app))].sort(
-                (a, b) => featuredTierWeight(b) - featuredTierWeight(a),
-              );
-              const hotApps = list.filter((app) => app.isHot && !isEditorChoice(app));
-              const heroApps =
-                paidApps.length > 0
-                  ? (paidApps.length < 6 ? [...paidApps, ...hotApps].slice(0, 6) : paidApps.slice(0, 6))
-                  : (hotApps.length > 0 ? hotApps.slice(0, 6) : list.slice(0, 6));
-              return <ChoiceIcons apps={heroApps} />;
-            })()}
+            <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
           </div>
+
+          {/* Direct Category Quick Links for Crawler & User Discovery */}
+          <nav aria-label="Top Categories" className="mt-5 flex flex-wrap items-center justify-center gap-2">
+            {chipCategories.map((c) => (
+              <Link
+                key={c.slug}
+                to="/category/$slug"
+                params={{ slug: c.slug }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/80 px-3.5 py-1.5 text-xs font-medium text-body transition-all hover:border-accent hover:bg-surface hover:text-ink hover:shadow-xs"
+              >
+                <span>{c.emoji || "📁"}</span>
+                <span>{c.name}</span>
+              </Link>
+            ))}
+          </nav>
 
           {directory ? null : (
             <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>

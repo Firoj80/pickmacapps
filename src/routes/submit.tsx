@@ -9,8 +9,16 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 
+export type SubmitSearch = {
+  tier?: "featured" | "article";
+  submitted?: string;
+  payment_id?: string;
+  subscription_id?: string;
+  status?: string;
+};
+
 export const Route = createFileRoute("/submit")({
-  validateSearch: (search: Record<string, unknown>) => ({
+  validateSearch: (search: Record<string, unknown>): SubmitSearch => ({
     tier: search.tier === "featured" || search.tier === "article" ? search.tier : undefined,
     submitted: search.submitted ? String(search.submitted) : undefined,
     payment_id: search.payment_id ? String(search.payment_id) : undefined,

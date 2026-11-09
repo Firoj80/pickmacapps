@@ -1,12 +1,15 @@
+export const PRIMARY_ORIGIN = "https://pickmacapps.store";
+
 /** Facts shared by the HTML head, markdown, llms.txt, and ai.txt. */
 export const site = {
   name: "PickMacApps",
-  title: "PickMacApps — Beautifully designed macOS apps, curated",
+  url: PRIMARY_ORIGIN,
+  title: "Best Mac Apps in 2026 | Curated Mac Software",
   description:
-    "A hand-picked shelf of beautifully designed macOS apps. Discover thoughtfully crafted tools, utilities, and indie software for your Mac.",
+    "Discover the best Mac apps for productivity, development, design and everyday work. Explore curated macOS software, free apps and useful alternatives.",
   logoPath: "/favicon.svg",
   ogImage: "/og-v2.jpg",
-  ogImageAlt: "PickMacApps — Beautifully designed macOS apps, curated",
+  ogImageAlt: "PickMacApps — Curated Mac Software & Best Mac Apps in 2026",
   ogImageWidth: "1200",
   ogImageHeight: "630",
   policyUpdated: "2026-10-27",

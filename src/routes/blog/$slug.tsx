@@ -2,7 +2,6 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { getPost, posts } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
-import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -43,7 +42,7 @@ export const Route = createFileRoute("/blog/$slug")({
       imageAlt: `${post.title} — PickMacApps Editorial Guide`,
       type: "article",
       publishedTime: post.date,
-      modifiedTime: post.date,
+      modifiedTime: (post.updatedAt && post.updatedAt !== post.date) ? post.updatedAt : undefined,
     });
     const enhancement = getGuideEnhancement(post.slug, post.excerpt);
     const script = jsonLdScript(guideGraph(originFrom(matches), post, enhancement.faqs));
@@ -77,14 +76,18 @@ function BlogPost() {
   return (
     <main>
       <article className="mx-auto max-w-3xl px-6 py-12 lg:py-16">
-        <nav className="mb-8 flex items-center gap-2 text-sm text-muted">
+        <nav aria-label="Breadcrumb" className="mb-8 flex items-center gap-2 text-sm text-muted">
           <Link to="/" className="transition-colors hover:text-ink">
             Home
           </Link>
-          <span>/</span>
+          <span aria-hidden="true">/</span>
           <Link to="/blog" className="transition-colors hover:text-ink">
             Blog
           </Link>
+          <span aria-hidden="true">/</span>
+          <span className="truncate text-ink font-medium" aria-current="page">
+            {post.title}
+          </span>
         </nav>
 
         <header>
@@ -186,12 +189,6 @@ function BlogPost() {
         ) : null}
 
         <div className="blog-body" dangerouslySetInnerHTML={{ __html: post.html }} />
-
-        {featuresScanMyDisk(mentioned.map((app) => app.name).concat(post.html.includes("ScanMyDisk") ? ["ScanMyDisk"] : [])) ? (
-          <div className="mt-8">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Visible FAQ Section */}
         {enhancement.faqs.length > 0 ? (

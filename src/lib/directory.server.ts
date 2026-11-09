@@ -125,6 +125,10 @@ async function ensureTombstones(sql: Sql) {
       deleted_at timestamptz not null default now()
     )`,
   );
+  await sql.query(
+    `insert into app_tombstones (slug) values ('scanmydisk') on conflict (slug) do nothing`,
+  );
+  await sql.query(`delete from apps where slug = 'scanmydisk'`);
 }
 
 async function seedCatalogApps(sql: Sql) {
@@ -352,6 +356,7 @@ export async function publishedDirectory() {
       emoji: row.emoji,
       paragraphs: asStringList(row.paragraphs),
       tips: asStringList(row.tips),
+      faqs: findShelfCategory(row.slug)?.faqs ?? [],
     }));
   } catch (err) {
     console.error("published categories failed:", err);
@@ -922,11 +927,12 @@ export async function listSubmissions() {
     app_name: string;
     website: string;
     plan: string;
+    tier?: string;
     status: string;
     email: string;
     x_handle?: string;
     created_at: string | Date;
-  }>("select id, app_name, website, plan, status, email, coalesce(x_handle, '') as x_handle, created_at from submissions order by created_at desc limit 100");
+  }>("select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, created_at from submissions order by created_at desc limit 100");
 }
 
 export async function rejectSubmission(id: string) {

@@ -181,8 +181,57 @@ function appImages(app: AppItem) {
   return images;
 }
 
+function appCategoryType(category: string): string {
+  switch (category.toLowerCase()) {
+    case "utility":
+    case "utilities":
+      return "UtilitiesApplication";
+    case "productivity":
+      return "ProductivityApplication";
+    case "dev":
+    case "developer":
+    case "developer-tools":
+      return "DeveloperApplication";
+    case "design":
+    case "design-creative":
+      return "DesignApplication";
+    case "video":
+    case "video-media":
+      return "MultimediaApplication";
+    case "ai":
+    case "ai-apps":
+      return "ProductivityApplication";
+    default:
+      return "SoftwareApplication";
+  }
+}
+
+function appOffers(app: AppItem) {
+  if (app.pricing === "free") {
+    return {
+      "@type": "Offer",
+      price: 0,
+      priceCurrency: "USD",
+      availability: "https://schema.org/InStock",
+    };
+  }
+  if (app.price !== undefined && app.price !== null) {
+    const numeric = typeof app.price === "number" ? app.price : parseFloat(String(app.price).replace(/[^0-9.]/g, ""));
+    if (!Number.isNaN(numeric)) {
+      return {
+        "@type": "Offer",
+        price: numeric,
+        priceCurrency: app.currency || "USD",
+        availability: "https://schema.org/InStock",
+      };
+    }
+  }
+  return undefined;
+}
+
 export function appGraph(origin: string, app: AppItem) {
   const path = `/app/${app.slug}`;
+  const offers = appOffers(app);
   return graph(origin, [
     organizationNode(origin),
     breadcrumbNode(origin, path, [
@@ -199,7 +248,15 @@ export function appGraph(origin: string, app: AppItem) {
       operatingSystem: "macOS",
       image: appImages(app),
       url: absoluteUrl(origin, path),
-      ...(app.pricing === "free" ? { offers: { "@type": "Offer", price: 0, priceCurrency: "USD" } } : {}),
+      ...(offers ? { offers } : {}),
+      publisher: {
+        "@type": "Organization",
+        name: site.name,
+        url: absoluteUrl(origin, "/"),
+      },
+      ...(app.developerName ? { author: { "@type": "Person", name: app.developerName } } : {}),
+      datePublished: app.createdAt,
+      ...(app.updatedAt && app.updatedAt !== app.createdAt ? { dateModified: app.updatedAt } : {}),
     },
   ]);
 }
@@ -220,7 +277,7 @@ export function guideGraph(origin: string, post: Post, faqs?: { q: string; a: st
       description: post.excerpt,
       image: [absoluteUrl(origin, site.ogImage)],
       datePublished: post.date,
-      dateModified: post.date,
+      dateModified: (post.updatedAt && post.updatedAt !== post.date) ? post.updatedAt : post.date,
       inLanguage: "en",
       url: absoluteUrl(origin, path),
       mainEntityOfPage: absoluteUrl(origin, path),

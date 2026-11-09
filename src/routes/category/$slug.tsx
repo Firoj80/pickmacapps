@@ -1,6 +1,5 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { ScanMyDiskNote, featuresScanMyDisk } from "@/components/scanmydisk-note";
 import { appPriorityWeight, posts } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
@@ -85,6 +84,7 @@ export const Route = createFileRoute("/category/$slug")({
       twitterDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
       path: `/category/${slug}`,
       origin,
+      noindex: listed.length === 0,
     });
     const script = jsonLdScript(categoryGraph(origin, category, listed, category.faqs));
     return {
@@ -205,12 +205,6 @@ function CategoryPage() {
             </div>
           )}
         </section>
-
-        {featuresScanMyDisk(listed.map((app) => app.name)) ? (
-          <div className="mt-8">
-            <ScanMyDiskNote />
-          </div>
-        ) : null}
 
         {/* Editorial Guide: What to look for */}
         {category.tips.length > 0 ? (

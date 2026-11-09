@@ -204,7 +204,6 @@ function renderApp(origin: string, slug: string): MarkdownPage | null {
     `- Added: ${app.createdAt.slice(0, 10)}`,
     "",
     app.description.trim(),
-    app.slug === "scanmydisk" ? "ScanMyDisk is built by the author of this site." : "",
     "",
     `[Visit website](${app.website})`,
   ].filter((line) => line !== "")

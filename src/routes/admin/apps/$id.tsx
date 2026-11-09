@@ -109,7 +109,8 @@ function EditAppForm({ app }: { app: EditAppData }) {
         );
       } else {
         setFetchStatus("error");
-        setFetchMessage(result.message || "Could not re-fetch metadata from this site.");
+        const errMsg = (result as { message?: string; error?: string }).message || (result as { message?: string; error?: string }).error;
+        setFetchMessage(errMsg || "Could not re-fetch metadata from this site.");
       }
     } catch {
       setFetchStatus("error");

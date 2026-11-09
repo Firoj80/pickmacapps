@@ -1,22 +1,27 @@
 import { createServerFn } from "@tanstack/react-start";
-import { site } from "@/lib/site";
+import { PRIMARY_ORIGIN, site } from "@/lib/site";
+
+export { PRIMARY_ORIGIN };
 
 export const fetchSiteOrigin = createServerFn({ method: "GET" }).handler(async () => {
+  if (process.env.NODE_ENV === "production") {
+    return PRIMARY_ORIGIN;
+  }
   const { getRequestUrl } = await import("@tanstack/start-server-core");
   const reqOrigin = getRequestUrl({ xForwardedHost: true, xForwardedProto: true }).origin;
-  if (reqOrigin && !reqOrigin.includes("localhost") && !reqOrigin.includes("127.0.0.1")) {
-    return reqOrigin;
+  if (reqOrigin && reqOrigin.includes("pickmacapps.store")) {
+    return PRIMARY_ORIGIN;
   }
   const envUrl = process.env.APP_URL?.trim();
   if (envUrl && /^https?:\/\//i.test(envUrl)) {
     return envUrl.replace(/\/$/, "");
   }
-  return reqOrigin;
+  return reqOrigin || PRIMARY_ORIGIN;
 });
 
 export function originFrom(matches: ReadonlyArray<{ context: unknown }>) {
   const origin = (matches[0]?.context as { origin?: string } | undefined)?.origin;
-  return origin ?? "";
+  return origin || PRIMARY_ORIGIN;
 }
 
 export function canonicalPath(path: string) {
