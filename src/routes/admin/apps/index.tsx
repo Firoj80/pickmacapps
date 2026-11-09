@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
 import { pricingLabel } from "@/lib/catalog";
-import { fetchAdminApps, ensureAdminSession } from "@/lib/directory.fn";
+import { fetchAdminApps, ensureAdminSession, getCachedAdminApps } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/apps/")({
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/admin/apps/")({
       throw redirect({ href: "/admin/login" });
     }
   },
-  loader: () => fetchAdminApps(),
+  loader: () => getCachedAdminApps(),
   component: AppsPage,
   head: ({ matches }) => {
     const seo = buildMetadata({

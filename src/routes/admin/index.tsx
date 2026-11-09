@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, Pill, fieldClass, statusTone, useAdminNotice } from "@/components/admin-shell";
-import { fetchAdminHome, ensureAdminSession } from "@/lib/directory.fn";
+import { fetchAdminHome, ensureAdminSession, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/")({
       throw redirect({ href: "/admin/login" });
     }
   },
-  loader: () => fetchAdminHome(),
+  loader: () => getCachedAdminHome(),
   component: AdminHome,
   head: ({ matches }) => {
     const seo = buildMetadata({

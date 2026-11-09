@@ -3,23 +3,22 @@ import { AuthProvider } from "@/lib/auth/provider";
 import { Missing } from "@/components/missing";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { buildMetadata, fetchSiteOrigin, originFrom } from "@/lib/seo";
+import { buildMetadata, fetchSiteOrigin, originFrom, PRIMARY_ORIGIN } from "@/lib/seo";
 import { fetchDirectory } from "@/lib/directory.fn";
 import { pageCopy } from "@/lib/site";
 import appCss from "../styles.css?url";
 
 // ---------------------------------------------------------------------------
-// Client-side directory cache
+// Client-side directory cache (Stale-While-Revalidate)
 // ---------------------------------------------------------------------------
-// The root beforeLoad previously called fetchDirectory() on EVERY navigation,
-// blocking the router (and making single clicks appear broken) because
-// TanStack Router awaits beforeLoad before completing any navigation.
+// The root beforeLoad previously called fetchDirectory() and fetchSiteOrigin()
+// blocking the router on every navigation once a 15s timer expired.
 //
-// We cache the result in module scope for DIRECTORY_STALE_MS (5 min) so that
-// client-side SPA navigations reuse the already-fetched data instantly.
-// SSR always fetches fresh (no module cache persists between requests).
+// We cache the directory in module scope and return it synchronously on client
+// navigations (0ms response). Background revalidation occurs after 5 minutes
+// without blocking user clicks or route transitions.
 // ---------------------------------------------------------------------------
-const STALE_MS = 15 * 1000; // 15 seconds
+const DIRECTORY_STALE_MS = 5 * 60 * 1000; // 5 minutes
 
 // --- Directory cache ---
 type DirectoryResult = Awaited<ReturnType<typeof fetchDirectory>>;
@@ -37,21 +36,38 @@ if (typeof window !== "undefined") {
   (window as unknown as { __invalidateDirectoryCache?: () => void }).__invalidateDirectoryCache = invalidateDirectoryCache;
 }
 
-async function getCachedDirectory(): Promise<DirectoryResult | null> {
+function getCachedDirectory(currentContextDirectory?: DirectoryResult | null): DirectoryResult | null | Promise<DirectoryResult | null> {
   // Server-side: never share cache between requests
   if (typeof window === "undefined") {
-    try {
-      return await fetchDirectory();
-    } catch {
-      return null;
-    }
+    return fetchDirectory().catch(() => null);
   }
-  // Client-side: return cached value if still fresh
-  const now = Date.now();
-  if (_directoryCache !== null && now - _directoryCachedAt < STALE_MS) {
+  // Client-side: if memory cache is empty but router context already has the directory (from SSR), seed it!
+  if (_directoryCache === null && currentContextDirectory) {
+    _directoryCache = currentContextDirectory;
+    _directoryCachedAt = Date.now();
+  }
+  // If we already have the directory in memory, RETURN IT IMMEDIATELY (0ms!)
+  if (_directoryCache !== null) {
+    const now = Date.now();
+    // Stale-while-revalidate: if older than 5 minutes, refresh in the background without blocking the user
+    if (now - _directoryCachedAt > DIRECTORY_STALE_MS && !_directoryPromise) {
+      _directoryPromise = fetchDirectory()
+        .then((result) => {
+          if (result) {
+            _directoryCache = result;
+            _directoryCachedAt = Date.now();
+          }
+          _directoryPromise = null;
+          return result;
+        })
+        .catch(() => {
+          _directoryPromise = null;
+          return _directoryCache;
+        });
+    }
     return _directoryCache;
   }
-  // Deduplicate concurrent fetches (e.g. rapid navigation)
+  // Initial cold client fallback: fetch once and cache
   if (_directoryPromise) return _directoryPromise;
   _directoryPromise = fetchDirectory()
     .then((result) => {
@@ -62,50 +78,39 @@ async function getCachedDirectory(): Promise<DirectoryResult | null> {
     })
     .catch(() => {
       _directoryPromise = null;
-      return _directoryCache; // return stale on error rather than null
+      return _directoryCache;
     });
   return _directoryPromise;
 }
 
 // --- Origin cache ---
-let _originCache: string | null = null;
-let _originCachedAt = 0;
-let _originPromise: Promise<string> | null = null;
-
-async function getCachedOrigin(): Promise<string> {
-  if (typeof window === "undefined") {
-    try {
-      return await fetchSiteOrigin();
-    } catch {
-      return "";
-    }
+function getCachedOrigin(): string | Promise<string> {
+  if (typeof window !== "undefined") {
+    return window.location.origin || PRIMARY_ORIGIN;
   }
-  const now = Date.now();
-  if (_originCache !== null && now - _originCachedAt < STALE_MS) {
-    return _originCache;
-  }
-  if (_originPromise) return _originPromise;
-  _originPromise = fetchSiteOrigin()
-    .then((result) => {
-      _originCache = result;
-      _originCachedAt = Date.now();
-      _originPromise = null;
-      return result;
-    })
-    .catch(() => {
-      _originPromise = null;
-      return _originCache ?? "";
-    });
-  return _originPromise;
+  return fetchSiteOrigin().catch(() => PRIMARY_ORIGIN);
 }
 
 const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";d.dataset.theme=t;d.classList.toggle("dark",t==="dark"||(t==="system"&&m.matches))}a();m.addEventListener("change",a)}catch(e){}})()`;
+
+function NavigationProgressBar() {
+  const isLoading = useRouterState({ select: (s) => s.isLoading });
+  if (!isLoading) return null;
+  return (
+    <div
+      role="progressbar"
+      aria-label="Loading page"
+      className="fixed top-0 left-0 right-0 z-[99999] h-[3px] bg-gradient-to-r from-accent via-amber-400 to-sky-500 animate-pulse pointer-events-none shadow-xs"
+    />
+  );
+}
 
 function Frame() {
   const path = useRouterState({ select: (state) => state.location.pathname });
   const admin = path.startsWith("/admin");
   return (
     <>
+      <NavigationProgressBar />
       {admin ? null : <SiteHeader />}
       <div className="flex-1">
         <Outlet />
@@ -116,24 +121,17 @@ function Frame() {
 }
 
 export const Route = createRootRoute({
-  beforeLoad: async ({ location }) => {
+  beforeLoad: async ({ context, location }) => {
     // For admin pages, resolve instantly without querying public directory
     if (location.pathname.startsWith("/admin")) {
       return { origin: "", directory: null };
     }
-    let origin = "";
-    try {
-      origin = await getCachedOrigin();
-    } catch {
-      origin = "";
-    }
-    try {
-      const directory = await getCachedDirectory();
-      return { origin, directory };
-    } catch (err) {
-      console.error("[root.beforeLoad] fetchDirectory error:", err);
-      return { origin, directory: null };
-    }
+    const origin = typeof window !== "undefined"
+      ? (window.location.origin || PRIMARY_ORIGIN)
+      : await getCachedOrigin();
+    const directoryOrPromise = getCachedDirectory((context as { directory?: DirectoryResult | null })?.directory);
+    const directory = directoryOrPromise instanceof Promise ? await directoryOrPromise : directoryOrPromise;
+    return { origin, directory };
   },
   notFoundComponent: () => (
     <Missing title="Page not found" body="That page isn't part of the directory." />

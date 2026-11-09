@@ -18,9 +18,9 @@ export function SiteHeader() {
           </Link>
 
           <nav className="hidden items-center gap-5 text-[14px] text-body md:flex">
-            <a href="/#apps" className="transition-colors hover:text-ink">
+            <Link to="/" hash="apps" className="transition-colors hover:text-ink">
               Apps
-            </a>
+            </Link>
             <Link to="/category" className="transition-colors hover:text-ink">
               Categories
             </Link>
@@ -73,9 +73,9 @@ export function SiteHeader() {
         <nav className="border-t border-line bg-canvas px-4 py-3 md:hidden">
           <ul className="space-y-1">
             <li>
-              <a href="/#apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/" hash="apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Apps
-              </a>
+              </Link>
             </li>
             <li>
               <Link to="/category" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">

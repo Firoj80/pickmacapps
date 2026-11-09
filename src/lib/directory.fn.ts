@@ -164,3 +164,126 @@ export const fetchAdminGuide = createServerFn({ method: "GET" })
     const { getGuide } = await import("./directory.server");
     return getGuide(data.slug);
   });
+
+// ---------------------------------------------------------------------------
+// Client-side Admin Navigation Cache (Stale-While-Revalidate)
+// ---------------------------------------------------------------------------
+let _adminHomeCache: unknown = null;
+let _adminHomeCachedAt = 0;
+let _adminHomePromise: Promise<unknown> | null = null;
+
+let _adminAppsCache: unknown = null;
+let _adminAppsCachedAt = 0;
+let _adminAppsPromise: Promise<unknown> | null = null;
+
+let _adminGuidesCache: unknown = null;
+let _adminGuidesCachedAt = 0;
+let _adminGuidesPromise: Promise<unknown> | null = null;
+
+const ADMIN_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+export function invalidateAdminDataCache() {
+  _adminHomeCache = null;
+  _adminHomeCachedAt = 0;
+  _adminHomePromise = null;
+  _adminAppsCache = null;
+  _adminAppsCachedAt = 0;
+  _adminAppsPromise = null;
+  _adminGuidesCache = null;
+  _adminGuidesCachedAt = 0;
+  _adminGuidesPromise = null;
+}
+
+if (typeof window !== "undefined") {
+  (window as unknown as { __invalidateAdminDataCache?: () => void }).__invalidateAdminDataCache = invalidateAdminDataCache;
+}
+
+export async function getCachedAdminHome() {
+  if (typeof window === "undefined") return fetchAdminHome();
+  const now = Date.now();
+  if (_adminHomeCache !== null) {
+    if (now - _adminHomeCachedAt > ADMIN_CACHE_TTL_MS && !_adminHomePromise) {
+      _adminHomePromise = fetchAdminHome().then((res) => {
+        _adminHomeCache = res;
+        _adminHomeCachedAt = Date.now();
+        _adminHomePromise = null;
+        return res;
+      }).catch(() => {
+        _adminHomePromise = null;
+        return _adminHomeCache;
+      });
+    }
+    return _adminHomeCache as Awaited<ReturnType<typeof fetchAdminHome>>;
+  }
+  if (_adminHomePromise) return _adminHomePromise as Promise<Awaited<ReturnType<typeof fetchAdminHome>>>;
+  _adminHomePromise = fetchAdminHome().then((res) => {
+    _adminHomeCache = res;
+    _adminHomeCachedAt = Date.now();
+    _adminHomePromise = null;
+    return res;
+  }).catch((err) => {
+    _adminHomePromise = null;
+    throw err;
+  });
+  return _adminHomePromise as Promise<Awaited<ReturnType<typeof fetchAdminHome>>>;
+}
+
+export async function getCachedAdminApps() {
+  if (typeof window === "undefined") return fetchAdminApps();
+  const now = Date.now();
+  if (_adminAppsCache !== null) {
+    if (now - _adminAppsCachedAt > ADMIN_CACHE_TTL_MS && !_adminAppsPromise) {
+      _adminAppsPromise = fetchAdminApps().then((res) => {
+        _adminAppsCache = res;
+        _adminAppsCachedAt = Date.now();
+        _adminAppsPromise = null;
+        return res;
+      }).catch(() => {
+        _adminAppsPromise = null;
+        return _adminAppsCache;
+      });
+    }
+    return _adminAppsCache as Awaited<ReturnType<typeof fetchAdminApps>>;
+  }
+  if (_adminAppsPromise) return _adminAppsPromise as Promise<Awaited<ReturnType<typeof fetchAdminApps>>>;
+  _adminAppsPromise = fetchAdminApps().then((res) => {
+    _adminAppsCache = res;
+    _adminAppsCachedAt = Date.now();
+    _adminAppsPromise = null;
+    return res;
+  }).catch((err) => {
+    _adminAppsPromise = null;
+    throw err;
+  });
+  return _adminAppsPromise as Promise<Awaited<ReturnType<typeof fetchAdminApps>>>;
+}
+
+export async function getCachedAdminGuides() {
+  if (typeof window === "undefined") return fetchAdminGuides();
+  const now = Date.now();
+  if (_adminGuidesCache !== null) {
+    if (now - _adminGuidesCachedAt > ADMIN_CACHE_TTL_MS && !_adminGuidesPromise) {
+      _adminGuidesPromise = fetchAdminGuides().then((res) => {
+        _adminGuidesCache = res;
+        _adminGuidesCachedAt = Date.now();
+        _adminGuidesPromise = null;
+        return res;
+      }).catch(() => {
+        _adminGuidesPromise = null;
+        return _adminGuidesCache;
+      });
+    }
+    return _adminGuidesCache as Awaited<ReturnType<typeof fetchAdminGuides>>;
+  }
+  if (_adminGuidesPromise) return _adminGuidesPromise as Promise<Awaited<ReturnType<typeof fetchAdminGuides>>>;
+  _adminGuidesPromise = fetchAdminGuides().then((res) => {
+    _adminGuidesCache = res;
+    _adminGuidesCachedAt = Date.now();
+    _adminGuidesPromise = null;
+    return res;
+  }).catch((err) => {
+    _adminGuidesPromise = null;
+    throw err;
+  });
+  return _adminGuidesPromise as Promise<Awaited<ReturnType<typeof fetchAdminGuides>>>;
+}

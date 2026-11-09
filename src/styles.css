@@ -39,6 +39,11 @@ html.dark {
   color: var(--color-ink);
 }
 
+html, body, a, button, select, input {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
 @keyframes rise {
   from {
     opacity: 0;

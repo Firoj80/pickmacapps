@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
-import { fetchAdminGuides, ensureAdminSession } from "@/lib/directory.fn";
+import { fetchAdminGuides, ensureAdminSession, getCachedAdminGuides } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/guides/")({
@@ -12,7 +12,7 @@ export const Route = createFileRoute("/admin/guides/")({
       throw redirect({ href: "/admin/login" });
     }
   },
-  loader: () => fetchAdminGuides(),
+  loader: () => getCachedAdminGuides(),
   component: GuidesPage,
   head: ({ matches }) => {
     const seo = buildMetadata({
