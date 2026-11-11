@@ -2,9 +2,13 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildSubmissionInlineKeyboard,
+  buildXPostInlineKeyboard,
+  buildXPostTemplates,
   escapeTelegramHtml,
   formatSubmissionNotification,
+  formatXPostTelegramMessage,
   isAuthorizedTelegramSender,
+  normalizeCreatorMention,
   parseSubmissionCallbackData,
   verifyTelegramWebhookSecret,
   type TelegramSubmissionInfo,
@@ -52,8 +56,11 @@ test("buildSubmissionInlineKeyboard returns interactive moderation buttons while
   assert.ok(allButtons.some((b) => b.url === "https://focusbell.app/"));
 
   const approvedKb = buildSubmissionInlineKeyboard({ ...baseSubmission, status: "approved" }, "focusbell-pro");
-  assert.equal(approvedKb.inline_keyboard.flat().some((b) => b.callback_data), false);
-  assert.ok(approvedKb.inline_keyboard.flat().some((b) => b.url === "https://pickmacapps.store/app/focusbell-pro"));
+  const approvedButtons = approvedKb.inline_keyboard.flat();
+  assert.equal(approvedButtons.some((b) => b.callback_data?.startsWith("sub:approve:")), false);
+  assert.equal(approvedButtons.some((b) => b.callback_data?.startsWith("sub:reject:")), false);
+  assert.ok(approvedButtons.some((b) => b.callback_data === `sub:xpost:1:${sampleUuid}`));
+  assert.ok(approvedButtons.some((b) => b.url === "https://pickmacapps.store/app/focusbell-pro"));
 });
 
 test("formatSubmissionNotification includes badge state, escaped app details, and approval URL", () => {
@@ -92,4 +99,44 @@ test("isAuthorizedTelegramSender and verifyTelegramWebhookSecret enforce strict 
   assert.equal(verifyTelegramWebhookSecret(null, "secret-abc", true), false);
   assert.equal(verifyTelegramWebhookSecret(null, "derived-secret", false), true);
   assert.equal(verifyTelegramWebhookSecret("wrong", "derived-secret", false), false);
+});
+
+test("parseSubmissionCallbackData parses xpost template callbacks within 64 bytes", () => {
+  for (let i = 1; i <= 5; i++) {
+    const raw = `sub:xpost:${i}:${sampleUuid}`;
+    assert.ok(Buffer.byteLength(raw, "utf8") <= 64);
+    assert.deepEqual(parseSubmissionCallbackData(raw), {
+      action: "xpost",
+      templateIndex: i,
+      submissionId: sampleUuid,
+    });
+  }
+  assert.equal(parseSubmissionCallbackData(`sub:xpost:0:${sampleUuid}`), null);
+  assert.equal(parseSubmissionCallbackData(`sub:xpost:6:${sampleUuid}`), null);
+});
+
+test("normalizeCreatorMention and 5 X post templates include app, creator, tagline, links, and CTA", () => {
+  assert.equal(normalizeCreatorMention("@firoj80"), "@firoj80");
+  assert.equal(normalizeCreatorMention("firoj80"), "@firoj80");
+  assert.equal(normalizeCreatorMention("https://x.com/firoj80/"), "@firoj80");
+  assert.equal(normalizeCreatorMention(""), "");
+
+  const templates = buildXPostTemplates(baseSubmission, "focusbell-pro");
+  assert.equal(templates.length, 5);
+  for (const tpl of templates) {
+    assert.ok(tpl.text.includes("FocusBell <Pro>"));
+    assert.ok(tpl.text.includes("@focusbell"));
+    assert.ok(tpl.text.includes("Stay on track & ship faster"));
+    assert.ok(tpl.text.includes("https://pickmacapps.store/app/focusbell-pro"));
+    assert.ok(tpl.text.includes("https://pickmacapps.store/submit"));
+  }
+
+  const msg = formatXPostTelegramMessage(baseSubmission, 2, "focusbell-pro");
+  assert.match(msg, /Template 2\/5/);
+  assert.match(msg, /<pre>[\s\S]*FocusBell &lt;Pro&gt;/);
+
+  const kb = buildXPostInlineKeyboard(baseSubmission, 2, "focusbell-pro");
+  const buttons = kb.inline_keyboard.flat();
+  assert.ok(buttons.some((b) => b.text === "• 2 •" && b.callback_data === `sub:xpost:2:${sampleUuid}`));
+  assert.ok(buttons.some((b) => b.url?.startsWith("https://x.com/intent/tweet?text=")));
 });

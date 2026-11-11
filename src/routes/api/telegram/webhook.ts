@@ -8,6 +8,7 @@ interface TelegramUpdate {
     message?: {
       message_id: number;
       chat?: { id?: number | string };
+      text?: string;
     };
   };
   message?: {
@@ -29,9 +30,11 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         const {
           answerTelegramCallback,
           buildSubmissionInlineKeyboard,
+          buildXPostInlineKeyboard,
           editTelegramMessage,
           escapeTelegramHtml,
           formatSubmissionNotification,
+          formatXPostTelegramMessage,
           getTelegramWebhookSecret,
           isAuthorizedTelegramSender,
           isTelegramConfigured,
@@ -192,10 +195,33 @@ export const Route = createFileRoute("/api/telegram/webhook")({
                 }),
                 buildSubmissionInlineKeyboard(updated, created.slug),
               );
+              await sendTelegramMessage(
+                chatId,
+                formatXPostTelegramMessage(updated, 1, created.slug),
+                buildXPostInlineKeyboard(updated, 1, created.slug),
+              );
             }
           } catch (error) {
             const message = error instanceof Error ? error.message : "Could not approve submission.";
             await answerTelegramCallback(callback.id, `⚠️ ${message}`, true);
+          }
+          return Response.json({ ok: true });
+        }
+
+        if (parsed.action === "xpost") {
+          const templateIndex = parsed.templateIndex ?? 1;
+          await answerTelegramCallback(callback.id, `𝕏 Switched to Template ${templateIndex}/5`);
+
+          const xText = formatXPostTelegramMessage(submission, templateIndex);
+          const xKb = buildXPostInlineKeyboard(submission, templateIndex);
+
+          if (chatId !== undefined) {
+            const isAlreadyXPostCard = String(callback.message?.text ?? "").includes("Ready-to-Share Post");
+            if (isAlreadyXPostCard && messageId !== undefined) {
+              await editTelegramMessage(chatId, messageId, xText, xKb);
+            } else {
+              await sendTelegramMessage(chatId, xText, xKb);
+            }
           }
           return Response.json({ ok: true });
         }

@@ -20,7 +20,13 @@ export interface TelegramSubmissionInfo {
   approvedSlug?: string;
 }
 
-export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge";
+export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "xpost";
+
+export interface ParsedTelegramCallback {
+  action: TelegramSubmissionAction;
+  submissionId: string;
+  templateIndex?: number;
+}
 
 export function escapeTelegramHtml(text: string): string {
   return String(text ?? "")
@@ -63,13 +69,173 @@ export function isAuthorizedTelegramSender(fromId: unknown, chatId: unknown, adm
   return from === expected || chat === expected;
 }
 
-export function parseSubmissionCallbackData(data: string): { action: TelegramSubmissionAction; submissionId: string } | null {
+export function parseSubmissionCallbackData(data: string): ParsedTelegramCallback | null {
   const trimmed = String(data ?? "").trim();
+  const xpostMatch = /^sub:xpost:([1-5]):([a-zA-Z0-9-]+)$/.exec(trimmed);
+  if (xpostMatch) {
+    return {
+      action: "xpost",
+      templateIndex: Number(xpostMatch[1]),
+      submissionId: xpostMatch[2],
+    };
+  }
   const match = /^sub:(approve|apphot|reject|badge):([a-zA-Z0-9-]+)$/.exec(trimmed);
   if (!match) return null;
   return {
     action: match[1] as TelegramSubmissionAction,
     submissionId: match[2],
+  };
+}
+
+export function normalizeCreatorMention(xHandle?: string): string {
+  const raw = String(xHandle ?? "").trim();
+  if (!raw) return "";
+  const urlMatch = /(?:x\.com|twitter\.com)\/([A-Za-z0-9_]{1,30})/i.exec(raw);
+  const handle = (urlMatch ? urlMatch[1] : raw.replace(/^@+/, "")).replace(/[^A-Za-z0-9_]/g, "");
+  return handle ? `@${handle}` : "";
+}
+
+export interface XPostTemplate {
+  id: number;
+  label: string;
+  text: string;
+}
+
+export function buildXPostTemplates(submission: TelegramSubmissionInfo, slug?: string): XPostTemplate[] {
+  const name = submission.appName.trim();
+  const creator = normalizeCreatorMention(submission.xHandle);
+  const byCreator = creator ? ` by ${creator}` : "";
+  const rawTagline = submission.tagline.trim();
+  const shortTagline = rawTagline.length > 120 ? `${rawTagline.slice(0, 117).trimEnd()}...` : rawTagline;
+  const resolvedSlug = slug || submission.approvedSlug;
+  const appUrl = resolvedSlug ? `${PRIMARY_ORIGIN}/app/${resolvedSlug}` : PRIMARY_ORIGIN;
+  const submitUrl = `${PRIMARY_ORIGIN}/submit`;
+
+  return [
+    {
+      id: 1,
+      label: "Clean Launch",
+      text: [
+        `New on PickMacApps `,
+        ``,
+        `Meet ${name}${byCreator} — ${shortTagline}`,
+        ``,
+        `Explore it here:`,
+        `${appUrl}`,
+        ``,
+        `Built a Mac app? Submit yours to get discovered 👇`,
+        `${submitUrl}`,
+      ].join("\n"),
+    },
+    {
+      id: 2,
+      label: "Fresh Addition",
+      text: [
+        `${name}${byCreator} was just added to PickMacApps! ✨`,
+        ``,
+        `${shortTagline}`,
+        ``,
+        `Check features & pricing: ${appUrl}`,
+        ``,
+        `Have a macOS app? Add your app to PickMacApps: ${submitUrl}`,
+      ].join("\n"),
+    },
+    {
+      id: 3,
+      label: "Punchy Spotlight",
+      text: [
+        `Just listed on PickMacApps: ${name}${byCreator} 🚀`,
+        ``,
+        `${shortTagline}`,
+        ``,
+        `Details & download → ${appUrl}`,
+        ``,
+        `Building for Mac? Submit your app here: ${submitUrl}`,
+      ].join("\n"),
+    },
+    {
+      id: 4,
+      label: "Mac Discovery",
+      text: [
+        `If you use a Mac, check out ${name}${byCreator} 👀`,
+        ``,
+        `${shortTagline}`,
+        ``,
+        `Full listing on PickMacApps:`,
+        `${appUrl}`,
+        ``,
+        `Want your Mac app featured? Submit it today 👇`,
+        `${submitUrl}`,
+      ].join("\n"),
+    },
+    {
+      id: 5,
+      label: "Creator Shoutout",
+      text: [
+        `Mac App Spotlight 🔦`,
+        ``,
+        `${name}${byCreator}`,
+        `→ ${shortTagline}`,
+        ``,
+        `Live now: ${appUrl}`,
+        ``,
+        `Founders: get your Mac app in front of daily Mac users → ${submitUrl}`,
+      ].join("\n"),
+    },
+  ];
+}
+
+export function formatXPostTelegramMessage(
+  submission: TelegramSubmissionInfo,
+  templateIndex = 1,
+  slug?: string,
+): string {
+  const templates = buildXPostTemplates(submission, slug);
+  const idx = Math.min(Math.max(1, templateIndex), templates.length);
+  const selected = templates[idx - 1];
+  const creator = normalizeCreatorMention(submission.xHandle);
+
+  return [
+    `𝕏 <b>Ready-to-Share Post for ${escapeTelegramHtml(submission.appName)}</b>${creator ? ` (${escapeTelegramHtml(creator)})` : ""}`,
+    `📝 <b>Template ${idx}/5:</b> ${escapeTelegramHtml(selected.label)} <i>(tap text below to copy)</i>`,
+    ``,
+    `<pre>${escapeTelegramHtml(selected.text)}</pre>`,
+    ``,
+    `👇 Pick another template or post directly on X:`,
+  ].join("\n");
+}
+
+export interface TelegramInlineButton {
+  text: string;
+  url?: string;
+  callback_data?: string;
+}
+
+export function buildXPostInlineKeyboard(
+  submission: TelegramSubmissionInfo,
+  templateIndex = 1,
+  slug?: string,
+): { inline_keyboard: TelegramInlineButton[][] } {
+  const templates = buildXPostTemplates(submission, slug);
+  const idx = Math.min(Math.max(1, templateIndex), templates.length);
+  const selected = templates[idx - 1];
+  const resolvedSlug = slug || submission.approvedSlug;
+  const appUrl = resolvedSlug ? `${PRIMARY_ORIGIN}/app/${resolvedSlug}` : PRIMARY_ORIGIN;
+  const xIntentUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(selected.text)}`;
+
+  const templateRow: TelegramInlineButton[] = templates.map((t) => ({
+    text: t.id === idx ? `• ${t.id} •` : `${t.id}`,
+    callback_data: `sub:xpost:${t.id}:${submission.id}`,
+  }));
+
+  return {
+    inline_keyboard: [
+      templateRow,
+      [
+        { text: "𝕏 Post on X", url: xIntentUrl },
+        { text: "🌐 View App Page", url: appUrl },
+      ],
+    ],
   };
 }
 
@@ -150,15 +316,16 @@ function safeHttpUrl(url: string): string | null {
 export function buildSubmissionInlineKeyboard(
   submission: TelegramSubmissionInfo,
   approvedSlug?: string,
-) {
+): { inline_keyboard: TelegramInlineButton[][] } {
   const websiteUrl = safeHttpUrl(submission.website);
   const slug = approvedSlug || submission.approvedSlug;
 
   if (submission.status === "approved") {
-    const row: { text: string; url?: string; callback_data?: string }[] = [];
-    if (slug) row.push({ text: "🌐 View Live Listing", url: `${PRIMARY_ORIGIN}/app/${slug}` });
-    row.push({ text: "⚙️ Open Admin", url: `${PRIMARY_ORIGIN}/admin/apps` });
-    return { inline_keyboard: [row] };
+    const row1: TelegramInlineButton[] = [];
+    if (slug) row1.push({ text: "🌐 View Live Listing", url: `${PRIMARY_ORIGIN}/app/${slug}` });
+    row1.push({ text: "⚙️ Open Admin", url: `${PRIMARY_ORIGIN}/admin/apps` });
+    const row2: TelegramInlineButton[] = [{ text: "𝕏 Generate X Post", callback_data: `sub:xpost:1:${submission.id}` }];
+    return { inline_keyboard: [row1, row2] };
   }
 
   if (submission.status === "rejected") {
@@ -167,7 +334,7 @@ export function buildSubmissionInlineKeyboard(
     };
   }
 
-  const rows: { text: string; url?: string; callback_data?: string }[][] = [
+  const rows: TelegramInlineButton[][] = [
     [
       { text: "✅ Approve & Publish", callback_data: `sub:approve:${submission.id}` },
       { text: "🔥 Approve + Hot", callback_data: `sub:apphot:${submission.id}` },
@@ -263,7 +430,11 @@ export async function registerTelegramWebhook(origin: string) {
     throw new Error("Set TELEGRAM_BOT_TOKEN and TELEGRAM_ADMIN_CHAT_ID in your environment variables first.");
   }
 
-  const base = (origin && origin.startsWith("https://") ? origin : PRIMARY_ORIGIN).replace(/\/$/, "");
+  // Always prefer canonical non-redirecting host for Telegram webhooks (www -> apex 308 breaks Telegram POSTs)
+  const cleanOrigin = origin && origin.startsWith("https://") && !origin.includes("www.pickmacapps.store")
+    ? origin
+    : PRIMARY_ORIGIN;
+  const base = cleanOrigin.replace(/\/$/, "");
   const webhookUrl = `${base}/api/telegram/webhook`;
   const secretToken = getTelegramWebhookSecret();
 

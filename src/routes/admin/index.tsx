@@ -695,21 +695,36 @@ function AdminHome() {
             </form>
           </div>
           <div className="mt-4 space-y-1.5 rounded-xl border border-line bg-stone-50/70 p-3.5 text-xs text-body">
-            <p className="font-semibold text-ink">Environment Variables (Vercel / Server):</p>
-            <ul className="space-y-1 text-muted">
-              <li>
-                <code className="text-ink">TELEGRAM_BOT_TOKEN</code> — Bot token from <code>@BotFather</code>
-              </li>
-              <li>
-                <code className="text-ink">TELEGRAM_ADMIN_CHAT_ID</code> — Your numeric Telegram Chat ID (send <code>/id</code> to bot)
-              </li>
-              <li>
-                <code className="text-ink">TELEGRAM_WEBHOOK_SECRET</code> — <em>Optional</em> custom webhook verification secret
-              </li>
-            </ul>
-            <p className="pt-1 text-[11px] text-muted">
-              Webhook endpoint: <code className="text-ink">/api/telegram/webhook</code> · Commands: <code>/start</code>, <code>/id</code>, <code>/pending</code>
-            </p>
+            {data.stats.telegramConfigured ? (
+              <>
+                <p className="font-semibold text-emerald-700">✅ Bot Token & Admin Chat ID active</p>
+                <p className="text-muted leading-relaxed">
+                  Notifications, live badge checks, 1-tap approval, and 5 X post templates are ready.{" "}
+                  <code className="text-ink">TELEGRAM_WEBHOOK_SECRET</code> is optional (auto-managed).
+                </p>
+                <p className="pt-0.5 text-[11px] text-muted">
+                  Webhook: <code className="text-ink">/api/telegram/webhook</code> · Commands: <code>/start</code>, <code>/id</code>, <code>/pending</code>
+                </p>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold text-ink">Environment Variables (Vercel / Server):</p>
+                <ul className="space-y-1 text-muted">
+                  <li>
+                    <code className="text-ink">TELEGRAM_BOT_TOKEN</code> — Bot token from <code>@BotFather</code>
+                  </li>
+                  <li>
+                    <code className="text-ink">TELEGRAM_ADMIN_CHAT_ID</code> — Your numeric Telegram Chat ID (send <code>/id</code> to bot)
+                  </li>
+                  <li>
+                    <code className="text-ink">TELEGRAM_WEBHOOK_SECRET</code> — <em>Optional</em> (auto-generated if omitted)
+                  </li>
+                </ul>
+                <p className="pt-1 text-[11px] text-muted">
+                  Webhook endpoint: <code className="text-ink">/api/telegram/webhook</code> · Commands: <code>/start</code>, <code>/id</code>, <code>/pending</code>
+                </p>
+              </>
+            )}
           </div>
         </section>
       </div>
