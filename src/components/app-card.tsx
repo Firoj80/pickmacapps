@@ -23,6 +23,24 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
   }, [optimizedCover]);
 
   const showCover = Boolean(coverSrcActive) && !coverFailed;
+  const isGold = choice && app.featuredTier === "article";
+  const isBlue = choice && app.featuredTier !== "article";
+  const isHotCard = Boolean(app.isHot) && !choice;
+  const isAnimated = isGold || isBlue || isHotCard;
+
+  const outerFrameClass = isGold
+    ? "relative overflow-hidden rounded-2xl bg-amber-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(245,158,11,0.38)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(245,158,11,0.48)] dark:bg-amber-500/25"
+    : isBlue
+    ? "relative overflow-hidden rounded-2xl bg-sky-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(14,165,233,0.34)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(14,165,233,0.45)] dark:bg-sky-500/25"
+    : isHotCard
+    ? "relative overflow-hidden rounded-2xl bg-rose-400/40 p-[2px] shadow-[0_6px_24px_-8px_rgba(244,63,94,0.32)] transition-all duration-300 group-hover:shadow-[0_14px_32px_-6px_rgba(244,63,94,0.42)] dark:bg-rose-500/25"
+    : "relative overflow-hidden rounded-2xl border border-line/60 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)]";
+
+  const waveRingClass = isGold
+    ? "card-wave-ring card-wave-ring-gold"
+    : isBlue
+    ? "card-wave-ring card-wave-ring-blue"
+    : "card-wave-ring card-wave-ring-hot";
 
   return (
     <Link
@@ -30,89 +48,109 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
       params={{ slug: app.slug }}
       className="group flex flex-col transition-transform duration-200"
     >
-      {/* Visual Screen Preview Card (Adaptive canvas with zero cropping) */}
-      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line/60 bg-surface-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)] dark:bg-[#141416]">
-        {showCover ? (
-          <>
-            <img
-              alt=""
-              aria-hidden="true"
-              src={coverSrcActive}
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-              className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-125"
-            />
-            <img
-              alt={`${app.name} preview`}
-              src={coverSrcActive}
-              loading={priority ? "eager" : "lazy"}
-              decoding={priority ? "sync" : "async"}
-              fetchPriority={priority ? "high" : "auto"}
-              width={800}
-              height={450}
-              onError={() => {
-                if (coverSrcActive !== cover && cover) {
-                  setCoverSrcActive(cover);
-                } else {
-                  setCoverFailed(true);
-                }
-              }}
-              className="relative z-10 h-full w-full object-contain transition duration-300"
-            />
-          </>
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center bg-[#0f0f11] p-6 text-center dark:bg-[#141416]">
-            <img
-              alt={`${app.name} icon`}
-              src={optimizedIcon}
-              loading={priority ? "eager" : "lazy"}
-              decoding="async"
-              width={64}
-              height={64}
-              onError={(event) => {
-                if (event.currentTarget.src !== app.icon) {
-                  event.currentTarget.src = app.icon;
-                } else {
-                  event.currentTarget.src = "/site-favicon.svg";
-                }
-              }}
-              className="h-16 w-16 rounded-[18px] object-cover shadow-lg ring-1 ring-white/10"
-            />
-            <p className="mt-3 text-sm font-semibold text-white/90">{app.name}</p>
-            <p className="mt-1 line-clamp-2 max-w-[240px] text-xs text-white/60">{app.tagline}</p>
-          </div>
-        )}
-
-        {/* Badges on Preview Canvas (Top-Left) */}
-        <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5">
-          {app.isHot && !choice ? (
-            <div className="flex items-center gap-1 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10.5px] font-bold text-white shadow-xs backdrop-blur-md">
-              <span>🔥 Hot</span>
+      {/* Visual Screen Preview Card (Adaptive canvas with animated tier border wave) */}
+      <div className={outerFrameClass}>
+        {isAnimated ? <div aria-hidden="true" className={waveRingClass} /> : null}
+        <div
+          className={`relative z-10 aspect-[16/9] overflow-hidden bg-surface-2 dark:bg-[#141416] ${
+            isAnimated ? "rounded-[14px]" : "rounded-2xl"
+          }`}
+        >
+          {isAnimated ? <div aria-hidden="true" className="card-wave-sheen z-15" /> : null}
+          {showCover ? (
+            <>
+              <img
+                alt=""
+                aria-hidden="true"
+                src={coverSrcActive}
+                loading={priority ? "eager" : "lazy"}
+                decoding="async"
+                onError={(event) => {
+                  event.currentTarget.style.display = "none";
+                }}
+                className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-125"
+              />
+              <img
+                alt={`${app.name} preview`}
+                src={coverSrcActive}
+                loading={priority ? "eager" : "lazy"}
+                decoding={priority ? "sync" : "async"}
+                fetchPriority={priority ? "high" : "auto"}
+                width={800}
+                height={450}
+                onError={() => {
+                  if (coverSrcActive !== cover && cover) {
+                    setCoverSrcActive(cover);
+                  } else {
+                    setCoverFailed(true);
+                  }
+                }}
+                className="relative z-10 h-full w-full object-contain transition duration-300"
+              />
+            </>
+          ) : (
+            <div className="flex h-full w-full flex-col items-center justify-center bg-[#0f0f11] p-6 text-center dark:bg-[#141416]">
+              <img
+                alt={`${app.name} icon`}
+                src={optimizedIcon}
+                loading={priority ? "eager" : "lazy"}
+                decoding="async"
+                width={64}
+                height={64}
+                onError={(event) => {
+                  if (event.currentTarget.src !== app.icon) {
+                    event.currentTarget.src = app.icon;
+                  } else {
+                    event.currentTarget.src = "/site-favicon.svg";
+                  }
+                }}
+                className="h-16 w-16 rounded-[18px] object-cover shadow-lg ring-1 ring-white/10"
+              />
+              <p className="mt-3 text-sm font-semibold text-white/90">{app.name}</p>
+              <p className="mt-1 line-clamp-2 max-w-[240px] text-xs text-white/60">{app.tagline}</p>
             </div>
-          ) : null}
+          )}
 
-          <span
-            className={`flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold tracking-tight shadow-xs backdrop-blur-md ${
-              app.pricing === "free"
-                ? "bg-emerald-600/90 text-white ring-1 ring-emerald-400/40"
-                : app.pricing === "freemium"
-                ? "bg-sky-600/90 text-white ring-1 ring-sky-400/40"
-                : "bg-black/65 text-white/90 ring-1 ring-white/20"
-            }`}
-          >
-            {pricingLabel[app.pricing] || "Free"}
-          </span>
-        </div>
+          {/* Badges on Preview Canvas (Top-Left) */}
+          <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5">
+            {isGold ? (
+              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2.5 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
+                ★ Featured
+              </span>
+            ) : isBlue ? (
+              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
+                ✦ Featured
+              </span>
+            ) : isHotCard ? (
+              <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-rose-300/40">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-85" />
+                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                </span>
+                <span>🔥 Hot</span>
+              </div>
+            ) : null}
 
-        {/* Top-Right Arrow Action Circle Indicator */}
-        <div className="absolute top-3 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
-          <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="7" y1="17" x2="17" y2="7" />
-            <polyline points="7 7 17 7 17 17" />
-          </svg>
+            <span
+              className={`flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold tracking-tight shadow-xs backdrop-blur-md ${
+                app.pricing === "free"
+                  ? "bg-emerald-600/90 text-white ring-1 ring-emerald-400/40"
+                  : app.pricing === "freemium"
+                  ? "bg-sky-600/90 text-white ring-1 ring-sky-400/40"
+                  : "bg-black/65 text-white/90 ring-1 ring-white/20"
+              }`}
+            >
+              {pricingLabel[app.pricing] || "Free"}
+            </span>
+          </div>
+
+          {/* Top-Right Arrow Action Circle Indicator */}
+          <div className="absolute top-3 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
+            <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="7" y1="17" x2="17" y2="7" />
+              <polyline points="7 7 17 7 17 17" />
+            </svg>
+          </div>
         </div>
       </div>
 

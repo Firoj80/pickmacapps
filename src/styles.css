@@ -181,8 +181,88 @@ html, body, a, button, select, input {
   word-break: break-word;
 }
 
+@keyframes card-wave-spin {
+  from {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes card-wave-sheen {
+  0%, 100% {
+    transform: translateX(-140%) skewX(-18deg);
+    opacity: 0;
+  }
+  18% {
+    opacity: 1;
+  }
+  52% {
+    transform: translateX(220%) skewX(-18deg);
+    opacity: 0;
+  }
+}
+
+.card-wave-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 200%;
+  aspect-ratio: 1 / 1;
+  pointer-events: none;
+  animation: card-wave-spin 5.5s linear infinite;
+  will-change: transform;
+}
+
+.card-wave-ring-gold {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 210deg,
+    #f59e0b 260deg,
+    #fef08a 305deg,
+    #d97706 340deg,
+    transparent 360deg
+  );
+}
+
+.card-wave-ring-blue {
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 210deg,
+    #0ea5e9 260deg,
+    #bae6fd 305deg,
+    #2563eb 340deg,
+    transparent 360deg
+  );
+}
+
+.card-wave-ring-hot {
+  animation-duration: 4.5s;
+  background: conic-gradient(
+    from 0deg,
+    transparent 0deg 210deg,
+    #f43f5e 260deg,
+    #fdba74 305deg,
+    #e11d48 340deg,
+    transparent 360deg
+  );
+}
+
+.card-wave-sheen {
+  position: absolute;
+  inset: 0;
+  width: 55%;
+  pointer-events: none;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.16), transparent);
+  animation: card-wave-sheen 6s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .card-silver::after,
+  .card-wave-ring,
+  .card-wave-sheen,
   .animate-ping,
   .rise,
   .shelf > * {
