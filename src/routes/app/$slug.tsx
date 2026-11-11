@@ -3,6 +3,7 @@ import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appPairs } from "@/lib/compare";
+import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -21,14 +22,18 @@ function appMetaDescription(app: AppItem): string {
 }
 
 export const Route = createFileRoute("/app/$slug")({
-  beforeLoad: ({ params, context }) => {
-    const found = publishedApps(context.directory).some((app) => app.slug === params.slug);
-    if (!found) throw notFound();
+  beforeLoad: async ({ params, context }) => {
+    const resolved = await resolveRouteDirectoryMatch(
+      context.directory,
+      (dir) => publishedApps(dir).some((app) => app.slug === params.slug),
+    );
+    if (!resolved.found) throw notFound();
+    return { directory: resolved.directory };
   },
   component: AppPage,
   notFoundComponent: () => <Missing title="App not found" body="That Mac app isn't in the directory." />,
   head: ({ params, matches }) => {
-    const app = publishedApps(matches[0]?.context.directory).find((item) => item.slug === params.slug);
+    const app = publishedApps(directoryFromMatches(matches)).find((item) => item.slug === params.slug);
     if (!app) {
       const missing = buildMetadata({
         title: pageCopy.notFound.title,

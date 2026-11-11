@@ -13,26 +13,34 @@ import { appIconUrl } from "@/lib/image-opt";
 import { compareGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
+import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 
 const ARCHIVE = "public, s-maxage=86400, stale-while-revalidate=604800";
 
 export const Route = createFileRoute("/compare/$slug")({
   headers: () => ({ "Cache-Control": ARCHIVE }),
-  beforeLoad: ({ params, context }) => {
-    const directory = context.directory;
-    const source = {
+  beforeLoad: async ({ params, context }) => {
+    const resolved = await resolveRouteDirectoryMatch(context.directory, (dir) => {
+      const hit = resolveCompareSlug(params.slug, {
+        apps: [...publishedApps(dir)],
+        posts: dir?.posts ?? [],
+      });
+      return hit.status !== "missing";
+    });
+    const directory = resolved.directory;
+    const hit = resolveCompareSlug(params.slug, {
       apps: [...publishedApps(directory)],
       posts: directory?.posts ?? [],
-    };
-    const hit = resolveCompareSlug(params.slug, source);
+    });
     if (hit.status === "redirect") throw redirect({ href: hit.to, statusCode: 308 });
     if (hit.status === "hub") throw redirect({ href: "/compare", statusCode: 308 });
     if (hit.status === "missing") throw notFound();
+    return { directory };
   },
   component: ComparePage,
   head: ({ params, matches }) => {
-    const directory = matches[0]?.context.directory;
+    const directory = directoryFromMatches(matches);
     const source = {
       apps: [...publishedApps(directory)],
       posts: directory?.posts ?? [],

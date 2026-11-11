@@ -1,89 +1,21 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { Missing } from "@/components/missing";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { buildMetadata, fetchSiteOrigin, originFrom, PRIMARY_ORIGIN } from "@/lib/seo";
-import { fetchDirectory } from "@/lib/directory.fn";
+import {
+  getCachedDirectory,
+  invalidateDirectoryCache,
+  seedDirectoryCache,
+  type DirectoryResult,
+} from "@/lib/directory-cache";
 import { pageCopy } from "@/lib/site";
 import { getStoredTheme, syncThemeToDom } from "@/lib/theme";
 import appCss from "../styles.css?url";
 
-// ---------------------------------------------------------------------------
-// Client-side directory cache (Stale-While-Revalidate)
-// ---------------------------------------------------------------------------
-// The root beforeLoad previously called fetchDirectory() and fetchSiteOrigin()
-// blocking the router on every navigation once a 15s timer expired.
-//
-// We cache the directory in module scope and return it synchronously on client
-// navigations (0ms response). Background revalidation occurs after 5 minutes
-// without blocking user clicks or route transitions.
-// ---------------------------------------------------------------------------
-const DIRECTORY_STALE_MS = 5 * 60 * 1000; // 5 minutes
-
-// --- Directory cache ---
-type DirectoryResult = Awaited<ReturnType<typeof fetchDirectory>>;
-let _directoryCache: DirectoryResult | null = null;
-let _directoryCachedAt = 0;
-let _directoryPromise: Promise<DirectoryResult | null> | null = null;
-
-export function invalidateDirectoryCache() {
-  _directoryCache = null;
-  _directoryCachedAt = 0;
-  _directoryPromise = null;
-}
-
-if (typeof window !== "undefined") {
-  (window as unknown as { __invalidateDirectoryCache?: () => void }).__invalidateDirectoryCache = invalidateDirectoryCache;
-}
-
-function getCachedDirectory(currentContextDirectory?: DirectoryResult | null): DirectoryResult | null | Promise<DirectoryResult | null> {
-  // Server-side: never share cache between requests
-  if (typeof window === "undefined") {
-    return fetchDirectory().catch(() => null);
-  }
-  // Client-side: if memory cache is empty but router context already has the directory (from SSR), seed it!
-  if (_directoryCache === null && currentContextDirectory) {
-    _directoryCache = currentContextDirectory;
-    _directoryCachedAt = Date.now();
-  }
-  // If we already have the directory in memory, RETURN IT IMMEDIATELY (0ms!)
-  if (_directoryCache !== null) {
-    const now = Date.now();
-    // Stale-while-revalidate: if older than 5 minutes, refresh in the background without blocking the user
-    if (now - _directoryCachedAt > DIRECTORY_STALE_MS && !_directoryPromise) {
-      _directoryPromise = fetchDirectory()
-        .then((result) => {
-          if (result) {
-            _directoryCache = result;
-            _directoryCachedAt = Date.now();
-          }
-          _directoryPromise = null;
-          return result;
-        })
-        .catch(() => {
-          _directoryPromise = null;
-          return _directoryCache;
-        });
-    }
-    return _directoryCache;
-  }
-  // Initial cold client fallback: fetch once and cache
-  if (_directoryPromise) return _directoryPromise;
-  _directoryPromise = fetchDirectory()
-    .then((result) => {
-      _directoryCache = result;
-      _directoryCachedAt = Date.now();
-      _directoryPromise = null;
-      return result;
-    })
-    .catch(() => {
-      _directoryPromise = null;
-      return _directoryCache;
-    });
-  return _directoryPromise;
-}
+export { invalidateDirectoryCache };
 
 // --- Origin cache ---
 function getCachedOrigin(): string | Promise<string> {
@@ -112,11 +44,23 @@ function NavigationProgressBar() {
 
 function Frame() {
   const path = useRouterState({ select: (state) => state.location.pathname });
+  const { directory } = Route.useRouteContext();
   const admin = path.startsWith("/admin");
+  const wasAdminRef = useRef(admin);
 
   useEffect(() => {
     syncThemeToDom(getStoredTheme(), path);
-  }, [path]);
+    if (wasAdminRef.current && !admin) {
+      invalidateDirectoryCache();
+    }
+    wasAdminRef.current = admin;
+  }, [path, admin]);
+
+  useEffect(() => {
+    if (!admin && directory) {
+      seedDirectoryCache(directory);
+    }
+  }, [admin, directory]);
 
   return (
     <>

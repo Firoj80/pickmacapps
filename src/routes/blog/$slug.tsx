@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { Missing } from "@/components/missing";
 import { getPost, posts } from "@/lib/catalog";
+import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 import { getGuideEnhancement } from "@/lib/guide-enhancements";
 import { guideGraph, jsonLdScript } from "@/lib/jsonld";
@@ -8,15 +9,18 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 export const Route = createFileRoute("/blog/$slug")({
-  beforeLoad: ({ params, context }) => {
-    const directory = context.directory;
-    const found = directory ? directory.posts.some((post) => post.slug === params.slug) : Boolean(getPost(params.slug));
-    if (!found) throw notFound();
+  beforeLoad: async ({ params, context }) => {
+    const resolved = await resolveRouteDirectoryMatch(
+      context.directory,
+      (dir) => (dir ? dir.posts.some((post) => post.slug === params.slug) : Boolean(getPost(params.slug))),
+    );
+    if (!resolved.found) throw notFound();
+    return { directory: resolved.directory };
   },
   component: BlogPost,
   notFoundComponent: () => <Missing title="Guide not found" body="That article isn't on the blog." />,
   head: ({ params, matches }) => {
-    const directory = matches[0]?.context.directory;
+    const directory = directoryFromMatches(matches);
     const post = directory ? directory.posts.find((item) => item.slug === params.slug) : getPost(params.slug);
     if (!post) {
       const missing = buildMetadata({

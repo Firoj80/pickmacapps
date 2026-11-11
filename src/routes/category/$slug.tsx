@@ -1,6 +1,7 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { appPriorityWeight, posts } from "@/lib/catalog";
+import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -44,17 +45,22 @@ function categoryFrom(
 }
 
 export const Route = createFileRoute("/category/$slug")({
-  beforeLoad: ({ params, context }) => {
+  beforeLoad: async ({ params, context }) => {
     const slug = normalizeCategorySlug(params.slug);
     if (slug !== params.slug) {
       throw redirect({ to: "/category/$slug", params: { slug } });
     }
-    if (!categoryFrom(context.directory, slug)) throw notFound();
+    const resolved = await resolveRouteDirectoryMatch(
+      context.directory,
+      (dir) => Boolean(categoryFrom(dir, slug)),
+    );
+    if (!resolved.found) throw notFound();
+    return { directory: resolved.directory };
   },
   component: CategoryPage,
   head: ({ params, matches }) => {
     const slug = normalizeCategorySlug(params.slug);
-    const directory = matches[0]?.context.directory;
+    const directory = directoryFromMatches(matches);
     const category = categoryFrom(directory, slug);
     const rawListed = publishedApps(directory).filter((app) => normalizeCategorySlug(app.category) === slug);
     const listed = [...rawListed].sort((a, b) => {
