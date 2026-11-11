@@ -42,11 +42,19 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
     ? "card-wave-ring card-wave-ring-blue"
     : "card-wave-ring card-wave-ring-hot";
 
+  const hoverWaveClass = isGold
+    ? "card-hover-wave card-hover-wave-gold z-15"
+    : isBlue
+    ? "card-hover-wave card-hover-wave-blue z-15"
+    : isHotCard
+    ? "card-hover-wave card-hover-wave-hot z-15"
+    : "card-hover-wave card-hover-wave-neutral z-15";
+
   return (
     <Link
       to="/app/$slug"
       params={{ slug: app.slug }}
-      className="group flex flex-col transition-transform duration-200"
+      className="group flex flex-col transition-transform duration-300 ease-out hover:-translate-y-0.5"
     >
       {/* Visual Screen Preview Card (Adaptive canvas with animated tier border wave) */}
       <div className={outerFrameClass}>
@@ -56,7 +64,7 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
             isAnimated ? "rounded-[14px]" : "rounded-2xl"
           }`}
         >
-          {isAnimated ? <div aria-hidden="true" className="card-wave-sheen z-15" /> : null}
+          <div aria-hidden="true" className={hoverWaveClass} />
           {showCover ? (
             <>
               <img
