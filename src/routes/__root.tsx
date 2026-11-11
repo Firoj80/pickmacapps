@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { Missing } from "@/components/missing";
@@ -6,6 +7,7 @@ import { SiteHeader } from "@/components/site-header";
 import { buildMetadata, fetchSiteOrigin, originFrom, PRIMARY_ORIGIN } from "@/lib/seo";
 import { fetchDirectory } from "@/lib/directory.fn";
 import { pageCopy } from "@/lib/site";
+import { getStoredTheme, syncThemeToDom } from "@/lib/theme";
 import appCss from "../styles.css?url";
 
 // ---------------------------------------------------------------------------
@@ -91,7 +93,7 @@ function getCachedOrigin(): string | Promise<string> {
   return fetchSiteOrigin().catch(() => PRIMARY_ORIGIN);
 }
 
-const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";d.dataset.theme=t;d.classList.toggle("dark",t==="dark"||(t==="system"&&m.matches))}a();m.addEventListener("change",a)}catch(e){}})()`;
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var adm=/^\\/admin(\\/|$)/.test(location.pathname);var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";var dark=!adm&&(t==="dark"||(t==="system"&&m.matches));d.dataset.theme=adm?"light":t;d.classList.toggle("dark",dark);var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content",dark?"#08090a":"#ffffff")}a();m.addEventListener("change",a)}catch(e){}})()`;
 
 const MINILYTICS_HOST = "https://minilytics.firojstats.workers.dev";
 const MINILYTICS_ADMIN_GUARD = `(function(){try{var w=window,l=w.location,u="${MINILYTICS_HOST}";if(w.__mlAdminGuard)return;w.__mlAdminGuard=1;function isAdm(){return /^\\/admin(\\/|$)/.test(l.pathname)}var origFetch=w.fetch;if(origFetch){w.fetch=function(input){var target=typeof input==="string"?input:input&&typeof input==="object"&&"url"in input?String(input.url):"";if(isAdm()&&target.indexOf(u)===0)return Promise.resolve(new Response(null,{status:204}));return origFetch.apply(this,arguments)}}var nav=w.navigator;if(nav&&nav.sendBeacon){var origBeacon=nav.sendBeacon.bind(nav);nav.sendBeacon=function(target){if(isAdm()&&typeof target==="string"&&target.indexOf(u)===0)return true;return origBeacon.apply(nav,arguments)}}}catch(e){}})()`;
@@ -111,6 +113,11 @@ function NavigationProgressBar() {
 function Frame() {
   const path = useRouterState({ select: (state) => state.location.pathname });
   const admin = path.startsWith("/admin");
+
+  useEffect(() => {
+    syncThemeToDom(getStoredTheme(), path);
+  }, [path]);
+
   return (
     <>
       <NavigationProgressBar />
@@ -164,6 +171,7 @@ export const Route = createRootRoute({
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
         { name: "theme-color", content: "#ffffff" },
+        { name: "color-scheme", content: "light dark" },
         ...((process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)
           ? [{ name: "google-site-verification", content: (process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)! }]
           : []),

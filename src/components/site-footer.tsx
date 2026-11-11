@@ -1,4 +1,5 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
+import { FooterThemeSwitcher } from "@/components/theme-toggle";
 import { featuredTierWeight, isEditorChoice } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appIconUrl } from "@/lib/image-opt";
@@ -190,8 +191,9 @@ export function SiteFooter() {
 
         {/* Bottom Bar matching reference layout */}
         <div className="mt-14 flex flex-col gap-4 border-t border-line/70 pt-8 sm:flex-row sm:items-center sm:justify-between text-[12px] text-muted">
-          <div>
+          <div className="flex flex-wrap items-center gap-4">
             <span>© {new Date().getFullYear()} PickMacApps. All rights reserved.</span>
+            <FooterThemeSwitcher />
           </div>
 
           <p className="max-w-xl text-[11.5px] leading-relaxed text-muted sm:text-right">

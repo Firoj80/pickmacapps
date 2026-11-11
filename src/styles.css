@@ -21,17 +21,17 @@
 
 html.dark {
   color-scheme: dark;
-  --color-canvas: #0c0c0d;
-  --color-surface: #141416;
-  --color-surface-2: #1c1c1f;
-  --color-line: #2a2a2e;
-  --color-line-2: #3a3a40;
-  --color-ink: #f5f5f6;
-  --color-body: #c7c7cc;
-  --color-muted: #9a9aa3;
-  --color-faint: #6e6e76;
-  --color-accent: #f5f5f6;
-  --color-grid: #ffffff0d;
+  --color-canvas: #08090a;
+  --color-surface: #101114;
+  --color-surface-2: #16171b;
+  --color-line: #1d1f24;
+  --color-line-2: #2a2d34;
+  --color-ink: #f4f5f7;
+  --color-body: #b4b8c0;
+  --color-muted: #7b8089;
+  --color-faint: #52565e;
+  --color-accent: #3b82f6;
+  --color-grid: #ffffff07;
 }
 
 ::selection {

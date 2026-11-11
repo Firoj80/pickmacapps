@@ -60,7 +60,7 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
       <div className={outerFrameClass}>
         {isAnimated ? <div aria-hidden="true" className={waveRingClass} /> : null}
         <div
-          className={`relative z-10 aspect-[16/9] overflow-hidden bg-surface-2 dark:bg-[#141416] ${
+          className={`relative z-10 aspect-[16/9] overflow-hidden bg-surface-2 dark:bg-[#101114] ${
             isAnimated ? "rounded-[14px]" : "rounded-2xl"
           }`}
         >

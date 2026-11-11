@@ -246,7 +246,7 @@ function AppPage() {
 
             {/* App Screenshot / Demo */}
             {app.demo ? (
-              <div className="mt-8 overflow-hidden rounded-xl border border-line bg-surface-2/40 dark:bg-[#141416]">
+              <div className="mt-8 overflow-hidden rounded-xl border border-line bg-surface-2/40 dark:bg-[#101114]">
                 {app.demo.endsWith(".mp4") ? (
                   <video src={app.demo} controls muted loop playsInline className="block h-auto max-h-[580px] w-full object-contain" />
                 ) : (

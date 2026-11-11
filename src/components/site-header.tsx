@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { useState } from "react";
+import { HeaderThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
@@ -33,8 +34,8 @@ export function SiteHeader() {
           </nav>
         </div>
 
-        {/* Right side: Sponsor link and Submit Action */}
-        <div className="flex items-center gap-4">
+        {/* Right side: Sponsor link, Theme Switcher, and Submit Action */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
           <Link
             to="/sponsor"
             data-ml-goal="pricing_cta"
@@ -45,6 +46,8 @@ export function SiteHeader() {
             </span>
             <span>Sponsor</span>
           </Link>
+
+          <HeaderThemeToggle />
 
           {/* Submit App Primary Action Button */}
           <Link
