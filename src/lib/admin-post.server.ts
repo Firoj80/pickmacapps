@@ -16,6 +16,7 @@ import {
   setPackagePrice,
   toggleAppHot,
 } from "@/lib/directory.server";
+import { registerTelegramWebhook } from "@/lib/telegram.server";
 
 function redirect(location: string, cookie?: string) {
   const headers = new Headers({ location });
@@ -137,6 +138,10 @@ export async function handleAdminPost(request: Request) {
     if (action === "badges") {
       await runBadgeChecks();
       return redirect("/admin?saved=badges");
+    }
+    if (action === "telegram") {
+      await registerTelegramWebhook(url.origin);
+      return redirect("/admin?saved=telegram");
     }
     if (action === "approve") {
       await approveSubmission(String(form.get("id") ?? ""));

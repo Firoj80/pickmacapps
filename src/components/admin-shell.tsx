@@ -58,6 +58,7 @@ const savedCopy: Record<string, string> = {
   rejected: "Submission rejected.",
   published_all: "All unpublished listings have been published.",
   created: "New listing created and published successfully.",
+  telegram: "Telegram webhook connected and test message sent.",
 };
 
 export function Notice({ error, saved }: { error: string; saved: string }) {

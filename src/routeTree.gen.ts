@@ -45,6 +45,7 @@ import { Route as ApiAdminSplatRouteImport } from './routes/api/admin/$'
 import { Route as ApiCronBadgesRouteImport } from './routes/api/cron/badges'
 import { Route as ApiDodoWebhookRouteImport } from './routes/api/dodo/webhook'
 import { Route as ApiMdSplatRouteImport } from './routes/api/md/$'
+import { Route as ApiTelegramWebhookRouteImport } from './routes/api/telegram/webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -226,6 +227,11 @@ const ApiMdSplatRoute = ApiMdSplatRouteImport.update({
   path: '/api/md/$',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTelegramWebhookRoute = ApiTelegramWebhookRouteImport.update({
+  id: '/api/telegram/webhook',
+  path: '/api/telegram/webhook',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/api/cron/badges': typeof ApiCronBadgesRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
   '/admin/apps/': typeof AdminAppsIndexRoute
   '/admin/guides/': typeof AdminGuidesIndexRoute
 }
@@ -300,6 +307,7 @@ export interface FileRoutesByTo {
   '/api/cron/badges': typeof ApiCronBadgesRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
   '/admin/apps': typeof AdminAppsIndexRoute
   '/admin/guides': typeof AdminGuidesIndexRoute
 }
@@ -339,6 +347,7 @@ export interface FileRoutesById {
   '/api/cron/badges': typeof ApiCronBadgesRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
+  '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
   '/admin/apps/': typeof AdminAppsIndexRoute
   '/admin/guides/': typeof AdminGuidesIndexRoute
 }
@@ -379,6 +388,7 @@ export interface FileRouteTypes {
     | '/api/cron/badges'
     | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/api/telegram/webhook'
     | '/admin/apps/'
     | '/admin/guides/'
   fileRoutesByTo: FileRoutesByTo
@@ -417,6 +427,7 @@ export interface FileRouteTypes {
     | '/api/cron/badges'
     | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/api/telegram/webhook'
     | '/admin/apps'
     | '/admin/guides'
   id:
@@ -455,6 +466,7 @@ export interface FileRouteTypes {
     | '/api/cron/badges'
     | '/api/dodo/webhook'
     | '/api/md/$'
+    | '/api/telegram/webhook'
     | '/admin/apps/'
     | '/admin/guides/'
   fileRoutesById: FileRoutesById
@@ -494,6 +506,7 @@ export interface RootRouteChildren {
   ApiCronBadgesRoute: typeof ApiCronBadgesRoute
   ApiDodoWebhookRoute: typeof ApiDodoWebhookRoute
   ApiMdSplatRoute: typeof ApiMdSplatRoute
+  ApiTelegramWebhookRoute: typeof ApiTelegramWebhookRoute
   AdminAppsIndexRoute: typeof AdminAppsIndexRoute
   AdminGuidesIndexRoute: typeof AdminGuidesIndexRoute
 }
@@ -752,6 +765,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMdSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/telegram/webhook': {
+      id: '/api/telegram/webhook'
+      path: '/api/telegram/webhook'
+      fullPath: '/api/telegram/webhook'
+      preLoaderRoute: typeof ApiTelegramWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -790,6 +810,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiCronBadgesRoute: ApiCronBadgesRoute,
   ApiDodoWebhookRoute: ApiDodoWebhookRoute,
   ApiMdSplatRoute: ApiMdSplatRoute,
+  ApiTelegramWebhookRoute: ApiTelegramWebhookRoute,
   AdminAppsIndexRoute: AdminAppsIndexRoute,
   AdminGuidesIndexRoute: AdminGuidesIndexRoute,
 }

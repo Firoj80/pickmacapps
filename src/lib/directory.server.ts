@@ -6,6 +6,7 @@ import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
 import { cleanXHandle } from "@/lib/metadata.server";
+import { isTelegramConfigured, notifyTelegramSubmission, type TelegramSubmissionInfo } from "@/lib/telegram.server";
 import type { AppItem, FeaturedTier, Post, Pricing } from "@/lib/catalog";
 
 type AppRow = {
@@ -581,6 +582,7 @@ export async function adminStats() {
     guides: guides.filter((guide) => guide.status === "published").length,
     draftGuides: guides.filter((guide) => guide.status !== "published").length,
     revenueCents: Number(revenue[0]?.cents ?? 0),
+    telegramConfigured: isTelegramConfigured(),
   };
 }
 
@@ -935,6 +937,97 @@ export async function listSubmissions() {
   }>("select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, created_at from submissions order by created_at desc limit 100");
 }
 
+export async function getSubmissionById(id: string): Promise<TelegramSubmissionInfo | null> {
+  const sql = await directorySql();
+  const rows = await sql.query<{
+    id: string;
+    app_name: string;
+    website: string;
+    tagline: string;
+    email: string;
+    x_handle?: string;
+    plan: string;
+    tier?: string;
+    pricing?: string;
+    category?: string;
+    badge_ok: unknown;
+    status: string;
+    app_slug?: string | null;
+  }>(
+    `select s.id, s.app_name, s.website, s.tagline, s.email, coalesce(s.x_handle, '') as x_handle,
+            s.plan, coalesce(s.tier, 'featured') as tier, coalesce(s.pricing, '') as pricing,
+            coalesce(s.category, '') as category, s.badge_ok, s.status, a.slug as app_slug
+       from submissions s
+       left join apps a on a.id = s.app_id
+      where s.id = $1
+      limit 1`,
+    [id],
+  );
+  const row = rows[0];
+  if (!row) return null;
+  return {
+    id: row.id,
+    appName: row.app_name,
+    website: row.website,
+    tagline: row.tagline,
+    email: row.email,
+    xHandle: row.x_handle || undefined,
+    plan: row.plan,
+    tier: row.tier,
+    pricing: row.pricing || undefined,
+    category: row.category || undefined,
+    badgeOk: asBool(row.badge_ok),
+    status: row.status,
+    approvedSlug: row.app_slug || undefined,
+  };
+}
+
+export async function updateSubmissionBadgeStatus(id: string, badgeOk: boolean) {
+  const sql = await directorySql();
+  await sql.query("update submissions set badge_ok = $2 where id = $1", [id, badgeOk]);
+}
+
+export async function listPendingSubmissionsForTelegram(limit = 5): Promise<TelegramSubmissionInfo[]> {
+  const sql = await directorySql();
+  const rows = await sql.query<{
+    id: string;
+    app_name: string;
+    website: string;
+    tagline: string;
+    email: string;
+    x_handle?: string;
+    plan: string;
+    tier?: string;
+    pricing?: string;
+    category?: string;
+    badge_ok: unknown;
+    status: string;
+  }>(
+    `select id, app_name, website, tagline, email, coalesce(x_handle, '') as x_handle,
+            plan, coalesce(tier, 'featured') as tier, coalesce(pricing, '') as pricing,
+            coalesce(category, '') as category, badge_ok, status
+       from submissions
+      where status in ('pending', 'paid')
+      order by created_at desc
+      limit $1`,
+    [Math.min(Math.max(1, limit), 10)],
+  );
+  return rows.map((row) => ({
+    id: row.id,
+    appName: row.app_name,
+    website: row.website,
+    tagline: row.tagline,
+    email: row.email,
+    xHandle: row.x_handle || undefined,
+    plan: row.plan,
+    tier: row.tier,
+    pricing: row.pricing || undefined,
+    category: row.category || undefined,
+    badgeOk: asBool(row.badge_ok),
+    status: row.status,
+  }));
+}
+
 export async function rejectSubmission(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<{ id: string }>(
@@ -993,6 +1086,8 @@ export async function submitListing(
   }
   const sql = await directorySql();
   const id = randomUUID();
+  const cleanedPricing = cleanPricing(input.pricing);
+  const initialStatus = plan === "choice" ? "awaiting_payment" : "pending";
   await sql.query(
     `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category)
      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
@@ -1006,15 +1101,34 @@ export async function submitListing(
       plan,
       tier,
       plan === "free",
-      plan === "choice" ? "awaiting_payment" : "pending",
+      initialStatus,
       description,
       icon,
       demo,
-      cleanPricing(input.pricing),
+      cleanedPricing,
       category.slug,
     ],
   );
-  if (plan === "free") return { ok: true as const, message: "Submitted. It stays pending until an admin approves it." };
+  const telegramInfo: TelegramSubmissionInfo = {
+    id,
+    appName: name,
+    website,
+    tagline,
+    email,
+    xHandle,
+    plan,
+    tier,
+    pricing: cleanedPricing,
+    category: category.name,
+    badgeOk: plan === "free",
+    status: initialStatus,
+  };
+  if (plan === "free") {
+    await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
+      console.error("[telegram] notify free submission failed:", err);
+    });
+    return { ok: true as const, message: "Submitted. It stays pending until an admin approves it." };
+  }
   try {
     const checkout = await createChoiceCheckout({
       submissionId: id,
@@ -1034,6 +1148,9 @@ export async function submitListing(
         [randomUUID(), id, checkout.paymentId, amountCents],
       );
     }
+    await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
+      console.error("[telegram] notify paid checkout failed:", err);
+    });
     return { ok: true as const, checkoutUrl: checkout.checkoutUrl, message: "Continue to checkout." };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Checkout could not be started.";
@@ -1063,9 +1180,15 @@ export async function markPaymentPaid(input: { eventId: string; submissionId: st
     );
   }
   await sql.query("insert into webhook_events (id) values ($1)", [input.eventId]);
+  const paidSubmission = await getSubmissionById(input.submissionId);
+  if (paidSubmission) {
+    await notifyTelegramSubmission(paidSubmission, "payment_succeeded").catch((err) => {
+      console.error("[telegram] notify paid confirmation failed:", err);
+    });
+  }
 }
 
-export async function approveSubmission(id: string) {
+export async function approveSubmission(id: string, options?: { makeHot?: boolean }) {
   const sql = await directorySql();
   const rows = await sql.query<{
     id: string;
@@ -1117,11 +1240,12 @@ export async function approveSubmission(id: string) {
   };
   const isChoice = submission.plan === "choice";
   const tier = isChoice ? (submission.tier === "article" ? "article" : "featured") : null;
+  const makeHot = Boolean(options?.makeHot);
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, demo, status, submitter_email, submitter_x, is_user_submitted
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,'published',$15,$16,true)`,
+      editor_choice, featured_tier, featured_until, is_hot, demo, status, submitter_email, submitter_x, is_user_submitted
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,$15,'published',$16,$17,true)`,
     [
       appId,
       submission.app_name,
@@ -1136,6 +1260,7 @@ export async function approveSubmission(id: string) {
       category.emoji,
       isChoice,
       tier,
+      makeHot,
       submission.demo || "",
       submission.email,
       submission.x_handle || "",
@@ -1143,6 +1268,7 @@ export async function approveSubmission(id: string) {
   );
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
   await audit(sql, "approve", slug, submission.plan);
+  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug };
 }
 
 export async function runBadgeChecks() {
