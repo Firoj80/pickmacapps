@@ -283,11 +283,11 @@ function EditAppForm({ app }: { app: EditAppData }) {
               </div>
             </div>
             {demo && (
-              <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface">
+              <div className="mt-3 overflow-hidden rounded-lg border border-line bg-surface-2/40 dark:bg-[#141416]">
                 <img
                   src={demo}
                   alt="Demo screenshot"
-                  className="max-h-40 w-full object-cover"
+                  className="max-h-48 w-full object-contain"
                   onError={(e) => {
                     (e.currentTarget as HTMLElement).style.display = "none";
                   }}

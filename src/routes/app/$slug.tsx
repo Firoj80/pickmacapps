@@ -246,9 +246,9 @@ function AppPage() {
 
             {/* App Screenshot / Demo */}
             {app.demo ? (
-              <div className="mt-8 overflow-hidden rounded-xl border border-line bg-surface">
+              <div className="mt-8 overflow-hidden rounded-xl border border-line bg-surface-2/40 dark:bg-[#141416]">
                 {app.demo.endsWith(".mp4") ? (
-                  <video src={app.demo} controls muted loop playsInline className="aspect-[16/10] w-full object-cover" />
+                  <video src={app.demo} controls muted loop playsInline className="block h-auto max-h-[580px] w-full object-contain" />
                 ) : (
                   <img
                     alt={`${app.name} screenshot`}
@@ -256,7 +256,7 @@ function AppPage() {
                     loading="lazy"
                     decoding="async"
                     width={800}
-                    height={500}
+                    height={450}
                     onError={(e) => {
                       if (e.currentTarget.src !== app.demo) {
                         e.currentTarget.src = app.demo;
@@ -264,7 +264,7 @@ function AppPage() {
                         (e.currentTarget as HTMLElement).style.display = "none";
                       }
                     }}
-                    className="aspect-[16/10] w-full object-cover"
+                    className="block h-auto max-h-[580px] w-full object-contain"
                   />
                 )}
               </div>

@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { addedLabel, isEditorChoice, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -14,6 +14,15 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
   const cover = coverSrc(app.demo);
   const optimizedCover = appCoverUrl(cover);
   const optimizedIcon = appIconUrl(app.icon);
+  const [coverSrcActive, setCoverSrcActive] = useState(optimizedCover);
+  const [coverFailed, setCoverFailed] = useState(false);
+
+  useEffect(() => {
+    setCoverSrcActive(optimizedCover);
+    setCoverFailed(false);
+  }, [optimizedCover]);
+
+  const showCover = Boolean(coverSrcActive) && !coverFailed;
 
   return (
     <Link
@@ -21,28 +30,41 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
       params={{ slug: app.slug }}
       className="group flex flex-col transition-transform duration-200"
     >
-      {/* Visual Screen Preview Card (Black/Dark Canvas with rounded corners) */}
-      <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-line/60 bg-[#0f0f11] shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)] dark:bg-[#141416]">
-        {cover ? (
-          <img
-            alt={`${app.name} preview`}
-            src={optimizedCover}
-            loading={priority ? "eager" : "lazy"}
-            decoding={priority ? "sync" : "async"}
-            fetchPriority={priority ? "high" : "auto"}
-            width={800}
-            height={500}
-            onError={(event) => {
-              if (event.currentTarget.src !== cover) {
-                event.currentTarget.src = cover;
-              } else {
+      {/* Visual Screen Preview Card (Adaptive canvas with zero cropping) */}
+      <div className="relative aspect-[16/9] overflow-hidden rounded-2xl border border-line/60 bg-surface-2 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)] dark:bg-[#141416]">
+        {showCover ? (
+          <>
+            <img
+              alt=""
+              aria-hidden="true"
+              src={coverSrcActive}
+              loading={priority ? "eager" : "lazy"}
+              decoding="async"
+              onError={(event) => {
                 event.currentTarget.style.display = "none";
-              }
-            }}
-            className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.02]"
-          />
+              }}
+              className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-125"
+            />
+            <img
+              alt={`${app.name} preview`}
+              src={coverSrcActive}
+              loading={priority ? "eager" : "lazy"}
+              decoding={priority ? "sync" : "async"}
+              fetchPriority={priority ? "high" : "auto"}
+              width={800}
+              height={450}
+              onError={() => {
+                if (coverSrcActive !== cover && cover) {
+                  setCoverSrcActive(cover);
+                } else {
+                  setCoverFailed(true);
+                }
+              }}
+              className="relative z-10 h-full w-full object-contain transition duration-300"
+            />
+          </>
         ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center p-6 text-center">
+          <div className="flex h-full w-full flex-col items-center justify-center bg-[#0f0f11] p-6 text-center dark:bg-[#141416]">
             <img
               alt={`${app.name} icon`}
               src={optimizedIcon}
@@ -65,7 +87,7 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
         )}
 
         {/* Badges on Preview Canvas (Top-Left) */}
-        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-1.5">
+        <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5">
           {app.isHot && !choice ? (
             <div className="flex items-center gap-1 rounded-full bg-rose-600/90 px-2 py-0.5 text-[10.5px] font-bold text-white shadow-xs backdrop-blur-md">
               <span>🔥 Hot</span>
@@ -86,7 +108,7 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
         </div>
 
         {/* Top-Right Arrow Action Circle Indicator */}
-        <div className="absolute top-3 right-3 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
+        <div className="absolute top-3 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
           <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="7" y1="17" x2="17" y2="7" />
             <polyline points="7 7 17 7 17 17" />
