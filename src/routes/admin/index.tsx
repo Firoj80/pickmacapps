@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, Pill, fieldClass, statusTone, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminHome, ensureAdminSession, getCachedAdminHome } from "@/lib/directory.fn";
@@ -34,14 +34,6 @@ function AdminHome() {
   const data = Route.useLoaderData();
   const notice = useAdminNotice();
   const [activeTab, setActiveTab] = useState<"all" | "pending" | "paid">("all");
-
-  useEffect(() => {
-    window.minilytics?.("identify", {
-      user_id: "admin",
-      email: "admin@pickmacapps.store",
-      name: "Admin",
-    });
-  }, []);
 
   const waiting = data.submissions.filter((item) => item.status === "pending" || item.status === "paid").length;
   const filteredSubmissions = data.submissions.filter((item) => {

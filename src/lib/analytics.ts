@@ -13,11 +13,15 @@ declare global {
   }
 }
 
+function isAdminRoute(): boolean {
+  return typeof window !== "undefined" && /^\/admin(\/|$)/.test(window.location.pathname);
+}
+
 /**
  * Retrieve visitor and session attribution IDs from Minilytics client.
  */
 export function getAttribution(): { ml_visitor_id?: string; ml_session_id?: string } {
-  if (typeof window === "undefined") return {};
+  if (typeof window === "undefined" || isAdminRoute()) return {};
   try {
     return window.minilytics?.attribution?.() ?? {};
   } catch (err) {
@@ -53,7 +57,7 @@ export function appendAttributionToUrl(targetUrl: string): string {
  * e.g. trackGoal("signup_completed", { plan: "featured" })
  */
 export function trackGoal(goal: string, properties?: Record<string, unknown>): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || isAdminRoute()) return;
   try {
     window.minilytics?.("goal", goal, properties);
   } catch (err) {
@@ -66,7 +70,7 @@ export function trackGoal(goal: string, properties?: Record<string, unknown>): v
  * e.g. identifyUser({ user_id: user.id, email: user.email, name: user.name })
  */
 export function identifyUser(user: { user_id?: string; email?: string; name?: string; [key: string]: unknown }): void {
-  if (typeof window === "undefined") return;
+  if (typeof window === "undefined" || isAdminRoute()) return;
   try {
     window.minilytics?.("identify", user);
   } catch (err) {
