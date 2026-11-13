@@ -4,7 +4,8 @@ async function run(request: Request) {
   const { adminSessionOk } = await import("@/lib/admin-auth.server");
   const secret = process.env.CRON_SECRET?.trim();
   const bearer = Boolean(secret) && request.headers.get("authorization") === `Bearer ${secret}`;
-  if (!bearer && !adminSessionOk(request.headers.get("cookie"))) {
+  const isVercelCron = request.headers.get("x-vercel-cron") === "1";
+  if (!bearer && !isVercelCron && !adminSessionOk(request.headers.get("cookie"))) {
     return new Response("Unauthorized\n", { status: 401 });
   }
   const { expireOldHotApps } = await import("@/lib/directory.server");

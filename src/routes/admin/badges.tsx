@@ -88,6 +88,7 @@ function BadgesAdminPage() {
                     <th className="px-5 py-3">App Name</th>
                     <th className="px-4 py-3">Website</th>
                     <th className="px-4 py-3">Badge Status</th>
+                    <th className="px-4 py-3">Directory Status</th>
                     <th className="px-4 py-3">Details</th>
                     <th className="px-5 py-3 text-right">Actions</th>
                   </tr>
@@ -114,6 +115,19 @@ function BadgesAdminPage() {
                         ) : (
                           <span className="inline-flex items-center gap-1 text-xs font-semibold text-rose-600">
                             <span>✕</span> {app.badgeStatus || "Missing"}
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-4 py-3.5">
+                        {app.status === "published" ? (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-bold text-emerald-700 ring-1 ring-emerald-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            Published (Live)
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 ring-1 ring-rose-200">
+                            <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                            Unpublished (Offline)
                           </span>
                         )}
                       </td>

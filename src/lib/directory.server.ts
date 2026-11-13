@@ -1523,32 +1523,64 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
 export async function runBadgeChecks() {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>(
-    "select * from apps where status = 'published' and editor_choice = false and is_user_submitted = true",
+    "select * from apps where status in ('published', 'unpublished') and editor_choice = false and is_user_submitted = true",
   );
-  const results: { slug: string; result: string; detail: string }[] = [];
+  const results: { slug: string; result: string; detail: string; action: "published" | "unpublished" | "unchanged" }[] = [];
   for (const row of rows) {
     const check = await checkBadgeOnPage(row.website);
     let result = "ok";
     let misses = 0;
-    if (!check.ok && check.message.includes("couldn't find")) {
-      result = "missing";
+    let newStatus = row.status;
+    let action: "published" | "unpublished" | "unchanged" = "unchanged";
+
+    if (!check.ok) {
+      result = check.message.includes("couldn't find") ? "missing" : "error";
       misses = Number(row.badge_misses) + 1;
-    } else if (!check.ok) {
-      result = "error";
-      misses = Number(row.badge_misses);
+      // Auto-unpublish if badge is not found
+      if (row.status === "published") {
+        newStatus = "unpublished";
+        action = "unpublished";
+        await audit(sql, "unpublish_badge", row.slug, `Auto-unpublished: PickMacApps badge not found (${check.message})`);
+      }
+    } else {
+      result = "ok";
+      misses = 0;
+      // Auto-republish if badge was restored on website
+      if (row.status === "unpublished") {
+        newStatus = "published";
+        action = "published";
+        await audit(sql, "republish_badge", row.slug, "Auto-republished: PickMacApps badge found on website");
+      }
     }
-    const unpublish = result === "missing" && misses >= 2;
+
     await sql.query(
-      `update apps set badge_status = $2, badge_misses = $3, badge_checked_at = now(), badge_detail = $4,
-        status = case when $5 then 'unpublished' else status end, updated_at = now()
-       where id = $1`,
-      [row.id, unpublish ? "missing" : result, result === "ok" ? 0 : misses, check.message, unpublish],
+      `update apps
+          set badge_status = $2,
+              badge_misses = $3,
+              badge_checked_at = now(),
+              badge_detail = $4,
+              status = $5,
+              updated_at = now()
+        where id = $1`,
+      [row.id, result, misses, check.message, newStatus],
     );
+
     await sql.query(
       "insert into badge_checks (id, app_id, result, detail) values ($1,$2,$3,$4)",
-      [randomUUID(), row.id, unpublish ? "unpublished" : result, check.message],
+      [randomUUID(), row.id, newStatus === "published" ? result : "unpublished", check.message],
     );
-    results.push({ slug: row.slug, result: unpublish ? "unpublished" : result, detail: check.message });
+
+    if (action !== "unchanged") {
+      try {
+        const { submitToIndexNow, urlsForAppChange } = await import("@/lib/indexnow");
+        const { PRIMARY_ORIGIN } = await import("@/lib/seo");
+        submitToIndexNow(PRIMARY_ORIGIN, urlsForAppChange(PRIMARY_ORIGIN, row.slug));
+      } catch (err) {
+        console.error("[badge-check] IndexNow submit failed:", err);
+      }
+    }
+
+    results.push({ slug: row.slug, result, detail: check.message, action });
   }
   return results;
 }
