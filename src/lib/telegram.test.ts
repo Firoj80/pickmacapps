@@ -1,11 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildConfirmationInlineKeyboard,
   buildSubmissionInlineKeyboard,
+  buildSubmitterConfirmationText,
   buildXPostInlineKeyboard,
   buildXPostTemplates,
   escapeTelegramHtml,
   formatSubmissionNotification,
+  formatSubmitterConfirmationMessage,
   formatXPostTelegramMessage,
   isAuthorizedTelegramSender,
   normalizeCreatorMention,
@@ -36,7 +39,7 @@ test("escapeTelegramHtml escapes HTML special characters", () => {
 });
 
 test("parseSubmissionCallbackData validates actions and stays under 64 bytes", () => {
-  for (const action of ["approve", "apphot", "reject", "badge", "nobadge"] as const) {
+  for (const action of ["approve", "apphot", "reject", "badge", "nobadge", "conf"] as const) {
     const raw = `sub:${action}:${sampleUuid}`;
     assert.ok(Buffer.byteLength(raw, "utf8") <= 64, `${raw} exceeds Telegram 64-byte callback limit`);
     assert.deepEqual(parseSubmissionCallbackData(raw), { action, submissionId: sampleUuid });
@@ -54,6 +57,8 @@ test("buildSubmissionInlineKeyboard returns interactive moderation buttons while
   assert.ok(allButtons.some((b) => b.callback_data === `sub:apphot:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:badge:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:reject:${sampleUuid}`));
+  assert.ok(allButtons.some((b) => b.callback_data === `sub:conf:${sampleUuid}`));
+  assert.ok(allButtons.some((b) => b.url === "https://x.com/focusbell"));
   assert.ok(allButtons.some((b) => b.url === "https://focusbell.app/"));
 
   // When badge is missing (badgeOk: false) on free listing: Approve is disabled
@@ -171,4 +176,29 @@ test("normalizeCreatorMention and 5 X post templates include app, creator, tagli
   const buttons = kb.inline_keyboard.flat();
   assert.ok(buttons.some((b) => b.text === "• 2 •" && b.callback_data === `sub:xpost:2:${sampleUuid}`));
   assert.ok(buttons.some((b) => b.url?.startsWith("https://x.com/intent/tweet?text=")));
+});
+
+test("buildSubmitterConfirmationText and formatSubmitterConfirmationMessage contain greeting, dashboard URL, and mini-dashboard feature bullets", () => {
+  const customSubmission: TelegramSubmissionInfo = {
+    ...baseSubmission,
+    dashboardToken: "secret-token-1234",
+  };
+  const text = buildSubmitterConfirmationText(customSubmission);
+  assert.ok(text.includes("Hey FocusBell <Pro> Dev 👋"));
+  assert.ok(text.includes("https://pickmacapps.store/dashboard/secret-token-1234"));
+  assert.ok(text.includes("Track real-time App Card clicks and impressions"));
+  assert.ok(text.includes('Track "Try App" / website referral clicks'));
+  assert.ok(text.includes("Live preview your app card as visitors see it"));
+  assert.ok(text.includes("Edit your tagline, description, category, and pricing"));
+  assert.ok(text.includes("Upgrade or switch listing plans"));
+
+  const msg = formatSubmitterConfirmationMessage(customSubmission);
+  assert.match(msg, /Confirmation DM for FocusBell &lt;Pro&gt; Creator/);
+  assert.match(msg, /<pre>[\s\S]*https:\/\/pickmacapps\.store\/dashboard\/secret-token-1234[\s\S]*<\/pre>/);
+
+  const kb = buildConfirmationInlineKeyboard(customSubmission);
+  const buttons = kb.inline_keyboard.flat();
+  assert.ok(buttons.some((b) => b.text.includes("@focusbell") && b.url === "https://x.com/focusbell"));
+  assert.ok(buttons.some((b) => b.text.includes("Open Dashboard") && b.url === "https://pickmacapps.store/dashboard/secret-token-1234"));
+  assert.ok(buttons.some((b) => b.url === "https://focusbell.app/"));
 });

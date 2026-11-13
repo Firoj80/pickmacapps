@@ -20,9 +20,10 @@ export interface TelegramSubmissionInfo {
   approvedSlug?: string;
   existingSlug?: string;
   isUpdate?: boolean;
+  dashboardToken?: string;
 }
 
-export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "nobadge" | "xpost";
+export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "nobadge" | "xpost" | "conf";
 
 export interface ParsedTelegramCallback {
   action: TelegramSubmissionAction;
@@ -81,7 +82,7 @@ export function parseSubmissionCallbackData(data: string): ParsedTelegramCallbac
       submissionId: xpostMatch[2],
     };
   }
-  const match = /^sub:(approve|apphot|reject|badge|nobadge):([a-zA-Z0-9-]+)$/.exec(trimmed);
+  const match = /^sub:(approve|apphot|reject|badge|nobadge|conf):([a-zA-Z0-9-]+)$/.exec(trimmed);
   if (!match) return null;
   return {
     action: match[1] as TelegramSubmissionAction,
@@ -364,18 +365,96 @@ export function buildSubmissionInlineKeyboard(
         { text: "🔥 Approve + Hot", callback_data: `sub:apphot:${submission.id}` },
       ];
 
+  const creator = normalizeCreatorMention(submission.xHandle);
+  const cleanHandle = creator ? creator.replace(/^@/, "") : "";
+
+  const row3: TelegramInlineButton[] = [
+    { text: "📋 Confirmation DM", callback_data: `sub:conf:${submission.id}` },
+  ];
+  if (cleanHandle) {
+    row3.push({ text: `𝕏 @${cleanHandle}`, url: `https://x.com/${cleanHandle}` });
+  } else if (submission.email) {
+    const subject = encodeURIComponent(`Your PickMacApps submission: ${submission.appName}`);
+    row3.push({ text: "✉️ Email Submitter", url: `mailto:${submission.email}?subject=${subject}` });
+  }
+
   const rows: TelegramInlineButton[][] = [
     row1,
     [
       { text: "🔍 Check Badge", callback_data: `sub:badge:${submission.id}` },
       { text: "❌ Reject", callback_data: `sub:reject:${submission.id}` },
     ],
+    row3,
   ];
 
   if (websiteUrl) {
     rows.push([{ text: "🌐 Visit Website", url: websiteUrl }]);
   }
 
+  return { inline_keyboard: rows };
+}
+
+export function buildSubmitterConfirmationText(submission: TelegramSubmissionInfo): string {
+  const name = submission.appName.trim();
+  const token = submission.dashboardToken || submission.id;
+  const dashUrl = `${PRIMARY_ORIGIN}/dashboard/${token}`;
+
+  return [
+    `Hey ${name} Dev 👋`,
+    ``,
+    `Your app has been submitted to PickMacApps! `,
+    ``,
+    `Here is your private dashboard link to track and manage your listing:`,
+    `${dashUrl}`,
+    ``,
+    `With your mini-dashboard, you can:`,
+    `• 📊 Track real-time App Card clicks and impressions`,
+    `• 🚀 Track "Try App" / website referral clicks`,
+    `• 👁️ Live preview your app card as visitors see it`,
+    `• ✏️ Edit your tagline, description, category, and pricing`,
+    `• 🖼️ Update your app icon and demo/video link anytime`,
+    `• ⭐ Upgrade or switch listing plans (Free to Blue / Gold Badge)`,
+    `• ⏳ Monitor your submission approval status in real-time`,
+    ``,
+    `We're reviewing your submission now and will update you shortly!`,
+  ].join("\n");
+}
+
+export function formatSubmitterConfirmationMessage(submission: TelegramSubmissionInfo): string {
+  const text = buildSubmitterConfirmationText(submission);
+  const creator = normalizeCreatorMention(submission.xHandle);
+
+  return [
+    `💬 <b>Confirmation DM for ${escapeTelegramHtml(submission.appName)} Creator</b>${creator ? ` (${escapeTelegramHtml(creator)})` : ""} <i>(tap text below to copy)</i>`,
+    ``,
+    `<pre>${escapeTelegramHtml(text)}</pre>`,
+    ``,
+    `👇 Quick actions for this creator:`,
+  ].join("\n");
+}
+
+export function buildConfirmationInlineKeyboard(
+  submission: TelegramSubmissionInfo,
+): { inline_keyboard: TelegramInlineButton[][] } {
+  const token = submission.dashboardToken || submission.id;
+  const dashUrl = `${PRIMARY_ORIGIN}/dashboard/${token}`;
+  const creator = normalizeCreatorMention(submission.xHandle);
+  const cleanHandle = creator ? creator.replace(/^@/, "") : "";
+  const websiteUrl = safeHttpUrl(submission.website);
+
+  const row1: TelegramInlineButton[] = [];
+  if (cleanHandle) {
+    row1.push({ text: `𝕏 Open @${cleanHandle}`, url: `https://x.com/${cleanHandle}` });
+  } else if (submission.email) {
+    const subject = encodeURIComponent(`Your PickMacApps submission: ${submission.appName}`);
+    row1.push({ text: `✉️ Email Submitter`, url: `mailto:${submission.email}?subject=${subject}` });
+  }
+  row1.push({ text: `🔑 Open Dashboard`, url: dashUrl });
+
+  const rows: TelegramInlineButton[][] = [row1];
+  if (websiteUrl) {
+    rows.push([{ text: `🌐 Visit Website`, url: websiteUrl }]);
+  }
   return { inline_keyboard: rows };
 }
 

@@ -29,11 +29,13 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         const { env } = await import("@/lib/env.server");
         const {
           answerTelegramCallback,
+          buildConfirmationInlineKeyboard,
           buildSubmissionInlineKeyboard,
           buildXPostInlineKeyboard,
           editTelegramMessage,
           escapeTelegramHtml,
           formatSubmissionNotification,
+          formatSubmitterConfirmationMessage,
           formatXPostTelegramMessage,
           getTelegramWebhookSecret,
           isAuthorizedTelegramSender,
@@ -269,6 +271,17 @@ export const Route = createFileRoute("/api/telegram/webhook")({
             } else {
               await sendTelegramMessage(chatId, xText, xKb);
             }
+          }
+          return Response.json({ ok: true });
+        }
+
+        if (parsed.action === "conf") {
+          const confText = formatSubmitterConfirmationMessage(submission);
+          const confKb = buildConfirmationInlineKeyboard(submission);
+          await answerTelegramCallback(callback.id, "📋 Confirmation DM drafted!");
+
+          if (chatId !== undefined) {
+            await sendTelegramMessage(chatId, confText, confKb);
           }
           return Response.json({ ok: true });
         }

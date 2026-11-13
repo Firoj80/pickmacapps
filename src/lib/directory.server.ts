@@ -1009,10 +1009,12 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     status: string;
     app_id?: string | null;
     app_slug?: string | null;
+    dashboard_token?: string | null;
   }>(
     `select s.id, s.app_name, s.website, s.tagline, s.email, coalesce(s.x_handle, '') as x_handle,
             s.plan, coalesce(s.tier, 'featured') as tier, coalesce(s.pricing, '') as pricing,
-            coalesce(s.category, '') as category, s.badge_ok, s.status, s.app_id, a.slug as app_slug
+            coalesce(s.category, '') as category, s.badge_ok, s.status, s.app_id, a.slug as app_slug,
+            s.dashboard_token
        from submissions s
        left join apps a on a.id = s.app_id
       where s.id = $1
@@ -1037,6 +1039,7 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     approvedSlug: row.status === "approved" ? row.app_slug || undefined : undefined,
     existingSlug: row.app_slug || undefined,
     isUpdate: Boolean(row.app_slug || row.app_id),
+    dashboardToken: row.dashboard_token || undefined,
   };
 }
 
@@ -1068,10 +1071,11 @@ export async function listPendingSubmissionsForTelegram(limit = 5): Promise<Tele
     category?: string;
     badge_ok: unknown;
     status: string;
+    dashboard_token?: string | null;
   }>(
     `select id, app_name, website, tagline, email, coalesce(x_handle, '') as x_handle,
             plan, coalesce(tier, 'featured') as tier, coalesce(pricing, '') as pricing,
-            coalesce(category, '') as category, badge_ok, status
+            coalesce(category, '') as category, badge_ok, status, dashboard_token
        from submissions
       where status in ('pending', 'paid')
       order by created_at desc
@@ -1091,6 +1095,7 @@ export async function listPendingSubmissionsForTelegram(limit = 5): Promise<Tele
     category: row.category || undefined,
     badgeOk: asBool(row.badge_ok),
     status: row.status,
+    dashboardToken: row.dashboard_token || undefined,
   }));
 }
 
@@ -1232,6 +1237,7 @@ export async function submitListing(
     status: initialStatus,
     existingSlug: existingApp?.slug,
     isUpdate: Boolean(existingApp),
+    dashboardToken: submissionToken,
   };
   if (plan === "free") {
     await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
