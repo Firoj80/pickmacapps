@@ -937,9 +937,11 @@ export async function listSubmissions() {
     x_handle?: string;
     badge_ok?: boolean;
     created_at: string | Date;
-  updated_at?: string | Date | null;
+    updated_at?: string | Date | null;
+    app_id?: string | null;
+    app_slug?: string | null;
   }>(
-    "select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, coalesce(badge_ok, false) as badge_ok, created_at from submissions order by created_at desc limit 100",
+    "select s.id, s.app_name, s.website, s.plan, coalesce(s.tier, 'featured') as tier, s.status, s.email, coalesce(s.x_handle, '') as x_handle, coalesce(s.badge_ok, false) as badge_ok, s.created_at, s.app_id, a.slug as app_slug from submissions s left join apps a on a.id = s.app_id order by s.created_at desc limit 100",
   );
 }
 
@@ -958,11 +960,12 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     category?: string;
     badge_ok: unknown;
     status: string;
+    app_id?: string | null;
     app_slug?: string | null;
   }>(
     `select s.id, s.app_name, s.website, s.tagline, s.email, coalesce(s.x_handle, '') as x_handle,
             s.plan, coalesce(s.tier, 'featured') as tier, coalesce(s.pricing, '') as pricing,
-            coalesce(s.category, '') as category, s.badge_ok, s.status, a.slug as app_slug
+            coalesce(s.category, '') as category, s.badge_ok, s.status, s.app_id, a.slug as app_slug
        from submissions s
        left join apps a on a.id = s.app_id
       where s.id = $1
@@ -984,7 +987,9 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     category: row.category || undefined,
     badgeOk: asBool(row.badge_ok),
     status: row.status,
-    approvedSlug: row.app_slug || undefined,
+    approvedSlug: row.status === "approved" ? row.app_slug || undefined : undefined,
+    existingSlug: row.app_slug || undefined,
+    isUpdate: Boolean(row.app_slug || row.app_id),
   };
 }
 
@@ -1052,6 +1057,44 @@ export async function rejectSubmission(id: string) {
   await audit(sql, "reject", id);
 }
 
+export function normalizeWebsiteDomain(rawUrl: string): string {
+  try {
+    let clean = rawUrl.trim();
+    if (!clean.startsWith("http://") && !clean.startsWith("https://")) {
+      clean = "https://" + clean;
+    }
+    const u = new URL(clean);
+    return u.hostname.toLowerCase().replace(/^www\./, "");
+  } catch {
+    return rawUrl.trim().toLowerCase().replace(/^https?:\/\//, "").replace(/^www\./, "").split("/")[0] ?? "";
+  }
+}
+
+export async function findExistingPublishedApp(website: string, name?: string) {
+  const sql = await directorySql();
+  const domain = normalizeWebsiteDomain(website);
+  const rows = await sql.query<{
+    id: string;
+    name: string;
+    slug: string;
+    website: string;
+    editor_choice: boolean;
+    featured_tier: string | null;
+    is_hot: boolean;
+  }>("select id, name, slug, website, editor_choice, featured_tier, is_hot from apps where status = 'published'");
+
+  if (domain) {
+    const match = rows.find((r) => normalizeWebsiteDomain(r.website) === domain);
+    if (match) return match;
+  }
+  if (name && name.trim()) {
+    const targetSlug = name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
+    const match = rows.find((r) => r.slug === targetSlug || r.name.toLowerCase() === name.trim().toLowerCase());
+    if (match) return match;
+  }
+  return null;
+}
+
 export async function submitListing(
   input: {
     name: string;
@@ -1098,13 +1141,14 @@ export async function submitListing(
     const badge = await checkBadgeOnPage(website);
     if (!badge.ok) return { ok: false as const, message: badge.message };
   }
+  const existingApp = await findExistingPublishedApp(website, name);
   const sql = await directorySql();
   const id = randomUUID();
   const cleanedPricing = cleanPricing(input.pricing);
   const initialStatus = plan === "choice" ? "awaiting_payment" : "pending";
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category, app_id)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
     [
       id,
       name,
@@ -1121,6 +1165,7 @@ export async function submitListing(
       demo,
       cleanedPricing,
       category.slug,
+      existingApp ? existingApp.id : null,
     ],
   );
   const telegramInfo: TelegramSubmissionInfo = {
@@ -1136,12 +1181,21 @@ export async function submitListing(
     category: category.name,
     badgeOk: plan === "free",
     status: initialStatus,
+    existingSlug: existingApp?.slug,
+    isUpdate: Boolean(existingApp),
   };
   if (plan === "free") {
     await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
       console.error("[telegram] notify free submission failed:", err);
     });
-    return { ok: true as const, message: "Submitted. It stays pending until an admin approves it." };
+    return {
+      ok: true as const,
+      message: existingApp
+        ? `Update submitted for ${existingApp.name}! We'll review your update and apply it to your live listing.`
+        : "Submitted. It stays pending until an admin approves it.",
+      existingSlug: existingApp?.slug,
+      isUpdate: Boolean(existingApp),
+    };
   }
   try {
     const checkout = await createChoiceCheckout({
@@ -1219,6 +1273,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     plan: string;
     tier?: string;
     status: string;
+    app_id?: string | null;
   }>("select * from submissions where id = $1", [id]);
   const submission = rows[0];
   if (!submission) throw new Error("Submission not found");
@@ -1246,15 +1301,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     }
     await updateSubmissionBadgeStatus(submission.id, true);
   }
-  const appId = randomUUID();
-  let slug =
-    submission.app_name
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-|-$/g, "")
-      .slice(0, 80) || appId.slice(0, 8);
-  const taken = await sql.query("select id from apps where slug = $1", [slug]);
-  if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
+
   const category = findShelfCategory(submission.category) ?? {
     slug: "utility",
     name: "Utility",
@@ -1265,6 +1312,109 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   const isChoice = submission.plan === "choice";
   const tier = isChoice ? (submission.tier === "article" ? "article" : "featured") : null;
   const makeHot = Boolean(options?.makeHot);
+
+  // Check if an existing published app matches this submission (Option B & C)
+  let existingApp: {
+    id: string;
+    name: string;
+    slug: string;
+    website: string;
+    editor_choice: boolean;
+    featured_tier: string | null;
+    is_hot: boolean;
+  } | null = null;
+
+  if (submission.app_id) {
+    const existingRows = await sql.query<{
+      id: string;
+      name: string;
+      slug: string;
+      website: string;
+      editor_choice: boolean;
+      featured_tier: string | null;
+      is_hot: boolean;
+    }>(
+      "select id, name, slug, website, editor_choice, featured_tier, is_hot from apps where id = $1 limit 1",
+      [submission.app_id],
+    );
+    if (existingRows[0]) existingApp = existingRows[0];
+  }
+  if (!existingApp) {
+    existingApp = await findExistingPublishedApp(submission.website, submission.app_name);
+  }
+
+  if (existingApp) {
+    // Option B: Update existing listing details without creating a duplicate
+    // Option C: If choice plan was paid/selected, upgrade app to Editor's Choice Gold or Blue
+    const updatedEditorChoice = isChoice ? true : existingApp.editor_choice;
+    const updatedTier = isChoice ? tier : existingApp.featured_tier;
+
+    await sql.query(
+      `update apps set
+        name = $1,
+        tagline = $2,
+        description = $3,
+        icon = coalesce(nullif($4, ''), icon),
+        website = $5,
+        pricing = $6,
+        category = $7,
+        category_name = $8,
+        category_icon = $9,
+        demo = coalesce(nullif($10, ''), demo),
+        editor_choice = $11,
+        featured_tier = $12,
+        featured_until = case
+          when $11 and not editor_choice then now() + interval '30 days'
+          when $11 and editor_choice and (featured_until is null or featured_until < now()) then now() + interval '30 days'
+          else featured_until
+        end,
+        is_hot = case when $13 then true else is_hot end,
+        submitter_email = coalesce(nullif($14, ''), submitter_email),
+        submitter_x = coalesce(nullif($15, ''), submitter_x),
+        updated_at = now()
+      where id = $16`,
+      [
+        submission.app_name,
+        submission.tagline,
+        submission.description || submission.tagline,
+        submission.icon || "",
+        submission.website,
+        cleanPricing(submission.pricing || (isChoice ? "paid" : "free")),
+        category.slug,
+        category.name,
+        category.emoji,
+        submission.demo || "",
+        updatedEditorChoice,
+        updatedTier,
+        makeHot,
+        submission.email,
+        submission.x_handle || "",
+        existingApp.id,
+      ],
+    );
+
+    await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, existingApp.id]);
+    await audit(sql, isChoice ? "upgrade_sponsor" : "update_app", existingApp.slug, submission.plan);
+    return {
+      id: existingApp.id,
+      slug: existingApp.slug,
+      name: submission.app_name,
+      categorySlug: category.slug,
+      isUpdate: true,
+      isChoice,
+      tier: updatedTier,
+    };
+  }
+
+  const appId = randomUUID();
+  let slug =
+    submission.app_name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-|-$/g, "")
+      .slice(0, 80) || appId.slice(0, 8);
+  const taken = await sql.query("select id from apps where slug = $1", [slug]);
+  if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
@@ -1292,7 +1442,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   );
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
   await audit(sql, "approve", slug, submission.plan);
-  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug };
+  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier };
 }
 
 export async function runBadgeChecks() {

@@ -467,7 +467,20 @@ function AdminHome() {
                 {filteredSubmissions.map((item) => (
                   <tr key={item.id} className="transition hover:bg-stone-50/40">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-ink">{item.app_name}</p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="font-medium text-ink">{item.app_name}</p>
+                        {item.app_slug ? (
+                          <a
+                            href={`/app/${item.app_slug}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-0.5 rounded-md bg-purple-50 px-2 py-0.5 text-[10.5px] font-semibold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300"
+                            title="Updates the live listing upon approval"
+                          >
+                            🔄 Update (/app/{item.app_slug})
+                          </a>
+                        ) : null}
+                      </div>
                       <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
                         <a href={item.website} className="underline hover:text-ink" target="_blank" rel="noreferrer">
                           {item.website}

@@ -220,7 +220,9 @@ export const Route = createFileRoute("/api/telegram/webhook")({
 
             await answerTelegramCallback(
               callback.id,
-              makeHot ? `🔥 Approved & marked Hot: ${created.name}` : `✅ Approved & published: ${created.name}`,
+              created.isUpdate
+                ? (makeHot ? `🔥 Updated & marked Hot: ${created.name}` : `✅ Updated & applied: ${created.name}`)
+                : (makeHot ? `🔥 Approved & marked Hot: ${created.name}` : `✅ Approved & published: ${created.name}`),
             );
 
             if (chatId !== undefined && messageId !== undefined) {

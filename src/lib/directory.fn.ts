@@ -16,7 +16,21 @@ export const fetchAppMetadataFn = createServerFn({ method: "POST" })
   })
   .handler(async ({ data }) => {
     const { fetchAppMetadata } = await import("./metadata.server");
-    return fetchAppMetadata(data.url);
+    const { findExistingPublishedApp } = await import("./directory.server");
+    const result = await fetchAppMetadata(data.url);
+    const existing = await findExistingPublishedApp(data.url, result.ok ? result.data.name : undefined);
+    return {
+      ...result,
+      alreadyListed: existing
+        ? {
+            id: existing.id,
+            name: existing.name,
+            slug: existing.slug,
+            isPaid: existing.editor_choice,
+            tier: existing.featured_tier,
+          }
+        : null,
+    };
   });
 
 export const submitListingFn = createServerFn({ method: "POST" })

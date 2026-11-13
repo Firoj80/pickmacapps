@@ -115,6 +115,7 @@ function SubmitPage() {
   const [fetching, setFetching] = useState(false);
   const [fetchStatus, setFetchStatus] = useState<"idle" | "success" | "error">("idle");
   const [fetchMessage, setFetchMessage] = useState("");
+  const [alreadyListed, setAlreadyListed] = useState<{ id: string; name: string; slug: string; isPaid?: boolean; tier?: string | null } | null>(null);
 
   const currentPrice = selectedPlan === "article" ? articlePrice : featuredPrice;
   const paid = selectedPlan === "featured" || selectedPlan === "article";
@@ -170,6 +171,11 @@ function SubmitPage() {
 
     try {
       const result = await fetchAppMetadataFn({ data: { url: target } });
+      if (result.alreadyListed) {
+        setAlreadyListed(result.alreadyListed);
+      } else {
+        setAlreadyListed(null);
+      }
       if (result.ok) {
         const data = result.data;
         if (data.name) setName(data.name);
@@ -184,7 +190,9 @@ function SubmitPage() {
 
         setFetchStatus("success");
         setFetchMessage(
-          "Details auto-filled from your website! Please review each field below, customize anything, and submit."
+          result.alreadyListed
+            ? `Found existing listing for ${result.alreadyListed.name}! Details auto-filled. Submitting will update your listing (or upgrade to Sponsor if selected).`
+            : "Details auto-filled from your website! Please review each field below, customize anything, and submit."
         );
       } else {
         setFetchStatus("error");
@@ -221,10 +229,20 @@ function SubmitPage() {
               <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
                 <CheckIcon className="h-8 w-8" />
               </div>
-              <h2 className="font-display text-2xl font-bold tracking-tight text-ink">Submission received!</h2>
+              <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
+                {alreadyListed ? "Update received!" : "Submission received!"}
+              </h2>
               <p className="mt-2 text-sm leading-relaxed text-body">
-                Thank you for submitting your app. We’ll review your listing details and send confirmation to{" "}
-                <strong>{email}</strong>.
+                {alreadyListed ? (
+                  <>
+                    Thank you for submitting an update for <strong>{name || alreadyListed.name}</strong>. We’ll review and apply your updates to your live listing (<a href={`/app/${alreadyListed.slug}`} target="_blank" rel="noreferrer" className="underline font-medium hover:text-ink">/app/{alreadyListed.slug}</a>).
+                  </>
+                ) : (
+                  <>
+                    Thank you for submitting your app. We’ll review your listing details and send confirmation to{" "}
+                    <strong>{email}</strong>.
+                  </>
+                )}
               </p>
               <button
                 type="button"
@@ -677,6 +695,22 @@ function SubmitPage() {
                       }
                     }}
                   >
+                    {alreadyListed ? (
+                      <div className="mb-4 rounded-2xl border border-sky-300/80 bg-sky-50/80 p-4 text-xs text-sky-950 dark:border-sky-800/60 dark:bg-sky-950/40 dark:text-sky-200 shadow-xs">
+                        <div className="flex items-start gap-2.5">
+                          <span className="text-base leading-none">ℹ️</span>
+                          <div>
+                            <p className="font-semibold text-sm">
+                              {alreadyListed.name} is already listed in our directory!
+                            </p>
+                            <p className="mt-0.5 leading-relaxed opacity-90">
+                              Submitting this form will <strong>update your existing listing</strong> (<a href={`/app/${alreadyListed.slug}`} target="_blank" rel="noreferrer" className="underline font-semibold hover:opacity-80">/app/{alreadyListed.slug}</a>) rather than creating a duplicate.
+                              {paid ? " You are upgrading to an Editor's Choice Sponsor tier!" : " You can also choose Gold or Blue below if you wish to upgrade to a featured placement."}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
                     <div className="space-y-4 rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs">
                       <div className="flex items-center justify-between">
                         <h3 className="text-base font-semibold tracking-[-0.025em] text-ink">App information</h3>
@@ -1124,13 +1158,21 @@ function SubmitPage() {
                               ? "Enter your X handle to submit"
                               : paid && isSelectedTierFull
                                 ? "This tier is full · Select another plan"
-                                : selectedPlan === "article"
-                                  ? `Continue to Payment · $${articlePrice} (Express 2h + Medium Article)`
-                                  : selectedPlan === "featured"
-                                    ? `Continue to Payment · $${featuredPrice} (Top 6 Spot)`
+                                : alreadyListed
+                                  ? paid
+                                    ? selectedPlan === "article"
+                                      ? `Upgrade to Gold Sponsor · $${articlePrice} (Top 3 Spot + Medium Article)`
+                                      : `Upgrade to Blue Sponsor · $${featuredPrice} (Top 6 Spot)`
                                     : badge === "ok"
-                                      ? "Submit Free Listing"
-                                      : "Verify badge to submit"}
+                                      ? "Submit Listing Update"
+                                      : "Verify badge to submit update"
+                                  : selectedPlan === "article"
+                                    ? `Continue to Payment · $${articlePrice} (Express 2h + Medium Article)`
+                                    : selectedPlan === "featured"
+                                      ? `Continue to Payment · $${featuredPrice} (Top 6 Spot)`
+                                      : badge === "ok"
+                                        ? "Submit Free Listing"
+                                        : "Verify badge to submit"}
                     </button>
                   </form>
                 </div>

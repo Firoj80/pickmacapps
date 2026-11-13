@@ -18,6 +18,8 @@ export interface TelegramSubmissionInfo {
   badgeOk: boolean;
   status: string;
   approvedSlug?: string;
+  existingSlug?: string;
+  isUpdate?: boolean;
 }
 
 export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "nobadge" | "xpost";
@@ -249,13 +251,22 @@ function planLabel(submission: TelegramSubmissionInfo): string {
 }
 
 function defaultHeader(submission: TelegramSubmissionInfo, kind?: "submitted" | "payment_succeeded"): string {
-  if (submission.status === "approved") return "✅ <b>APPROVED &amp; PUBLISHED</b>";
+  if (submission.status === "approved") {
+    return submission.isUpdate ? "✅ <b>LISTING UPDATED &amp; PUBLISHED</b>" : "✅ <b>APPROVED &amp; PUBLISHED</b>";
+  }
   if (submission.status === "rejected") return "❌ <b>SUBMISSION REJECTED</b>";
   if (kind === "payment_succeeded" || submission.status === "paid") {
-    return "💰 <b>PAID SUBMISSION CONFIRMED — Ready to Approve</b>";
+    return submission.isUpdate
+      ? "💰 <b>SPONSOR UPGRADE PAID — Ready to Apply</b>"
+      : "💰 <b>PAID SUBMISSION CONFIRMED — Ready to Approve</b>";
   }
   if (submission.plan === "choice" && submission.status === "awaiting_payment") {
-    return "⏳ <b>NEW SPONSOR SUBMISSION (Awaiting Payment)</b>";
+    return submission.isUpdate
+      ? "⭐ <b>SPONSOR UPGRADE (Awaiting Payment)</b>"
+      : "⏳ <b>NEW SPONSOR SUBMISSION (Awaiting Payment)</b>";
+  }
+  if (submission.isUpdate) {
+    return "🔄 <b>APP LISTING UPDATE SUBMISSION</b>";
   }
   return "🆕 <b>NEW APP SUBMISSION</b>";
 }
@@ -294,6 +305,10 @@ export function formatSubmissionNotification(
     `👤 <b>Submitter:</b> ${escapeTelegramHtml([submission.xHandle, submission.email].filter(Boolean).join(" · "))}`,
     `🛡 <b>Badge Check:</b> ${escapeTelegramHtml(badgeText)}${options?.badgeNote ? ` <i>(${escapeTelegramHtml(options.badgeNote)})</i>` : ""}`,
   );
+
+  if (submission.existingSlug && submission.status !== "approved") {
+    lines.push(`🔗 <b>Current Live Page:</b> ${PRIMARY_ORIGIN}/app/${escapeTelegramHtml(submission.existingSlug)}`);
+  }
 
   const liveSlug = options?.approvedSlug || submission.approvedSlug;
   if (submission.status === "approved" && liveSlug) {

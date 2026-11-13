@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { hasPickMacAppsBadge, publicUrl } from "./badge.ts";
+import { normalizeWebsiteDomain } from "./directory.server.ts";
 
 test("hasPickMacAppsBadge rejects third-party badge assets without PickMacApps", () => {
   // Scenario matching shedi.app (which links to TryMacApps with badge.png)
@@ -62,4 +63,11 @@ test("publicUrl rejects private or invalid addresses", () => {
   assert.equal(publicUrl("http://192.168.1.1"), null);
   assert.equal(publicUrl("not-a-url"), null);
   assert.notEqual(publicUrl("https://example.com"), null);
+});
+
+test("normalizeWebsiteDomain strips protocol, www, and paths to match root domains", () => {
+  assert.equal(normalizeWebsiteDomain("https://hardebell.app/"), "hardebell.app");
+  assert.equal(normalizeWebsiteDomain("http://www.hardebell.app/download"), "hardebell.app");
+  assert.equal(normalizeWebsiteDomain("hardebell.app"), "hardebell.app");
+  assert.equal(normalizeWebsiteDomain("https://WWW.Hardebell.App/"), "hardebell.app");
 });

@@ -99,6 +99,25 @@ test("formatSubmissionNotification includes badge state, escaped app details, an
   );
   assert.match(approvedText, /APPROVED/);
   assert.match(approvedText, /https:\/\/pickmacapps\.store\/app\/focusbell-pro/);
+
+  const updateText = formatSubmissionNotification({
+    ...baseSubmission,
+    isUpdate: true,
+    existingSlug: "focusbell-pro",
+  });
+  assert.match(updateText, /APP LISTING UPDATE SUBMISSION/);
+  assert.match(updateText, /Current Live Page:<\/b> https:\/\/pickmacapps\.store\/app\/focusbell-pro/);
+
+  const sponsorUpgradeText = formatSubmissionNotification({
+    ...baseSubmission,
+    plan: "choice",
+    tier: "article",
+    isUpdate: true,
+    existingSlug: "focusbell-pro",
+    status: "awaiting_payment",
+  });
+  assert.match(sponsorUpgradeText, /SPONSOR UPGRADE/);
+  assert.match(sponsorUpgradeText, /Current Live Page:<\/b> https:\/\/pickmacapps\.store\/app\/focusbell-pro/);
 });
 
 test("isAuthorizedTelegramSender and verifyTelegramWebhookSecret enforce strict admin authorization", () => {
