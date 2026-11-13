@@ -23,6 +23,8 @@ import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as ApiUpvoteRouteImport } from './routes/api/upvote'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as BlogSlugRouteImport } from './routes/blog/$slug'
@@ -30,6 +32,7 @@ import { Route as CategoryIndexRouteImport } from './routes/category/index'
 import { Route as CategorySlugRouteImport } from './routes/category/$slug'
 import { Route as CompareIndexRouteImport } from './routes/compare/index'
 import { Route as CompareSlugRouteImport } from './routes/compare/$slug'
+import { Route as DashboardTokenRouteImport } from './routes/dashboard/$token'
 import { Route as SitemapAppsDotxmlRouteImport } from './routes/sitemap/apps[.]xml'
 import { Route as SitemapCategoriesDotxmlRouteImport } from './routes/sitemap/categories[.]xml'
 import { Route as SitemapCompareDotxmlRouteImport } from './routes/sitemap/compare[.]xml'
@@ -43,6 +46,9 @@ import { Route as AdminGuidesSlugRouteImport } from './routes/admin/guides/$slug
 import { Route as AdminGuidesNewRouteImport } from './routes/admin/guides/new'
 import { Route as ApiAdminSplatRouteImport } from './routes/api/admin/$'
 import { Route as ApiCronBadgesRouteImport } from './routes/api/cron/badges'
+import { Route as ApiCronExpireHotRouteImport } from './routes/api/cron/expire-hot'
+import { Route as ApiCronUpvotePromoteRouteImport } from './routes/api/cron/upvote-promote'
+import { Route as ApiDashboardTokenRouteImport } from './routes/api/dashboard/$token'
 import { Route as ApiDodoWebhookRouteImport } from './routes/api/dodo/webhook'
 import { Route as ApiMdSplatRouteImport } from './routes/api/md/$'
 import { Route as ApiTelegramWebhookRouteImport } from './routes/api/telegram/webhook'
@@ -117,6 +123,16 @@ const AdminLoginRoute = AdminLoginRouteImport.update({
   path: '/admin/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrackRoute = ApiTrackRouteImport.update({
+  id: '/api/track',
+  path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUpvoteRoute = ApiUpvoteRouteImport.update({
+  id: '/api/upvote',
+  path: '/api/upvote',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppSlugRoute = AppSlugRouteImport.update({
   id: '/app/$slug',
   path: '/app/$slug',
@@ -150,6 +166,11 @@ const CompareIndexRoute = CompareIndexRouteImport.update({
 const CompareSlugRoute = CompareSlugRouteImport.update({
   id: '/compare/$slug',
   path: '/compare/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardTokenRoute = DashboardTokenRouteImport.update({
+  id: '/dashboard/$token',
+  path: '/dashboard/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SitemapAppsDotxmlRoute = SitemapAppsDotxmlRouteImport.update({
@@ -217,6 +238,21 @@ const ApiCronBadgesRoute = ApiCronBadgesRouteImport.update({
   path: '/api/cron/badges',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCronExpireHotRoute = ApiCronExpireHotRouteImport.update({
+  id: '/api/cron/expire-hot',
+  path: '/api/cron/expire-hot',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCronUpvotePromoteRoute = ApiCronUpvotePromoteRouteImport.update({
+  id: '/api/cron/upvote-promote',
+  path: '/api/cron/upvote-promote',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiDashboardTokenRoute = ApiDashboardTokenRouteImport.update({
+  id: '/api/dashboard/$token',
+  path: '/api/dashboard/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiDodoWebhookRoute = ApiDodoWebhookRouteImport.update({
   id: '/api/dodo/webhook',
   path: '/api/dodo/webhook',
@@ -247,10 +283,13 @@ export interface FileRoutesByFullPath {
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/dashboard/$token': typeof DashboardTokenRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
@@ -266,6 +305,9 @@ export interface FileRoutesByFullPath {
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
   '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/cron/expire-hot': typeof ApiCronExpireHotRoute
+  '/api/cron/upvote-promote': typeof ApiCronUpvotePromoteRoute
+  '/api/dashboard/$token': typeof ApiDashboardTokenRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
   '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
@@ -286,10 +328,13 @@ export interface FileRoutesByTo {
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/dashboard/$token': typeof DashboardTokenRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
@@ -305,6 +350,9 @@ export interface FileRoutesByTo {
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
   '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/cron/expire-hot': typeof ApiCronExpireHotRoute
+  '/api/cron/upvote-promote': typeof ApiCronUpvotePromoteRoute
+  '/api/dashboard/$token': typeof ApiDashboardTokenRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
   '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
@@ -326,10 +374,13 @@ export interface FileRoutesById {
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
   '/admin/login': typeof AdminLoginRoute
+  '/api/track': typeof ApiTrackRoute
+  '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
   '/category/$slug': typeof CategorySlugRoute
   '/compare/$slug': typeof CompareSlugRoute
+  '/dashboard/$token': typeof DashboardTokenRoute
   '/sitemap/apps.xml': typeof SitemapAppsDotxmlRoute
   '/sitemap/categories.xml': typeof SitemapCategoriesDotxmlRoute
   '/sitemap/compare.xml': typeof SitemapCompareDotxmlRoute
@@ -345,6 +396,9 @@ export interface FileRoutesById {
   '/admin/guides/new': typeof AdminGuidesNewRoute
   '/api/admin/$': typeof ApiAdminSplatRoute
   '/api/cron/badges': typeof ApiCronBadgesRoute
+  '/api/cron/expire-hot': typeof ApiCronExpireHotRoute
+  '/api/cron/upvote-promote': typeof ApiCronUpvotePromoteRoute
+  '/api/dashboard/$token': typeof ApiDashboardTokenRoute
   '/api/dodo/webhook': typeof ApiDodoWebhookRoute
   '/api/md/$': typeof ApiMdSplatRoute
   '/api/telegram/webhook': typeof ApiTelegramWebhookRoute
@@ -367,10 +421,13 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/submit'
     | '/admin/login'
+    | '/api/track'
+    | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
     | '/compare/$slug'
+    | '/dashboard/$token'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
     | '/sitemap/compare.xml'
@@ -386,6 +443,9 @@ export interface FileRouteTypes {
     | '/admin/guides/new'
     | '/api/admin/$'
     | '/api/cron/badges'
+    | '/api/cron/expire-hot'
+    | '/api/cron/upvote-promote'
+    | '/api/dashboard/$token'
     | '/api/dodo/webhook'
     | '/api/md/$'
     | '/api/telegram/webhook'
@@ -406,10 +466,13 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/submit'
     | '/admin/login'
+    | '/api/track'
+    | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
     | '/compare/$slug'
+    | '/dashboard/$token'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
     | '/sitemap/compare.xml'
@@ -425,6 +488,9 @@ export interface FileRouteTypes {
     | '/admin/guides/new'
     | '/api/admin/$'
     | '/api/cron/badges'
+    | '/api/cron/expire-hot'
+    | '/api/cron/upvote-promote'
+    | '/api/dashboard/$token'
     | '/api/dodo/webhook'
     | '/api/md/$'
     | '/api/telegram/webhook'
@@ -445,10 +511,13 @@ export interface FileRouteTypes {
     | '/sponsor'
     | '/submit'
     | '/admin/login'
+    | '/api/track'
+    | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
     | '/category/$slug'
     | '/compare/$slug'
+    | '/dashboard/$token'
     | '/sitemap/apps.xml'
     | '/sitemap/categories.xml'
     | '/sitemap/compare.xml'
@@ -464,6 +533,9 @@ export interface FileRouteTypes {
     | '/admin/guides/new'
     | '/api/admin/$'
     | '/api/cron/badges'
+    | '/api/cron/expire-hot'
+    | '/api/cron/upvote-promote'
+    | '/api/dashboard/$token'
     | '/api/dodo/webhook'
     | '/api/md/$'
     | '/api/telegram/webhook'
@@ -485,10 +557,13 @@ export interface RootRouteChildren {
   SponsorRoute: typeof SponsorRoute
   SubmitRoute: typeof SubmitRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  ApiTrackRoute: typeof ApiTrackRoute
+  ApiUpvoteRoute: typeof ApiUpvoteRoute
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
   CategorySlugRoute: typeof CategorySlugRoute
   CompareSlugRoute: typeof CompareSlugRoute
+  DashboardTokenRoute: typeof DashboardTokenRoute
   SitemapAppsDotxmlRoute: typeof SitemapAppsDotxmlRoute
   SitemapCategoriesDotxmlRoute: typeof SitemapCategoriesDotxmlRoute
   SitemapCompareDotxmlRoute: typeof SitemapCompareDotxmlRoute
@@ -504,6 +579,9 @@ export interface RootRouteChildren {
   AdminGuidesNewRoute: typeof AdminGuidesNewRoute
   ApiAdminSplatRoute: typeof ApiAdminSplatRoute
   ApiCronBadgesRoute: typeof ApiCronBadgesRoute
+  ApiCronExpireHotRoute: typeof ApiCronExpireHotRoute
+  ApiCronUpvotePromoteRoute: typeof ApiCronUpvotePromoteRoute
+  ApiDashboardTokenRoute: typeof ApiDashboardTokenRoute
   ApiDodoWebhookRoute: typeof ApiDodoWebhookRoute
   ApiMdSplatRoute: typeof ApiMdSplatRoute
   ApiTelegramWebhookRoute: typeof ApiTelegramWebhookRoute
@@ -611,6 +689,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/track': {
+      id: '/api/track'
+      path: '/api/track'
+      fullPath: '/api/track'
+      preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upvote': {
+      id: '/api/upvote'
+      path: '/api/upvote'
+      fullPath: '/api/upvote'
+      preLoaderRoute: typeof ApiUpvoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/$slug': {
       id: '/app/$slug'
       path: '/app/$slug'
@@ -658,6 +750,13 @@ declare module '@tanstack/react-router' {
       path: '/compare/$slug'
       fullPath: '/compare/$slug'
       preLoaderRoute: typeof CompareSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dashboard/$token': {
+      id: '/dashboard/$token'
+      path: '/dashboard/$token'
+      fullPath: '/dashboard/$token'
+      preLoaderRoute: typeof DashboardTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sitemap/apps.xml': {
@@ -751,6 +850,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiCronBadgesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/cron/expire-hot': {
+      id: '/api/cron/expire-hot'
+      path: '/api/cron/expire-hot'
+      fullPath: '/api/cron/expire-hot'
+      preLoaderRoute: typeof ApiCronExpireHotRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/cron/upvote-promote': {
+      id: '/api/cron/upvote-promote'
+      path: '/api/cron/upvote-promote'
+      fullPath: '/api/cron/upvote-promote'
+      preLoaderRoute: typeof ApiCronUpvotePromoteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/dashboard/$token': {
+      id: '/api/dashboard/$token'
+      path: '/api/dashboard/$token'
+      fullPath: '/api/dashboard/$token'
+      preLoaderRoute: typeof ApiDashboardTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/dodo/webhook': {
       id: '/api/dodo/webhook'
       path: '/api/dodo/webhook'
@@ -789,10 +909,13 @@ const rootRouteChildren: RootRouteChildren = {
   SponsorRoute: SponsorRoute,
   SubmitRoute: SubmitRoute,
   AdminLoginRoute: AdminLoginRoute,
+  ApiTrackRoute: ApiTrackRoute,
+  ApiUpvoteRoute: ApiUpvoteRoute,
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,
   CategorySlugRoute: CategorySlugRoute,
   CompareSlugRoute: CompareSlugRoute,
+  DashboardTokenRoute: DashboardTokenRoute,
   SitemapAppsDotxmlRoute: SitemapAppsDotxmlRoute,
   SitemapCategoriesDotxmlRoute: SitemapCategoriesDotxmlRoute,
   SitemapCompareDotxmlRoute: SitemapCompareDotxmlRoute,
@@ -808,6 +931,9 @@ const rootRouteChildren: RootRouteChildren = {
   AdminGuidesNewRoute: AdminGuidesNewRoute,
   ApiAdminSplatRoute: ApiAdminSplatRoute,
   ApiCronBadgesRoute: ApiCronBadgesRoute,
+  ApiCronExpireHotRoute: ApiCronExpireHotRoute,
+  ApiCronUpvotePromoteRoute: ApiCronUpvotePromoteRoute,
+  ApiDashboardTokenRoute: ApiDashboardTokenRoute,
   ApiDodoWebhookRoute: ApiDodoWebhookRoute,
   ApiMdSplatRoute: ApiMdSplatRoute,
   ApiTelegramWebhookRoute: ApiTelegramWebhookRoute,

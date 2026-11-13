@@ -155,6 +155,60 @@ function EditAppForm({ app }: { app: EditAppData }) {
     >
       <Notice {...notice} />
 
+      {/* Analytics & Submitter Dashboard Panel */}
+      <div className="max-w-2xl rounded-2xl border border-line bg-surface-2/60 p-4 shadow-xs">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+          <div className="rounded-xl border border-line bg-white p-3">
+            <div className="text-[11px] font-medium text-muted uppercase">Card Clicks</div>
+            <div className="mt-1 text-xl font-bold text-ink">{app.clickCount ?? 0}</div>
+          </div>
+          <div className="rounded-xl border border-line bg-white p-3">
+            <div className="text-[11px] font-medium text-muted uppercase">Try App Clicks</div>
+            <div className="mt-1 text-xl font-bold text-ink">{app.tryCount ?? 0}</div>
+          </div>
+          <div className="rounded-xl border border-line bg-white p-3">
+            <div className="text-[11px] font-medium text-muted uppercase">Upvotes</div>
+            <div className="mt-1 text-xl font-bold text-ink">▲ {app.upvoteCount ?? 0}</div>
+          </div>
+          <div className="rounded-xl border border-line bg-white p-3">
+            <div className="text-[11px] font-medium text-muted uppercase">🔥 Hot Status</div>
+            <div className="mt-1 text-xs font-semibold text-ink">
+              {app.isHot ? (
+                <span className="text-rose-600">Active</span>
+              ) : (
+                <span className="text-muted">No</span>
+              )}
+            </div>
+            {app.isHot && app.hotMarkedAt ? (
+              <div className="mt-0.5 text-[10px] text-muted font-mono">
+                {(() => {
+                  const marked = new Date(app.hotMarkedAt);
+                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                  const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+                  return `Expires in ${daysLeft}d`;
+                })()}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        {app.dashboardToken ? (
+          <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-line bg-white px-3.5 py-2 text-xs">
+            <div className="flex items-center gap-1.5 text-muted truncate">
+              <span className="font-semibold text-ink">Submitter Dashboard:</span>
+              <span className="font-mono text-[11px] truncate">/dashboard/{app.dashboardToken}</span>
+            </div>
+            <Link
+              to="/dashboard/$token"
+              params={{ token: app.dashboardToken }}
+              target="_blank"
+              className="shrink-0 rounded-lg bg-ink px-2.5 py-1 text-[11px] font-semibold text-canvas hover:opacity-90"
+            >
+              Open Dashboard ↗
+            </Link>
+          </div>
+        ) : null}
+      </div>
+
       <form
         method="post"
         action="/api/admin/apps"

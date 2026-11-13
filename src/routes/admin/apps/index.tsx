@@ -353,6 +353,16 @@ function AppsPage() {
                         <span>{app.isHot ? "Hot Active" : "Make Hot"}</span>
                       </button>
                     </form>
+                    {app.isHot && app.hotMarkedAt ? (
+                      <div className="mt-1 text-[10px] text-muted font-mono">
+                        {(() => {
+                          const marked = new Date(app.hotMarkedAt);
+                          const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                          const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+                          return `Expires in ${daysLeft}d`;
+                        })()}
+                      </div>
+                    ) : null}
                   </td>
 
                   {/* Actions */}

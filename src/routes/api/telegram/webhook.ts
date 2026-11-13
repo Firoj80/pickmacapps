@@ -240,6 +240,13 @@ export const Route = createFileRoute("/api/telegram/webhook")({
                 formatXPostTelegramMessage(updated, 1, created.slug),
                 buildXPostInlineKeyboard(updated, 1, created.slug),
               );
+              if (created.dashboardToken) {
+                const dashUrl = `${PRIMARY_ORIGIN}/dashboard/${created.dashboardToken}`;
+                await sendTelegramMessage(
+                  chatId,
+                  `🔑 <b>Submitter Dashboard Link:</b>\n<a href="${dashUrl}">${dashUrl}</a>\n\n<i>Share this secret link with the creator so they can track card clicks, try clicks, and edit their listing.</i>`,
+                );
+              }
             }
           } catch (error) {
             const message = error instanceof Error ? error.message : "Could not approve submission.";

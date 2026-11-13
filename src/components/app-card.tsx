@@ -9,6 +9,25 @@ function coverSrc(demo: string) {
   return clean;
 }
 
+function getOrSetVisitorId(): string {
+  if (typeof window === "undefined") return "";
+  let vid = localStorage.getItem("pma_vid");
+  if (!vid) {
+    vid = "v_" + Math.random().toString(36).substring(2) + Date.now().toString(36);
+    localStorage.setItem("pma_vid", vid);
+  }
+  return vid;
+}
+
+function trackClick(appId: string, type: "click" | "try") {
+  if (typeof window === "undefined" || !appId) return;
+  fetch("/api/track", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ appId, type }),
+  }).catch(() => {});
+}
+
 export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" | "md" | "sm"; priority?: boolean }) {
   const choice = isEditorChoice(app);
   const cover = coverSrc(app.demo);
@@ -16,11 +35,56 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
   const optimizedIcon = appIconUrl(app.icon);
   const [coverSrcActive, setCoverSrcActive] = useState(optimizedCover);
   const [coverFailed, setCoverFailed] = useState(false);
+  const [upvotes, setUpvotes] = useState(app.upvoteCount ?? 0);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [voting, setVoting] = useState(false);
 
   useEffect(() => {
     setCoverSrcActive(optimizedCover);
     setCoverFailed(false);
   }, [optimizedCover]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && app.id) {
+      const votedList = JSON.parse(localStorage.getItem("pma_voted") || "[]");
+      if (Array.isArray(votedList) && votedList.includes(app.id)) {
+        setHasVoted(true);
+      }
+    }
+  }, [app.id]);
+
+  const handleUpvote = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hasVoted || voting || !app.id) return;
+
+    setVoting(true);
+    setUpvotes((prev) => prev + 1);
+    setHasVoted(true);
+
+    try {
+      const votedList = JSON.parse(localStorage.getItem("pma_voted") || "[]");
+      if (Array.isArray(votedList)) {
+        votedList.push(app.id);
+        localStorage.setItem("pma_voted", JSON.stringify(votedList));
+      }
+    } catch {}
+
+    const visitorId = getOrSetVisitorId();
+    fetch("/api/upvote", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ appId: app.id, visitorId }),
+    })
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; upvoteCount?: number }) => {
+        if (data.ok && typeof data.upvoteCount === "number") {
+          setUpvotes(data.upvoteCount);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setVoting(false));
+  };
 
   const showCover = Boolean(coverSrcActive) && !coverFailed;
   const isGold = choice && app.featuredTier === "article";
@@ -54,6 +118,7 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
     <Link
       to="/app/$slug"
       params={{ slug: app.slug }}
+      onClick={() => trackClick(app.id, "click")}
       className="group flex flex-col transition-transform duration-300 ease-out hover:-translate-y-0.5"
     >
       {/* Visual Screen Preview Card (Adaptive canvas with animated tier border wave) */}
@@ -187,17 +252,34 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
               ) : null}
             </div>
 
-            <span
-              className={`shrink-0 rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none ${
-                app.pricing === "free"
-                  ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400"
-                  : app.pricing === "freemium"
-                  ? "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400"
-                  : "bg-surface-2 text-muted ring-1 ring-line"
-              }`}
-            >
-              {pricingLabel[app.pricing] || "Free"}
-            </span>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {/* Upvote Button Badge */}
+              <button
+                type="button"
+                onClick={handleUpvote}
+                title={hasVoted ? "You upvoted this app" : "Upvote this app"}
+                className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-all ${
+                  hasVoted
+                    ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/30"
+                    : "bg-surface-2 text-muted ring-1 ring-line hover:bg-amber-500/10 hover:text-amber-600 hover:ring-amber-400/30 cursor-pointer"
+                }`}
+              >
+                <span className="text-[10px]">▲</span>
+                <span>{upvotes}</span>
+              </button>
+
+              <span
+                className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none ${
+                  app.pricing === "free"
+                    ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400"
+                    : app.pricing === "freemium"
+                    ? "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400"
+                    : "bg-surface-2 text-muted ring-1 ring-line"
+                }`}
+              >
+                {pricingLabel[app.pricing] || "Free"}
+              </span>
+            </div>
           </div>
           <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">
             {app.tagline}

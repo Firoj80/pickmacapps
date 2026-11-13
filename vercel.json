@@ -1,6 +1,10 @@
 {
   "installCommand": "npm install --omit=dev --no-audit --no-fund",
-  "crons": [{ "path": "/api/cron/badges", "schedule": "0 8 * * *" }],
+  "crons": [
+    { "path": "/api/cron/badges", "schedule": "0 8 * * *" },
+    { "path": "/api/cron/expire-hot", "schedule": "0 3 * * *" },
+    { "path": "/api/cron/upvote-promote", "schedule": "0 4 * * *" }
+  ],
   "redirects": [
     {
       "source": "/:path*",

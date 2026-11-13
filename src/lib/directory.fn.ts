@@ -301,3 +301,13 @@ export async function getCachedAdminGuides() {
   });
   return _adminGuidesPromise as Promise<Awaited<ReturnType<typeof fetchAdminGuides>>>;
 }
+
+export const fetchDashboardAppFn = createServerFn({ method: "GET" })
+  .validator((input: unknown) => {
+    const data = typeof input === "object" && input && "token" in input ? (input as { token: string }) : { token: "" };
+    return { token: String(data.token ?? "") };
+  })
+  .handler(async ({ data }) => {
+    const { getDashboardByToken } = await import("./directory.server");
+    return getDashboardByToken(data.token);
+  });

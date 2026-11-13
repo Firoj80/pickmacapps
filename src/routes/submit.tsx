@@ -406,13 +406,28 @@ function SubmitPage() {
                       {/* Live Slot Status Pill */}
                       <div className="mt-3">
                         {featuredSlots.isFull ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600">
-                            🔴 Sold out (0/3 available)
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600">
+                              🔴 Sold out (0/3 available)
+                            </span>
+                            {featuredSlots.openDates && featuredSlots.openDates.length > 0 ? (
+                              <p className="text-[11px] font-medium text-sky-700 dark:text-sky-300">
+                                📅 Next slot opens: {new Date(featuredSlots.openDates[0]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                {featuredSlots.openDates.length > 1 ? ` · then ${new Date(featuredSlots.openDates[1]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+                              </p>
+                            ) : null}
+                          </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                            🟢 {featuredSlots.remaining} of 3 spots available
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                              🟢 {featuredSlots.remaining} of 3 spots available
+                            </span>
+                            {featuredSlots.openDates && featuredSlots.openDates.length > 0 ? (
+                              <p className="text-[11px] text-muted">
+                                Next spot frees up on {new Date(featuredSlots.openDates[0]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </p>
+                            ) : null}
+                          </div>
                         )}
                         <p className="mt-1 text-[11px] text-muted">
                           Strict 3-app cap (cycle until {featuredSlots.nextDate})
@@ -505,13 +520,28 @@ function SubmitPage() {
                       {/* Live Slot Status Pill */}
                       <div className="mt-3">
                         {articleSlots.isFull ? (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600">
-                            🔴 Sold out (0/3 available)
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-rose-500/10 border border-rose-500/30 px-2.5 py-1 text-xs font-bold text-rose-600">
+                              🔴 Sold out (0/3 available)
+                            </span>
+                            {articleSlots.openDates && articleSlots.openDates.length > 0 ? (
+                              <p className="text-[11px] font-medium text-amber-700 dark:text-amber-300">
+                                📅 Next slot opens: {new Date(articleSlots.openDates[0]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                                {articleSlots.openDates.length > 1 ? ` · then ${new Date(articleSlots.openDates[1]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : ""}
+                              </p>
+                            ) : null}
+                          </div>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
-                            🟢 {articleSlots.remaining} of 3 spots available
-                          </span>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-2.5 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-400">
+                              🟢 {articleSlots.remaining} of 3 spots available
+                            </span>
+                            {articleSlots.openDates && articleSlots.openDates.length > 0 ? (
+                              <p className="text-[11px] text-muted">
+                                Next spot frees up on {new Date(articleSlots.openDates[0]).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              </p>
+                            ) : null}
+                          </div>
                         )}
                         <p className="mt-1 text-[11px] text-muted">
                           Strict 3-app cap (cycle until {articleSlots.nextDate})

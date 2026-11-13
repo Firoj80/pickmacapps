@@ -15,6 +15,7 @@ import {
   setChoicePrice,
   setPackagePrice,
   toggleAppHot,
+  updateUpvoteSettings,
   verifySubmissionBadge,
 } from "@/lib/directory.server";
 import { registerTelegramWebhook } from "@/lib/telegram.server";
@@ -151,6 +152,17 @@ export async function handleAdminPost(request: Request) {
         return redirect(`/admin?error=${encodeURIComponent(`Badge check failed: ${result.message}`)}`);
       }
       return redirect("/admin?saved=badge_ok");
+    }
+    if (action === "update-upvote-settings") {
+      const upvotesEnabled = form.get("upvotes_enabled") === "on";
+      const autoHotEnabled = form.get("auto_hot_enabled") === "on";
+      const hotThreshold = Number(form.get("hot_threshold") ?? 15);
+      await updateUpvoteSettings({
+        upvotesEnabled,
+        autoHotEnabled,
+        hotThreshold: Number.isFinite(hotThreshold) && hotThreshold > 0 ? hotThreshold : 15,
+      });
+      return redirect("/admin?saved=upvote_settings");
     }
     if (action === "approve") {
       await approveSubmission(String(form.get("id") ?? ""));

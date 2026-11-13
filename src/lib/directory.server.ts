@@ -25,6 +25,7 @@ type AppRow = {
   featured_tier?: string | null;
   featured_until?: string | Date | null;
   is_hot?: boolean;
+  hot_marked_at?: string | Date | null;
   is_user_submitted?: boolean;
   views_7d?: number | string;
   created_at: string | Date;
@@ -38,6 +39,10 @@ type AppRow = {
   badge_detail: string;
   submitter_email: string | null;
   submitter_x?: string | null;
+  click_count?: number | string;
+  try_count?: number | string;
+  upvote_count?: number | string;
+  dashboard_token?: string | null;
 };
 
 type GuideRow = {
@@ -90,6 +95,7 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
     featuredUntil: row.featured_until ? iso(row.featured_until) : null,
     isHot: asBool(row.is_hot),
+    hotMarkedAt: row.hot_marked_at ? iso(row.hot_marked_at) : null,
     isUserSubmitted: asBool(row.is_user_submitted),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
@@ -99,6 +105,10 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     status: row.status,
     badgeStatus: row.badge_status,
     badgeDetail: row.badge_detail,
+    clickCount: Number(row.click_count ?? 0),
+    tryCount: Number(row.try_count ?? 0),
+    upvoteCount: Number(row.upvote_count ?? 0),
+    dashboardToken: row.dashboard_token ?? null,
   };
 }
 
@@ -414,12 +424,28 @@ export async function countActiveEditorChoiceApps(excludeId?: string): Promise<n
   return Number(rows[0]?.count ?? 0);
 }
 
+export async function getPaidSlotDates(tier: "featured" | "article"): Promise<string[]> {
+  const sql = await directorySql();
+  const rows = await sql.query<{ featured_until: string | Date | null }>(
+    `select featured_until from apps
+     where editor_choice = true
+       and status = 'published'
+       and coalesce(featured_tier, 'featured') = $1
+       and featured_until is not null
+       and featured_until > now()
+     order by featured_until asc`,
+    [tier],
+  );
+  return rows.map((r) => (r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until)));
+}
+
 export type EditorChoiceSlotsInfo = {
   total: number;
   active: number;
   remaining: number;
   isFull: boolean;
   nextDate: string;
+  openDates: string[];
 };
 
 export type PublicOffer = {
@@ -463,10 +489,12 @@ export async function publicOffer(): Promise<PublicOffer> {
     );
   }
 
-  const [activeTotal, activeFeatured, activeArticle] = await Promise.all([
+  const [activeTotal, activeFeatured, activeArticle, featuredOpenDates, articleOpenDates] = await Promise.all([
     countActiveEditorChoiceApps(),
     countActiveTierApps("featured"),
     countActiveTierApps("article"),
+    getPaidSlotDates("featured"),
+    getPaidSlotDates("article"),
   ]);
 
   const nextDate = getNextCycleLabel();
@@ -480,6 +508,7 @@ export async function publicOffer(): Promise<PublicOffer> {
     remaining: featuredRemaining,
     isFull: featuredRemaining === 0,
     nextDate,
+    openDates: featuredOpenDates,
   };
 
   const articleSlots: EditorChoiceSlotsInfo = {
@@ -488,6 +517,7 @@ export async function publicOffer(): Promise<PublicOffer> {
     remaining: articleRemaining,
     isFull: articleRemaining === 0,
     nextDate,
+    openDates: articleOpenDates,
   };
 
   return {
@@ -505,6 +535,7 @@ export async function publicOffer(): Promise<PublicOffer> {
       remaining: totalRemaining,
       isFull: totalRemaining === 0,
       nextDate,
+      openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
     },
   };
 }
@@ -564,6 +595,8 @@ export async function adminStats() {
     console.error("adminStats occupants query error:", err);
   }
 
+  const upvoteSettings = await getUpvoteSettings();
+
   return {
     free: live.filter((app) => app.pricing === "free").length,
     paid: live.filter((app) => app.pricing === "paid").length,
@@ -585,6 +618,7 @@ export async function adminStats() {
     draftGuides: guides.filter((guide) => guide.status !== "published").length,
     revenueCents: Number(revenue[0]?.cents ?? 0),
     telegramConfigured: isTelegramConfigured(),
+    upvoteSettings,
   };
 }
 
@@ -598,7 +632,7 @@ export async function toggleAppHot(id: string) {
   const currentHot = asBool(rows[0].is_hot);
   const nextHot = !currentHot;
   await sql.query(
-    "update apps set is_hot = $1, updated_at = now() where id = $2",
+    "update apps set is_hot = $1, hot_marked_at = case when $1 then now() else null end, updated_at = now() where id = $2",
     [nextHot, id],
   );
   await audit(sql, nextHot ? "mark_hot" : "unmark_hot", id, `Hot set to ${nextHot}`);
@@ -1349,6 +1383,13 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     const updatedEditorChoice = isChoice ? true : existingApp.editor_choice;
     const updatedTier = isChoice ? tier : existingApp.featured_tier;
 
+    // Generate dashboard token if not already assigned
+    const dashTokenRows = await sql.query<{ dashboard_token: string | null }>(
+      "select dashboard_token from apps where id = $1 limit 1",
+      [existingApp.id],
+    );
+    const dashboardToken = dashTokenRows[0]?.dashboard_token || randomUUID();
+
     await sql.query(
       `update apps set
         name = $1,
@@ -1369,10 +1410,12 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
           else featured_until
         end,
         is_hot = case when $13 then true else is_hot end,
+        hot_marked_at = case when $13 and not is_hot then now() else hot_marked_at end,
         submitter_email = coalesce(nullif($14, ''), submitter_email),
         submitter_x = coalesce(nullif($15, ''), submitter_x),
+        dashboard_token = coalesce(dashboard_token, $16),
         updated_at = now()
-      where id = $16`,
+      where id = $17`,
       [
         submission.app_name,
         submission.tagline,
@@ -1389,6 +1432,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         makeHot,
         submission.email,
         submission.x_handle || "",
+        dashboardToken,
         existingApp.id,
       ],
     );
@@ -1403,10 +1447,12 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       isUpdate: true,
       isChoice,
       tier: updatedTier,
+      dashboardToken,
     };
   }
 
   const appId = randomUUID();
+  const dashboardToken = randomUUID();
   let slug =
     submission.app_name
       .toLowerCase()
@@ -1418,8 +1464,8 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, is_hot, demo, status, submitter_email, submitter_x, is_user_submitted
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,$15,'published',$16,$17,true)`,
+      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, demo, status, submitter_email, submitter_x, is_user_submitted, dashboard_token
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,case when $14 then now() else null end,$15,'published',$16,$17,true,$18)`,
     [
       appId,
       submission.app_name,
@@ -1438,11 +1484,12 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       submission.demo || "",
       submission.email,
       submission.x_handle || "",
+      dashboardToken,
     ],
   );
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
   await audit(sql, "approve", slug, submission.plan);
-  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier };
+  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier, dashboardToken };
 }
 
 export async function runBadgeChecks() {
@@ -1476,4 +1523,247 @@ export async function runBadgeChecks() {
     results.push({ slug: row.slug, result: unpublish ? "unpublished" : result, detail: check.message });
   }
   return results;
+}
+
+// -------------------------------------------------------------
+// Hot Auto-Expiry
+// -------------------------------------------------------------
+export async function expireOldHotApps(): Promise<number> {
+  const sql = await directorySql();
+  const rows = await sql.query<{ id: string }>(
+    `update apps
+     set is_hot = false, hot_marked_at = null, updated_at = now()
+     where is_hot = true
+       and hot_marked_at is not null
+       and hot_marked_at < now() - interval '30 days'
+     returning id`,
+  );
+  if (rows.length > 0) {
+    await audit(sql, "expire_hot", `${rows.length} apps`, `Expired hot tags older than 30 days`);
+  }
+  return rows.length;
+}
+
+// -------------------------------------------------------------
+// Click & Try-App Tracking
+// -------------------------------------------------------------
+export async function recordAppClick(appId: string, type: "click" | "try"): Promise<boolean> {
+  const sql = await directorySql();
+  const column = type === "try" ? "try_count" : "click_count";
+  const rows = await sql.query<{ id: string }>(
+    `update apps set ${column} = coalesce(${column}, 0) + 1 where id = $1 returning id`,
+    [appId],
+  );
+  return rows.length > 0;
+}
+
+// -------------------------------------------------------------
+// Submitter Mini-Dashboard
+// -------------------------------------------------------------
+export async function getDashboardByToken(token: string): Promise<(AppItem & { editorChoice: boolean; status: string; badgeStatus: string; badgeDetail: string; submitterEmail: string | null; submitterX: string | null }) | null> {
+  if (!token || typeof token !== "string") return null;
+  const sql = await directorySql();
+  const rows = await sql.query<AppRow>(
+    "select * from apps where dashboard_token = $1 limit 1",
+    [token.trim()],
+  );
+  const row = rows[0];
+  if (!row) return null;
+  const base = toApp(row);
+  return {
+    ...base,
+    submitterEmail: row.submitter_email ?? null,
+    submitterX: row.submitter_x ?? null,
+  };
+}
+
+export async function updateAppByToken(
+  token: string,
+  changes: {
+    tagline?: string;
+    description?: string;
+    demo?: string;
+    pricing?: Pricing;
+    category?: string;
+    icon?: string;
+    name?: string;
+  },
+): Promise<boolean> {
+  if (!token || typeof token !== "string") return false;
+  const sql = await directorySql();
+  const rows = await sql.query<{ id: string; category: string; category_name: string; category_icon: string }>(
+    "select id, category, category_name, category_icon from apps where dashboard_token = $1 limit 1",
+    [token.trim()],
+  );
+  const current = rows[0];
+  if (!current) return false;
+
+  let catSlug = current.category;
+  let catName = current.category_name;
+  let catEmoji = current.category_icon;
+  if (changes.category) {
+    const found = findShelfCategory(changes.category);
+    if (found) {
+      catSlug = found.slug;
+      catName = found.name;
+      catEmoji = found.emoji;
+    }
+  }
+
+  await sql.query(
+    `update apps set
+      name = coalesce(nullif($1, ''), name),
+      tagline = coalesce(nullif($2, ''), tagline),
+      description = coalesce(nullif($3, ''), description),
+      demo = coalesce($4, demo),
+      pricing = coalesce(nullif($5, '')::pricing, pricing),
+      category = $6,
+      category_name = $7,
+      category_icon = $8,
+      icon = coalesce(nullif($9, ''), icon),
+      updated_at = now()
+    where id = $10`,
+    [
+      changes.name?.trim() || "",
+      changes.tagline?.trim() || "",
+      changes.description?.trim() || "",
+      changes.demo !== undefined ? changes.demo.trim() : null,
+      changes.pricing ? cleanPricing(changes.pricing) : "",
+      catSlug,
+      catName,
+      catEmoji,
+      changes.icon?.trim() || "",
+      current.id,
+    ],
+  );
+  await audit(sql, "dashboard_edit", current.id, `Submitter edited listing via dashboard`);
+  return true;
+}
+
+// -------------------------------------------------------------
+// Upvote Settings & System
+// -------------------------------------------------------------
+export type UpvoteSettings = {
+  upvotesEnabled: boolean;
+  autoHotEnabled: boolean;
+  hotThreshold: number;
+};
+
+export async function getUpvoteSettings(): Promise<UpvoteSettings> {
+  const sql = await directorySql();
+  const rows = await sql.query<{ key: string; value: string }>(
+    "select key, value from settings where key in ('upvotes_enabled', 'upvote_auto_hot_enabled', 'upvote_hot_threshold')",
+  );
+  const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
+  return {
+    upvotesEnabled: map.upvotes_enabled === undefined ? true : asBool(map.upvotes_enabled),
+    autoHotEnabled: map.upvote_auto_hot_enabled === undefined ? true : asBool(map.upvote_auto_hot_enabled),
+    hotThreshold: Number(map.upvote_hot_threshold ?? 15) || 15,
+  };
+}
+
+export async function updateUpvoteSettings(settings: Partial<UpvoteSettings>): Promise<void> {
+  const sql = await directorySql();
+  if (settings.upvotesEnabled !== undefined) {
+    await sql.query(
+      `insert into settings (key, value) values ('upvotes_enabled', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(settings.upvotesEnabled)],
+    );
+  }
+  if (settings.autoHotEnabled !== undefined) {
+    await sql.query(
+      `insert into settings (key, value) values ('upvote_auto_hot_enabled', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(settings.autoHotEnabled)],
+    );
+  }
+  if (settings.hotThreshold !== undefined) {
+    await sql.query(
+      `insert into settings (key, value) values ('upvote_hot_threshold', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(Math.max(1, Math.round(settings.hotThreshold)))],
+    );
+  }
+}
+
+export async function submitAppUpvote(appId: string, fingerprint: string): Promise<{
+  ok: boolean;
+  alreadyVoted: boolean;
+  upvoteCount: number;
+  promotedToHot: boolean;
+  message?: string;
+}> {
+  const sql = await directorySql();
+  const settings = await getUpvoteSettings();
+  if (!settings.upvotesEnabled) {
+    return { ok: false, alreadyVoted: false, upvoteCount: 0, promotedToHot: false, message: "Upvoting is currently disabled" };
+  }
+
+  // Check if fingerprint already voted for this app
+  const existing = await sql.query<{ id: string }>(
+    "select id from app_upvotes where app_id = $1 and fingerprint = $2 limit 1",
+    [appId, fingerprint],
+  );
+  if (existing.length > 0) {
+    const cur = await sql.query<{ upvote_count: number }>("select upvote_count from apps where id = $1 limit 1", [appId]);
+    return {
+      ok: true,
+      alreadyVoted: true,
+      upvoteCount: Number(cur[0]?.upvote_count ?? 0),
+      promotedToHot: false,
+    };
+  }
+
+  // Insert vote
+  await sql.query(
+    "insert into app_upvotes (app_id, fingerprint) values ($1, $2) on conflict do nothing",
+    [appId, fingerprint],
+  );
+
+  // Increment upvote_count atomically
+  const updatedRows = await sql.query<{ id: string; upvote_count: number; is_hot: boolean }>(
+    `update apps set upvote_count = coalesce(upvote_count, 0) + 1 where id = $1 returning id, upvote_count, is_hot`,
+    [appId],
+  );
+  const row = updatedRows[0];
+  const newCount = Number(row?.upvote_count ?? 0);
+  const currentlyHot = asBool(row?.is_hot);
+
+  let promotedToHot = false;
+  if (settings.autoHotEnabled && !currentlyHot && newCount >= settings.hotThreshold) {
+    await sql.query(
+      "update apps set is_hot = true, hot_marked_at = now(), updated_at = now() where id = $1",
+      [appId],
+    );
+    await audit(sql, "auto_promote_hot", appId, `Auto-promoted to Hot via ${newCount} upvotes (threshold: ${settings.hotThreshold})`);
+    promotedToHot = true;
+  }
+
+  return {
+    ok: true,
+    alreadyVoted: false,
+    upvoteCount: newCount,
+    promotedToHot,
+  };
+}
+
+export async function promoteEligibleUpvotedApps(): Promise<number> {
+  const sql = await directorySql();
+  const settings = await getUpvoteSettings();
+  if (!settings.autoHotEnabled) return 0;
+
+  const rows = await sql.query<{ id: string }>(
+    `update apps
+     set is_hot = true, hot_marked_at = now(), updated_at = now()
+     where status = 'published'
+       and is_hot = false
+       and coalesce(upvote_count, 0) >= $1
+     returning id`,
+    [settings.hotThreshold],
+  );
+  if (rows.length > 0) {
+    await audit(sql, "cron_promote_hot", `${rows.length} apps`, `Promoted to hot via upvotes cron (threshold: ${settings.hotThreshold})`);
+  }
+  return rows.length;
 }

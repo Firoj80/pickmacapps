@@ -21,6 +21,15 @@ function appMetaDescription(app: AppItem): string {
   return `Discover ${app.name} for Mac. Explore its features, pricing, compatibility and alternatives.`;
 }
 
+function trackTryApp(appId?: string) {
+  if (typeof window === "undefined" || !appId) return;
+  fetch("/api/track", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ appId, type: "try" }),
+  }).catch(() => {});
+}
+
 export const Route = createFileRoute("/app/$slug")({
   beforeLoad: async ({ params, context }) => {
     const resolved = await resolveRouteDirectoryMatch(
@@ -215,7 +224,10 @@ function AppPage() {
                 target="_blank"
                 rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                 data-ml-goal="try_app"
-                onClick={() => trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website })}
+                onClick={() => {
+                  trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website });
+                  trackTryApp(app.id);
+                }}
                 className="hidden shrink-0 items-center gap-1.5 rounded-xl bg-ink px-6 py-3 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:inline-flex"
               >
                 Try the app
@@ -241,7 +253,10 @@ function AppPage() {
                 target="_blank"
                 rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                 data-ml-goal="try_app"
-                onClick={() => trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website })}
+                onClick={() => {
+                  trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website });
+                  trackTryApp(app.id);
+                }}
                 className="inline-flex items-center gap-1.5 rounded-xl bg-ink px-4 py-2 text-sm font-semibold text-canvas transition-colors hover:opacity-85 sm:hidden"
               >
                 Try the app

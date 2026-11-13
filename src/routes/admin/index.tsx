@@ -684,6 +684,79 @@ function AdminHome() {
         </section>
       </div>
 
+      {/* Upvotes & Auto-Promotion Settings */}
+      <section className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-xs">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-ink">Upvotes & Auto-Promotion to Hot</h2>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                  (data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-stone-100 text-muted"
+                }`}
+              >
+                {(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ? "Enabled" : "Disabled"}
+              </span>
+            </div>
+            <p className="mt-1 text-sm leading-relaxed text-body">
+              Allow visitors to upvote apps. When an app accumulates enough votes, it can be automatically promoted to the Hot Apps section.
+            </p>
+          </div>
+        </div>
+
+        <form method="post" action="/api/admin/update-upvote-settings" className="mt-4 grid gap-4 sm:grid-cols-3">
+          <label className="flex items-center gap-3 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
+            <input
+              type="checkbox"
+              name="upvotes_enabled"
+              defaultChecked={(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ?? true}
+              className="h-4 w-4 rounded accent-ink cursor-pointer"
+            />
+            <div>
+              <div className="font-semibold text-ink">Upvotes Sitewide</div>
+              <div className="text-muted text-[11px]">Show ▲ vote badge on app cards</div>
+            </div>
+          </label>
+
+          <label className="flex items-center gap-3 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
+            <input
+              type="checkbox"
+              name="auto_hot_enabled"
+              defaultChecked={(data.stats as { upvoteSettings?: { autoHotEnabled?: boolean } }).upvoteSettings?.autoHotEnabled ?? true}
+              className="h-4 w-4 rounded accent-ink cursor-pointer"
+            />
+            <div>
+              <div className="font-semibold text-ink">Auto-Promote to Hot</div>
+              <div className="text-muted text-[11px]">Mark Hot when threshold reached</div>
+            </div>
+          </label>
+
+          <div className="flex items-center gap-2 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
+            <div className="flex-1">
+              <label htmlFor="hot_threshold" className="font-semibold text-ink block">Vote Threshold</label>
+              <div className="text-muted text-[11px]">Votes needed for Hot</div>
+            </div>
+            <input
+              id="hot_threshold"
+              name="hot_threshold"
+              type="number"
+              min="1"
+              max="500"
+              defaultValue={(data.stats as { upvoteSettings?: { hotThreshold?: number } }).upvoteSettings?.hotThreshold ?? 15}
+              className="w-16 rounded-lg border border-line bg-white px-2 py-1 text-center font-bold text-ink"
+            />
+            <button
+              type="submit"
+              className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-canvas hover:opacity-90 cursor-pointer"
+            >
+              Save
+            </button>
+          </div>
+        </form>
+      </section>
+
       {/* Free-Listing Badges & Telegram Moderation Bot */}
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">

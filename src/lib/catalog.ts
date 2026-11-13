@@ -22,8 +22,13 @@ export type AppItem = {
   featuredTier?: FeaturedTier | null;
   featuredUntil?: string | null;
   isHot?: boolean;
+  hotMarkedAt?: string | null;
   isUserSubmitted?: boolean;
   views7d?: number;
+  clickCount?: number;
+  tryCount?: number;
+  upvoteCount?: number;
+  dashboardToken?: string | null;
   createdAt: string;
   updatedAt?: string;
   demo: string;
