@@ -419,10 +419,10 @@ function AdminHome() {
                             {occupant.featuredUntil ? (
                               <>
                                 <span>·</span>
-                                <span className="font-mono text-sky-700">
+                                <span className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
                                   {(() => {
                                     const until = new Date(occupant.featuredUntil);
-                                    const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                                    const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
                                     const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                                     return days > 0 ? `${days} days remaining (${formatted})` : `Expired on ${formatted}`;
                                   })()}
@@ -499,10 +499,10 @@ function AdminHome() {
                             {occupant.featuredUntil ? (
                               <>
                                 <span>·</span>
-                                <span className="font-mono text-sky-700">
+                                <span className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
                                   {(() => {
                                     const until = new Date(occupant.featuredUntil);
-                                    const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                                    const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
                                     const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                                     return days > 0 ? `${days} days remaining (${formatted})` : `Expired on ${formatted}`;
                                   })()}
@@ -569,14 +569,14 @@ function AdminHome() {
                         >
                           {h.name}
                         </Link>
-                        <div className="flex items-center gap-1.5 text-[10px] text-muted">
-                          <span>/{h.slug}</span>
+                        <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                          <span className="text-[11px]">/{h.slug}</span>
                           <span>·</span>
-                          <span className="font-mono text-rose-600">
+                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 ring-1 ring-rose-200/70">
                             {(() => {
                               const marked = new Date(h.hotMarkedAt || Date.now());
                               const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                              const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+                              const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
                               const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
                               return `${daysLeft} days remaining (${formatted})`;
                             })()}

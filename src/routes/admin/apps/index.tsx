@@ -315,13 +315,15 @@ function AppsPage() {
                       ) : null}
                     </div>
                     {app.editorChoice && app.featuredUntil ? (
-                      <div className="mt-1 text-[10px] font-mono text-muted">
-                        {(() => {
-                          const until = new Date(app.featuredUntil);
-                          const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
-                          const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                          return days > 0 ? `Paid expires: ${formatted} (${days} days left)` : `Paid expired: ${formatted}`;
-                        })()}
+                      <div className="mt-1">
+                        <span className="inline-block rounded-md bg-sky-50 px-2 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
+                          {(() => {
+                            const until = new Date(app.featuredUntil);
+                            const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                            const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                            return days > 0 ? `Paid expires: ${formatted} (${days} days left)` : `Paid expired: ${formatted}`;
+                          })()}
+                        </span>
                       </div>
                     ) : null}
                   </td>
@@ -364,14 +366,16 @@ function AppsPage() {
                       </button>
                     </form>
                     {app.isHot ? (
-                      <div className="mt-1 text-[10px] text-muted font-mono">
-                        {(() => {
-                          const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
-                          const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                          const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
-                          const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                          return `Expires: ${formatted} (${daysLeft} days left)`;
-                        })()}
+                      <div className="mt-1">
+                        <span className="inline-block rounded-md bg-rose-50 px-2 py-0.5 text-[10.5px] font-bold text-rose-700 ring-1 ring-rose-200/70">
+                          {(() => {
+                            const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
+                            const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                            const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                            const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                            return `Expires: ${formatted} (${daysLeft} days left)`;
+                          })()}
+                        </span>
                       </div>
                     ) : null}
                   </td>
