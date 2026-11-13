@@ -363,10 +363,10 @@ function AppsPage() {
                         <span>{app.isHot ? "Hot Active" : "Make Hot"}</span>
                       </button>
                     </form>
-                    {app.isHot && app.hotMarkedAt ? (
+                    {app.isHot ? (
                       <div className="mt-1 text-[10px] text-muted font-mono">
                         {(() => {
-                          const marked = new Date(app.hotMarkedAt);
+                          const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
                           const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
                           const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
                           const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });

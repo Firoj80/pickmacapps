@@ -95,7 +95,11 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
     featuredUntil: row.featured_until ? iso(row.featured_until) : null,
     isHot: asBool(row.is_hot),
-    hotMarkedAt: row.hot_marked_at ? iso(row.hot_marked_at) : null,
+    hotMarkedAt: row.hot_marked_at
+      ? iso(row.hot_marked_at)
+      : asBool(row.is_hot)
+      ? (row.created_at ? iso(row.created_at) : new Date().toISOString())
+      : null,
     isUserSubmitted: asBool(row.is_user_submitted),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
@@ -565,6 +569,7 @@ export async function adminStats() {
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   try {
+    await sql.query("update apps set hot_marked_at = now() where is_hot = true and hot_marked_at is null");
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
       "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 12",
     );
@@ -573,7 +578,9 @@ export async function adminStats() {
       name: r.name,
       slug: r.slug,
       icon: r.icon,
-      hotMarkedAt: r.hot_marked_at ? (r.hot_marked_at instanceof Date ? r.hot_marked_at.toISOString() : String(r.hot_marked_at)) : null,
+      hotMarkedAt: r.hot_marked_at
+        ? (r.hot_marked_at instanceof Date ? r.hot_marked_at.toISOString() : String(r.hot_marked_at))
+        : new Date().toISOString(),
     }));
 
     const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(

@@ -571,20 +571,16 @@ function AdminHome() {
                         </Link>
                         <div className="flex items-center gap-1.5 text-[10px] text-muted">
                           <span>/{h.slug}</span>
-                          {h.hotMarkedAt ? (
-                            <>
-                              <span>·</span>
-                              <span className="font-mono text-rose-600">
-                                {(() => {
-                                  const marked = new Date(h.hotMarkedAt);
-                                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                                  const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
-                                  const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                                  return `${daysLeft} days remaining (${formatted})`;
-                                })()}
-                              </span>
-                            </>
-                          ) : null}
+                          <span>·</span>
+                          <span className="font-mono text-rose-600">
+                            {(() => {
+                              const marked = new Date(h.hotMarkedAt || Date.now());
+                              const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                              const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+                              const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                              return `${daysLeft} days remaining (${formatted})`;
+                            })()}
+                          </span>
                         </div>
                       </div>
                     </div>
