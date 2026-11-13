@@ -60,42 +60,29 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
       <div className={outerFrameClass}>
         {isAnimated ? <div aria-hidden="true" className={waveRingClass} /> : null}
         <div
-          className={`relative z-10 aspect-[16/9] overflow-hidden bg-surface-2 dark:bg-[#101114] ${
+          className={`relative z-10 aspect-[1200/630] overflow-hidden bg-surface-2 dark:bg-[#101114] ${
             isAnimated ? "rounded-[14px]" : "rounded-2xl"
           }`}
         >
           <div aria-hidden="true" className={hoverWaveClass} />
           {showCover ? (
-            <>
-              <img
-                alt=""
-                aria-hidden="true"
-                src={coverSrcActive}
-                loading={priority ? "eager" : "lazy"}
-                decoding="async"
-                onError={(event) => {
-                  event.currentTarget.style.display = "none";
-                }}
-                className="pointer-events-none absolute inset-0 h-full w-full scale-125 object-cover opacity-55 blur-3xl saturate-125"
-              />
-              <img
-                alt={`${app.name} preview`}
-                src={coverSrcActive}
-                loading={priority ? "eager" : "lazy"}
-                decoding={priority ? "sync" : "async"}
-                fetchPriority={priority ? "high" : "auto"}
-                width={800}
-                height={450}
-                onError={() => {
-                  if (coverSrcActive !== cover && cover) {
-                    setCoverSrcActive(cover);
-                  } else {
-                    setCoverFailed(true);
-                  }
-                }}
-                className="relative z-10 h-full w-full object-contain transition duration-300"
-              />
-            </>
+            <img
+              alt={`${app.name} preview`}
+              src={coverSrcActive}
+              loading={priority ? "eager" : "lazy"}
+              decoding={priority ? "sync" : "async"}
+              fetchPriority={priority ? "high" : "auto"}
+              width={1200}
+              height={630}
+              onError={() => {
+                if (coverSrcActive !== cover && cover) {
+                  setCoverSrcActive(cover);
+                } else {
+                  setCoverFailed(true);
+                }
+              }}
+              className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.025]"
+            />
           ) : (
             <div className="flex h-full w-full flex-col items-center justify-center bg-[#0f0f11] p-6 text-center dark:bg-[#141416]">
               <img
@@ -119,41 +106,31 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
             </div>
           )}
 
-          {/* Badges on Preview Canvas (Top-Left) */}
-          <div className="absolute top-3 left-3 z-20 flex flex-wrap items-center gap-1.5">
-            {isGold ? (
-              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2.5 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
-                ★ Featured
-              </span>
-            ) : isBlue ? (
-              <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
-                ✦ Featured
-              </span>
-            ) : isHotCard ? (
-              <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-rose-300/40">
-                <span className="relative flex h-1.5 w-1.5">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-85" />
-                  <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+          {/* Badges on Preview Canvas (Top-Left: Featured or Hot tier only) */}
+          {isGold || isBlue || isHotCard ? (
+            <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5">
+              {isGold ? (
+                <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2.5 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
+                  ★ Featured
                 </span>
-                <span>🔥 Hot</span>
-              </div>
-            ) : null}
-
-            <span
-              className={`flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-semibold tracking-tight shadow-xs backdrop-blur-md ${
-                app.pricing === "free"
-                  ? "bg-emerald-600/90 text-white ring-1 ring-emerald-400/40"
-                  : app.pricing === "freemium"
-                  ? "bg-sky-600/90 text-white ring-1 ring-sky-400/40"
-                  : "bg-black/65 text-white/90 ring-1 ring-white/20"
-              }`}
-            >
-              {pricingLabel[app.pricing] || "Free"}
-            </span>
-          </div>
+              ) : isBlue ? (
+                <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
+                  ✦ Featured
+                </span>
+              ) : isHotCard ? (
+                <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-rose-300/40">
+                  <span className="relative flex h-1.5 w-1.5">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-85" />
+                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
+                  </span>
+                  <span>🔥 Hot</span>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
 
           {/* Top-Right Arrow Action Circle Indicator */}
-          <div className="absolute top-3 right-3 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
+          <div className="absolute top-2.5 right-2.5 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
             <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="7" y1="17" x2="17" y2="7" />
               <polyline points="7 7 17 7 17 17" />

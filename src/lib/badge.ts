@@ -27,6 +27,31 @@ export function publicUrl(value: string) {
   return url;
 }
 
+/**
+ * Verifies whether the HTML contains an authentic PickMacApps badge or backlink.
+ * Rejects generic "badge.svg" or "badge.png" matches that belong to third-party
+ * directories (such as TryMacApps, Product Hunt, MacNative).
+ */
+export function hasPickMacAppsBadge(html: string): boolean {
+  const lower = html.toLowerCase();
+  if (!lower.includes("pickmacapps")) {
+    return false;
+  }
+  const hasBacklink =
+    lower.includes("pickmacapps.store") ||
+    lower.includes("pickmacapps.com") ||
+    /href=["'][^"']*pickmacapps/i.test(lower);
+
+  const hasBadgeAsset =
+    /src=["'][^"']*pickmacapps/i.test(lower) ||
+    lower.includes("badge.svg") ||
+    lower.includes("badge-classic.svg") ||
+    lower.includes("badge-dark.svg") ||
+    lower.includes("featured on pickmacapps");
+
+  return hasBacklink || hasBadgeAsset;
+}
+
 export async function checkBadgeOnPage(value: string) {
   const url = publicUrl(value.trim());
   if (!url) {
@@ -44,10 +69,10 @@ export async function checkBadgeOnPage(value: string) {
     if (!response.ok) {
       return { ok: false, message: `We couldn't open that page (${response.status}).` };
     }
-    const html = (await response.text()).slice(0, 1_500_000).toLowerCase();
-    const found = html.includes("pickmacapps") || html.includes("badge.svg") || html.includes("badge.png");
+    const html = (await response.text()).slice(0, 1_500_000);
+    const found = hasPickMacAppsBadge(html);
     if (!found) {
-      return { ok: false, message: "We couldn't find the PickMacApps badge on that page yet." };
+      return { ok: false, message: "We couldn't find the PickMacApps badge or reciprocal link on that page yet." };
     }
     return { ok: true, message: "Badge found. You can submit your app." };
   } catch {
