@@ -1184,11 +1184,12 @@ export async function submitListing(
   const existingApp = await findExistingPublishedApp(website, name);
   const sql = await directorySql();
   const id = randomUUID();
+  const submissionToken = randomUUID();
   const cleanedPricing = cleanPricing(input.pricing);
   const initialStatus = plan === "choice" ? "awaiting_payment" : "pending";
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category, app_id)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category, app_id, dashboard_token)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)`,
     [
       id,
       name,
@@ -1206,6 +1207,7 @@ export async function submitListing(
       cleanedPricing,
       category.slug,
       existingApp ? existingApp.id : null,
+      submissionToken,
     ],
   );
   const telegramInfo: TelegramSubmissionInfo = {
@@ -1235,6 +1237,7 @@ export async function submitListing(
         : "Submitted. It stays pending until an admin approves it.",
       existingSlug: existingApp?.slug,
       isUpdate: Boolean(existingApp),
+      dashboardToken: submissionToken,
     };
   }
   try {
@@ -1242,7 +1245,7 @@ export async function submitListing(
       submissionId: id,
       email,
       name,
-      returnUrl: `${origin}/submit?submitted=1`,
+      returnUrl: `${origin}/dashboard/${submissionToken}?paid=1`,
       tier: tier === "article" ? "article" : "featured",
       mlVisitorId: attribution?.mlVisitorId,
       mlSessionId: attribution?.mlSessionId,
@@ -1259,7 +1262,12 @@ export async function submitListing(
     await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
       console.error("[telegram] notify paid checkout failed:", err);
     });
-    return { ok: true as const, checkoutUrl: checkout.checkoutUrl, message: "Continue to checkout." };
+    return {
+      ok: true as const,
+      checkoutUrl: checkout.checkoutUrl,
+      message: "Continue to checkout.",
+      dashboardToken: submissionToken,
+    };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Checkout could not be started.";
     return { ok: false as const, message };
@@ -1314,6 +1322,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     tier?: string;
     status: string;
     app_id?: string | null;
+    dashboard_token?: string | null;
   }>("select * from submissions where id = $1", [id]);
   const submission = rows[0];
   if (!submission) throw new Error("Submission not found");
@@ -1389,12 +1398,12 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     const updatedEditorChoice = isChoice ? true : existingApp.editor_choice;
     const updatedTier = isChoice ? tier : existingApp.featured_tier;
 
-    // Generate dashboard token if not already assigned
+    // Use submission's dashboard token, or existing app's token, or generate new
     const dashTokenRows = await sql.query<{ dashboard_token: string | null }>(
       "select dashboard_token from apps where id = $1 limit 1",
       [existingApp.id],
     );
-    const dashboardToken = dashTokenRows[0]?.dashboard_token || randomUUID();
+    const dashboardToken = dashTokenRows[0]?.dashboard_token || submission.dashboard_token || randomUUID();
 
     await sql.query(
       `update apps set
@@ -1458,7 +1467,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   }
 
   const appId = randomUUID();
-  const dashboardToken = randomUUID();
+  const dashboardToken = submission.dashboard_token || randomUUID();
   let slug =
     submission.app_name
       .toLowerCase()
@@ -1566,20 +1575,126 @@ export async function recordAppClick(appId: string, type: "click" | "try"): Prom
 // -------------------------------------------------------------
 // Submitter Mini-Dashboard
 // -------------------------------------------------------------
-export async function getDashboardByToken(token: string): Promise<(AppItem & { editorChoice: boolean; status: string; badgeStatus: string; badgeDetail: string; submitterEmail: string | null; submitterX: string | null }) | null> {
+export type DashboardViewData = (AppItem & {
+  editorChoice: boolean;
+  status: string;
+  badgeStatus: string;
+  badgeDetail: string;
+  submitterEmail: string | null;
+  submitterX: string | null;
+  isSubmissionPending?: boolean;
+  submissionPlan?: string;
+  submissionTier?: string;
+  submissionCreatedAt?: string;
+});
+
+export async function getDashboardByToken(token: string): Promise<DashboardViewData | null> {
   if (!token || typeof token !== "string") return null;
   const sql = await directorySql();
-  const rows = await sql.query<AppRow>(
+  const cleanToken = token.trim();
+
+  // 1. Check if token belongs to an existing published app
+  const appRows = await sql.query<AppRow>(
     "select * from apps where dashboard_token = $1 limit 1",
-    [token.trim()],
+    [cleanToken],
   );
-  const row = rows[0];
-  if (!row) return null;
-  const base = toApp(row);
+  if (appRows[0]) {
+    const row = appRows[0];
+    const base = toApp(row);
+    return {
+      ...base,
+      submitterEmail: row.submitter_email ?? null,
+      submitterX: row.submitter_x ?? null,
+      isSubmissionPending: false,
+    };
+  }
+
+  // 2. Otherwise, check if token belongs to a pending / awaiting_payment submission
+  const subRows = await sql.query<{
+    id: string;
+    app_name: string;
+    website: string;
+    tagline: string;
+    description: string;
+    icon: string;
+    demo: string;
+    pricing: string;
+    category: string;
+    email: string;
+    x_handle: string;
+    plan: string;
+    tier: string;
+    badge_ok: boolean;
+    status: string;
+    app_id: string | null;
+    created_at: string | Date;
+    dashboard_token: string | null;
+  }>(
+    "select * from submissions where dashboard_token = $1 limit 1",
+    [cleanToken],
+  );
+
+  const sub = subRows[0];
+  if (!sub) return null;
+
+  // If this submission was approved and attached to an app, return that app
+  if (sub.app_id) {
+    const attachedApps = await sql.query<AppRow>("select * from apps where id = $1 limit 1", [sub.app_id]);
+    if (attachedApps[0]) {
+      const base = toApp(attachedApps[0]);
+      return {
+        ...base,
+        submitterEmail: attachedApps[0].submitter_email ?? null,
+        submitterX: attachedApps[0].submitter_x ?? null,
+        isSubmissionPending: false,
+      };
+    }
+  }
+
+  const category = findShelfCategory(sub.category) ?? {
+    slug: "utility",
+    name: "Utility",
+    emoji: "🔧",
+    paragraphs: [],
+    tips: [],
+  };
+
+  // Return a pending app preview structure for the dashboard
   return {
-    ...base,
-    submitterEmail: row.submitter_email ?? null,
-    submitterX: row.submitter_x ?? null,
+    id: sub.id,
+    name: sub.app_name,
+    slug: sub.app_name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+    tagline: sub.tagline,
+    description: sub.description,
+    icon: sub.icon,
+    website: sub.website,
+    pricing: (sub.pricing as Pricing) || "free",
+    category: category.slug,
+    categoryName: category.name,
+    categoryIcon: category.emoji,
+    featured: false,
+    editorChoice: sub.plan === "choice",
+    featuredTier: sub.tier === "article" ? "article" : sub.plan === "choice" ? "featured" : null,
+    featuredUntil: null,
+    isHot: false,
+    isUserSubmitted: true,
+    views7d: 0,
+    clickCount: 0,
+    tryCount: 0,
+    upvoteCount: 0,
+    createdAt: iso(sub.created_at),
+    demo: sub.demo,
+    related: [],
+    status: sub.status,
+    badgeStatus: sub.badge_ok ? "ok" : "unchecked",
+    badgeDetail: "",
+    dashboardToken: sub.dashboard_token ?? cleanToken,
+    submitterEmail: sub.email,
+    submitterX: sub.x_handle,
+    isSubmissionPending: true,
+    submissionPlan: sub.plan,
+    submissionTier: sub.tier,
+    submissionCreatedAt: iso(sub.created_at),
   };
 }
 
@@ -1597,12 +1712,50 @@ export async function updateAppByToken(
 ): Promise<boolean> {
   if (!token || typeof token !== "string") return false;
   const sql = await directorySql();
+  const cleanToken = token.trim();
   const rows = await sql.query<{ id: string; category: string; category_name: string; category_icon: string }>(
     "select id, category, category_name, category_icon from apps where dashboard_token = $1 limit 1",
-    [token.trim()],
+    [cleanToken],
   );
-  const current = rows[0];
-  if (!current) return false;
+  let current = rows[0];
+  if (!current) {
+    // If not found in apps table, check if it's a pending submission
+    const subRows = await sql.query<{ id: string; category: string }>(
+      "select id, category from submissions where dashboard_token = $1 limit 1",
+      [cleanToken],
+    );
+    const sub = subRows[0];
+    if (!sub) return false;
+
+    let catSlug = sub.category;
+    if (changes.category) {
+      const found = findShelfCategory(changes.category);
+      if (found) catSlug = found.slug;
+    }
+
+    await sql.query(
+      `update submissions set
+        app_name = coalesce(nullif($1, ''), app_name),
+        tagline = coalesce(nullif($2, ''), tagline),
+        description = coalesce(nullif($3, ''), description),
+        demo = coalesce($4, demo),
+        pricing = coalesce(nullif($5, ''), pricing),
+        category = $6,
+        icon = coalesce(nullif($7, ''), icon)
+      where id = $8`,
+      [
+        changes.name?.trim() || "",
+        changes.tagline?.trim() || "",
+        changes.description?.trim() || "",
+        changes.demo !== undefined ? changes.demo.trim() : null,
+        changes.pricing ? cleanPricing(changes.pricing) : "",
+        catSlug,
+        changes.icon?.trim() || "",
+        sub.id,
+      ],
+    );
+    return true;
+  }
 
   let catSlug = current.category;
   let catName = current.category_name;

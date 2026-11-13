@@ -712,6 +712,10 @@ function SubmitPage() {
                             price: currentPrice,
                             appName: name.trim(),
                           });
+                          if (result.dashboardToken) {
+                            window.location.href = `/dashboard/${result.dashboardToken}?new=1`;
+                            return;
+                          }
                           setSent(true);
                         } else {
                           setBadge("fail");
