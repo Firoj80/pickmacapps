@@ -22,7 +22,11 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as SponsorRouteImport } from './routes/sponsor'
 import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminBadgesRouteImport } from './routes/admin/badges'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminSubmissionsRouteImport } from './routes/admin/submissions'
+import { Route as AdminTelegramRouteImport } from './routes/admin/telegram'
+import { Route as AdminUpvotesRouteImport } from './routes/admin/upvotes'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
 import { Route as ApiUpvoteRouteImport } from './routes/api/upvote'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
@@ -118,9 +122,29 @@ const AdminIndexRoute = AdminIndexRouteImport.update({
   path: '/admin/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminBadgesRoute = AdminBadgesRouteImport.update({
+  id: '/admin/badges',
+  path: '/admin/badges',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminSubmissionsRoute = AdminSubmissionsRouteImport.update({
+  id: '/admin/submissions',
+  path: '/admin/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminTelegramRoute = AdminTelegramRouteImport.update({
+  id: '/admin/telegram',
+  path: '/admin/telegram',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminUpvotesRoute = AdminUpvotesRouteImport.update({
+  id: '/admin/upvotes',
+  path: '/admin/upvotes',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiTrackRoute = ApiTrackRouteImport.update({
@@ -282,7 +306,11 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
+  '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/telegram': typeof AdminTelegramRoute
+  '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
@@ -327,7 +355,11 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
+  '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/telegram': typeof AdminTelegramRoute
+  '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
@@ -373,7 +405,11 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/sponsor': typeof SponsorRoute
   '/submit': typeof SubmitRoute
+  '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/submissions': typeof AdminSubmissionsRoute
+  '/admin/telegram': typeof AdminTelegramRoute
+  '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
@@ -420,7 +456,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/submit'
+    | '/admin/badges'
     | '/admin/login'
+    | '/admin/submissions'
+    | '/admin/telegram'
+    | '/admin/upvotes'
     | '/api/track'
     | '/api/upvote'
     | '/app/$slug'
@@ -465,7 +505,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/submit'
+    | '/admin/badges'
     | '/admin/login'
+    | '/admin/submissions'
+    | '/admin/telegram'
+    | '/admin/upvotes'
     | '/api/track'
     | '/api/upvote'
     | '/app/$slug'
@@ -510,7 +554,11 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/sponsor'
     | '/submit'
+    | '/admin/badges'
     | '/admin/login'
+    | '/admin/submissions'
+    | '/admin/telegram'
+    | '/admin/upvotes'
     | '/api/track'
     | '/api/upvote'
     | '/app/$slug'
@@ -556,7 +604,11 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   SponsorRoute: typeof SponsorRoute
   SubmitRoute: typeof SubmitRoute
+  AdminBadgesRoute: typeof AdminBadgesRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminSubmissionsRoute: typeof AdminSubmissionsRoute
+  AdminTelegramRoute: typeof AdminTelegramRoute
+  AdminUpvotesRoute: typeof AdminUpvotesRoute
   ApiTrackRoute: typeof ApiTrackRoute
   ApiUpvoteRoute: typeof ApiUpvoteRoute
   AppSlugRoute: typeof AppSlugRoute
@@ -682,11 +734,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/badges': {
+      id: '/admin/badges'
+      path: '/admin/badges'
+      fullPath: '/admin/badges'
+      preLoaderRoute: typeof AdminBadgesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/admin/login': {
       id: '/admin/login'
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/submissions': {
+      id: '/admin/submissions'
+      path: '/admin/submissions'
+      fullPath: '/admin/submissions'
+      preLoaderRoute: typeof AdminSubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/telegram': {
+      id: '/admin/telegram'
+      path: '/admin/telegram'
+      fullPath: '/admin/telegram'
+      preLoaderRoute: typeof AdminTelegramRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/upvotes': {
+      id: '/admin/upvotes'
+      path: '/admin/upvotes'
+      fullPath: '/admin/upvotes'
+      preLoaderRoute: typeof AdminUpvotesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/track': {
@@ -908,7 +988,11 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   SponsorRoute: SponsorRoute,
   SubmitRoute: SubmitRoute,
+  AdminBadgesRoute: AdminBadgesRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminSubmissionsRoute: AdminSubmissionsRoute,
+  AdminTelegramRoute: AdminTelegramRoute,
+  AdminUpvotesRoute: AdminUpvotesRoute,
   ApiTrackRoute: ApiTrackRoute,
   ApiUpvoteRoute: ApiUpvoteRoute,
   AppSlugRoute: AppSlugRoute,

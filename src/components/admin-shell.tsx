@@ -1,11 +1,24 @@
 import type { ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 
-export type AdminSection = "overview" | "apps" | "add_app" | "guides" | "add_guide";
+export type AdminSection =
+  | "overview"
+  | "apps"
+  | "add_app"
+  | "guides"
+  | "add_guide"
+  | "submissions"
+  | "upvotes"
+  | "badges"
+  | "telegram";
 
 const mainNav = [
   { to: "/admin", label: "Overview", id: "overview" as const, icon: "📊" },
+  { to: "/admin/submissions", label: "Submissions", id: "submissions" as const, icon: "📥" },
   { to: "/admin/apps", label: "All Apps", id: "apps" as const, icon: "📱" },
+  { to: "/admin/upvotes", label: "Upvotes & Hot", id: "upvotes" as const, icon: "▲" },
+  { to: "/admin/badges", label: "Free Badges", id: "badges" as const, icon: "🔍" },
+  { to: "/admin/telegram", label: "Telegram Bot", id: "telegram" as const, icon: "🤖" },
   { to: "/admin/guides", label: "All Guides", id: "guides" as const, icon: "📖" },
 ];
 
@@ -79,20 +92,18 @@ export function AdminShell({
   lede,
   active,
   actions,
-  sidebarWidgets,
   children,
 }: {
   title: string;
   lede?: string;
   active: AdminSection;
   actions?: ReactNode;
-  sidebarWidgets?: ReactNode;
   children: ReactNode;
 }) {
   const isLoading = useRouterState({ select: (s) => s.isLoading });
 
   return (
-    <div className="min-h-screen bg-[#f4f3ef] lg:grid lg:grid-cols-[300px_minmax(0,1fr)]">
+    <div className="min-h-screen bg-[#f4f3ef] lg:grid lg:grid-cols-[250px_minmax(0,1fr)]">
       {/* Top Loading Progress Bar */}
       {isLoading ? (
         <div
@@ -127,7 +138,7 @@ export function AdminShell({
           </div>
         </div>
 
-        {/* Navigation & Sidebar Widgets Section */}
+        {/* Navigation Section */}
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
           {/* Main Navigation */}
           <div>
@@ -198,13 +209,6 @@ export function AdminShell({
               })}
             </div>
           </div>
-
-          {/* Optional Sidebar Widgets */}
-          {sidebarWidgets ? (
-            <div className="space-y-4 pt-2 border-t border-line/60">
-              {sidebarWidgets}
-            </div>
-          ) : null}
         </div>
 
         {/* Sidebar Footer */}

@@ -1,6 +1,5 @@
-import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { AdminShell, Notice, Pill, fieldClass, statusTone, useAdminNotice } from "@/components/admin-shell";
+import { AdminShell, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminHome, ensureAdminSession, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -33,15 +32,8 @@ function money(cents: number) {
 function AdminHome() {
   const data = Route.useLoaderData();
   const notice = useAdminNotice();
-  const [activeTab, setActiveTab] = useState<"all" | "pending" | "paid">("all");
 
   const waiting = data.submissions.filter((item) => item.status === "pending" || item.status === "paid").length;
-  const filteredSubmissions = data.submissions.filter((item) => {
-    if (activeTab === "pending") return item.status === "pending";
-    if (activeTab === "paid") return item.status === "paid";
-    return true;
-  });
-
   const blueOccupants = data.stats.blueOccupants ?? [];
   const goldOccupants = data.stats.goldOccupants ?? [];
   const hotApps = data.stats.hotApps ?? [];
@@ -49,7 +41,7 @@ function AdminHome() {
   return (
     <AdminShell
       title="Overview"
-      lede="Live system vitals, 30-day slot allocations, traffic trends, and listing management."
+      lede="Live system vitals, 30-day slot allocations, traffic trends, and quick operations."
       active="overview"
       actions={
         <div className="flex flex-wrap items-center gap-2">
@@ -73,7 +65,7 @@ function AdminHome() {
           <form method="post" action="/api/admin/badges">
             <button
               type="submit"
-              className="rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-medium text-ink transition hover:bg-stone-50"
+              className="rounded-xl border border-line bg-white px-3.5 py-2 text-xs font-medium text-ink transition hover:bg-stone-50 cursor-pointer"
             >
               Verify Badges
             </button>
@@ -85,162 +77,6 @@ function AdminHome() {
           >
             + New Guide
           </Link>
-        </div>
-      }
-      sidebarWidgets={
-        <div className="space-y-4">
-          {/* Submissions Pipeline Sidebar Widget */}
-          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-line/60">
-              <span className="font-semibold text-ink flex items-center gap-1.5">
-                <span>📥</span> Submissions Pipeline
-              </span>
-              <span className="rounded-full bg-ink px-1.5 py-0.2 text-[10px] font-bold text-canvas">
-                {data.submissions.length}
-              </span>
-            </div>
-            <div className="mt-2.5 flex items-center justify-between text-[11px]">
-              <span className="text-muted">Pending review:</span>
-              <span className="font-bold text-amber-600">{waiting}</span>
-            </div>
-            <div className="mt-1 flex items-center justify-between text-[11px]">
-              <span className="text-muted">Paid waiting:</span>
-              <span className="font-bold text-sky-600">
-                {data.submissions.filter((s) => s.status === "paid").length}
-              </span>
-            </div>
-            <a
-              href="#submissions-pipeline"
-              className="mt-2.5 block text-center rounded-lg border border-line bg-white py-1.5 text-[11px] font-semibold text-ink hover:bg-stone-100 transition"
-            >
-              View Pipeline ({waiting} waiting) ↓
-            </a>
-          </div>
-
-          {/* Upvotes & Auto-Promotion Sidebar Widget */}
-          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-line/60">
-              <span className="font-semibold text-ink flex items-center gap-1.5">
-                <span>▲</span> Upvotes & Auto-Hot
-              </span>
-              <span
-                className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
-                  (data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-stone-200 text-stone-600"
-                }`}
-              >
-                {(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ? "Enabled" : "Off"}
-              </span>
-            </div>
-
-            <form method="post" action="/api/admin/update-upvote-settings" className="mt-2.5 space-y-2">
-              <label className="flex items-center gap-2 text-[11px] text-body">
-                <input
-                  type="checkbox"
-                  name="upvotes_enabled"
-                  defaultChecked={(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ?? true}
-                  className="h-3.5 w-3.5 rounded accent-ink cursor-pointer"
-                />
-                <span>Upvotes Sitewide</span>
-              </label>
-
-              <label className="flex items-center gap-2 text-[11px] text-body">
-                <input
-                  type="checkbox"
-                  name="auto_hot_enabled"
-                  defaultChecked={(data.stats as { upvoteSettings?: { autoHotEnabled?: boolean } }).upvoteSettings?.autoHotEnabled ?? true}
-                  className="h-3.5 w-3.5 rounded accent-ink cursor-pointer"
-                />
-                <span>Auto-Promote to Hot</span>
-              </label>
-
-              <div className="flex items-center justify-between gap-1 pt-1">
-                <span className="text-[11px] text-muted">Threshold:</span>
-                <div className="flex items-center gap-1">
-                  <input
-                    name="hot_threshold"
-                    type="number"
-                    min="1"
-                    max="500"
-                    defaultValue={(data.stats as { upvoteSettings?: { hotThreshold?: number } }).upvoteSettings?.hotThreshold ?? 15}
-                    className="w-12 rounded border border-line bg-white px-1.5 py-0.5 text-center text-[11px] font-bold text-ink"
-                  />
-                  <button
-                    type="submit"
-                    className="rounded bg-ink px-2 py-0.5 text-[10px] font-bold text-canvas hover:opacity-90 cursor-pointer"
-                  >
-                    Save
-                  </button>
-                </div>
-              </div>
-            </form>
-          </div>
-
-          {/* Free-Listing Badges Sidebar Widget */}
-          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-line/60">
-              <span className="font-semibold text-ink flex items-center gap-1.5">
-                <span>🔍</span> Free-Listing Badges
-              </span>
-              <form method="post" action="/api/admin/badges" className="inline">
-                <button
-                  type="submit"
-                  className="rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-ink border border-line hover:bg-stone-100"
-                >
-                  Check Now
-                </button>
-              </form>
-            </div>
-            <div className="mt-2 text-[11px] text-muted">
-              {data.badges.length} user-submitted free apps
-            </div>
-            <ul className="mt-1.5 max-h-28 space-y-1 overflow-auto text-[10.5px]">
-              {data.badges.slice(0, 5).map((app) => (
-                <li key={app.id} className="flex items-center justify-between gap-1 truncate">
-                  <span className="truncate text-ink">{app.name}</span>
-                  <span className={`shrink-0 font-medium ${app.badgeStatus === "ok" ? "text-emerald-600" : "text-rose-500"}`}>
-                    {app.badgeStatus === "ok" ? "✓ OK" : "✕ Miss"}
-                  </span>
-                </li>
-              ))}
-              {data.badges.length > 5 ? (
-                <li className="text-[10px] text-muted italic">+{data.badges.length - 5} more apps</li>
-              ) : null}
-            </ul>
-          </div>
-
-          {/* Telegram Moderation Bot Sidebar Widget */}
-          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
-            <div className="flex items-center justify-between pb-2 border-b border-line/60">
-              <span className="font-semibold text-ink flex items-center gap-1.5">
-                <span>🤖</span> Telegram Bot
-              </span>
-              <span
-                className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
-                  data.stats.telegramConfigured
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {data.stats.telegramConfigured ? "Active" : "Setup"}
-              </span>
-            </div>
-            <p className="mt-2 text-[10.5px] leading-tight text-muted">
-              {data.stats.telegramConfigured
-                ? "Instant alerts & 1-tap moderation ready."
-                : "Env vars needed: TELEGRAM_BOT_TOKEN & CHAT_ID."}
-            </p>
-            <form method="post" action="/api/admin/telegram" className="mt-2">
-              <button
-                type="submit"
-                disabled={!data.stats.telegramConfigured}
-                className="w-full rounded-lg bg-ink py-1 text-[10.5px] font-semibold text-canvas hover:opacity-90 disabled:opacity-40"
-              >
-                Test Connection
-              </button>
-            </form>
-          </div>
         </div>
       }
     >
@@ -341,8 +177,150 @@ function AdminHome() {
         </div>
       </section>
 
+      {/* Operations & Quick Actions Hub */}
+      <section aria-label="Operations and quick actions" className="mt-5">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-semibold text-ink">Operations & Quick Actions</h2>
+            <p className="text-xs text-muted">Dedicated operational management pages and system controls.</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          {/* Submissions Pipeline */}
+          <Link
+            to="/admin/submissions"
+            preload="intent"
+            className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/30 hover:shadow-sm"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-base">
+                  📥
+                </span>
+                {waiting > 0 ? (
+                  <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-bold text-amber-800">
+                    {waiting} waiting
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-600">
+                    All clear
+                  </span>
+                )}
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-ink group-hover:text-ink">
+                Submissions Pipeline
+              </h3>
+              <p className="mt-1 text-xs text-muted line-clamp-2">
+                Review submitted apps, verify backlink badges, and approve or reject listings.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-ink">
+              <span>Open pipeline</span>
+              <span className="ml-1 transition-transform group-hover:translate-x-0.5">→</span>
+            </div>
+          </Link>
+
+          {/* Upvotes & Auto-Promotion */}
+          <Link
+            to="/admin/upvotes"
+            preload="intent"
+            className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/30 hover:shadow-sm"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-50 text-base">
+                  ▲
+                </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    (data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-stone-100 text-stone-600"
+                  }`}
+                >
+                  {(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ? "Enabled" : "Off"}
+                </span>
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-ink group-hover:text-ink">
+                Upvotes & Auto-Hot
+              </h3>
+              <p className="mt-1 text-xs text-muted line-clamp-2">
+                Configure sitewide voting and threshold ({(data.stats as { upvoteSettings?: { hotThreshold?: number } }).upvoteSettings?.hotThreshold ?? 15} votes) for auto-promotion to Hot.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-ink">
+              <span>Configure rules</span>
+              <span className="ml-1 transition-transform group-hover:translate-x-0.5">→</span>
+            </div>
+          </Link>
+
+          {/* Free-Listing Badges */}
+          <Link
+            to="/admin/badges"
+            preload="intent"
+            className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/30 hover:shadow-sm"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-base">
+                  🔍
+                </span>
+                <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-700">
+                  {data.badges.length} apps
+                </span>
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-ink group-hover:text-ink">
+                Free-Listing Badges
+              </h3>
+              <p className="mt-1 text-xs text-muted line-clamp-2">
+                Audit backlink badges on user-submitted apps and run instant verification checks.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-ink">
+              <span>Audit badges</span>
+              <span className="ml-1 transition-transform group-hover:translate-x-0.5">→</span>
+            </div>
+          </Link>
+
+          {/* Telegram Moderation Bot */}
+          <Link
+            to="/admin/telegram"
+            preload="intent"
+            className="group relative flex flex-col justify-between rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/30 hover:shadow-sm"
+          >
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-purple-50 text-base">
+                  🤖
+                </span>
+                <span
+                  className={`rounded-full px-2 py-0.5 text-[11px] font-bold ${
+                    data.stats.telegramConfigured
+                      ? "bg-emerald-100 text-emerald-800"
+                      : "bg-amber-100 text-amber-800"
+                  }`}
+                >
+                  {data.stats.telegramConfigured ? "Active" : "Setup Needed"}
+                </span>
+              </div>
+              <h3 className="mt-3 text-sm font-semibold text-ink group-hover:text-ink">
+                Telegram Bot
+              </h3>
+              <p className="mt-1 text-xs text-muted line-clamp-2">
+                Instant submission notifications, live badge checks, and 1-tap moderation.
+              </p>
+            </div>
+            <div className="mt-3 flex items-center text-xs font-semibold text-ink">
+              <span>Manage bot</span>
+              <span className="ml-1 transition-transform group-hover:translate-x-0.5">→</span>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Secondary Quick Stats */}
-      <section aria-label="Secondary metrics" className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <section aria-label="Secondary metrics" className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <div className="rounded-xl border border-line bg-white px-3.5 py-2.5">
           <p className="text-[11px] font-medium text-muted">🔥 Hot Apps</p>
           <p className="mt-0.5 text-lg font-semibold text-ink">{data.stats.hotCount ?? 0} active</p>
@@ -446,7 +424,7 @@ function AdminHome() {
                                     const until = new Date(occupant.featuredUntil);
                                     const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
                                     const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                                    return days > 0 ? `Expires ${formatted} (${days}d left)` : `Expired ${formatted}`;
+                                    return days > 0 ? `${days} days remaining (${formatted})` : `Expired on ${formatted}`;
                                   })()}
                                 </span>
                               </>
@@ -526,7 +504,7 @@ function AdminHome() {
                                     const until = new Date(occupant.featuredUntil);
                                     const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
                                     const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                                    return days > 0 ? `Expires ${formatted} (${days}d left)` : `Expired ${formatted}`;
+                                    return days > 0 ? `${days} days remaining (${formatted})` : `Expired on ${formatted}`;
                                   })()}
                                 </span>
                               </>
@@ -602,7 +580,7 @@ function AdminHome() {
                                   const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
                                   const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
                                   const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-                                  return `Expires ${formatted} (${daysLeft}d)`;
+                                  return `${daysLeft} days remaining (${formatted})`;
                                 })()}
                               </span>
                             </>
@@ -616,7 +594,7 @@ function AdminHome() {
                       <button
                         type="submit"
                         title="Remove Hot status"
-                        className="rounded-lg bg-white px-2 py-1 text-[11px] font-medium text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50"
+                        className="rounded-lg bg-white px-2 py-1 text-[11px] font-medium text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50 cursor-pointer"
                       >
                         Remove
                       </button>
@@ -628,178 +606,6 @@ function AdminHome() {
           </div>
         </section>
       </div>
-
-      {/* Submissions Management */}
-      <section id="submissions-pipeline" className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
-        <div className="flex flex-col gap-2 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-sm font-semibold text-ink">Submissions Pipeline</h2>
-            <p className="text-xs text-muted">Review, approve, or reject submissions.</p>
-          </div>
-          <div className="flex items-center gap-1">
-            {(["all", "pending", "paid"] as const).map((tab) => (
-              <button
-                key={tab}
-                type="button"
-                onClick={() => setActiveTab(tab)}
-                className={`rounded-full px-3 py-1 text-xs font-medium capitalize transition ${
-                  activeTab === tab ? "bg-ink text-canvas" : "text-muted hover:bg-stone-100"
-                }`}
-              >
-                {tab === "all" ? `All (${data.submissions.length})` : tab === "pending" ? `Pending (${data.submissions.filter(s => s.status === 'pending').length})` : `Paid (${data.submissions.filter(s => s.status === 'paid').length})`}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {filteredSubmissions.length === 0 ? (
-          <p className="px-4 py-8 text-center text-sm text-muted">No submissions in this view.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-left text-sm">
-              <thead className="text-[11px] tracking-wide text-muted uppercase bg-stone-50/50">
-                <tr>
-                  <th className="px-4 py-2.5 font-medium">App</th>
-                  <th className="px-3 py-2.5 font-medium">Plan & Tier</th>
-                  <th className="px-3 py-2.5 font-medium">Status</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Action</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-line">
-                {filteredSubmissions.map((item) => (
-                  <tr key={item.id} className="transition hover:bg-stone-50/40">
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <p className="font-medium text-ink">{item.app_name}</p>
-                        {item.app_slug ? (
-                          <a
-                            href={`/app/${item.app_slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="inline-flex items-center gap-0.5 rounded-md bg-purple-50 px-2 py-0.5 text-[10.5px] font-semibold text-purple-700 hover:bg-purple-100 dark:bg-purple-950/40 dark:text-purple-300"
-                            title="Updates the live listing upon approval"
-                          >
-                            🔄 Update (/app/{item.app_slug})
-                          </a>
-                        ) : null}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-xs text-muted">
-                        <a href={item.website} className="underline hover:text-ink" target="_blank" rel="noreferrer">
-                          {item.website}
-                        </a>
-                        {item.email && <span>• {item.email}</span>}
-                        {item.x_handle && (
-                          <a
-                            href={`https://x.com/${item.x_handle.replace(/^@/, "")}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="font-medium text-ink hover:underline"
-                          >
-                            • {item.x_handle}
-                          </a>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-3 py-3">
-                      {item.plan === "choice" ? (
-                        <div className="flex flex-col items-start gap-1">
-                          <Pill tone="choice">
-                            {item.tier === "article" ? "🌟 Gold ($120)" : "🔹 Blue ($99)"}
-                          </Pill>
-                          {item.tier === "article" ? (
-                            (data.stats.goldChoice ?? 0) >= 3 && (item.status === "pending" || item.status === "paid") ? (
-                              <span className="text-[10px] font-semibold text-rose-600">⚠️ Gold full (3/3)</span>
-                            ) : (
-                              <span className="text-[10px] font-medium text-emerald-600">
-                                {Math.max(0, 3 - (data.stats.goldChoice ?? 0))}/3 Gold free
-                              </span>
-                            )
-                          ) : (
-                            (data.stats.blueChoice ?? 0) >= 3 && (item.status === "pending" || item.status === "paid") ? (
-                              <span className="text-[10px] font-semibold text-rose-600">⚠️ Blue full (3/3)</span>
-                            ) : (
-                              <span className="text-[10px] font-medium text-emerald-600">
-                                {Math.max(0, 3 - (data.stats.blueChoice ?? 0))}/3 Blue free
-                              </span>
-                            )
-                          )}
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-start gap-1">
-                          <Pill tone="off">Free Listing</Pill>
-                          {Boolean(item.badge_ok) ? (
-                            <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                              Badge Verified
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-rose-600">
-                              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
-                              ⚠️ Badge Missing
-                            </span>
-                          )}
-                        </div>
-                      )}
-                    </td>
-                    <td className="px-3 py-3">
-                      <Pill tone={statusTone(item.status)}>{item.status.replaceAll("_", " ")}</Pill>
-                    </td>
-                    <td className="px-4 py-3 text-right">
-                      {item.status === "pending" || item.status === "paid" ? (
-                        <div className="flex items-center justify-end gap-1.5">
-                          <form method="post" action="/api/admin/reject">
-                            <input type="hidden" name="id" value={item.id} />
-                            <button
-                              type="submit"
-                              className="rounded-lg px-2.5 py-1.5 text-xs text-muted transition hover:bg-stone-100 hover:text-ink cursor-pointer"
-                            >
-                              Reject
-                            </button>
-                          </form>
-                          {item.plan === "free" ? (
-                            <form method="post" action="/api/admin/verify-submission-badge">
-                              <input type="hidden" name="id" value={item.id} />
-                              <button
-                                type="submit"
-                                title="Check PickMacApps badge live on website"
-                                className="rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs font-medium text-ink transition hover:bg-stone-50 cursor-pointer"
-                              >
-                                🔍 Check Badge
-                              </button>
-                            </form>
-                          ) : null}
-                          {item.plan === "free" && !item.badge_ok ? (
-                            <button
-                              type="button"
-                              disabled
-                              title="Cannot approve: PickMacApps badge was not found on website. Verify badge first."
-                              className="rounded-lg bg-stone-200 px-3 py-1.5 text-xs font-medium text-stone-400 cursor-not-allowed"
-                            >
-                              Approve
-                            </button>
-                          ) : (
-                            <form method="post" action="/api/admin/approve">
-                              <input type="hidden" name="id" value={item.id} />
-                              <button
-                                type="submit"
-                                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-canvas transition hover:opacity-90 cursor-pointer"
-                              >
-                                Approve
-                              </button>
-                            </form>
-                          )}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted">{item.email}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </section>
 
       {/* Pricing Configuration Cards */}
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
@@ -814,7 +620,7 @@ function AdminHome() {
                 Blue Badge
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                   (data.stats.blueChoice ?? 0) >= 3 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
                 }`}
               >
@@ -838,7 +644,7 @@ function AdminHome() {
               Compare-at ($)
               <input name="compare" defaultValue={((data.offer.featuredCompareCents ?? data.offer.compareCents) / 100).toFixed(2)} className={fieldClass} />
             </label>
-            <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas hover:opacity-90">
+            <button type="submit" className="rounded-xl bg-ink px-4 py-2.5 text-sm font-medium text-canvas hover:opacity-90 cursor-pointer">
               Save Featured
             </button>
           </form>
@@ -855,7 +661,7 @@ function AdminHome() {
                 Gold Badge
               </span>
               <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                className={`rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${
                   (data.stats.goldChoice ?? 0) >= 3 ? "bg-rose-100 text-rose-700" : "bg-emerald-100 text-emerald-700"
                 }`}
               >
@@ -879,177 +685,10 @@ function AdminHome() {
               Compare-at ($)
               <input name="compare" defaultValue={((data.offer.articleCompareCents ?? 24900) / 100).toFixed(2)} className={fieldClass} />
             </label>
-            <button type="submit" className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:opacity-95">
+            <button type="submit" className="rounded-xl bg-gradient-to-r from-fuchsia-600 to-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-xs hover:opacity-95 cursor-pointer">
               Save Article
             </button>
           </form>
-        </section>
-      </div>
-
-      {/* Upvotes & Auto-Promotion Settings */}
-      <section className="mt-6 rounded-2xl border border-line bg-white p-5 shadow-xs">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-semibold text-ink">Upvotes & Auto-Promotion to Hot</h2>
-              <span
-                className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                  (data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-stone-100 text-muted"
-                }`}
-              >
-                {(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ? "Enabled" : "Disabled"}
-              </span>
-            </div>
-            <p className="mt-1 text-sm leading-relaxed text-body">
-              Allow visitors to upvote apps. When an app accumulates enough votes, it can be automatically promoted to the Hot Apps section.
-            </p>
-          </div>
-        </div>
-
-        <form method="post" action="/api/admin/update-upvote-settings" className="mt-4 grid gap-4 sm:grid-cols-3">
-          <label className="flex items-center gap-3 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
-            <input
-              type="checkbox"
-              name="upvotes_enabled"
-              defaultChecked={(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ?? true}
-              className="h-4 w-4 rounded accent-ink cursor-pointer"
-            />
-            <div>
-              <div className="font-semibold text-ink">Upvotes Sitewide</div>
-              <div className="text-muted text-[11px]">Show ▲ vote badge on app cards</div>
-            </div>
-          </label>
-
-          <label className="flex items-center gap-3 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
-            <input
-              type="checkbox"
-              name="auto_hot_enabled"
-              defaultChecked={(data.stats as { upvoteSettings?: { autoHotEnabled?: boolean } }).upvoteSettings?.autoHotEnabled ?? true}
-              className="h-4 w-4 rounded accent-ink cursor-pointer"
-            />
-            <div>
-              <div className="font-semibold text-ink">Auto-Promote to Hot</div>
-              <div className="text-muted text-[11px]">Mark Hot when threshold reached</div>
-            </div>
-          </label>
-
-          <div className="flex items-center gap-2 rounded-xl border border-line bg-stone-50/70 p-3 text-xs">
-            <div className="flex-1">
-              <label htmlFor="hot_threshold" className="font-semibold text-ink block">Vote Threshold</label>
-              <div className="text-muted text-[11px]">Votes needed for Hot</div>
-            </div>
-            <input
-              id="hot_threshold"
-              name="hot_threshold"
-              type="number"
-              min="1"
-              max="500"
-              defaultValue={(data.stats as { upvoteSettings?: { hotThreshold?: number } }).upvoteSettings?.hotThreshold ?? 15}
-              className="w-16 rounded-lg border border-line bg-white px-2 py-1 text-center font-bold text-ink"
-            />
-            <button
-              type="submit"
-              className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-canvas hover:opacity-90 cursor-pointer"
-            >
-              Save
-            </button>
-          </div>
-        </form>
-      </section>
-
-      {/* Free-Listing Badges & Telegram Moderation Bot */}
-      <div className="mt-6 grid gap-6 lg:grid-cols-2">
-        <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold text-ink">Free-Listing Badges</h2>
-              <p className="mt-1 text-sm leading-relaxed text-body">
-                Only user-submitted free listings are checked. All admin-added catalog apps are permanently exempt from badge checks.
-              </p>
-            </div>
-            <form method="post" action="/api/admin/badges">
-              <button type="submit" className="rounded-xl border border-line px-3 py-2 text-xs font-medium text-ink hover:bg-stone-50">
-                Check Now
-              </button>
-            </form>
-          </div>
-          <ul className="mt-4 max-h-56 space-y-2 overflow-auto text-sm">
-            {data.badges.length === 0 ? <li className="text-muted text-xs">No free listings to check.</li> : null}
-            {data.badges.map((app) => (
-              <li key={app.id} className="flex items-center justify-between gap-3 text-xs">
-                <span className="truncate font-medium text-ink">{app.name}</span>
-                <span className="shrink-0 text-muted">
-                  {app.badgeStatus}
-                  {app.badgeDetail ? ` · ${app.badgeDetail}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-
-        <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-sm font-semibold text-ink">Telegram Moderation Bot</h2>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${
-                    data.stats.telegramConfigured
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-amber-100 text-amber-800"
-                  }`}
-                >
-                  {data.stats.telegramConfigured ? "Configured" : "Env Vars Needed"}
-                </span>
-              </div>
-              <p className="mt-1 text-sm leading-relaxed text-body">
-                Receive instant alerts for every new app submission and approve, reject, or verify its backlink badge directly inside Telegram.
-              </p>
-            </div>
-            <form method="post" action="/api/admin/telegram">
-              <button
-                type="submit"
-                disabled={!data.stats.telegramConfigured}
-                className="shrink-0 rounded-xl bg-ink px-3.5 py-2 text-xs font-semibold text-canvas shadow-xs transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                Connect & Test
-              </button>
-            </form>
-          </div>
-          <div className="mt-4 space-y-1.5 rounded-xl border border-line bg-stone-50/70 p-3.5 text-xs text-body">
-            {data.stats.telegramConfigured ? (
-              <>
-                <p className="font-semibold text-emerald-700">✅ Bot Token & Admin Chat ID active</p>
-                <p className="text-muted leading-relaxed">
-                  Notifications, live badge checks, 1-tap approval, and 5 X post templates are ready.{" "}
-                  <code className="text-ink">TELEGRAM_WEBHOOK_SECRET</code> is optional (auto-managed).
-                </p>
-                <p className="pt-0.5 text-[11px] text-muted">
-                  Webhook: <code className="text-ink">/api/telegram/webhook</code> · Commands: <code>/start</code>, <code>/id</code>, <code>/pending</code>
-                </p>
-              </>
-            ) : (
-              <>
-                <p className="font-semibold text-ink">Environment Variables (Vercel / Server):</p>
-                <ul className="space-y-1 text-muted">
-                  <li>
-                    <code className="text-ink">TELEGRAM_BOT_TOKEN</code> — Bot token from <code>@BotFather</code>
-                  </li>
-                  <li>
-                    <code className="text-ink">TELEGRAM_ADMIN_CHAT_ID</code> — Your numeric Telegram Chat ID (send <code>/id</code> to bot)
-                  </li>
-                  <li>
-                    <code className="text-ink">TELEGRAM_WEBHOOK_SECRET</code> — <em>Optional</em> (auto-generated if omitted)
-                  </li>
-                </ul>
-                <p className="pt-1 text-[11px] text-muted">
-                  Webhook endpoint: <code className="text-ink">/api/telegram/webhook</code> · Commands: <code>/start</code>, <code>/id</code>, <code>/pending</code>
-                </p>
-              </>
-            )}
-          </div>
         </section>
       </div>
     </AdminShell>
