@@ -546,8 +546,16 @@ export async function publicOffer(): Promise<PublicOffer> {
 
 export async function adminStats() {
   const sql = await directorySql();
-  const apps = await sql.query<{ pricing: string; status: string; editor_choice: boolean; featured_tier: string | null; is_hot?: boolean }>(
-    "select pricing, status, editor_choice, featured_tier, is_hot from apps",
+  const apps = await sql.query<{
+    pricing: string;
+    status: string;
+    editor_choice: boolean;
+    featured_tier: string | null;
+    is_hot?: boolean;
+    click_count?: number | string;
+    try_count?: number | string;
+  }>(
+    "select pricing, status, editor_choice, featured_tier, is_hot, click_count, try_count from apps",
   );
   const guides = await sql.query<{ status: string }>("select status from guides");
   const revenue = await sql.query<{ cents: string }>(
@@ -559,6 +567,9 @@ export async function adminStats() {
   ).length;
   const goldChoice = live.filter((app) => app.editor_choice && app.featured_tier === "article").length;
   const hotCount = live.filter((app) => app.is_hot).length;
+
+  const totalCardClicks = apps.reduce((sum, app) => sum + Number(app.click_count ?? 0), 0);
+  const totalTryClicks = apps.reduce((sum, app) => sum + Number(app.try_count ?? 0), 0);
 
   const views7d = 0;
   const views30d = 0;
@@ -632,6 +643,8 @@ export async function adminStats() {
     revenueCents: Number(revenue[0]?.cents ?? 0),
     telegramConfigured: isTelegramConfigured(),
     upvoteSettings,
+    totalCardClicks,
+    totalTryClicks,
   };
 }
 

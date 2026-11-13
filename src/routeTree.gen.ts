@@ -24,6 +24,7 @@ import { Route as SubmitRouteImport } from './routes/submit'
 import { Route as AdminIndexRouteImport } from './routes/admin/index'
 import { Route as AdminBadgesRouteImport } from './routes/admin/badges'
 import { Route as AdminLoginRouteImport } from './routes/admin/login'
+import { Route as AdminStatsRouteImport } from './routes/admin/stats'
 import { Route as AdminSubmissionsRouteImport } from './routes/admin/submissions'
 import { Route as AdminTelegramRouteImport } from './routes/admin/telegram'
 import { Route as AdminUpvotesRouteImport } from './routes/admin/upvotes'
@@ -130,6 +131,11 @@ const AdminBadgesRoute = AdminBadgesRouteImport.update({
 const AdminLoginRoute = AdminLoginRouteImport.update({
   id: '/admin/login',
   path: '/admin/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminStatsRoute = AdminStatsRouteImport.update({
+  id: '/admin/stats',
+  path: '/admin/stats',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminSubmissionsRoute = AdminSubmissionsRouteImport.update({
@@ -308,6 +314,7 @@ export interface FileRoutesByFullPath {
   '/submit': typeof SubmitRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/stats': typeof AdminStatsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
@@ -357,6 +364,7 @@ export interface FileRoutesByTo {
   '/submit': typeof SubmitRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/stats': typeof AdminStatsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
@@ -407,6 +415,7 @@ export interface FileRoutesById {
   '/submit': typeof SubmitRoute
   '/admin/badges': typeof AdminBadgesRoute
   '/admin/login': typeof AdminLoginRoute
+  '/admin/stats': typeof AdminStatsRoute
   '/admin/submissions': typeof AdminSubmissionsRoute
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/admin/badges'
     | '/admin/login'
+    | '/admin/stats'
     | '/admin/submissions'
     | '/admin/telegram'
     | '/admin/upvotes'
@@ -507,6 +517,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/admin/badges'
     | '/admin/login'
+    | '/admin/stats'
     | '/admin/submissions'
     | '/admin/telegram'
     | '/admin/upvotes'
@@ -556,6 +567,7 @@ export interface FileRouteTypes {
     | '/submit'
     | '/admin/badges'
     | '/admin/login'
+    | '/admin/stats'
     | '/admin/submissions'
     | '/admin/telegram'
     | '/admin/upvotes'
@@ -606,6 +618,7 @@ export interface RootRouteChildren {
   SubmitRoute: typeof SubmitRoute
   AdminBadgesRoute: typeof AdminBadgesRoute
   AdminLoginRoute: typeof AdminLoginRoute
+  AdminStatsRoute: typeof AdminStatsRoute
   AdminSubmissionsRoute: typeof AdminSubmissionsRoute
   AdminTelegramRoute: typeof AdminTelegramRoute
   AdminUpvotesRoute: typeof AdminUpvotesRoute
@@ -746,6 +759,13 @@ declare module '@tanstack/react-router' {
       path: '/admin/login'
       fullPath: '/admin/login'
       preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/stats': {
+      id: '/admin/stats'
+      path: '/admin/stats'
+      fullPath: '/admin/stats'
+      preLoaderRoute: typeof AdminStatsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/submissions': {
@@ -990,6 +1010,7 @@ const rootRouteChildren: RootRouteChildren = {
   SubmitRoute: SubmitRoute,
   AdminBadgesRoute: AdminBadgesRoute,
   AdminLoginRoute: AdminLoginRoute,
+  AdminStatsRoute: AdminStatsRoute,
   AdminSubmissionsRoute: AdminSubmissionsRoute,
   AdminTelegramRoute: AdminTelegramRoute,
   AdminUpvotesRoute: AdminUpvotesRoute,

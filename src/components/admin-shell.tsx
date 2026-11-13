@@ -4,6 +4,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 export type AdminSection =
   | "overview"
   | "apps"
+  | "stats"
   | "add_app"
   | "guides"
   | "add_guide"
@@ -14,6 +15,7 @@ export type AdminSection =
 
 const mainNav = [
   { to: "/admin", label: "Overview", id: "overview" as const, icon: "📊" },
+  { to: "/admin/stats", label: "App Analytics", id: "stats" as const, icon: "📈" },
   { to: "/admin/submissions", label: "Submissions", id: "submissions" as const, icon: "📥" },
   { to: "/admin/apps", label: "All Apps", id: "apps" as const, icon: "📱" },
   { to: "/admin/upvotes", label: "Upvotes & Hot", id: "upvotes" as const, icon: "▲" },

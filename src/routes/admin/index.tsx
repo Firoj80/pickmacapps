@@ -177,6 +177,93 @@ function AdminHome() {
         </div>
       </section>
 
+      {/* Directory Engagement & Click Analytics */}
+      <section aria-label="Directory engagement metrics" className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Total App Card Clicks */}
+        <Link
+          to="/admin/stats"
+          preload="intent"
+          className="group rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/20 hover:shadow-sm"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-muted">Total App Card Clicks</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-xs">
+              👁️
+            </span>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="font-display text-[28px] font-semibold tracking-tight text-ink">
+              {(data.stats.totalCardClicks ?? 0).toLocaleString()}
+            </span>
+            <span className="text-xs font-semibold text-indigo-600 group-hover:underline">View stats →</span>
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Total modal card opens across all apps</p>
+        </Link>
+
+        {/* Total "Try App" Button Clicks */}
+        <Link
+          to="/admin/stats"
+          preload="intent"
+          className="group rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/20 hover:shadow-sm"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-muted">Total "Try App" Clicks</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-emerald-50 text-xs">
+              🚀
+            </span>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="font-display text-[28px] font-semibold tracking-tight text-emerald-600">
+              {(data.stats.totalTryClicks ?? 0).toLocaleString()}
+            </span>
+            <span className="text-xs font-semibold text-emerald-700 group-hover:underline">View stats →</span>
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Outbound website referral clicks</p>
+        </Link>
+
+        {/* Click Conversion Rate */}
+        <Link
+          to="/admin/stats"
+          preload="intent"
+          className="group rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/20 hover:shadow-sm"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-medium text-muted">Click Conversion</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-amber-50 text-xs">
+              🎯
+            </span>
+          </div>
+          <div className="mt-2 flex items-baseline justify-between">
+            <span className="font-display text-[28px] font-semibold tracking-tight text-ink">
+              {(data.stats.totalCardClicks ?? 0) > 0
+                ? (((data.stats.totalTryClicks ?? 0) / (data.stats.totalCardClicks ?? 0)) * 100).toFixed(1)
+                : "0.0"}%
+            </span>
+            <span className="text-xs font-semibold text-amber-700 group-hover:underline">Details →</span>
+          </div>
+          <p className="mt-1 text-[11px] text-muted">Try clicks vs. card impressions</p>
+        </Link>
+
+        {/* Analytics Hub Card */}
+        <Link
+          to="/admin/stats"
+          preload="intent"
+          className="group flex flex-col justify-between rounded-2xl border border-dashed border-indigo-200 bg-indigo-50/40 p-4 transition hover:border-indigo-400 hover:bg-indigo-50/70 hover:shadow-sm"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-[12px] font-semibold text-indigo-950">App Analytics & Performance</span>
+            <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-100 text-xs">📈</span>
+          </div>
+          <div className="my-1.5 text-xs text-indigo-800">
+            Per-app breakdown of card clicks and outbound referrals for all {data.stats.free + data.stats.paid + data.stats.freemium} listings.
+          </div>
+          <div className="flex items-center text-xs font-semibold text-indigo-900 group-hover:underline">
+            <span>Explore All Apps</span>
+            <span className="ml-1">→</span>
+          </div>
+        </Link>
+      </section>
+
       {/* Operations & Quick Actions Hub */}
       <section aria-label="Operations and quick actions" className="mt-5">
         <div className="mb-3 flex items-center justify-between">
