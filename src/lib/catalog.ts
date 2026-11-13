@@ -125,15 +125,15 @@ function pinRank(slug: string) {
   return shelfRank.get(slug) ?? Number.POSITIVE_INFINITY;
 }
 
-export function sortApps(list: AppItem[], order: "newest" | "oldest" | "name" | "free") {
+export function sortApps(list: AppItem[], order: "oldest" | "newest" | "name" | "free" = "oldest") {
   const next = [...list];
   if (order === "name") next.sort((a, b) => a.name.localeCompare(b.name));
   else if (order === "free") {
     next.sort((a, b) => (priceRank[a.pricing] ?? 3) - (priceRank[b.pricing] ?? 3));
-  } else if (order === "oldest") {
-    next.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.name.localeCompare(b.name));
-  } else {
+  } else if (order === "newest") {
     next.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name));
+  } else {
+    next.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.name.localeCompare(b.name));
   }
   next.sort((a, b) => {
     const ap = pinRank(a.slug);
@@ -180,9 +180,13 @@ export function appPriorityWeight(app: AppItem): number {
  * If 6 paid apps ARE available, only the paid apps are shown (no hot apps toggled).
  */
 export function getHeroAppIcons(list: readonly AppItem[], max = 6): AppItem[] {
-  const paidApps = [...list.filter((app) => isEditorChoice(app))].sort(
-    (a, b) => featuredTierWeight(b) - featuredTierWeight(a),
-  );
+  const paidApps = [...list.filter((app) => isEditorChoice(app))].sort((a, b) => {
+    const wDiff = featuredTierWeight(b) - featuredTierWeight(a);
+    if (wDiff !== 0) return wDiff;
+    const timeA = new Date(a.createdAt).getTime() || 0;
+    const timeB = new Date(b.createdAt).getTime() || 0;
+    return timeA - timeB || a.name.localeCompare(b.name);
+  });
 
   // If 6 or more paid apps are available, use strictly the paid apps
   if (paidApps.length >= max) {
@@ -196,12 +200,9 @@ export function getHeroAppIcons(list: readonly AppItem[], max = 6): AppItem[] {
   const hotApps = list
     .filter((app) => app.isHot && !paidSlugs.has(app.slug))
     .sort((a, b) => {
-      const vA = a.views7d ?? 0;
-      const vB = b.views7d ?? 0;
-      if (vB !== vA) return vB - vA;
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
-      return timeB - timeA || a.name.localeCompare(b.name);
+      return timeA - timeB || a.name.localeCompare(b.name);
     })
     .slice(0, remainingSlots);
 
@@ -212,7 +213,7 @@ export function shelfApps(
   list: AppItem[] = apps,
   query = "",
   category = "all",
-  order: "newest" | "oldest" | "name" | "free" = "newest",
+  order: "oldest" | "newest" | "name" | "free" = "oldest",
 ) {
   const needle = query.trim().toLowerCase();
   const filtered = list.filter((app) => {
@@ -278,8 +279,14 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[]; guid
 ];
 
 /** Editor’s Choice stays its own row. Every other app is grouped by job. */
-export function homeGroups(list: AppItem[], order: "newest" | "oldest" | "name" | "free" = "newest") {
-  const choice = [...list.filter(isEditorChoice)].sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
+export function homeGroups(list: AppItem[], order: "oldest" | "newest" | "name" | "free" = "oldest") {
+  const choice = [...list.filter(isEditorChoice)].sort((a, b) => {
+    const diff = featuredTierWeight(b) - featuredTierWeight(a);
+    if (diff !== 0) return diff;
+    const timeA = new Date(a.createdAt).getTime() || 0;
+    const timeB = new Date(b.createdAt).getTime() || 0;
+    return timeA - timeB || a.name.localeCompare(b.name);
+  });
   const rest = new Map(list.filter((app) => !isEditorChoice(app)).map((app) => [app.slug, app]));
   const groups = homeJobs.flatMap((job) => {
     const apps = sortApps(

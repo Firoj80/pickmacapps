@@ -5,7 +5,7 @@ import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
 
-export type HeroSort = "hot" | "new" | "old" | "trending" | "free";
+export type HeroSort = "hot" | "new" | "trending" | "free";
 
 export function AppGrid({
   apps,
@@ -30,7 +30,7 @@ export function AppGrid({
   arranged?: boolean;
   filters?: "all" | "search";
 }) {
-  const [order, setOrder] = useState<"newest" | "name" | "free">("newest");
+  const [order, setOrder] = useState<"oldest" | "newest" | "name" | "free">("oldest");
   const [page, setPage] = useState(0);
 
   const visible = useMemo(() => {
@@ -113,7 +113,6 @@ export function AppGrid({
             >
               <option value="hot">Hot</option>
               <option value="new">Newest</option>
-              <option value="old">Oldest</option>
               <option value="trending">Trending</option>
               <option value="free">Free</option>
             </select>
@@ -160,7 +159,6 @@ export function AppGrid({
               [
                 ["hot", "🔥 Hot"],
                 ["new", "✨ Latest"],
-                ["old", "⏳ Oldest"],
                 ["trending", "📈 Trending"],
                 ["free", "🎁 Free"],
               ] as const

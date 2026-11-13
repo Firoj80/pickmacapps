@@ -28,6 +28,7 @@ type AppRow = {
   is_user_submitted?: boolean;
   views_7d?: number | string;
   created_at: string | Date;
+  updated_at?: string | Date | null;
   demo: string;
   related: string[] | string;
   status: string;
@@ -92,6 +93,7 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     isUserSubmitted: asBool(row.is_user_submitted),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
+    updatedAt: row.updated_at ? iso(row.updated_at) : undefined,
     demo: row.demo,
     related: asJson(row.related, []),
     status: row.status,
@@ -338,7 +340,7 @@ export async function publishedDirectory() {
     `select a.*, 0 as views_7d
      from apps a
      where a.status = 'published'
-     order by a.created_at desc`,
+     order by a.created_at asc, a.name asc`,
   );
   const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
   const apps = appRows.map(toApp);
@@ -533,12 +535,12 @@ export async function adminStats() {
   let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   try {
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string }>(
-      "select id, name, slug, icon from apps where status = 'published' and is_hot = true order by updated_at desc limit 12",
+      "select id, name, slug, icon from apps where status = 'published' and is_hot = true order by created_at asc limit 12",
     );
     hotApps = hotRows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, icon: r.icon }));
 
     const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
-      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by created_at desc",
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by created_at asc",
     );
     blueOccupants = blueRows.map((r) => ({
       id: r.id,
@@ -549,7 +551,7 @@ export async function adminStats() {
     }));
 
     const goldRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
-      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and featured_tier = 'article' order by created_at desc",
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and featured_tier = 'article' order by created_at asc",
     );
     goldOccupants = goldRows.map((r) => ({
       id: r.id,
@@ -935,6 +937,7 @@ export async function listSubmissions() {
     x_handle?: string;
     badge_ok?: boolean;
     created_at: string | Date;
+  updated_at?: string | Date | null;
   }>(
     "select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, coalesce(badge_ok, false) as badge_ok, created_at from submissions order by created_at desc limit 100",
   );

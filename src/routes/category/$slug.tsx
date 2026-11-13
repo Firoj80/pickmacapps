@@ -66,7 +66,7 @@ export const Route = createFileRoute("/category/$slug")({
     const listed = [...rawListed].sort((a, b) => {
       const diff = appPriorityWeight(b) - appPriorityWeight(a);
       if (diff !== 0) return diff;
-      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || a.name.localeCompare(b.name);
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() || a.name.localeCompare(b.name);
     });
 
     if (!category) {
@@ -112,7 +112,7 @@ function CategoryPage() {
   const listed = [...rawListed].sort((a, b) => {
     const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
-    return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime() || a.name.localeCompare(b.name);
+    return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() || a.name.localeCompare(b.name);
   });
   const label = category.name.toLowerCase();
 

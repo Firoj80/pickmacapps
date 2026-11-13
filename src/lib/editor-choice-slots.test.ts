@@ -82,11 +82,11 @@ test("getHeroAppIcons toggles on top hot apps when fewer than 6 paid apps are av
     { id: "paid-2", slug: "paid-2", name: "Paid Blue", editorChoice: true, featuredTier: "featured", createdAt: "2026-10-02" } as AppItem,
   ];
   const hotApps: AppItem[] = [
-    { id: "hot-1", slug: "hot-1", name: "Hot Top Views", editorChoice: false, isHot: true, views7d: 100, createdAt: "2026-10-01" } as AppItem,
-    { id: "hot-2", slug: "hot-2", name: "Hot Mid Views", editorChoice: false, isHot: true, views7d: 50, createdAt: "2026-10-01" } as AppItem,
+    { id: "hot-1", slug: "hot-1", name: "Hot 1", editorChoice: false, isHot: true, views7d: 100, createdAt: "2026-10-01" } as AppItem,
+    { id: "hot-2", slug: "hot-2", name: "Hot 2", editorChoice: false, isHot: true, views7d: 50, createdAt: "2026-10-02" } as AppItem,
+    { id: "hot-4", slug: "hot-4", name: "Hot 4", editorChoice: false, isHot: true, views7d: 10, createdAt: "2026-10-03" } as AppItem,
+    { id: "hot-5", slug: "hot-5", name: "Hot 5", editorChoice: false, isHot: true, views7d: 5, createdAt: "2026-10-04" } as AppItem,
     { id: "hot-3", slug: "hot-3", name: "Hot Newer", editorChoice: false, isHot: true, views7d: 10, createdAt: "2026-11-01" } as AppItem,
-    { id: "hot-4", slug: "hot-4", name: "Hot Older", editorChoice: false, isHot: true, views7d: 10, createdAt: "2026-10-01" } as AppItem,
-    { id: "hot-5", slug: "hot-5", name: "Hot Extra", editorChoice: false, isHot: true, views7d: 5, createdAt: "2026-10-01" } as AppItem,
   ];
   const standardApp = { id: "std-1", slug: "std-1", name: "Standard", editorChoice: false, isHot: false, views7d: 999 } as AppItem;
 
@@ -95,13 +95,13 @@ test("getHeroAppIcons toggles on top hot apps when fewer than 6 paid apps are av
   // Paid apps first: Gold tier then Blue tier
   assert.equal(result[0].slug, "paid-1");
   assert.equal(result[1].slug, "paid-2");
-  // Remaining 4 are top hot apps (ordered by views7d desc, then createdAt desc)
+  // Remaining 4 are hot apps ordered oldest first (hot-1, hot-2, hot-4, hot-5)
   assert.equal(result[2].slug, "hot-1");
   assert.equal(result[3].slug, "hot-2");
-  assert.equal(result[4].slug, "hot-3");
-  assert.equal(result[5].slug, "hot-4");
-  // hot-5 and standardApp must NOT be in the hero
-  assert.equal(result.some((a) => a.slug === "hot-5"), false);
+  assert.equal(result[4].slug, "hot-4");
+  assert.equal(result[5].slug, "hot-5");
+  // hot-3 (newer) and standardApp must NOT be in the hero
+  assert.equal(result.some((a) => a.slug === "hot-3"), false);
   assert.equal(result.some((a) => a.slug === "std-1"), false);
 });
 
