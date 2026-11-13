@@ -79,18 +79,20 @@ export function AdminShell({
   lede,
   active,
   actions,
+  sidebarWidgets,
   children,
 }: {
   title: string;
   lede?: string;
   active: AdminSection;
   actions?: ReactNode;
+  sidebarWidgets?: ReactNode;
   children: ReactNode;
 }) {
   const isLoading = useRouterState({ select: (s) => s.isLoading });
 
   return (
-    <div className="min-h-screen bg-[#f4f3ef] lg:grid lg:grid-cols-[240px_minmax(0,1fr)]">
+    <div className="min-h-screen bg-[#f4f3ef] lg:grid lg:grid-cols-[300px_minmax(0,1fr)]">
       {/* Top Loading Progress Bar */}
       {isLoading ? (
         <div
@@ -125,7 +127,7 @@ export function AdminShell({
           </div>
         </div>
 
-        {/* Navigation Sections */}
+        {/* Navigation & Sidebar Widgets Section */}
         <div className="flex-1 overflow-y-auto px-3 py-3 space-y-5">
           {/* Main Navigation */}
           <div>
@@ -196,6 +198,13 @@ export function AdminShell({
               })}
             </div>
           </div>
+
+          {/* Optional Sidebar Widgets */}
+          {sidebarWidgets ? (
+            <div className="space-y-4 pt-2 border-t border-line/60">
+              {sidebarWidgets}
+            </div>
+          ) : null}
         </div>
 
         {/* Sidebar Footer */}

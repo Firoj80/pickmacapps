@@ -561,14 +561,20 @@ export async function adminStats() {
   const topApps7d: { id: string; name: string; slug: string; icon: string; views: number }[] = [];
   const trafficSources7d: { source: string; views: number }[] = [];
 
-  let hotApps: { id: string; name: string; slug: string; icon: string }[] = [];
+  let hotApps: { id: string; name: string; slug: string; icon: string; hotMarkedAt: string | null }[] = [];
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   try {
-    const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string }>(
-      "select id, name, slug, icon from apps where status = 'published' and is_hot = true order by created_at asc limit 12",
+    const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
+      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 12",
     );
-    hotApps = hotRows.map((r) => ({ id: r.id, name: r.name, slug: r.slug, icon: r.icon }));
+    hotApps = hotRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      hotMarkedAt: r.hot_marked_at ? (r.hot_marked_at instanceof Date ? r.hot_marked_at.toISOString() : String(r.hot_marked_at)) : null,
+    }));
 
     const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
       "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by created_at asc",

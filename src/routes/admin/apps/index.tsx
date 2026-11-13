@@ -314,6 +314,16 @@ function AppsPage() {
                         )
                       ) : null}
                     </div>
+                    {app.editorChoice && app.featuredUntil ? (
+                      <div className="mt-1 text-[10px] font-mono text-muted">
+                        {(() => {
+                          const until = new Date(app.featuredUntil);
+                          const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                          const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                          return days > 0 ? `Paid expires: ${formatted} (${days}d left)` : `Paid expired: ${formatted}`;
+                        })()}
+                      </div>
+                    ) : null}
                   </td>
 
                   {/* Reciprocal Badge Status */}
@@ -359,7 +369,8 @@ function AppsPage() {
                           const marked = new Date(app.hotMarkedAt);
                           const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
                           const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
-                          return `Expires in ${daysLeft}d`;
+                          const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                          return `Expires: ${formatted} (${daysLeft}d)`;
                         })()}
                       </div>
                     ) : null}

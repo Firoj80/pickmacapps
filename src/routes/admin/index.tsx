@@ -87,6 +87,162 @@ function AdminHome() {
           </Link>
         </div>
       }
+      sidebarWidgets={
+        <div className="space-y-4">
+          {/* Submissions Pipeline Sidebar Widget */}
+          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-line/60">
+              <span className="font-semibold text-ink flex items-center gap-1.5">
+                <span>📥</span> Submissions Pipeline
+              </span>
+              <span className="rounded-full bg-ink px-1.5 py-0.2 text-[10px] font-bold text-canvas">
+                {data.submissions.length}
+              </span>
+            </div>
+            <div className="mt-2.5 flex items-center justify-between text-[11px]">
+              <span className="text-muted">Pending review:</span>
+              <span className="font-bold text-amber-600">{waiting}</span>
+            </div>
+            <div className="mt-1 flex items-center justify-between text-[11px]">
+              <span className="text-muted">Paid waiting:</span>
+              <span className="font-bold text-sky-600">
+                {data.submissions.filter((s) => s.status === "paid").length}
+              </span>
+            </div>
+            <a
+              href="#submissions-pipeline"
+              className="mt-2.5 block text-center rounded-lg border border-line bg-white py-1.5 text-[11px] font-semibold text-ink hover:bg-stone-100 transition"
+            >
+              View Pipeline ({waiting} waiting) ↓
+            </a>
+          </div>
+
+          {/* Upvotes & Auto-Promotion Sidebar Widget */}
+          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-line/60">
+              <span className="font-semibold text-ink flex items-center gap-1.5">
+                <span>▲</span> Upvotes & Auto-Hot
+              </span>
+              <span
+                className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
+                  (data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-stone-200 text-stone-600"
+                }`}
+              >
+                {(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ? "Enabled" : "Off"}
+              </span>
+            </div>
+
+            <form method="post" action="/api/admin/update-upvote-settings" className="mt-2.5 space-y-2">
+              <label className="flex items-center gap-2 text-[11px] text-body">
+                <input
+                  type="checkbox"
+                  name="upvotes_enabled"
+                  defaultChecked={(data.stats as { upvoteSettings?: { upvotesEnabled?: boolean } }).upvoteSettings?.upvotesEnabled ?? true}
+                  className="h-3.5 w-3.5 rounded accent-ink cursor-pointer"
+                />
+                <span>Upvotes Sitewide</span>
+              </label>
+
+              <label className="flex items-center gap-2 text-[11px] text-body">
+                <input
+                  type="checkbox"
+                  name="auto_hot_enabled"
+                  defaultChecked={(data.stats as { upvoteSettings?: { autoHotEnabled?: boolean } }).upvoteSettings?.autoHotEnabled ?? true}
+                  className="h-3.5 w-3.5 rounded accent-ink cursor-pointer"
+                />
+                <span>Auto-Promote to Hot</span>
+              </label>
+
+              <div className="flex items-center justify-between gap-1 pt-1">
+                <span className="text-[11px] text-muted">Threshold:</span>
+                <div className="flex items-center gap-1">
+                  <input
+                    name="hot_threshold"
+                    type="number"
+                    min="1"
+                    max="500"
+                    defaultValue={(data.stats as { upvoteSettings?: { hotThreshold?: number } }).upvoteSettings?.hotThreshold ?? 15}
+                    className="w-12 rounded border border-line bg-white px-1.5 py-0.5 text-center text-[11px] font-bold text-ink"
+                  />
+                  <button
+                    type="submit"
+                    className="rounded bg-ink px-2 py-0.5 text-[10px] font-bold text-canvas hover:opacity-90 cursor-pointer"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          {/* Free-Listing Badges Sidebar Widget */}
+          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-line/60">
+              <span className="font-semibold text-ink flex items-center gap-1.5">
+                <span>🔍</span> Free-Listing Badges
+              </span>
+              <form method="post" action="/api/admin/badges" className="inline">
+                <button
+                  type="submit"
+                  className="rounded bg-white px-1.5 py-0.5 text-[10px] font-semibold text-ink border border-line hover:bg-stone-100"
+                >
+                  Check Now
+                </button>
+              </form>
+            </div>
+            <div className="mt-2 text-[11px] text-muted">
+              {data.badges.length} user-submitted free apps
+            </div>
+            <ul className="mt-1.5 max-h-28 space-y-1 overflow-auto text-[10.5px]">
+              {data.badges.slice(0, 5).map((app) => (
+                <li key={app.id} className="flex items-center justify-between gap-1 truncate">
+                  <span className="truncate text-ink">{app.name}</span>
+                  <span className={`shrink-0 font-medium ${app.badgeStatus === "ok" ? "text-emerald-600" : "text-rose-500"}`}>
+                    {app.badgeStatus === "ok" ? "✓ OK" : "✕ Miss"}
+                  </span>
+                </li>
+              ))}
+              {data.badges.length > 5 ? (
+                <li className="text-[10px] text-muted italic">+{data.badges.length - 5} more apps</li>
+              ) : null}
+            </ul>
+          </div>
+
+          {/* Telegram Moderation Bot Sidebar Widget */}
+          <div className="rounded-xl border border-line/80 bg-stone-50/70 p-3 text-xs">
+            <div className="flex items-center justify-between pb-2 border-b border-line/60">
+              <span className="font-semibold text-ink flex items-center gap-1.5">
+                <span>🤖</span> Telegram Bot
+              </span>
+              <span
+                className={`rounded-full px-1.5 py-0.2 text-[9px] font-bold ${
+                  data.stats.telegramConfigured
+                    ? "bg-emerald-100 text-emerald-700"
+                    : "bg-amber-100 text-amber-800"
+                }`}
+              >
+                {data.stats.telegramConfigured ? "Active" : "Setup"}
+              </span>
+            </div>
+            <p className="mt-2 text-[10.5px] leading-tight text-muted">
+              {data.stats.telegramConfigured
+                ? "Instant alerts & 1-tap moderation ready."
+                : "Env vars needed: TELEGRAM_BOT_TOKEN & CHAT_ID."}
+            </p>
+            <form method="post" action="/api/admin/telegram" className="mt-2">
+              <button
+                type="submit"
+                disabled={!data.stats.telegramConfigured}
+                className="w-full rounded-lg bg-ink py-1 text-[10.5px] font-semibold text-canvas hover:opacity-90 disabled:opacity-40"
+              >
+                Test Connection
+              </button>
+            </form>
+          </div>
+        </div>
+      }
     >
       <Notice {...notice} />
 
@@ -280,7 +436,22 @@ function AdminHome() {
                           >
                             {occupant.name}
                           </Link>
-                          <p className="text-[10px] text-muted">/{occupant.slug}</p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted">
+                            <span>/{occupant.slug}</span>
+                            {occupant.featuredUntil ? (
+                              <>
+                                <span>·</span>
+                                <span className="font-mono text-sky-700">
+                                  {(() => {
+                                    const until = new Date(occupant.featuredUntil);
+                                    const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                                    const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                                    return days > 0 ? `Expires ${formatted} (${days}d left)` : `Expired ${formatted}`;
+                                  })()}
+                                </span>
+                              </>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                       <Link
@@ -345,7 +516,22 @@ function AdminHome() {
                           >
                             {occupant.name}
                           </Link>
-                          <p className="text-[10px] text-muted">/{occupant.slug}</p>
+                          <div className="flex items-center gap-1.5 text-[10px] text-muted">
+                            <span>/{occupant.slug}</span>
+                            {occupant.featuredUntil ? (
+                              <>
+                                <span>·</span>
+                                <span className="font-mono text-sky-700">
+                                  {(() => {
+                                    const until = new Date(occupant.featuredUntil);
+                                    const days = Math.ceil((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+                                    const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                                    return days > 0 ? `Expires ${formatted} (${days}d left)` : `Expired ${formatted}`;
+                                  })()}
+                                </span>
+                              </>
+                            ) : null}
+                          </div>
                         </div>
                       </div>
                       <Link
@@ -405,7 +591,23 @@ function AdminHome() {
                         >
                           {h.name}
                         </Link>
-                        <p className="text-[10px] text-muted">/{h.slug}</p>
+                        <div className="flex items-center gap-1.5 text-[10px] text-muted">
+                          <span>/{h.slug}</span>
+                          {h.hotMarkedAt ? (
+                            <>
+                              <span>·</span>
+                              <span className="font-mono text-rose-600">
+                                {(() => {
+                                  const marked = new Date(h.hotMarkedAt);
+                                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                                  const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+                                  const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                                  return `Expires ${formatted} (${daysLeft}d)`;
+                                })()}
+                              </span>
+                            </>
+                          ) : null}
+                        </div>
                       </div>
                     </div>
                     <form method="post" action="/api/admin/toggle-hot" className="inline">
@@ -428,7 +630,7 @@ function AdminHome() {
       </div>
 
       {/* Submissions Management */}
-      <section className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
+      <section id="submissions-pipeline" className="mt-6 overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <div className="flex flex-col gap-2 border-b border-line px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-sm font-semibold text-ink">Submissions Pipeline</h2>
