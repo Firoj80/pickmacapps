@@ -33,7 +33,7 @@ const homeFaqs = [
   },
 ];
 
-type HeroSort = "hot" | "new" | "trending" | "free";
+type HeroSort = "hot" | "new" | "old" | "trending" | "free";
 
 function inHeroCategory(app: AppItem, category: string) {
   if (category === "all") return true;
@@ -51,6 +51,17 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
       return timeB - timeA || a.name.localeCompare(b.name);
+    });
+    return next;
+  }
+  if (sort === "old") {
+    // Oldest (Old to New): Featured apps on top (old first), then Hot apps (old first), then all apps by createdAt asc (oldest first)
+    next.sort((a, b) => {
+      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
+      if (pDiff !== 0) return pDiff;
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeA - timeB || a.name.localeCompare(b.name);
     });
     return next;
   }
@@ -80,6 +91,7 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
     return next;
   }
   // Hot tab: Gold apps (1st), Blue apps (2nd), Hot 🔥 apps (3rd), then standard apps
+  // For featured and hot tiers on the hot list: old first then new (createdAt asc)
   return shelfApps(next);
 }
 
@@ -96,7 +108,7 @@ export const Route = createFileRoute("/")({
     const next: { q?: string; cat?: string; sort?: HeroSort } = {};
     if (typeof search.q === "string" && search.q) next.q = search.q;
     if (typeof search.cat === "string" && search.cat && search.cat !== "all") next.cat = search.cat;
-    if (search.sort === "new" || search.sort === "trending" || search.sort === "hot" || search.sort === "free") next.sort = search.sort;
+    if (search.sort === "new" || search.sort === "old" || search.sort === "trending" || search.sort === "hot" || search.sort === "free") next.sort = search.sort;
     return next;
   },
   component: Home,

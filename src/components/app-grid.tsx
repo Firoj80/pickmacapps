@@ -5,7 +5,7 @@ import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
 
-export type HeroSort = "hot" | "new" | "trending" | "free";
+export type HeroSort = "hot" | "new" | "old" | "trending" | "free";
 
 export function AppGrid({
   apps,
@@ -111,8 +111,9 @@ export function AppGrid({
               onChange={(event) => onSort(event.target.value as HeroSort)}
               className="h-12 w-full cursor-pointer appearance-none rounded-xl border border-line bg-surface pr-10 pl-4 text-[14.5px] font-medium text-ink shadow-xs transition-colors focus-visible:border-accent focus-visible:outline-none"
             >
-              <option value="new">Newest</option>
               <option value="hot">Hot</option>
+              <option value="new">Newest</option>
+              <option value="old">Oldest</option>
               <option value="trending">Trending</option>
               <option value="free">Free</option>
             </select>
@@ -159,6 +160,7 @@ export function AppGrid({
               [
                 ["hot", "🔥 Hot"],
                 ["new", "✨ Latest"],
+                ["old", "⏳ Oldest"],
                 ["trending", "📈 Trending"],
                 ["free", "🎁 Free"],
               ] as const

@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { apps, homeGroups, isEditorChoice, shelfApps, type AppItem } from "./catalog.ts"
+import { apps, homeGroups, isEditorChoice, shelfApps, sortApps, type AppItem } from "./catalog.ts"
 
 test("editor's choice comes only from the saved flag", () => {
   const { choice, groups } = homeGroups(apps, "newest")
@@ -27,4 +27,23 @@ test("new apps follow the original shelf, newest first", () => {
   assert.equal(slugs[0], shelf[0])
   assert.deepEqual(slugs.slice(0, shelf.length), shelf)
   assert.deepEqual(slugs.slice(-2), ["brand-new", "older-new"])
+})
+
+test("sortApps with oldest orders apps from oldest to newest", () => {
+  const sample = apps[0]
+  const older = { ...sample, id: "app-old", slug: "app-old", name: "Older App", createdAt: "2024-01-01" } as AppItem
+  const newer = { ...sample, id: "app-new", slug: "app-new", name: "Newer App", createdAt: "2026-05-01" } as AppItem
+  const sorted = sortApps([newer, older], "oldest")
+  assert.deepEqual(sorted.map((a) => a.slug), ["app-old", "app-new"])
+})
+
+test("shelfApps orders featured and hot apps from oldest to newest", () => {
+  const sample = apps[0]
+  const oldHot = { ...sample, id: "hot-old", slug: "hot-old", name: "Old Hot", isHot: true, createdAt: "2024-01-01" } as AppItem
+  const newHot = { ...sample, id: "hot-new", slug: "hot-new", name: "New Hot", isHot: true, createdAt: "2026-05-01" } as AppItem
+  const standard = { ...sample, id: "standard-1", slug: "standard-1", name: "Standard", isHot: false, createdAt: "2025-01-01" } as AppItem
+
+  const results = shelfApps([newHot, standard, oldHot], "", "all", "newest")
+  const hotSlugs = results.filter((a) => a.isHot).map((a) => a.slug)
+  assert.deepEqual(hotSlugs, ["hot-old", "hot-new"])
 })

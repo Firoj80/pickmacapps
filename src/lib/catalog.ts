@@ -125,11 +125,13 @@ function pinRank(slug: string) {
   return shelfRank.get(slug) ?? Number.POSITIVE_INFINITY;
 }
 
-export function sortApps(list: AppItem[], order: "newest" | "name" | "free") {
+export function sortApps(list: AppItem[], order: "newest" | "oldest" | "name" | "free") {
   const next = [...list];
   if (order === "name") next.sort((a, b) => a.name.localeCompare(b.name));
   else if (order === "free") {
     next.sort((a, b) => (priceRank[a.pricing] ?? 3) - (priceRank[b.pricing] ?? 3));
+  } else if (order === "oldest") {
+    next.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.name.localeCompare(b.name));
   } else {
     next.sort((a, b) => b.createdAt.localeCompare(a.createdAt) || a.name.localeCompare(b.name));
   }
@@ -210,7 +212,7 @@ export function shelfApps(
   list: AppItem[] = apps,
   query = "",
   category = "all",
-  order: "newest" | "name" | "free" = "newest",
+  order: "newest" | "oldest" | "name" | "free" = "newest",
 ) {
   const needle = query.trim().toLowerCase();
   const filtered = list.filter((app) => {
@@ -222,6 +224,12 @@ export function shelfApps(
   return [...sortApps(filtered, order)].sort((a, b) => {
     const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
+    // For featured and hot apps on the hot list: old first then new (createdAt asc)
+    if (appPriorityWeight(a) > 0) {
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeA - timeB || a.name.localeCompare(b.name);
+    }
     return 0;
   });
 }
@@ -270,7 +278,7 @@ const homeJobs: { id: string; title: string; line: string; slugs: string[]; guid
 ];
 
 /** Editor’s Choice stays its own row. Every other app is grouped by job. */
-export function homeGroups(list: AppItem[], order: "newest" | "name" | "free" = "newest") {
+export function homeGroups(list: AppItem[], order: "newest" | "oldest" | "name" | "free" = "newest") {
   const choice = [...list.filter(isEditorChoice)].sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
   const rest = new Map(list.filter((app) => !isEditorChoice(app)).map((app) => [app.slug, app]));
   const groups = homeJobs.flatMap((job) => {
