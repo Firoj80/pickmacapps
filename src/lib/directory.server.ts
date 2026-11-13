@@ -933,8 +933,11 @@ export async function listSubmissions() {
     status: string;
     email: string;
     x_handle?: string;
+    badge_ok?: boolean;
     created_at: string | Date;
-  }>("select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, created_at from submissions order by created_at desc limit 100");
+  }>(
+    "select id, app_name, website, plan, coalesce(tier, 'featured') as tier, status, email, coalesce(x_handle, '') as x_handle, coalesce(badge_ok, false) as badge_ok, created_at from submissions order by created_at desc limit 100",
+  );
 }
 
 export async function getSubmissionById(id: string): Promise<TelegramSubmissionInfo | null> {
@@ -985,6 +988,14 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
 export async function updateSubmissionBadgeStatus(id: string, badgeOk: boolean) {
   const sql = await directorySql();
   await sql.query("update submissions set badge_ok = $2 where id = $1", [id, badgeOk]);
+}
+
+export async function verifySubmissionBadge(id: string) {
+  const submission = await getSubmissionById(id);
+  if (!submission) throw new Error("Submission not found");
+  const check = await checkBadgeOnPage(submission.website);
+  await updateSubmissionBadgeStatus(id, check.ok);
+  return check;
 }
 
 export async function listPendingSubmissionsForTelegram(limit = 5): Promise<TelegramSubmissionInfo[]> {
@@ -1221,6 +1232,16 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         `Cannot approve as ${tierLabel}: All ${MAX_TIER_SLOTS} slots for this tier are currently full (${activeTier}/${MAX_TIER_SLOTS} active). Please unpublish or remove another app from this tier before approving.`
       );
     }
+  } else {
+    // Free listing: Must verify PickMacApps badge live on website before approving
+    const badgeCheck = await checkBadgeOnPage(submission.website);
+    if (!badgeCheck.ok) {
+      await updateSubmissionBadgeStatus(submission.id, false);
+      throw new Error(
+        `Cannot approve free listing: PickMacApps badge was not found on ${submission.website} (${badgeCheck.message}). Please verify the badge is installed before approving.`
+      );
+    }
+    await updateSubmissionBadgeStatus(submission.id, true);
   }
   const appId = randomUUID();
   let slug =

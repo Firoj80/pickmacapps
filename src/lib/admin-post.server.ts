@@ -15,6 +15,7 @@ import {
   setChoicePrice,
   setPackagePrice,
   toggleAppHot,
+  verifySubmissionBadge,
 } from "@/lib/directory.server";
 import { registerTelegramWebhook } from "@/lib/telegram.server";
 
@@ -142,6 +143,14 @@ export async function handleAdminPost(request: Request) {
     if (action === "telegram") {
       await registerTelegramWebhook(url.origin);
       return redirect("/admin?saved=telegram");
+    }
+    if (action === "verify-submission-badge") {
+      const id = String(form.get("id") ?? "");
+      const result = await verifySubmissionBadge(id);
+      if (!result.ok) {
+        return redirect(`/admin?error=${encodeURIComponent(`Badge check failed: ${result.message}`)}`);
+      }
+      return redirect("/admin?saved=badge_ok");
     }
     if (action === "approve") {
       await approveSubmission(String(form.get("id") ?? ""));

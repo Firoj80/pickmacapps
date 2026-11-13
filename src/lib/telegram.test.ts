@@ -36,7 +36,7 @@ test("escapeTelegramHtml escapes HTML special characters", () => {
 });
 
 test("parseSubmissionCallbackData validates actions and stays under 64 bytes", () => {
-  for (const action of ["approve", "apphot", "reject", "badge"] as const) {
+  for (const action of ["approve", "apphot", "reject", "badge", "nobadge"] as const) {
     const raw = `sub:${action}:${sampleUuid}`;
     assert.ok(Buffer.byteLength(raw, "utf8") <= 64, `${raw} exceeds Telegram 64-byte callback limit`);
     assert.deepEqual(parseSubmissionCallbackData(raw), { action, submissionId: sampleUuid });
@@ -47,6 +47,7 @@ test("parseSubmissionCallbackData validates actions and stays under 64 bytes", (
 });
 
 test("buildSubmissionInlineKeyboard returns interactive moderation buttons while pending", () => {
+  // When badge is verified (badgeOk: true)
   const kb = buildSubmissionInlineKeyboard(baseSubmission);
   const allButtons = kb.inline_keyboard.flat();
   assert.ok(allButtons.some((b) => b.callback_data === `sub:approve:${sampleUuid}`));
@@ -54,6 +55,18 @@ test("buildSubmissionInlineKeyboard returns interactive moderation buttons while
   assert.ok(allButtons.some((b) => b.callback_data === `sub:badge:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:reject:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.url === "https://focusbell.app/"));
+
+  // When badge is missing (badgeOk: false) on free listing: Approve is disabled
+  const noBadgeKb = buildSubmissionInlineKeyboard({ ...baseSubmission, badgeOk: false });
+  const noBadgeButtons = noBadgeKb.inline_keyboard.flat();
+  assert.ok(noBadgeButtons.some((b) => b.callback_data === `sub:nobadge:${sampleUuid}`), "Must show disabled nobadge button");
+  assert.equal(noBadgeButtons.some((b) => b.callback_data === `sub:approve:${sampleUuid}`), false, "Must not show approve button");
+  assert.equal(noBadgeButtons.some((b) => b.callback_data === `sub:apphot:${sampleUuid}`), false, "Must not show apphot button");
+
+  // Paid sponsor is exempt: Approve enabled even if badgeOk is false
+  const paidKb = buildSubmissionInlineKeyboard({ ...baseSubmission, plan: "choice", badgeOk: false });
+  const paidButtons = paidKb.inline_keyboard.flat();
+  assert.ok(paidButtons.some((b) => b.callback_data === `sub:approve:${sampleUuid}`), "Paid sponsor has approve enabled");
 
   const approvedKb = buildSubmissionInlineKeyboard({ ...baseSubmission, status: "approved" }, "focusbell-pro");
   const approvedButtons = approvedKb.inline_keyboard.flat();

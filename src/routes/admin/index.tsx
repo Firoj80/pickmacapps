@@ -510,7 +510,20 @@ function AdminHome() {
                           )}
                         </div>
                       ) : (
-                        <Pill tone="off">Free Listing</Pill>
+                        <div className="flex flex-col items-start gap-1">
+                          <Pill tone="off">Free Listing</Pill>
+                          {Boolean(item.badge_ok) ? (
+                            <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                              Badge Verified
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-rose-600">
+                              <span className="h-1.5 w-1.5 rounded-full bg-rose-500" />
+                              ⚠️ Badge Missing
+                            </span>
+                          )}
+                        </div>
                       )}
                     </td>
                     <td className="px-3 py-3">
@@ -518,25 +531,48 @@ function AdminHome() {
                     </td>
                     <td className="px-4 py-3 text-right">
                       {item.status === "pending" || item.status === "paid" ? (
-                        <div className="flex justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           <form method="post" action="/api/admin/reject">
                             <input type="hidden" name="id" value={item.id} />
                             <button
                               type="submit"
-                              className="rounded-lg px-2.5 py-1.5 text-xs text-muted transition hover:bg-stone-100 hover:text-ink"
+                              className="rounded-lg px-2.5 py-1.5 text-xs text-muted transition hover:bg-stone-100 hover:text-ink cursor-pointer"
                             >
                               Reject
                             </button>
                           </form>
-                          <form method="post" action="/api/admin/approve">
-                            <input type="hidden" name="id" value={item.id} />
+                          {item.plan === "free" ? (
+                            <form method="post" action="/api/admin/verify-submission-badge">
+                              <input type="hidden" name="id" value={item.id} />
+                              <button
+                                type="submit"
+                                title="Check PickMacApps badge live on website"
+                                className="rounded-lg border border-line bg-white px-2.5 py-1.5 text-xs font-medium text-ink transition hover:bg-stone-50 cursor-pointer"
+                              >
+                                🔍 Check Badge
+                              </button>
+                            </form>
+                          ) : null}
+                          {item.plan === "free" && !item.badge_ok ? (
                             <button
-                              type="submit"
-                              className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-canvas transition hover:opacity-90"
+                              type="button"
+                              disabled
+                              title="Cannot approve: PickMacApps badge was not found on website. Verify badge first."
+                              className="rounded-lg bg-stone-200 px-3 py-1.5 text-xs font-medium text-stone-400 cursor-not-allowed"
                             >
                               Approve
                             </button>
-                          </form>
+                          ) : (
+                            <form method="post" action="/api/admin/approve">
+                              <input type="hidden" name="id" value={item.id} />
+                              <button
+                                type="submit"
+                                className="rounded-lg bg-ink px-3 py-1.5 text-xs font-medium text-canvas transition hover:opacity-90 cursor-pointer"
+                              >
+                                Approve
+                              </button>
+                            </form>
+                          )}
                         </div>
                       ) : (
                         <span className="text-xs text-muted">{item.email}</span>

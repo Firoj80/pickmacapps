@@ -20,7 +20,7 @@ export interface TelegramSubmissionInfo {
   approvedSlug?: string;
 }
 
-export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "xpost";
+export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "nobadge" | "xpost";
 
 export interface ParsedTelegramCallback {
   action: TelegramSubmissionAction;
@@ -79,7 +79,7 @@ export function parseSubmissionCallbackData(data: string): ParsedTelegramCallbac
       submissionId: xpostMatch[2],
     };
   }
-  const match = /^sub:(approve|apphot|reject|badge):([a-zA-Z0-9-]+)$/.exec(trimmed);
+  const match = /^sub:(approve|apphot|reject|badge|nobadge):([a-zA-Z0-9-]+)$/.exec(trimmed);
   if (!match) return null;
   return {
     action: match[1] as TelegramSubmissionAction,
@@ -334,11 +334,23 @@ export function buildSubmissionInlineKeyboard(
     };
   }
 
+  const isFree = submission.plan !== "choice";
+  const badgeMissing = isFree && !submission.badgeOk;
+
+  const row1: TelegramInlineButton[] = badgeMissing
+    ? [
+        {
+          text: "🚫 Approve Disabled (No Badge)",
+          callback_data: `sub:nobadge:${submission.id}`,
+        },
+      ]
+    : [
+        { text: "✅ Approve & Publish", callback_data: `sub:approve:${submission.id}` },
+        { text: "🔥 Approve + Hot", callback_data: `sub:apphot:${submission.id}` },
+      ];
+
   const rows: TelegramInlineButton[][] = [
-    [
-      { text: "✅ Approve & Publish", callback_data: `sub:approve:${submission.id}` },
-      { text: "🔥 Approve + Hot", callback_data: `sub:apphot:${submission.id}` },
-    ],
+    row1,
     [
       { text: "🔍 Check Badge", callback_data: `sub:badge:${submission.id}` },
       { text: "❌ Reject", callback_data: `sub:reject:${submission.id}` },

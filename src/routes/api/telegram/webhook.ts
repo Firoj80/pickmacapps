@@ -141,6 +141,15 @@ export const Route = createFileRoute("/api/telegram/webhook")({
           return Response.json({ ok: true });
         }
 
+        if (parsed.action === "nobadge") {
+          await answerTelegramCallback(
+            callback.id,
+            "⚠️ Cannot approve: PickMacApps badge was not found on website. Ask creator to add badge, then tap '🔍 Check Badge' to re-verify.",
+            true,
+          );
+          return Response.json({ ok: true });
+        }
+
         if (parsed.action === "badge") {
           const check = await checkBadgeOnPage(submission.website);
           await updateSubmissionBadgeStatus(submission.id, check.ok);
@@ -149,7 +158,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
 
           await answerTelegramCallback(
             callback.id,
-            check.ok ? "✅ Badge verified on website!" : `❌ ${check.message}`,
+            check.ok ? "✅ Badge verified on website! Approve buttons enabled." : `❌ Badge not found: ${check.message}`,
             !check.ok,
           );
 
@@ -160,7 +169,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
               formatSubmissionNotification(refreshed, {
                 badgeNote: check.ok
                   ? `live checked ${checkedAt}`
-                  : `${check.message} · ${checkedAt}`,
+                  : `⚠️ Badge missing: ${check.message} (${checkedAt})`,
               }),
               buildSubmissionInlineKeyboard(refreshed),
             );
@@ -169,6 +178,35 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         }
 
         if (parsed.action === "approve" || parsed.action === "apphot") {
+          // Live check badge before approving if free plan
+          if (submission.plan !== "choice") {
+            const liveCheck = await checkBadgeOnPage(submission.website);
+            if (!liveCheck.ok) {
+              await updateSubmissionBadgeStatus(submission.id, false);
+              const refreshed: typeof submission = { ...submission, badgeOk: false };
+              const checkedAt = new Date().toISOString().slice(11, 19) + " UTC";
+
+              await answerTelegramCallback(
+                callback.id,
+                `⚠️ Cannot approve: PickMacApps badge not found on website!\n\n${liveCheck.message}`,
+                true,
+              );
+
+              if (chatId !== undefined && messageId !== undefined) {
+                await editTelegramMessage(
+                  chatId,
+                  messageId,
+                  formatSubmissionNotification(refreshed, {
+                    badgeNote: `⚠️ BLOCKED: Badge not found · ${liveCheck.message} (${checkedAt})`,
+                  }),
+                  buildSubmissionInlineKeyboard(refreshed),
+                );
+              }
+              return Response.json({ ok: true });
+            }
+            await updateSubmissionBadgeStatus(submission.id, true);
+          }
+
           try {
             const makeHot = parsed.action === "apphot";
             const created = await approveSubmission(submission.id, { makeHot });
