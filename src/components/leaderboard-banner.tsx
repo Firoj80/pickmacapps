@@ -22,9 +22,9 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
   if (top10.length === 0) return null;
 
   return (
-    <div className="mt-6 w-full max-w-full overflow-hidden">
+    <div className="w-full max-w-full overflow-hidden">
       {/* Banner Top Header */}
-      <div className="mx-auto mb-2.5 flex flex-wrap items-center justify-between gap-2 px-2 text-xs">
+      <div className="mb-2.5 flex flex-wrap items-center justify-between gap-2 px-0.5 text-xs">
         <div className="flex items-center gap-2">
           <span className="flex h-5 w-5 items-center justify-center rounded-md bg-amber-500/15 text-xs text-amber-500">
             🏆

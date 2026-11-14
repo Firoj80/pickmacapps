@@ -61,7 +61,15 @@ function LeaderboardPage() {
   const totalPages = Math.max(1, Math.ceil(totalApps / pageSize));
   const currentPage = Math.min(page, totalPages);
   const startIndex = (currentPage - 1) * pageSize;
-  const pageApps = sortedApps.slice(startIndex, startIndex + pageSize);
+
+  // On page 1, top 3 are featured in the podium, so show ranks 4 to 30 in the list below.
+  // On page 2+, show standard 30 apps per page (31-60, 61-90, etc.)
+  const listApps =
+    currentPage === 1
+      ? sortedApps.slice(3, 30)
+      : sortedApps.slice(startIndex, startIndex + pageSize);
+
+  const baseRank = currentPage === 1 ? 4 : startIndex + 1;
 
   function goToPage(p: number) {
     navigate({
@@ -148,7 +156,9 @@ function LeaderboardPage() {
           <div>
             <h2 className="text-base font-bold text-ink">Catalog Rankings</h2>
             <p className="text-xs text-muted">
-              Showing apps #{startIndex + 1} to #{Math.min(startIndex + pageSize, totalApps)} of {totalApps}
+              {currentPage === 1
+                ? `Showing apps #4 to #${Math.min(30, totalApps)} of ${totalApps} (Top 3 featured in Podium above)`
+                : `Showing apps #${startIndex + 1} to #${Math.min(startIndex + pageSize, totalApps)} of ${totalApps}`}
             </p>
           </div>
           <div className="flex items-center gap-2 text-xs">
@@ -158,12 +168,12 @@ function LeaderboardPage() {
           </div>
         </div>
 
-        {pageApps.length === 0 ? (
+        {listApps.length === 0 ? (
           <div className="p-12 text-center text-sm text-muted">No apps found on this page.</div>
         ) : (
           <div className="divide-y divide-line">
-            {pageApps.map((app, idx) => {
-              const rank = startIndex + idx + 1;
+            {listApps.map((app, idx) => {
+              const rank = baseRank + idx;
               return <LeaderboardRow key={app.id || app.slug} app={app} rank={rank} />;
             })}
           </div>

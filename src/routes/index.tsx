@@ -247,12 +247,14 @@ function Home() {
             <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
           </div>
 
-          {/* Running Banner Style Leaderboard (Top 10 Apps by Upvotes) */}
-          <LeaderboardBanner apps={list} />
-
           {directory ? null : (
             <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
           )}
+        </div>
+
+        {/* Running Banner Style Leaderboard (Top 10 Apps by Upvotes) - matching full page width (max-w-[1360px]) */}
+        <div className="mx-auto w-full max-w-[1360px] mt-6 sm:mt-8">
+          <LeaderboardBanner apps={list} />
         </div>
       </section>
 
