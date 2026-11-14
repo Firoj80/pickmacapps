@@ -778,6 +778,7 @@ export async function createAdminApp(input: {
       input.demo?.trim() || "",
     ],
   );
+  await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
   return { id, slug };
 }
@@ -1189,7 +1190,7 @@ export async function findExistingPublishedApp(website: string, name?: string) {
     editor_choice: boolean;
     featured_tier: string | null;
     is_hot: boolean;
-  }>("select id, name, slug, website, editor_choice, featured_tier, is_hot from apps where status = 'published'");
+  }>("select id, name, slug, website, editor_choice, featured_tier, is_hot from apps where status in ('published', 'unpublished')");
 
   if (domain) {
     const match = rows.find((r) => normalizeWebsiteDomain(r.website) === domain);
@@ -1498,6 +1499,8 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         submitter_email = coalesce(nullif($14, ''), submitter_email),
         submitter_x = coalesce(nullif($15, ''), submitter_x),
         dashboard_token = coalesce(dashboard_token, $16),
+        status = 'published',
+        badge_misses = 0,
         updated_at = now()
       where id = $17`,
       [
@@ -1521,6 +1524,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       ],
     );
 
+    await sql.query("delete from app_tombstones where slug = $1", [existingApp.slug]);
     await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, existingApp.id]);
     await audit(sql, isChoice ? "upgrade_sponsor" : "update_app", existingApp.slug, submission.plan);
     return {
@@ -1571,6 +1575,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       dashboardToken,
     ],
   );
+  await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
   await audit(sql, "approve", slug, submission.plan);
   return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier, dashboardToken };
