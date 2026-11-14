@@ -139,11 +139,27 @@ async function ensureTombstones(sql: Sql) {
   await sql.query(
     `create table if not exists app_tombstones (
       slug text primary key,
+      name text,
+      category text,
+      redirect_url text,
       deleted_at timestamptz not null default now()
     )`,
   );
+  await sql.query("alter table app_tombstones add column if not exists name text");
+  await sql.query("alter table app_tombstones add column if not exists category text");
+  await sql.query("alter table app_tombstones add column if not exists redirect_url text");
   await sql.query(
-    `insert into app_tombstones (slug) values ('scanmydisk') on conflict (slug) do nothing`,
+    `insert into app_tombstones (slug, name, category) values
+     ('scanmydisk', 'ScanMyDisk', 'utility'),
+     ('shedi', 'Shedi', 'dev'),
+     ('photsy', 'Photsy', 'photography'),
+     ('herdbell', 'Herdbell', 'utility'),
+     ('screentoast', 'ScreenToast', 'design'),
+     ('drain', 'Drain', 'utility'),
+     ('peeka', 'Peeka', 'utility')
+     on conflict (slug) do update set
+       name = coalesce(excluded.name, app_tombstones.name),
+       category = coalesce(excluded.category, app_tombstones.category)`,
   );
   await sql.query(`delete from apps where slug = 'scanmydisk'`);
 }
@@ -263,6 +279,12 @@ async function ensureSeed(sql: Sql) {
     console.error("ensureSeed categories failed:", err);
   }
   try {
+    await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
+    await sql.query("alter table apps add column if not exists is_user_submitted boolean not null default false");
+  } catch (err) {
+    console.error("ensureSeed is_hot & flags failed:", err);
+  }
+  try {
     const flagRows = await sql.query<{ value: string }>("select value from settings where key = 'apps_seeded'");
     const seeded = flagRows[0]?.value ?? null;
     if (seeded !== "1") {
@@ -378,11 +400,25 @@ export async function publishedDirectory() {
   } catch (err) {
     console.error("published categories failed:", err);
   }
+  let tombstones: { slug: string; name?: string; category?: string }[] = [];
+  try {
+    const tombRows = await sql.query<{ slug: string; name: string | null; category: string | null }>(
+      "select slug, name, category from app_tombstones",
+    );
+    tombstones = tombRows.map((r) => ({
+      slug: r.slug,
+      name: r.name || undefined,
+      category: r.category || undefined,
+    }));
+  } catch (err) {
+    console.error("published tombstones failed:", err);
+  }
   return {
     apps,
     posts: guideRows.map(toPost),
     editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
     categories,
+    tombstones,
   };
 }
 
@@ -870,19 +906,26 @@ export async function saveApp(input: {
 
 export async function deleteApp(id: string) {
   const sql = await directorySql();
-  const rows = await sql.query<{ slug: string }>("delete from apps where id = $1 returning slug", [id]);
-  const slug = rows[0]?.slug;
-  if (!slug) return;
+  const rows = await sql.query<{ slug: string; name: string; category: string }>(
+    "delete from apps where id = $1 returning slug, name, category",
+    [id],
+  );
+  const row = rows[0];
+  if (!row?.slug) return;
   try {
     await sql.query(
-      `insert into app_tombstones (slug) values ($1)
-       on conflict (slug) do update set deleted_at = now()`,
-      [slug],
+      `insert into app_tombstones (slug, name, category, deleted_at)
+       values ($1, $2, $3, now())
+       on conflict (slug) do update set
+         name = coalesce(excluded.name, app_tombstones.name),
+         category = coalesce(excluded.category, app_tombstones.category),
+         deleted_at = now()`,
+      [row.slug, row.name || null, row.category || null],
     );
   } catch (err) {
     console.error("app tombstone failed:", err);
   }
-  await audit(sql, "delete-app", slug);
+  await audit(sql, "delete-app", row.slug);
 }
 
 export async function listGuides() {

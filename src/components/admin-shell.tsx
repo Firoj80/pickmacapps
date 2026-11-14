@@ -75,6 +75,7 @@ const savedCopy: Record<string, string> = {
   created: "New listing created and published successfully.",
   telegram: "Telegram webhook connected and test message sent.",
   badge_ok: "PickMacApps badge verified on website! You can now approve this listing.",
+  deleted: "Listing permanently deleted. The URL now serves the Alternatives Hub.",
 };
 
 export function Notice({ error, saved }: { error: string; saved: string }) {

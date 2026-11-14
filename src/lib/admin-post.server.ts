@@ -70,7 +70,7 @@ export async function handleAdminPost(request: Request) {
       const intent = String(form.get("intent") ?? "save");
       if (intent === "delete") {
         await deleteApp(String(form.get("id") ?? ""));
-        return redirect("/admin/apps");
+        return redirect("/admin/apps?saved=deleted");
       }
       if (intent === "create" || !form.get("id")) {
         const { id } = await createAdminApp({

@@ -1,0 +1,2090 @@
+{
+  "scanmydisk": {
+    "name": "ScanMyDisk",
+    "category": "utility"
+  },
+  "shedi": {
+    "name": "Shedi",
+    "category": "dev"
+  },
+  "photsy": {
+    "name": "Photsy",
+    "category": "photography"
+  },
+  "herdbell": {
+    "name": "Herdbell",
+    "category": "utility"
+  },
+  "screentoast": {
+    "name": "ScreenToast",
+    "category": "design"
+  },
+  "drain": {
+    "name": "Drain",
+    "category": "utility"
+  },
+  "peeka": {
+    "name": "Peeka",
+    "category": "utility"
+  },
+  "notchi": {
+    "name": "Notchi",
+    "category": "utility"
+  },
+  "satori": {
+    "name": "Satori",
+    "category": "utility"
+  },
+  "t-scriptor": {
+    "name": "T-Scriptor",
+    "category": "utility"
+  },
+  "taco-tuesday": {
+    "name": "Taco Tuesday",
+    "category": "utility"
+  },
+  "sight": {
+    "name": "Sight",
+    "category": "utility"
+  },
+  "blook": {
+    "name": "Blook",
+    "category": "utility"
+  },
+  "tucklane": {
+    "name": "Tucklane",
+    "category": "utility"
+  },
+  "gossip": {
+    "name": "Gossip",
+    "category": "utility"
+  },
+  "zipic": {
+    "name": "Zipic",
+    "category": "design"
+  },
+  "mightybench": {
+    "name": "MightyBench",
+    "category": "design"
+  },
+  "otterdock": {
+    "name": "Otterdock",
+    "category": "utility"
+  },
+  "scrubs": {
+    "name": "Scrubs",
+    "category": "utility"
+  },
+  "helix": {
+    "name": "Helix",
+    "category": "utility"
+  },
+  "citenook": {
+    "name": "Citenook",
+    "category": "utility"
+  },
+  "textlore": {
+    "name": "Textlore",
+    "category": "utility"
+  },
+  "deskwatch": {
+    "name": "Deskwatch",
+    "category": "utility"
+  },
+  "up-a-notch": {
+    "name": "Up A Notch",
+    "category": "utility"
+  },
+  "rekey": {
+    "name": "Rekey",
+    "category": "utility"
+  },
+  "ribbon-for-mac": {
+    "name": "Ribbon for Mac",
+    "category": "utility"
+  },
+  "rollcage": {
+    "name": "Rollcage",
+    "category": "utility"
+  },
+  "tilemode": {
+    "name": "Tilemode",
+    "category": "utility"
+  },
+  "disklumo": {
+    "name": "Disklumo",
+    "category": "utility"
+  },
+  "copypasta": {
+    "name": "CopyPasta",
+    "category": "utility"
+  },
+  "afterword": {
+    "name": "Afterword",
+    "category": "utility"
+  },
+  "sequence-tool": {
+    "name": "Sequence Tool",
+    "category": "design"
+  },
+  "encore-display": {
+    "name": "Encore Display",
+    "category": "utility"
+  },
+  "penfont": {
+    "name": "Penfont",
+    "category": "design"
+  },
+  "lunille": {
+    "name": "Lunille",
+    "category": "utility"
+  },
+  "shepi": {
+    "name": "Shepi",
+    "category": "utility"
+  },
+  "current": {
+    "name": "Current",
+    "category": "utility"
+  },
+  "localeditor": {
+    "name": "LocalEditor",
+    "category": "utility"
+  },
+  "deskworthy": {
+    "name": "Deskworthy",
+    "category": "utility"
+  },
+  "maceq": {
+    "name": "MACEQ",
+    "category": "design"
+  },
+  "nori": {
+    "name": "Nori",
+    "category": "utility"
+  },
+  "speakmac": {
+    "name": "Speakmac",
+    "category": "utility"
+  },
+  "widgetscreen": {
+    "name": "WidgetScreen",
+    "category": "utility"
+  },
+  "ribbon": {
+    "name": "Ribbon",
+    "category": "utility"
+  },
+  "soundbuddy": {
+    "name": "SoundBuddy",
+    "category": "design"
+  },
+  "moody": {
+    "name": "Moody",
+    "category": "utility"
+  },
+  "toolkitz": {
+    "name": "ToolKITZ",
+    "category": "utility"
+  },
+  "rewritebar": {
+    "name": "RewriteBar",
+    "category": "utility"
+  },
+  "tidymac": {
+    "name": "TidyMac",
+    "category": "utility"
+  },
+  "upto": {
+    "name": "Upto",
+    "category": "utility"
+  },
+  "openshelf": {
+    "name": "OpenShelf",
+    "category": "design"
+  },
+  "stripix": {
+    "name": "Stripix",
+    "category": "design"
+  },
+  "macdisk": {
+    "name": "MacDisk",
+    "category": "utility"
+  },
+  "syncophant": {
+    "name": "Syncophant",
+    "category": "utility"
+  },
+  "notchnudge": {
+    "name": "NotchNudge",
+    "category": "utility"
+  },
+  "tocal": {
+    "name": "Tocal",
+    "category": "utility"
+  },
+  "devcleaner": {
+    "name": "DevCleaner",
+    "category": "utility"
+  },
+  "networkmonitor": {
+    "name": "NetworkMonitor",
+    "category": "utility"
+  },
+  "mate": {
+    "name": "Mate",
+    "category": "utility"
+  },
+  "lisorto": {
+    "name": "Lisorto",
+    "category": "utility"
+  },
+  "mowji": {
+    "name": "Mowji",
+    "category": "utility"
+  },
+  "snapzy": {
+    "name": "Snapzy",
+    "category": "utility"
+  },
+  "gsd-task-manager": {
+    "name": "GSD Task Manager",
+    "category": "utility"
+  },
+  "meowse": {
+    "name": "Meowse",
+    "category": "utility"
+  },
+  "speechy": {
+    "name": "Speechy",
+    "category": "utility"
+  },
+  "slashspace": {
+    "name": "Slashspace",
+    "category": "utility"
+  },
+  "cinch": {
+    "name": "Cinch",
+    "category": "utility"
+  },
+  "tack-plus": {
+    "name": "Tack+",
+    "category": "utility"
+  },
+  "consul": {
+    "name": "Consul",
+    "category": "design"
+  },
+  "buffer": {
+    "name": "Buffer",
+    "category": "utility"
+  },
+  "quilt": {
+    "name": "Quilt",
+    "category": "design"
+  },
+  "notchmemo": {
+    "name": "NotchMemo",
+    "category": "utility"
+  },
+  "notchtime": {
+    "name": "NotchTime",
+    "category": "utility"
+  },
+  "tapformat": {
+    "name": "Tapformat",
+    "category": "design"
+  },
+  "nodoze": {
+    "name": "NoDoze",
+    "category": "utility"
+  },
+  "stringout": {
+    "name": "Stringout",
+    "category": "design"
+  },
+  "nullkey": {
+    "name": "NullKey",
+    "category": "utility"
+  },
+  "seenlio": {
+    "name": "Seenlio",
+    "category": "utility"
+  },
+  "kudu": {
+    "name": "Kudu",
+    "category": "utility"
+  },
+  "tucko": {
+    "name": "Tucko",
+    "category": "utility"
+  },
+  "ratio": {
+    "name": "Ratio",
+    "category": "utility"
+  },
+  "winq": {
+    "name": "Winq",
+    "category": "utility"
+  },
+  "snipora": {
+    "name": "Snipora",
+    "category": "utility"
+  },
+  "rambla": {
+    "name": "Rambla",
+    "category": "utility"
+  },
+  "tiremusu": {
+    "name": "Tiremusu",
+    "category": "utility"
+  },
+  "papa": {
+    "name": "Papa",
+    "category": "utility"
+  },
+  "lynx-download-manager": {
+    "name": "Lynx Download Manager",
+    "category": "utility"
+  },
+  "make-mac-better": {
+    "name": "Make Mac Better",
+    "category": "utility"
+  },
+  "kopi": {
+    "name": "Kopi",
+    "category": "utility"
+  },
+  "wakebee": {
+    "name": "WakeBee",
+    "category": "utility"
+  },
+  "budget-day": {
+    "name": "Budget Day",
+    "category": "utility"
+  },
+  "filesmac": {
+    "name": "FilesMac",
+    "category": "utility"
+  },
+  "heartbeatmac": {
+    "name": "HeartbeatMac",
+    "category": "utility"
+  },
+  "hocusfocus": {
+    "name": "HocusFocus",
+    "category": "utility"
+  },
+  "annotake": {
+    "name": "Annotake",
+    "category": "utility"
+  },
+  "cupola": {
+    "name": "Cupola",
+    "category": "utility"
+  },
+  "tapmac": {
+    "name": "TapMac",
+    "category": "utility"
+  },
+  "typecorrect": {
+    "name": "TypeCorrect",
+    "category": "utility"
+  },
+  "layout": {
+    "name": "Layout",
+    "category": "utility"
+  },
+  "orange": {
+    "name": "Orange",
+    "category": "design"
+  },
+  "minimal-paste": {
+    "name": "Minimal Paste",
+    "category": "utility"
+  },
+  "perchy": {
+    "name": "Perchy",
+    "category": "utility"
+  },
+  "continuo": {
+    "name": "Continuo",
+    "category": "utility"
+  },
+  "branchway": {
+    "name": "Branchway",
+    "category": "utility"
+  },
+  "newton": {
+    "name": "Newton",
+    "category": "utility"
+  },
+  "tinycast": {
+    "name": "Tinycast",
+    "category": "utility"
+  },
+  "chitra-studio": {
+    "name": "Chitra Studio",
+    "category": "design"
+  },
+  "talkflow": {
+    "name": "talkflow",
+    "category": "utility"
+  },
+  "skillkeeper": {
+    "name": "SkillKeeper",
+    "category": "utility"
+  },
+  "virtual-diary": {
+    "name": "Virtual Diary",
+    "category": "utility"
+  },
+  "cleanbrowse": {
+    "name": "CleanBrowse",
+    "category": "utility"
+  },
+  "bayview": {
+    "name": "Bayview",
+    "category": "utility"
+  },
+  "tuningmac": {
+    "name": "TuningMac",
+    "category": "design"
+  },
+  "freshly-squeezed": {
+    "name": "Freshly Squeezed",
+    "category": "design"
+  },
+  "portlivo": {
+    "name": "Portlivo",
+    "category": "utility"
+  },
+  "nijia": {
+    "name": "Nijia",
+    "category": "utility"
+  },
+  "bytebud": {
+    "name": "Bytebud",
+    "category": "utility"
+  },
+  "cortex": {
+    "name": "Cortex",
+    "category": "utility"
+  },
+  "timecard": {
+    "name": "Timecard",
+    "category": "utility"
+  },
+  "see-your-disk": {
+    "name": "See Your Disk",
+    "category": "utility"
+  },
+  "aso-studio": {
+    "name": "ASO Studio",
+    "category": "utility"
+  },
+  "rushilo": {
+    "name": "Rushilo",
+    "category": "design"
+  },
+  "spacewise": {
+    "name": "SpaceWise",
+    "category": "utility"
+  },
+  "arazio": {
+    "name": "Arazio",
+    "category": "design"
+  },
+  "split": {
+    "name": "Split",
+    "category": "utility"
+  },
+  "agent-limit": {
+    "name": "Agent Limit",
+    "category": "utility"
+  },
+  "mailvault": {
+    "name": "MailVault",
+    "category": "utility"
+  },
+  "downly": {
+    "name": "Downly",
+    "category": "utility"
+  },
+  "hushtop": {
+    "name": "Hushtop",
+    "category": "utility"
+  },
+  "notch-design": {
+    "name": "Notch Design",
+    "category": "utility"
+  },
+  "lily-db": {
+    "name": "Lily DB",
+    "category": "utility"
+  },
+  "mint": {
+    "name": "Mint",
+    "category": "utility"
+  },
+  "clipex": {
+    "name": "Clipex",
+    "category": "utility"
+  },
+  "copse": {
+    "name": "Copse",
+    "category": "utility"
+  },
+  "murmur": {
+    "name": "Murmur",
+    "category": "utility"
+  },
+  "widgetscape": {
+    "name": "Widgetscape",
+    "category": "utility"
+  },
+  "devt-pro": {
+    "name": "DevT Pro",
+    "category": "utility"
+  },
+  "iloveframes": {
+    "name": "iloveframes",
+    "category": "design"
+  },
+  "betterwispr": {
+    "name": "BetterWispr",
+    "category": "utility"
+  },
+  "gleam-audio": {
+    "name": "Gleam Audio",
+    "category": "design"
+  },
+  "mitosis": {
+    "name": "Mitosis",
+    "category": "utility"
+  },
+  "vibepause": {
+    "name": "VibePause",
+    "category": "utility"
+  },
+  "folio": {
+    "name": "Folio",
+    "category": "utility"
+  },
+  "localinbox": {
+    "name": "LocalInbox",
+    "category": "utility"
+  },
+  "packtray": {
+    "name": "Packtray",
+    "category": "utility"
+  },
+  "filebridge": {
+    "name": "FileBridge",
+    "category": "utility"
+  },
+  "homy": {
+    "name": "Homy",
+    "category": "utility"
+  },
+  "zumbo": {
+    "name": "Zumbo",
+    "category": "utility"
+  },
+  "cardlarp": {
+    "name": "CardLARP",
+    "category": "design"
+  },
+  "calllane": {
+    "name": "CallLane",
+    "category": "utility"
+  },
+  "halo": {
+    "name": "Halo",
+    "category": "utility"
+  },
+  "bytemail": {
+    "name": "Bytemail",
+    "category": "utility"
+  },
+  "drawingpics": {
+    "name": "DrawingPics",
+    "category": "design"
+  },
+  "lumadisk": {
+    "name": "LumaDisk",
+    "category": "utility"
+  },
+  "context-dock": {
+    "name": "Context Dock",
+    "category": "utility"
+  },
+  "sidelet": {
+    "name": "Sidelet",
+    "category": "utility"
+  },
+  "voila": {
+    "name": "Voila",
+    "category": "design"
+  },
+  "chainyourmac": {
+    "name": "ChainYourMac",
+    "category": "utility"
+  },
+  "kippy": {
+    "name": "Kippy",
+    "category": "utility"
+  },
+  "displaypilot": {
+    "name": "DisplayPilot",
+    "category": "utility"
+  },
+  "sipbreak": {
+    "name": "Sipbreak",
+    "category": "utility"
+  },
+  "zeptap": {
+    "name": "Zeptap",
+    "category": "utility"
+  },
+  "markdific": {
+    "name": "Markdific",
+    "category": "utility"
+  },
+  "trailback": {
+    "name": "Trailback",
+    "category": "productivity"
+  },
+  "pungo": {
+    "name": "Pungo",
+    "category": "utility"
+  },
+  "rollferry": {
+    "name": "RollFerry",
+    "category": "utility"
+  },
+  "sorted": {
+    "name": "Sorted",
+    "category": "productivity"
+  },
+  "hushmark": {
+    "name": "Hushmark",
+    "category": "utility"
+  },
+  "peakpad": {
+    "name": "PeakPad",
+    "category": "utility"
+  },
+  "fling": {
+    "name": "Fling",
+    "category": "utility"
+  },
+  "momo": {
+    "name": "NotchMomo",
+    "category": "utility"
+  },
+  "stitchslide": {
+    "name": "StitchSlide",
+    "category": "design"
+  },
+  "glidepage": {
+    "name": "GlidePage",
+    "category": "utility"
+  },
+  "orcylo": {
+    "name": "Orcylo",
+    "category": "dev"
+  },
+  "searchonmac": {
+    "name": "SearchOnMac",
+    "category": "productivity"
+  },
+  "macfold": {
+    "name": "MacFold",
+    "category": "utility"
+  },
+  "here": {
+    "name": "Here",
+    "category": "utility"
+  },
+  "assist": {
+    "name": "Assist",
+    "category": "utility"
+  },
+  "notchmind": {
+    "name": "NotchMind",
+    "category": "utility"
+  },
+  "cuewake": {
+    "name": "Cuewake",
+    "category": "utility"
+  },
+  "stepaway": {
+    "name": "StepAway",
+    "category": "productivity"
+  },
+  "stowlink": {
+    "name": "StowLink",
+    "category": "utility"
+  },
+  "macdelta": {
+    "name": "MacDelta",
+    "category": "dev"
+  },
+  "omninotch": {
+    "name": "OmniNotch",
+    "category": "dev"
+  },
+  "cta": {
+    "name": "CTA",
+    "category": "utility"
+  },
+  "vinaa": {
+    "name": "Vinaa",
+    "category": "dev"
+  },
+  "drop-notch": {
+    "name": "Drop Notch",
+    "category": "dev"
+  },
+  "shotbase": {
+    "name": "Shotbase",
+    "category": "design"
+  },
+  "insurstaq-ai": {
+    "name": "InsurStaq AI",
+    "category": "productivity"
+  },
+  "dockui": {
+    "name": "DockUI",
+    "category": "dev"
+  },
+  "everypaste": {
+    "name": "EveryPaste",
+    "category": "productivity"
+  },
+  "pastely": {
+    "name": "Pastely",
+    "category": "utility"
+  },
+  "aso-engine": {
+    "name": "ASO Engine",
+    "category": "dev"
+  },
+  "locul": {
+    "name": "Locul",
+    "category": "dev"
+  },
+  "contextli": {
+    "name": "Contextli",
+    "category": "productivity"
+  },
+  "makernotch": {
+    "name": "MakerNotch",
+    "category": "utility"
+  },
+  "kiiwi": {
+    "name": "Kiiwi",
+    "category": "audio"
+  },
+  "thoughtdrop": {
+    "name": "ThoughtDrop",
+    "category": "productivity"
+  },
+  "notchowl": {
+    "name": "NotchOwl",
+    "category": "utility"
+  },
+  "notchpop": {
+    "name": "NotchPop",
+    "category": "utility"
+  },
+  "maccelerate": {
+    "name": "Maccelerate",
+    "category": "productivity"
+  },
+  "orbl": {
+    "name": "Orbl",
+    "category": "design"
+  },
+  "locus": {
+    "name": "Locus",
+    "category": "productivity"
+  },
+  "pastily": {
+    "name": "Pastily",
+    "category": "utility"
+  },
+  "stoic": {
+    "name": "Stoic",
+    "category": "audio"
+  },
+  "diskmate": {
+    "name": "DiskMate",
+    "category": "productivity"
+  },
+  "notchbuddy": {
+    "name": "Notch Buddy",
+    "category": "audio"
+  },
+  "iina": {
+    "name": "IINA",
+    "category": "utility"
+  },
+  "replay-software": {
+    "name": "Replay Software",
+    "category": "productivity"
+  },
+  "eagle": {
+    "name": "Eagle",
+    "category": "design"
+  },
+  "cleanshot-x": {
+    "name": "CleanShot X",
+    "category": "utility"
+  },
+  "upscayl": {
+    "name": "Upscayl",
+    "category": "utility"
+  },
+  "hejour": {
+    "name": "Hejour",
+    "category": "productivity"
+  },
+  "heed": {
+    "name": "Heed",
+    "category": "utility"
+  },
+  "local-chat": {
+    "name": "LocalChat",
+    "category": "productivity"
+  },
+  "process-spy": {
+    "name": "ProcessSpy",
+    "category": "dev"
+  },
+  "astro": {
+    "name": "Astro",
+    "category": "dev"
+  },
+  "splonk": {
+    "name": "Splonk",
+    "category": "productivity"
+  },
+  "hand-mirror": {
+    "name": "Hand Mirror",
+    "category": "productivity"
+  },
+  "one-thing": {
+    "name": "One Thing",
+    "category": "productivity"
+  },
+  "lookaway": {
+    "name": "LookAway",
+    "category": "productivity"
+  },
+  "granola": {
+    "name": "Granola",
+    "category": "productivity"
+  },
+  "localcan": {
+    "name": "LocalCan",
+    "category": "dev"
+  },
+  "boltai": {
+    "name": "BoltAI",
+    "category": "dev"
+  },
+  "idlemac": {
+    "name": "IdleMac",
+    "category": "utility"
+  },
+  "klack": {
+    "name": "Klack",
+    "category": "audio"
+  },
+  "paste": {
+    "name": "Paste",
+    "category": "dev"
+  },
+  "compresto": {
+    "name": "Compresto",
+    "category": "utility"
+  },
+  "slapmac": {
+    "name": "SlapMac",
+    "category": "utility"
+  },
+  "pimosa": {
+    "name": "Pimosa",
+    "category": "audio"
+  },
+  "orbit": {
+    "name": "Orbit",
+    "category": "ai"
+  },
+  "cursor": {
+    "name": "Cursor",
+    "category": "dev"
+  },
+  "cosmil": {
+    "name": "Cosmil",
+    "category": "utility"
+  },
+  "wavexml": {
+    "name": "WaveXML",
+    "category": "video"
+  },
+  "skud": {
+    "name": "Skud",
+    "category": "utility"
+  },
+  "codex": {
+    "name": "Codex",
+    "category": "dev"
+  },
+  "panels": {
+    "name": "Panels",
+    "category": "entertainment"
+  },
+  "the-missing-gradient-studio-for-mac-gradients-cool": {
+    "name": "The missing gradient studio for Mac, Gradients.cool",
+    "category": "design"
+  },
+  "tone": {
+    "name": "Tone",
+    "category": "audio"
+  },
+  "pieoneer": {
+    "name": "Pieoneer",
+    "category": "utility"
+  },
+  "screen-studio": {
+    "name": "Screen Studio",
+    "category": "video"
+  },
+  "picmal": {
+    "name": "Picmal",
+    "category": "utility"
+  },
+  "wallset": {
+    "name": "Wallset",
+    "category": "utility"
+  },
+  "framer": {
+    "name": "Framer",
+    "category": "design"
+  },
+  "moonitor": {
+    "name": "Moonitor",
+    "category": "finance"
+  },
+  "tidy": {
+    "name": "Tidy",
+    "category": "productivity"
+  },
+  "notion-calendar": {
+    "name": "Notion Calendar",
+    "category": "productivity"
+  },
+  "prostir-zvuku": {
+    "name": "prostir zvuku",
+    "category": "lifestyle"
+  },
+  "droptodo": {
+    "name": "DropToDo",
+    "category": "productivity"
+  },
+  "voxt": {
+    "name": "Voxt",
+    "category": "ai"
+  },
+  "letterboxx": {
+    "name": "Letterboxx",
+    "category": "productivity"
+  },
+  "wemotion": {
+    "name": "WeMotion",
+    "category": "video"
+  },
+  "superbot": {
+    "name": "superbot",
+    "category": "ai"
+  },
+  "mymind": {
+    "name": "mymind",
+    "category": "productivity"
+  },
+  "minimizall": {
+    "name": "Minimizall",
+    "category": "productivity"
+  },
+  "radial": {
+    "name": "Radial",
+    "category": "productivity"
+  },
+  "tellie": {
+    "name": "Tellie",
+    "category": "design"
+  },
+  "hoolo": {
+    "name": "Hoolo",
+    "category": "productivity"
+  },
+  "vehla": {
+    "name": "Vehla",
+    "category": "productivity"
+  },
+  "unfold": {
+    "name": "Unfold",
+    "category": "utility"
+  },
+  "badgeify": {
+    "name": "Badgeify",
+    "category": "utility"
+  },
+  "supaste": {
+    "name": "Supaste",
+    "category": "productivity"
+  },
+  "neon-vision-editor": {
+    "name": "Neon Vision Editor",
+    "category": "dev"
+  },
+  "severn-planner": {
+    "name": "Severn Planner",
+    "category": "productivity"
+  },
+  "mongon": {
+    "name": "Mongon",
+    "category": "dev"
+  },
+  "superscribe": {
+    "name": "Superscribe",
+    "category": "productivity"
+  },
+  "notion": {
+    "name": "Notion",
+    "category": "productivity"
+  },
+  "open-screen-shot": {
+    "name": "Open Screen Shot",
+    "category": "utility"
+  },
+  "liqoria": {
+    "name": "Liqoria",
+    "category": "lifestyle"
+  },
+  "focusjar": {
+    "name": "FocusJar",
+    "category": "productivity"
+  },
+  "super-shortcuts": {
+    "name": "Super Shortcuts",
+    "category": "productivity"
+  },
+  "keeby": {
+    "name": "Keeby",
+    "category": "utility"
+  },
+  "shake-it-on": {
+    "name": "Shake it On",
+    "category": "utility"
+  },
+  "deskminder": {
+    "name": "DeskMinder",
+    "category": "productivity"
+  },
+  "soulver": {
+    "name": "Soulver",
+    "category": "productivity"
+  },
+  "dia": {
+    "name": "Dia",
+    "category": "productivity"
+  },
+  "waterlemon": {
+    "name": "Waterlemon",
+    "category": "design"
+  },
+  "atlas": {
+    "name": "Atlas",
+    "category": "productivity"
+  },
+  "voiceos": {
+    "name": "VoiceOS",
+    "category": "productivity"
+  },
+  "chimes": {
+    "name": "Chimes",
+    "category": "audio"
+  },
+  "autoshelf": {
+    "name": "AutoShelf",
+    "category": "productivity"
+  },
+  "spantime": {
+    "name": "SpanTime",
+    "category": "business"
+  },
+  "rasterloom": {
+    "name": "Rasterloom",
+    "category": "design"
+  },
+  "onlook": {
+    "name": "Onlook",
+    "category": "utility"
+  },
+  "minarah": {
+    "name": "Minarah",
+    "category": "lifestyle"
+  },
+  "forma": {
+    "name": "Forma",
+    "category": "productivity"
+  },
+  "1password": {
+    "name": "1Password",
+    "category": "utility"
+  },
+  "canary-mail": {
+    "name": "Canary Mail",
+    "category": "productivity"
+  },
+  "popnote": {
+    "name": "PopNote",
+    "category": "productivity"
+  },
+  "zoundry": {
+    "name": "Zoundry",
+    "category": "utility"
+  },
+  "usage": {
+    "name": "Usage",
+    "category": "utility"
+  },
+  "sketch": {
+    "name": "Sketch",
+    "category": "design"
+  },
+  "dropzone": {
+    "name": "Dropzone",
+    "category": "utility"
+  },
+  "walltune": {
+    "name": "WallTune",
+    "category": "utility"
+  },
+  "lightroll": {
+    "name": "LightRoll",
+    "category": "photography"
+  },
+  "sadfinder": {
+    "name": "SADFinder",
+    "category": "productivity"
+  },
+  "maccess": {
+    "name": "Maccess",
+    "category": "ai"
+  },
+  "textsniper": {
+    "name": "TextSniper",
+    "category": "productivity"
+  },
+  "hora-calendar": {
+    "name": "hora Calendar",
+    "category": "productivity"
+  },
+  "mailtwin": {
+    "name": "MailTwin",
+    "category": "productivity"
+  },
+  "launchos": {
+    "name": "LaunchOS",
+    "category": "productivity"
+  },
+  "getcompress": {
+    "name": "GetCompress",
+    "category": "video"
+  },
+  "purge": {
+    "name": "Purge",
+    "category": "utility"
+  },
+  "lyrimuse": {
+    "name": "Lyrimuse",
+    "category": "audio"
+  },
+  "sundown": {
+    "name": "Sundown",
+    "category": "utility"
+  },
+  "presentify": {
+    "name": "Presentify",
+    "category": "productivity"
+  },
+  "backspace-macos-live-wallpapers": {
+    "name": "Backspace: macOS Live Wallpapers",
+    "category": "entertainment"
+  },
+  "interview-vip": {
+    "name": "Interview VIP",
+    "category": "ai"
+  },
+  "deskcommit": {
+    "name": "DeskCommit",
+    "category": "utility"
+  },
+  "bartender-6": {
+    "name": "Bartender 6",
+    "category": "utility"
+  },
+  "checkmydisk": {
+    "name": "CheckMyDisk",
+    "category": "utility"
+  },
+  "oh-my-notes": {
+    "name": "Oh My Notes",
+    "category": "productivity"
+  },
+  "clickfit": {
+    "name": "ClickFit",
+    "category": "productivity"
+  },
+  "cachesweep": {
+    "name": "Cachesweep",
+    "category": "utility"
+  },
+  "translateair": {
+    "name": "TranslateAir",
+    "category": "productivity"
+  },
+  "seqlog": {
+    "name": "SeqLog",
+    "category": "writing"
+  },
+  "hilium": {
+    "name": "Hilium",
+    "category": "utility"
+  },
+  "wallspace": {
+    "name": "Wallspace",
+    "category": "utility"
+  },
+  "woday": {
+    "name": "Woday",
+    "category": "productivity"
+  },
+  "room-service": {
+    "name": "Room Service",
+    "category": "dev"
+  },
+  "market-ticker-live": {
+    "name": "Market Ticker Live",
+    "category": "finance"
+  },
+  "mux": {
+    "name": "Mux",
+    "category": "utility"
+  },
+  "sayonic": {
+    "name": "Sayonic",
+    "category": "productivity"
+  },
+  "build-mac-app": {
+    "name": "Build Mac App",
+    "category": "dev"
+  },
+  "sero": {
+    "name": "Sero",
+    "category": "ai"
+  },
+  "zonedial": {
+    "name": "Zonedial",
+    "category": "utility"
+  },
+  "codeshot": {
+    "name": "Codeshot",
+    "category": "dev"
+  },
+  "compressor": {
+    "name": "Compressor",
+    "category": "utility"
+  },
+  "claudete": {
+    "name": "Claudete",
+    "category": "dev"
+  },
+  "interviewman": {
+    "name": "InterviewMan",
+    "category": "ai"
+  },
+  "peekabop": {
+    "name": "Peekabop",
+    "category": "audio"
+  },
+  "quicklook-pro": {
+    "name": "QuickLook Pro",
+    "category": "utility"
+  },
+  "bpm-player": {
+    "name": "BPM Player",
+    "category": "audio"
+  },
+  "frameos": {
+    "name": "FrameOS",
+    "category": "dev"
+  },
+  "open-timer": {
+    "name": "Open Timer",
+    "category": "productivity"
+  },
+  "macrest": {
+    "name": "MacRest",
+    "category": "utility"
+  },
+  "tono": {
+    "name": "Tono",
+    "category": "lifestyle"
+  },
+  "redact-guard": {
+    "name": "Redact Guard",
+    "category": "utility"
+  },
+  "marko": {
+    "name": "Marko",
+    "category": "productivity"
+  },
+  "finbar": {
+    "name": "Finbar",
+    "category": "productivity"
+  },
+  "runey": {
+    "name": "Runey",
+    "category": "business"
+  },
+  "muse": {
+    "name": "Muse",
+    "category": "productivity"
+  },
+  "qampanion": {
+    "name": "Qampanion",
+    "category": "dev"
+  },
+  "glaze": {
+    "name": "Glaze",
+    "category": "ai"
+  },
+  "squeezo": {
+    "name": "Squeezo",
+    "category": "utility"
+  },
+  "noticky": {
+    "name": "Noticky",
+    "category": "productivity"
+  },
+  "muet": {
+    "name": "muet",
+    "category": "productivity"
+  },
+  "rescript": {
+    "name": "Rescript",
+    "category": "productivity"
+  },
+  "betterswitch": {
+    "name": "Betterswitch",
+    "category": "productivity"
+  },
+  "macsmith": {
+    "name": "Macsmith",
+    "category": "dev"
+  },
+  "windowcase": {
+    "name": "Windowcase",
+    "category": "utility"
+  },
+  "cybokron-dock-groups": {
+    "name": "Cybokron Dock Groups",
+    "category": "productivity"
+  },
+  "suzume-mail": {
+    "name": "Suzume Mail",
+    "category": "productivity"
+  },
+  "shiftbar": {
+    "name": "ShiftBar",
+    "category": "utility"
+  },
+  "hipixel": {
+    "name": "HiPixel",
+    "category": "photography"
+  },
+  "purrify": {
+    "name": "Purrify",
+    "category": "utility"
+  },
+  "ayron-time-tracker": {
+    "name": "Ayron Time Tracker",
+    "category": "productivity"
+  },
+  "findmsg": {
+    "name": "FINDmsg",
+    "category": "productivity"
+  },
+  "wasdy-claude-skills-and-mcp-manager": {
+    "name": "Wasdy - Claude Skills & MCP Manager",
+    "category": "ai"
+  },
+  "shutterkit": {
+    "name": "Shutterkit",
+    "category": "photography"
+  },
+  "shhepit": {
+    "name": "Shhepit",
+    "category": "productivity"
+  },
+  "resurf": {
+    "name": "Resurf",
+    "category": "productivity"
+  },
+  "backdrop": {
+    "name": "Backdrop",
+    "category": "utility"
+  },
+  "vocal-notes": {
+    "name": "Vocal Notes",
+    "category": "audio"
+  },
+  "fs-pdf-compressor": {
+    "name": "FS PDF Compressor",
+    "category": "utility"
+  },
+  "siftframe": {
+    "name": "SiftFrame",
+    "category": "productivity"
+  },
+  "tokens-4-breakfast": {
+    "name": "Tokens 4 Breakfast",
+    "category": "productivity"
+  },
+  "cleanmymac": {
+    "name": "CleanMyMac",
+    "category": "utility"
+  },
+  "dynamiclake": {
+    "name": "DynamicLake",
+    "category": "productivity"
+  },
+  "notate": {
+    "name": "Notate",
+    "category": "productivity"
+  },
+  "bauhaus-clock": {
+    "name": "Bauhaus Clock",
+    "category": "utility"
+  },
+  "creavit-studio": {
+    "name": "Creavit Studio",
+    "category": "video"
+  },
+  "type": {
+    "name": "Type",
+    "category": "productivity"
+  },
+  "raycast": {
+    "name": "Raycast",
+    "category": "productivity"
+  },
+  "slap-alert": {
+    "name": "Slap Alert",
+    "category": "productivity"
+  },
+  "tuple": {
+    "name": "Tuple",
+    "category": "dev"
+  },
+  "displaybuddy": {
+    "name": "DisplayBuddy",
+    "category": "utility"
+  },
+  "macpacker": {
+    "name": "MacPacker",
+    "category": "utility"
+  },
+  "toplify": {
+    "name": "Toplify",
+    "category": "marketing"
+  },
+  "keyameleon": {
+    "name": "Keyameleon",
+    "category": "productivity"
+  },
+  "chargd": {
+    "name": "Chargd",
+    "category": "business"
+  },
+  "corner-time": {
+    "name": "Corner Time",
+    "category": "utility"
+  },
+  "craft": {
+    "name": "Craft",
+    "category": "writing"
+  },
+  "wifi-lens-pro": {
+    "name": "WiFi Lens Pro",
+    "category": "utility"
+  },
+  "bookvault": {
+    "name": "BookVault",
+    "category": "utility"
+  },
+  "agentpeek": {
+    "name": "AgentPeek",
+    "category": "dev"
+  },
+  "perch": {
+    "name": "Perch",
+    "category": "productivity"
+  },
+  "tethershot": {
+    "name": "TetherShot",
+    "category": "utility"
+  },
+  "greetigo": {
+    "name": "Greetigo",
+    "category": "productivity"
+  },
+  "filenav": {
+    "name": "FileNav",
+    "category": "productivity"
+  },
+  "focusos": {
+    "name": "FocusOS",
+    "category": "photography"
+  },
+  "orchard": {
+    "name": "Orchard",
+    "category": "ai"
+  },
+  "audio-notes-formerly-email-me": {
+    "name": "Audio Notes formerly Email Me",
+    "category": "ai"
+  },
+  "caesura": {
+    "name": "Caesura",
+    "category": "utility"
+  },
+  "obsidian": {
+    "name": "Obsidian",
+    "category": "writing"
+  },
+  "gatheros": {
+    "name": "GatherOS",
+    "category": "design"
+  },
+  "mute": {
+    "name": "Mute",
+    "category": "utility"
+  },
+  "freeloader": {
+    "name": "Freeloader",
+    "category": "utility"
+  },
+  "healthynotch": {
+    "name": "HealthyNotch",
+    "category": "productivity"
+  },
+  "heatscope-ai-ux-attention-heatmaps": {
+    "name": "HeatScope AI UX Attention Heatmaps",
+    "category": "design"
+  },
+  "ghostmark": {
+    "name": "Ghostmark",
+    "category": "utility"
+  },
+  "crewtower": {
+    "name": "CrewTower",
+    "category": "dev"
+  },
+  "folder-hub": {
+    "name": "Folder Hub",
+    "category": "utility"
+  },
+  "inkstone": {
+    "name": "Inkstone",
+    "category": "writing"
+  },
+  "tinta-voice": {
+    "name": "Tinta Voice",
+    "category": "productivity"
+  },
+  "geardex": {
+    "name": "GearDex",
+    "category": "photography"
+  },
+  "ave-for-mac": {
+    "name": "AVE for Mac",
+    "category": "video"
+  },
+  "slashit-app": {
+    "name": "Slashit App",
+    "category": "productivity"
+  },
+  "subscription-day": {
+    "name": "Subscription Day",
+    "category": "lifestyle"
+  },
+  "shoji-your-screen-for-your-eyes-only": {
+    "name": "Shoji: your screen, for your eyes only",
+    "category": "utility"
+  },
+  "now": {
+    "name": "Now",
+    "category": "audio"
+  },
+  "ascope": {
+    "name": "Ascope",
+    "category": "marketing"
+  },
+  "recto-notes": {
+    "name": "Recto Notes",
+    "category": "productivity"
+  },
+  "notepad-exe-for-mac": {
+    "name": "Notepad.exe for Mac",
+    "category": "dev"
+  },
+  "lofi-space": {
+    "name": "Lofi Space",
+    "category": "productivity"
+  },
+  "wattmate": {
+    "name": "WattMate",
+    "category": "utility"
+  },
+  "just-a-pause": {
+    "name": "Just A Pause",
+    "category": "productivity"
+  },
+  "roadie": {
+    "name": "Roadie",
+    "category": "audio"
+  },
+  "code-meter": {
+    "name": "Code Meter",
+    "category": "productivity"
+  },
+  "vinyl-for-mac": {
+    "name": "Vinyl for Mac",
+    "category": "audio"
+  },
+  "leafy-vocabulary-builder-for-mac": {
+    "name": "Leafy: Vocabulary Builder for Mac",
+    "category": "productivity"
+  },
+  "paperman": {
+    "name": "Paperman",
+    "category": "utility"
+  },
+  "radioform-a-macos-eq-app": {
+    "name": "Radioform: A macOS EQ App",
+    "category": "audio"
+  },
+  "tenuo": {
+    "name": "Tenuo",
+    "category": "productivity"
+  },
+  "screen-movie": {
+    "name": "Screen Movie",
+    "category": "video"
+  },
+  "26keys": {
+    "name": "26Keys",
+    "category": "writing"
+  },
+  "convertit": {
+    "name": "ConvertIt",
+    "category": "productivity"
+  },
+  "itspaint": {
+    "name": "ItsPaint",
+    "category": "design"
+  },
+  "art4-for-mac": {
+    "name": "Art4 for Mac",
+    "category": "lifestyle"
+  },
+  "orca-one": {
+    "name": "Orca One",
+    "category": "productivity"
+  },
+  "aureon": {
+    "name": "Aureon",
+    "category": "productivity"
+  },
+  "walyro-video-wallpaper-app-for-mac": {
+    "name": "Walyro - Video Wallpaper App for Mac",
+    "category": "utility"
+  },
+  "grovenote": {
+    "name": "GroveNote",
+    "category": "dev"
+  },
+  "snapdown": {
+    "name": "Snapdown",
+    "category": "productivity"
+  },
+  "shortap": {
+    "name": "Shortap",
+    "category": "productivity"
+  },
+  "sqz": {
+    "name": "Sqz",
+    "category": "photography"
+  },
+  "stoot": {
+    "name": "Stoot",
+    "category": "design"
+  },
+  "pixph": {
+    "name": "Pixph",
+    "category": "productivity"
+  },
+  "brief": {
+    "name": "Brief",
+    "category": "productivity"
+  },
+  "quacknotes": {
+    "name": "QuackNotes",
+    "category": "dev"
+  },
+  "hamza": {
+    "name": "Hamza",
+    "category": "lifestyle"
+  },
+  "ply": {
+    "name": "Ply",
+    "category": "productivity"
+  },
+  "word-clock-pro": {
+    "name": "Word Clock Pro",
+    "category": "lifestyle"
+  },
+  "puppyone": {
+    "name": "PuppyOne",
+    "category": "productivity"
+  },
+  "iap-buddy": {
+    "name": "IAP Buddy",
+    "category": "dev"
+  },
+  "satu": {
+    "name": "Satu",
+    "category": "productivity"
+  },
+  "rede": {
+    "name": "Rede",
+    "category": "productivity"
+  },
+  "drivemosaic": {
+    "name": "DriveMosaic",
+    "category": "utility"
+  },
+  "mac-plus": {
+    "name": "MAC+",
+    "category": "productivity"
+  },
+  "workflo": {
+    "name": "Workflo.",
+    "category": "productivity"
+  },
+  "folders": {
+    "name": "Folders",
+    "category": "utility"
+  },
+  "grape": {
+    "name": "Grape",
+    "category": "productivity"
+  },
+  "pokey": {
+    "name": "Pokey",
+    "category": "communication"
+  },
+  "extradock-5": {
+    "name": "ExtraDock 5",
+    "category": "productivity"
+  },
+  "dropmute": {
+    "name": "Dropmute",
+    "category": "utility"
+  },
+  "toma": {
+    "name": "TOMA",
+    "category": "utility"
+  },
+  "revone": {
+    "name": "Revone",
+    "category": "analytics"
+  },
+  "coreviz-studio": {
+    "name": "Coreviz Studio",
+    "category": "ai"
+  },
+  "defocus": {
+    "name": "defocus",
+    "category": "productivity"
+  },
+  "keyecho": {
+    "name": "KeyEcho",
+    "category": "audio"
+  },
+  "glyph": {
+    "name": "Glyph",
+    "category": "writing"
+  },
+  "syllo": {
+    "name": "Syllo",
+    "category": "productivity"
+  },
+  "pixelcasso": {
+    "name": "Pixelcasso",
+    "category": "design"
+  },
+  "pulse": {
+    "name": "Pulse",
+    "category": "finance"
+  },
+  "nexus-shell": {
+    "name": "Nexus Shell",
+    "category": "dev"
+  },
+  "sip-color-for-mac": {
+    "name": "Sip Color for Mac",
+    "category": "dev"
+  },
+  "pixelcolor": {
+    "name": "PixelColor",
+    "category": "utility"
+  },
+  "mira": {
+    "name": "Mira",
+    "category": "entertainment"
+  },
+  "keyty": {
+    "name": "Keyty",
+    "category": "utility"
+  },
+  "edist": {
+    "name": "Edist",
+    "category": "writing"
+  },
+  "mjsfx": {
+    "name": "MJSFX",
+    "category": "audio"
+  },
+  "superlist": {
+    "name": "Superlist",
+    "category": "productivity"
+  },
+  "cooldock": {
+    "name": "Cooldock",
+    "category": "productivity"
+  },
+  "nodes": {
+    "name": "Nodes",
+    "category": "writing"
+  },
+  "macwall": {
+    "name": "MacWall",
+    "category": "utility"
+  },
+  "discrity": {
+    "name": "Discrity",
+    "category": "utility"
+  },
+  "moorline": {
+    "name": "Moorline",
+    "category": "business"
+  },
+  "dot": {
+    "name": "Dot",
+    "category": "productivity"
+  },
+  "unixtime": {
+    "name": "UnixTime",
+    "category": "utility"
+  },
+  "vidmage": {
+    "name": "VidMage",
+    "category": "ai"
+  },
+  "fantastical": {
+    "name": "Fantastical",
+    "category": "productivity"
+  },
+  "mural": {
+    "name": "Mural",
+    "category": "utility"
+  },
+  "vibe-in-color": {
+    "name": "Vibe in Color",
+    "category": "utility"
+  },
+  "secrets": {
+    "name": "Secrets",
+    "category": "productivity"
+  },
+  "aide": {
+    "name": "Aide",
+    "category": "utility"
+  },
+  "memoe": {
+    "name": "Memoe",
+    "category": "productivity"
+  },
+  "notchlive": {
+    "name": "NotchLive",
+    "category": "communication"
+  },
+  "maestri": {
+    "name": "Maestri",
+    "category": "ai"
+  },
+  "screenplace": {
+    "name": "ScreenPlace",
+    "category": "productivity"
+  },
+  "dictaty": {
+    "name": "Dictaty",
+    "category": "productivity"
+  },
+  "creos": {
+    "name": "CREOS",
+    "category": "productivity"
+  },
+  "screenlex": {
+    "name": "ScreenLex",
+    "category": "photography"
+  },
+  "nox": {
+    "name": "Nox",
+    "category": "utility"
+  },
+  "macusb": {
+    "name": "macUSB",
+    "category": "utility"
+  },
+  "mac-4-breakfast": {
+    "name": "Mac 4 Breakfast",
+    "category": "productivity"
+  },
+  "orbs": {
+    "name": "Orbs",
+    "category": "productivity"
+  },
+  "sessionwatcher": {
+    "name": "SessionWatcher",
+    "category": "utility"
+  },
+  "folderymenutm": {
+    "name": "FolderyMenu™",
+    "category": "utility"
+  },
+  "compact-contacts": {
+    "name": "Compact Contacts",
+    "category": "productivity"
+  },
+  "notch-now": {
+    "name": "Notch Now",
+    "category": "productivity"
+  },
+  "escale": {
+    "name": "Escale",
+    "category": "dev"
+  },
+  "tiles": {
+    "name": "Tiles",
+    "category": "productivity"
+  },
+  "zush": {
+    "name": "Zush",
+    "category": "productivity"
+  },
+  "camcue": {
+    "name": "CamCue",
+    "category": "ai"
+  },
+  "keelhaven": {
+    "name": "Keelhaven",
+    "category": "utility"
+  },
+  "unfumble": {
+    "name": "Unfumble",
+    "category": "utility"
+  },
+  "flairy": {
+    "name": "Flairy",
+    "category": "design"
+  },
+  "teebots": {
+    "name": "Teebots",
+    "category": "ai"
+  },
+  "hushnotes": {
+    "name": "HushNotes",
+    "category": "productivity"
+  },
+  "sidenotes": {
+    "name": "SideNotes",
+    "category": "productivity"
+  },
+  "midcode": {
+    "name": "midcode",
+    "category": "dev"
+  },
+  "orbitring": {
+    "name": "OrbitRing",
+    "category": "utility"
+  },
+  "glance": {
+    "name": "Glance",
+    "category": "productivity"
+  },
+  "reely": {
+    "name": "Reely",
+    "category": "dev"
+  },
+  "viaduct": {
+    "name": "Viaduct",
+    "category": "productivity"
+  },
+  "ornix": {
+    "name": "Ornix",
+    "category": "utility"
+  },
+  "dockside-for-mac": {
+    "name": "Dockside for Mac",
+    "category": "productivity"
+  },
+  "watchflows": {
+    "name": "Watchflows",
+    "category": "productivity"
+  },
+  "spacepeek": {
+    "name": "SpacePeek",
+    "category": "utility"
+  },
+  "framecast": {
+    "name": "Framecast",
+    "category": "video"
+  },
+  "retinly": {
+    "name": "Retinly",
+    "category": "productivity"
+  },
+  "abejas": {
+    "name": "Abejas",
+    "category": "productivity"
+  }
+}

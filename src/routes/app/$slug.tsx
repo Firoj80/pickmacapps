@@ -1,10 +1,12 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
+import { AppAlternatives } from "@/components/app-alternatives";
 import { Missing } from "@/components/missing";
 import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appPairs } from "@/lib/compare";
 import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
+import { getDiscontinuedAppInfo } from "@/lib/discontinued-apps";
 import { appGraph, jsonLdScript } from "@/lib/jsonld";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
@@ -31,27 +33,66 @@ function trackTryApp(appId?: string) {
 }
 
 export const Route = createFileRoute("/app/$slug")({
-  beforeLoad: async ({ params, context }) => {
+  beforeLoad: async ({ context }) => {
     const resolved = await resolveRouteDirectoryMatch(
       context.directory,
-      (dir) => publishedApps(dir).some((app) => app.slug === params.slug),
+      () => true,
     );
-    if (!resolved.found) throw notFound();
     return { directory: resolved.directory };
   },
   component: AppPage,
   notFoundComponent: () => <Missing title="App not found" body="That Mac app isn't in the directory." />,
   head: ({ params, matches }) => {
-    const app = publishedApps(directoryFromMatches(matches)).find((item) => item.slug === params.slug);
+    const dir = directoryFromMatches(matches);
+    const app = publishedApps(dir).find((item) => item.slug === params.slug);
     if (!app) {
-      const missing = buildMetadata({
-        title: pageCopy.notFound.title,
-        description: pageCopy.notFound.description,
-        path: `/app/${params.slug}`,
-        origin: originFrom(matches),
-        noindex: true,
+      const tombstones = (dir as { tombstones?: { slug: string; name?: string; category?: string }[] })?.tombstones;
+      const discontinued = getDiscontinuedAppInfo(params.slug, tombstones);
+      const currentYear = new Date().getFullYear();
+      const title = `Best Alternatives to ${discontinued.name} for Mac (${currentYear}) | PickMacApps`;
+      const description = `${discontinued.name} is no longer listed on PickMacApps. Discover the top ${discontinued.categoryName.toLowerCase()} alternatives and verified macOS apps.`;
+      const origin = originFrom(matches);
+      const path = `/app/${params.slug}`;
+
+      const seo = buildMetadata({
+        title,
+        description,
+        ogTitle: `Best Alternatives to ${discontinued.name} for Mac (${currentYear})`,
+        ogDescription: description,
+        twitterTitle: `Best Alternatives to ${discontinued.name} for Mac (${currentYear})`,
+        twitterDescription: description,
+        path,
+        origin,
+        noindex: false,
       });
-      return { meta: missing.meta, links: missing.links };
+
+      // Curate top alternatives for ItemList structured data
+      const catApps = publishedApps(dir)
+        .filter((a) => a.category === discontinued.category)
+        .slice(0, 8);
+      const alternativeList = catApps.length > 0 ? catApps : publishedApps(dir).slice(0, 8);
+
+      const jsonLd = {
+        "@context": "https://schema.org",
+        "@type": "ItemList",
+        name: `Top Alternatives to ${discontinued.name} for Mac`,
+        description,
+        itemListElement: alternativeList.map((item, index) => ({
+          "@type": "ListItem",
+          position: index + 1,
+          name: item.name,
+          url: `${origin}/app/${item.slug}`,
+          description: item.tagline,
+        })),
+      };
+
+      const script = jsonLdScript(jsonLd);
+
+      return {
+        meta: seo.meta,
+        links: [...seo.links, markdownAlternate(origin, path)],
+        ...(script ? { scripts: [script] } : {}),
+      };
     }
     const title = `${app.name} for Mac: Features & Pricing | PickMacApps`;
     const description = appMetaDescription(app);
@@ -81,7 +122,11 @@ function AppPage() {
   const { directory } = Route.useRouteContext();
   const allApps = publishedApps(directory);
   const app = allApps.find((item) => item.slug === slug) ?? null;
-  if (!app) return null;
+  if (!app) {
+    const tombstones = (directory as { tombstones?: { slug: string; name?: string; category?: string }[] })?.tombstones;
+    const discontinued = getDiscontinuedAppInfo(slug, tombstones);
+    return <AppAlternatives discontinued={discontinued} allApps={allApps} />;
+  }
 
   const allOtherApps = allApps.filter((item) => item.slug !== app.slug);
   const explicitRelated = app.related
