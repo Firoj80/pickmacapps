@@ -228,7 +228,8 @@ export function AdminShell({
                       <Link
                         key={item.id}
                         to={item.to}
-                        onClick={() => setMobileDrawerOpen(false)}
+                        preload="intent"
+                        onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                           isActive
                             ? "bg-ink font-semibold text-canvas shadow-xs"
@@ -258,7 +259,8 @@ export function AdminShell({
                       <Link
                         key={item.id}
                         to={item.to}
-                        onClick={() => setMobileDrawerOpen(false)}
+                        preload="intent"
+                        onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                           isActive
                             ? "bg-ink font-semibold text-canvas shadow-xs"
@@ -288,7 +290,8 @@ export function AdminShell({
                       <Link
                         key={item.id}
                         to={item.to}
-                        onClick={() => setMobileDrawerOpen(false)}
+                        preload="intent"
+                        onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                           isActive
                             ? "bg-ink font-semibold text-canvas shadow-xs"

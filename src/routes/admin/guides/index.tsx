@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
-import { fetchAdminGuides, ensureAdminSession, getCachedAdminGuides } from "@/lib/directory.fn";
+import { fetchAdminGuides, ensureAdminSession, getCachedAdminGuides, seedAdminGuidesCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/guides/")({
@@ -30,6 +30,10 @@ function GuidesPage() {
   const guides = Route.useLoaderData();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<"all" | "published" | "draft">("all");
+
+  if (typeof window !== "undefined" && guides) {
+    seedAdminGuidesCache(guides);
+  }
 
   const publishedCount = useMemo(() => guides.filter((g) => g.status === "published").length, [guides]);
   const draftCount = useMemo(() => guides.filter((g) => g.status !== "published").length, [guides]);

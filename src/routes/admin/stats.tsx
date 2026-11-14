@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, useAdminNotice } from "@/components/admin-shell";
-import { ensureAdminSession, getCachedAdminApps } from "@/lib/directory.fn";
+import { ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import type { AppItem } from "@/lib/catalog";
 
@@ -32,6 +32,10 @@ type SortField = "clicks" | "try" | "conversion" | "name";
 function AppStatsAdminPage() {
   const apps = Route.useLoaderData();
   const notice = useAdminNotice();
+
+  if (typeof window !== "undefined" && apps) {
+    seedAdminAppsCache(apps);
+  }
 
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "clicked" | "free" | "paid">("all");

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import type { AppItem } from "@/lib/catalog";
 import { appIconUrl } from "@/lib/image-opt";
@@ -19,6 +19,23 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
       .slice(0, 10);
   }, [apps]);
 
+  // Touch pause state so mobile taps freeze the moving ribbon and cleanly register clicks
+  const [touchPaused, setTouchPaused] = useState(false);
+  const touchTimerRef = useRef<number | null>(null);
+
+  const handleTouchStart = () => {
+    if (touchTimerRef.current) window.clearTimeout(touchTimerRef.current);
+    setTouchPaused(true);
+  };
+
+  const handleTouchEnd = () => {
+    if (touchTimerRef.current) window.clearTimeout(touchTimerRef.current);
+    // Keep paused for 600ms so user's tap navigates without moving target
+    touchTimerRef.current = window.setTimeout(() => {
+      setTouchPaused(false);
+    }, 600);
+  };
+
   if (top10.length === 0) return null;
 
   return (
@@ -37,6 +54,7 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
 
         <Link
           to="/leaderboard"
+          preload="intent"
           className="group inline-flex items-center gap-1 font-semibold text-accent hover:underline transition-colors"
         >
           <span>View Full Leaderboard</span>
@@ -45,7 +63,11 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
       </div>
 
       {/* Marquee Running Banner Track */}
-      <div className="relative w-full overflow-hidden py-1">
+      <div
+        className="relative w-full overflow-hidden py-1"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {/* Left & Right Gradient Fade Masks */}
         <div
           aria-hidden="true"
@@ -57,7 +79,10 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
         />
 
         {/* Double-loop for smooth continuous infinite scrolling */}
-        <div className="animate-marquee flex items-center gap-3">
+        <div
+          className="animate-marquee flex items-center gap-3"
+          style={touchPaused ? { animationPlayState: "paused" } : undefined}
+        >
           {[0, 1].map((copyIndex) => (
             <div key={`loop-${copyIndex}`} className="flex items-center gap-3 shrink-0">
               {top10.map((app, idx) => {

@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
 import { pricingLabel } from "@/lib/catalog";
-import { fetchAdminApps, ensureAdminSession, getCachedAdminApps } from "@/lib/directory.fn";
+import { fetchAdminApps, ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/apps/")({
@@ -43,6 +43,10 @@ function AppsPage() {
   const apps = Route.useLoaderData();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
+
+  if (typeof window !== "undefined" && apps) {
+    seedAdminAppsCache(apps);
+  }
 
   const hotCount = useMemo(() => apps.filter((a) => a.isHot).length, [apps]);
   const blueCount = useMemo(() => apps.filter((a) => a.editorChoice && a.featuredTier !== "article").length, [apps]);

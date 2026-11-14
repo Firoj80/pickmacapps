@@ -48,11 +48,13 @@ function Frame() {
   const admin = path.startsWith("/admin");
   const wasAdminRef = useRef(admin);
 
+  // Synchronously seed directory cache on client during initial render
+  if (typeof window !== "undefined" && !admin && directory) {
+    seedDirectoryCache(directory);
+  }
+
   useEffect(() => {
     syncThemeToDom(getStoredTheme(), path);
-    if (wasAdminRef.current && !admin) {
-      invalidateDirectoryCache();
-    }
     wasAdminRef.current = admin;
   }, [path, admin]);
 

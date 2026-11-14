@@ -1,9 +1,20 @@
-import { Link } from "@tanstack/react-router";
-import { useState } from "react";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
 import { HeaderThemeToggle } from "@/components/theme-toggle";
 
 export function SiteHeader() {
   const [open, setOpen] = useState(false);
+  const currentPath = useRouterState({ select: (s) => s.location.pathname });
+
+  // Automatically close mobile menu on route transitions
+  useEffect(() => {
+    setOpen(false);
+  }, [currentPath]);
+
+  // Safe deferred drawer close so clicks aren't aborted by DOM unmounting
+  const handleNavClick = () => {
+    setTimeout(() => setOpen(false), 50);
+  };
 
   return (
     <header className="sticky top-0 z-50 border-b border-line bg-canvas/80 backdrop-blur-xl">
@@ -12,26 +23,27 @@ export function SiteHeader() {
         <div className="flex items-center gap-7">
           <Link
             to="/"
+            preload="intent"
             className="flex items-center gap-2 text-[17px] font-bold tracking-tight text-ink transition hover:opacity-80"
-            onClick={() => setOpen(false)}
+            onClick={handleNavClick}
           >
             <span>PickMacApps</span>
           </Link>
 
           <nav className="hidden items-center gap-5 text-[14px] text-body md:flex">
-            <Link to="/" hash="apps" className="transition-colors hover:text-ink">
+            <Link to="/" hash="apps" preload="intent" className="transition-colors hover:text-ink">
               Apps
             </Link>
-            <Link to="/leaderboard" className="transition-colors hover:text-ink flex items-center gap-1">
+            <Link to="/leaderboard" preload="intent" className="transition-colors hover:text-ink flex items-center gap-1">
               <span>Leaderboard</span>
             </Link>
-            <Link to="/category" className="transition-colors hover:text-ink">
+            <Link to="/category" preload="intent" className="transition-colors hover:text-ink">
               Categories
             </Link>
-            <Link to="/compare" className="transition-colors hover:text-ink">
+            <Link to="/compare" preload="intent" className="transition-colors hover:text-ink">
               Alternatives
             </Link>
-            <Link to="/blog" className="transition-colors hover:text-ink">
+            <Link to="/blog" preload="intent" className="transition-colors hover:text-ink">
               Blog
             </Link>
           </nav>
@@ -41,6 +53,7 @@ export function SiteHeader() {
         <div className="flex items-center gap-2.5 sm:gap-3.5">
           <Link
             to="/sponsor"
+            preload="intent"
             data-ml-goal="pricing_cta"
             className="hidden items-center gap-1.5 text-[14px] font-medium text-body transition-colors hover:text-ink sm:inline-flex"
           >
@@ -55,6 +68,7 @@ export function SiteHeader() {
           {/* Submit App Primary Action Button */}
           <Link
             to="/submit"
+            preload="intent"
             data-ml-goal="signup_click"
             className="inline-flex items-center justify-center rounded-full bg-ink px-3 py-1.5 sm:px-4 sm:py-2 text-[12.5px] sm:text-[13.5px] font-medium text-canvas shadow-sm transition hover:opacity-90"
           >
@@ -79,33 +93,33 @@ export function SiteHeader() {
         <nav className="border-t border-line bg-canvas px-4 py-3 md:hidden">
           <ul className="space-y-1">
             <li>
-              <Link to="/" hash="apps" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/" hash="apps" preload="intent" onClick={handleNavClick} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Apps
               </Link>
             </li>
             <li>
-              <Link to="/leaderboard" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/leaderboard" preload="intent" onClick={handleNavClick} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base text-ink">
                 <span>🏆</span>
                 <span>Leaderboard</span>
               </Link>
             </li>
             <li>
-              <Link to="/category" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/category" preload="intent" onClick={handleNavClick} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Categories
               </Link>
             </li>
             <li>
-              <Link to="/compare" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/compare" preload="intent" onClick={handleNavClick} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Alternatives
               </Link>
             </li>
             <li>
-              <Link to="/blog" onClick={() => setOpen(false)} className="block rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/blog" preload="intent" onClick={handleNavClick} className="block rounded-xl px-3 py-2.5 text-base text-ink">
                 Blog
               </Link>
             </li>
             <li>
-              <Link to="/sponsor" onClick={() => setOpen(false)} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base text-ink">
+              <Link to="/sponsor" preload="intent" onClick={handleNavClick} className="flex items-center gap-2 rounded-xl px-3 py-2.5 text-base text-ink">
                 <span className="flex h-4 w-4 items-center justify-center rounded-full bg-amber-500/15 text-amber-500 text-[10px]">✔</span>
                 <span>Sponsor</span>
               </Link>

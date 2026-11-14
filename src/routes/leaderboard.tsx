@@ -316,6 +316,7 @@ function PodiumCard({
             <Link
               to="/app/$slug"
               params={{ slug: app.slug }}
+              preload="intent"
               className="font-bold text-sm sm:text-base text-ink hover:text-accent transition-colors truncate block"
             >
               {app.name}
@@ -334,6 +335,7 @@ function PodiumCard({
         <Link
           to="/app/$slug"
           params={{ slug: app.slug }}
+          preload="intent"
           className="rounded-xl border border-line bg-surface px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-ink hover:bg-surface-2 transition shadow-2xs"
         >
           View App →
@@ -364,7 +366,7 @@ function LeaderboardRow({ app, rank }: { app: AppItem; rank: number }) {
         </span>
 
         {/* App Icon */}
-        <Link to="/app/$slug" params={{ slug: app.slug }} className="shrink-0 mt-0.5 sm:mt-0">
+        <Link to="/app/$slug" params={{ slug: app.slug }} preload="intent" className="shrink-0 mt-0.5 sm:mt-0">
           {app.icon ? (
             <img
               src={appIconUrl(app.icon)}
@@ -384,6 +386,7 @@ function LeaderboardRow({ app, rank }: { app: AppItem; rank: number }) {
             <Link
               to="/app/$slug"
               params={{ slug: app.slug }}
+              preload="intent"
               className="font-semibold text-sm sm:text-base text-ink hover:text-accent transition-colors truncate"
             >
               {app.name}
@@ -436,6 +439,7 @@ function LeaderboardRow({ app, rank }: { app: AppItem; rank: number }) {
           <Link
             to="/app/$slug"
             params={{ slug: app.slug }}
+            preload="intent"
             className="rounded-xl bg-ink px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-canvas hover:opacity-90 transition shadow-2xs"
           >
             Details

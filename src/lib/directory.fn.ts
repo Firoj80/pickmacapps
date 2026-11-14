@@ -74,7 +74,15 @@ async function adminOnly() {
 let _adminSessionOk = false;
 let _adminCheckedAt = 0;
 let _adminCheckPromise: Promise<boolean> | null = null;
-const ADMIN_CHECK_TTL_MS = 3 * 60 * 1000; // 3 minutes
+const ADMIN_CHECK_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+if (typeof window !== "undefined") {
+  // If page was loaded at an authenticated admin URL via SSR, mark session as verified immediately
+  if (window.location.pathname.startsWith("/admin") && !window.location.pathname.startsWith("/admin/login")) {
+    _adminSessionOk = true;
+    _adminCheckedAt = Date.now();
+  }
+}
 
 export async function ensureAdminSession(): Promise<boolean> {
   // Always verify on the server side
@@ -195,6 +203,24 @@ let _adminGuidesCachedAt = 0;
 let _adminGuidesPromise: Promise<unknown> | null = null;
 
 const ADMIN_CACHE_TTL_MS = 60 * 1000; // 60 seconds
+
+export function seedAdminHomeCache(data: unknown) {
+  if (typeof window === "undefined" || !data) return;
+  _adminHomeCache = data;
+  _adminHomeCachedAt = Date.now();
+}
+
+export function seedAdminAppsCache(apps: unknown) {
+  if (typeof window === "undefined" || !apps) return;
+  _adminAppsCache = apps;
+  _adminAppsCachedAt = Date.now();
+}
+
+export function seedAdminGuidesCache(guides: unknown) {
+  if (typeof window === "undefined" || !guides) return;
+  _adminGuidesCache = guides;
+  _adminGuidesCachedAt = Date.now();
+}
 
 export function invalidateAdminDataCache() {
   _adminHomeCache = null;

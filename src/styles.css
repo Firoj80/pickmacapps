@@ -75,7 +75,9 @@ html, body, a, button, select, input {
   will-change: transform;
 }
 
-.animate-marquee:hover {
+.animate-marquee:hover,
+.animate-marquee:active,
+.animate-marquee:focus-within {
   animation-play-state: paused;
 }
 

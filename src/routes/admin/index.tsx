@@ -1,6 +1,6 @@
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
-import { fetchAdminHome, ensureAdminSession, getCachedAdminHome } from "@/lib/directory.fn";
+import { fetchAdminHome, ensureAdminSession, getCachedAdminHome, seedAdminHomeCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
 export const Route = createFileRoute("/admin/")({
@@ -32,6 +32,10 @@ function money(cents: number) {
 function AdminHome() {
   const data = Route.useLoaderData();
   const notice = useAdminNotice();
+
+  if (typeof window !== "undefined" && data) {
+    seedAdminHomeCache(data);
+  }
 
   const waiting = data.submissions.filter((item) => item.status === "pending" || item.status === "paid").length;
   const blueOccupants = data.stats.blueOccupants ?? [];
