@@ -99,43 +99,43 @@ function AppsPage() {
       }
     >
       {/* Real-time Summary Cards */}
-      <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-5">
-        <div className="rounded-2xl border border-line bg-white p-3.5 shadow-2xs">
-          <p className="text-[11px] font-medium text-muted">Total Apps</p>
+      <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+        <div className="rounded-2xl border border-line bg-white p-3.5 shadow-xs">
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Total Apps</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl font-bold text-ink">{apps.length}</span>
+            <span className="text-2xl font-bold text-ink">{apps.length}</span>
             <span className="text-[11px] text-muted">apps</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-rose-200 bg-rose-50/40 p-3.5 shadow-2xs">
-          <p className="text-[11px] font-semibold text-rose-800">🔥 Hot Featured</p>
+        <div className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-3.5 shadow-xs">
+          <p className="text-[11px] font-semibold text-rose-800 uppercase tracking-wider">🔥 Hot Shelf</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl font-bold text-rose-900">{hotCount}</span>
-            <span className="text-[11px] text-rose-700/80">apps</span>
+            <span className="text-2xl font-bold text-rose-900">{hotCount}</span>
+            <span className="text-[11px] text-rose-700/80">featured</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-sky-200 bg-sky-50/40 p-3.5 shadow-2xs">
-          <p className="text-[11px] font-semibold text-sky-800">🔹 Blue Tier</p>
+        <div className="rounded-2xl border border-sky-200/80 bg-sky-50/40 p-3.5 shadow-xs">
+          <p className="text-[11px] font-semibold text-sky-800 uppercase tracking-wider">🔹 Blue Tier</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl font-bold text-sky-900">{blueCount} / 3</span>
+            <span className="text-2xl font-bold text-sky-900">{blueCount} / 3</span>
             <span className="text-[11px] text-sky-700/80">slots</span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/40 p-3.5 shadow-2xs">
-          <p className="text-[11px] font-semibold text-amber-800">🌟 Gold Tier</p>
+        <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-3.5 shadow-xs">
+          <p className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider">🌟 Gold Tier</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-xl font-bold text-amber-900">{goldCount} / 3</span>
+            <span className="text-2xl font-bold text-amber-900">{goldCount} / 3</span>
             <span className="text-[11px] text-amber-700/80">slots</span>
           </div>
         </div>
 
-        <div className="col-span-2 sm:col-span-1 rounded-2xl border border-line bg-white p-3.5 shadow-2xs">
-          <p className="text-[11px] font-medium text-muted">Review Queue</p>
+        <div className="col-span-2 sm:col-span-1 rounded-2xl border border-line bg-white p-3.5 shadow-xs">
+          <p className="text-[11px] font-semibold text-muted uppercase tracking-wider">Review Queue</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className={`text-xl font-bold ${unpublishedCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>
+            <span className={`text-2xl font-bold ${unpublishedCount > 0 ? "text-amber-600" : "text-emerald-600"}`}>
               {unpublishedCount}
             </span>
             <span className="text-[11px] text-muted">pending</span>
@@ -144,7 +144,7 @@ function AppsPage() {
       </div>
 
       {/* Search and Filter Controls */}
-      <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="relative flex-1 sm:max-w-xs">
           <svg
             className="pointer-events-none absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted"
@@ -168,7 +168,7 @@ function AppsPage() {
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1">
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {filters.map((item) => {
             const countLabel =
               item.id === "all"
@@ -190,7 +190,7 @@ function AppsPage() {
                 key={item.id}
                 type="button"
                 onClick={() => setFilter(item.id)}
-                className={`rounded-full px-3 py-1.5 text-xs font-medium transition ${
+                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition cursor-pointer ${
                   filter === item.id
                     ? "bg-ink text-canvas shadow-xs font-semibold"
                     : "bg-white text-body ring-1 ring-line hover:bg-stone-50"
@@ -204,8 +204,8 @@ function AppsPage() {
         </div>
       </div>
 
-      {/* Modern Elevated Apps Table */}
-      <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
+      {/* Adaptive Desktop Table (< md hidden) */}
+      <div className="hidden md:block overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[800px] text-left text-sm">
             <thead className="text-[11px] font-semibold tracking-wider text-muted uppercase bg-stone-50/70 border-b border-line">
@@ -414,24 +414,171 @@ function AppsPage() {
             </tbody>
           </table>
         </div>
-
-        {shown.length === 0 ? (
-          <div className="p-12 text-center">
-            <p className="text-sm font-medium text-ink">No apps match this query or filter</p>
-            <p className="mt-1 text-xs text-muted">Try clearing your search query or switching filters.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                setFilter("all");
-              }}
-              className="mt-3 inline-block rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-medium text-body hover:bg-stone-50"
-            >
-              Reset Search
-            </button>
-          </div>
-        ) : null}
       </div>
+
+      {/* Adaptive Mobile Card List (< md visible) */}
+      <div className="block md:hidden space-y-3">
+        {shown.map((app) => (
+          <div key={app.id} className="rounded-2xl border border-line bg-white p-4 shadow-xs space-y-3">
+            {/* Top row: App icon, Title, Pricing & Category */}
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                {app.icon ? (
+                  <img
+                    alt={app.name}
+                    src={app.icon}
+                    onError={(e) => {
+                      (e.currentTarget as HTMLElement).style.display = "none";
+                    }}
+                    className="h-11 w-11 rounded-xl object-cover ring-1 ring-line shadow-2xs shrink-0"
+                  />
+                ) : (
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-100 text-xs font-bold text-muted ring-1 ring-line shrink-0">
+                    APP
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <Link
+                      to="/admin/apps/$id"
+                      params={{ id: app.id }}
+                      className="font-bold text-ink truncate text-sm hover:underline"
+                    >
+                      {app.name}
+                    </Link>
+                    {app.website ? (
+                      <a href={app.website} target="_blank" rel="noopener noreferrer" className="text-muted hover:text-ink">
+                        ↗
+                      </a>
+                    ) : null}
+                  </div>
+                  <div className="text-[11px] text-muted truncate">
+                    {app.categoryName || app.category} · <span className="font-mono">/app/{app.slug}</span>
+                  </div>
+                </div>
+              </div>
+
+              <span
+                className={`shrink-0 rounded-md px-2 py-0.5 text-[11px] font-semibold ${
+                  app.pricing === "free"
+                    ? "bg-emerald-500/10 text-emerald-700"
+                    : app.pricing === "freemium"
+                    ? "bg-sky-500/10 text-sky-700"
+                    : "bg-surface-2 text-stone-700 ring-1 ring-line"
+                }`}
+              >
+                {pricingLabel[app.pricing] || "Free"}
+              </span>
+            </div>
+
+            {/* Middle row: Badges, Placement & Expiry */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-line/60 text-xs">
+              <Pill tone={statusTone(app.status)}>{app.status}</Pill>
+              {app.editorChoice ? (
+                app.featuredTier === "article" ? (
+                  <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-800">
+                    🌟 Gold Tier
+                  </span>
+                ) : (
+                  <span className="rounded-full bg-sky-500/15 border border-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-800">
+                    🔹 Blue Tier
+                  </span>
+                )
+              ) : null}
+
+              {app.badgeStatus === "ok" ? (
+                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
+                  <span>✓</span> Badge Active
+                </span>
+              ) : app.badgeStatus === "fail" ? (
+                <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 font-medium">
+                  <span>✕</span> Missing Badge
+                </span>
+              ) : null}
+            </div>
+
+            {/* Expiry alerts if active */}
+            {app.editorChoice && app.featuredUntil ? (
+              <div className="text-[10.5px] font-bold text-sky-800 bg-sky-50 rounded-lg px-2.5 py-1">
+                {(() => {
+                  const until = new Date(app.featuredUntil);
+                  const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                  const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return days > 0 ? `Paid slot expires: ${formatted} (${days}d left)` : `Paid slot expired: ${formatted}`;
+                })()}
+              </div>
+            ) : null}
+
+            {app.isHot ? (
+              <div className="text-[10.5px] font-bold text-rose-800 bg-rose-50 rounded-lg px-2.5 py-1 ring-1 ring-rose-200/70">
+                {(() => {
+                  const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
+                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                  const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                  const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return `🔥 Hot expires: ${formatted} (${daysLeft}d left)`;
+                })()}
+              </div>
+            ) : null}
+
+            {/* Bottom action row: 1-touch actions */}
+            <div className="flex items-center justify-between gap-2 pt-2 border-t border-line">
+              <form method="post" action="/api/admin/toggle-hot" className="inline">
+                <input type="hidden" name="id" value={app.id} />
+                <input type="hidden" name="return_to" value="/admin/apps" />
+                <button
+                  type="submit"
+                  className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition cursor-pointer ${
+                    app.isHot
+                      ? "bg-rose-600 text-white shadow-xs"
+                      : "border border-line bg-stone-50 text-muted hover:border-rose-300"
+                  }`}
+                >
+                  <span>🔥</span>
+                  <span>{app.isHot ? "Hot Active" : "Make Hot"}</span>
+                </button>
+              </form>
+
+              <div className="flex items-center gap-2">
+                {app.status === "published" ? (
+                  <Link
+                    to="/app/$slug"
+                    params={{ slug: app.slug }}
+                    target="_blank"
+                    className="rounded-xl border border-line bg-stone-50 px-3 py-1.5 text-xs font-semibold text-body hover:text-ink"
+                  >
+                    Live ↗
+                  </Link>
+                ) : null}
+                <Link
+                  to="/admin/apps/$id"
+                  params={{ id: app.id }}
+                  className="rounded-xl bg-ink px-4 py-1.5 text-xs font-semibold text-canvas shadow-xs hover:opacity-90"
+                >
+                  Edit App
+                </Link>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {shown.length === 0 ? (
+        <div className="rounded-2xl border border-line bg-white p-12 text-center shadow-xs">
+          <p className="text-sm font-semibold text-ink">No apps match this query or filter</p>
+          <p className="mt-1 text-xs text-muted">Try clearing your search query or switching filters.</p>
+          <button
+            type="button"
+            onClick={() => {
+              setQuery("");
+              setFilter("all");
+            }}
+            className="mt-3 inline-block rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-medium text-body hover:bg-stone-50 cursor-pointer"
+          >
+            Reset Search
+          </button>
+        </div>
+      ) : null}
     </AdminShell>
   );
 }

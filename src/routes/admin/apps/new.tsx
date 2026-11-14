@@ -130,11 +130,14 @@ function NewAppPage() {
     >
       <Notice {...notice} />
 
-      <form
-        method="post"
-        action="/api/admin/apps"
-        className="max-w-2xl space-y-5 rounded-2xl border border-line bg-white p-6 shadow-xs"
-      >
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Main Form Column (Col 7-8 / 12) */}
+        <div className="lg:col-span-7 xl:col-span-8">
+          <form
+            method="post"
+            action="/api/admin/apps"
+            className="space-y-5 rounded-2xl border border-line bg-white p-5 sm:p-6 shadow-xs"
+          >
         <input type="hidden" name="intent" value="create" />
 
         {/* Section Header */}
@@ -456,6 +459,90 @@ function NewAppPage() {
           </Link>
         </div>
       </form>
-    </AdminShell>
+    </div>
+
+    {/* Studio Sidebar: Live Preview & Guidelines (Col 5 / 12) */}
+    <div className="lg:col-span-5 xl:col-span-4 space-y-4 lg:sticky lg:top-4 lg:self-start">
+      {/* 1. Live Interactive Preview Card */}
+      <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+        <div className="flex items-center justify-between border-b border-line pb-2.5">
+          <span className="text-xs font-semibold text-ink flex items-center gap-1.5">
+            <span>👁️</span> Live App Card Preview
+          </span>
+          <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-600">
+            Visitor View
+          </span>
+        </div>
+
+        <div className="mt-3 rounded-xl border border-line bg-stone-50/50 p-3.5 space-y-3">
+          <div className="flex items-start gap-3">
+            {icon ? (
+              <img
+                src={icon}
+                alt=""
+                className="h-11 w-11 rounded-xl object-cover ring-1 ring-line/80 shadow-2xs"
+                onError={(e) => {
+                  (e.target as HTMLElement).style.display = "none";
+                }}
+              />
+            ) : (
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-200 text-sm font-bold text-stone-700">
+                {(name || "App").slice(0, 2).toUpperCase()}
+              </div>
+            )}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-sm text-ink truncate">{name || "Untitled App"}</span>
+                {editorChoice ? (
+                  <span className="shrink-0 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
+                    {featuredTier === "article" ? "🌟 Gold" : "🔹 Blue"}
+                  </span>
+                ) : null}
+                {isHot ? (
+                  <span className="shrink-0 rounded bg-rose-100 px-1 text-[9.5px] font-bold text-rose-700">
+                    🔥
+                  </span>
+                ) : null}
+              </div>
+              <p className="mt-0.5 text-xs text-muted line-clamp-2">
+                {tagline || "Your app one-liner tagline will appear right here."}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs pt-2 border-t border-line/60">
+            <span className="rounded-md bg-white px-2 py-0.5 text-[10.5px] font-medium text-stone-700 border border-line capitalize">
+              {category} · {pricing}
+            </span>
+            <span className="font-semibold text-ink text-[11px] underline">
+              Try App →
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* 2. Direct Admin Creation Guidelines */}
+      <div className="rounded-2xl border border-line bg-white p-4 shadow-xs space-y-2.5 text-xs text-muted">
+        <span className="font-semibold uppercase tracking-wider text-ink block">
+          Admin Creation Privileges
+        </span>
+        <ul className="space-y-1.5 text-body/90 pl-1">
+          <li className="flex items-start gap-1.5">
+            <span className="text-emerald-600 font-bold">✓</span>
+            <span>Permanently exempt from reciprocal backlink checks.</span>
+          </li>
+          <li className="flex items-start gap-1.5">
+            <span className="text-emerald-600 font-bold">✓</span>
+            <span>Instantly indexed and published upon creation.</span>
+          </li>
+          <li className="flex items-start gap-1.5">
+            <span className="text-emerald-600 font-bold">✓</span>
+            <span>Can be marked as Hot or assigned to Blue/Gold slots directly.</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</AdminShell>
   );
 }

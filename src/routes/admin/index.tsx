@@ -506,7 +506,7 @@ function AdminHome() {
                             {occupant.featuredUntil ? (
                               <>
                                 <span>·</span>
-                                <span className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
+                                <span className="rounded-md bg-sky-100/90 px-2 py-0.5 text-[11px] font-bold tracking-tight text-sky-900 ring-1 ring-sky-300/80">
                                   {(() => {
                                     const until = new Date(occupant.featuredUntil);
                                     const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -586,7 +586,7 @@ function AdminHome() {
                             {occupant.featuredUntil ? (
                               <>
                                 <span>·</span>
-                                <span className="rounded-md bg-sky-50 px-1.5 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
+                                <span className="rounded-md bg-amber-100/90 px-2 py-0.5 text-[11px] font-bold tracking-tight text-amber-900 ring-1 ring-amber-300/80">
                                   {(() => {
                                     const until = new Date(occupant.featuredUntil);
                                     const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -659,7 +659,7 @@ function AdminHome() {
                         <div className="flex flex-wrap items-center gap-1.5 text-xs text-muted">
                           <span className="text-[11px]">/{h.slug}</span>
                           <span>·</span>
-                          <span className="rounded-md bg-rose-50 px-2 py-0.5 text-[11px] font-bold text-rose-700 ring-1 ring-rose-200/70">
+                          <span className="rounded-md bg-rose-100/90 px-2 py-0.5 text-[11px] font-bold tracking-tight text-rose-900 ring-1 ring-rose-300/80">
                             {(() => {
                               const marked = new Date(h.hotMarkedAt || Date.now());
                               const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);

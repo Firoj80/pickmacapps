@@ -155,66 +155,15 @@ function EditAppForm({ app }: { app: EditAppData }) {
     >
       <Notice {...notice} />
 
-      {/* Analytics & Submitter Dashboard Panel */}
-      <div className="max-w-2xl rounded-2xl border border-line bg-surface-2/60 p-4 shadow-xs">
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
-          <div className="rounded-xl border border-line bg-white p-3">
-            <div className="text-[11px] font-medium text-muted uppercase">Card Clicks</div>
-            <div className="mt-1 text-xl font-bold text-ink">{app.clickCount ?? 0}</div>
-          </div>
-          <div className="rounded-xl border border-line bg-white p-3">
-            <div className="text-[11px] font-medium text-muted uppercase">Try App Clicks</div>
-            <div className="mt-1 text-xl font-bold text-ink">{app.tryCount ?? 0}</div>
-          </div>
-          <div className="rounded-xl border border-line bg-white p-3">
-            <div className="text-[11px] font-medium text-muted uppercase">Upvotes</div>
-            <div className="mt-1 text-xl font-bold text-ink">▲ {app.upvoteCount ?? 0}</div>
-          </div>
-          <div className="rounded-xl border border-line bg-white p-3">
-            <div className="text-[11px] font-medium text-muted uppercase">🔥 Hot Status</div>
-            <div className="mt-1 text-xs font-semibold text-ink">
-              {app.isHot ? (
-                <span className="text-rose-600">Active</span>
-              ) : (
-                <span className="text-muted">No</span>
-              )}
-            </div>
-            {app.isHot && app.hotMarkedAt ? (
-              <div className="mt-0.5 text-[10px] text-muted font-mono">
-                {(() => {
-                  const marked = new Date(app.hotMarkedAt);
-                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                  const daysLeft = Math.max(0, Math.ceil((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
-                  return `Expires in ${daysLeft}d`;
-                })()}
-              </div>
-            ) : null}
-          </div>
-        </div>
-        {app.dashboardToken ? (
-          <div className="mt-3 flex items-center justify-between gap-2 rounded-xl border border-line bg-white px-3.5 py-2 text-xs">
-            <div className="flex items-center gap-1.5 text-muted truncate">
-              <span className="font-semibold text-ink">Submitter Dashboard:</span>
-              <span className="font-mono text-[11px] truncate">/dashboard/{app.dashboardToken}</span>
-            </div>
-            <Link
-              to="/dashboard/$token"
-              params={{ token: app.dashboardToken }}
-              target="_blank"
-              className="shrink-0 rounded-lg bg-ink px-2.5 py-1 text-[11px] font-semibold text-canvas hover:opacity-90"
-            >
-              Open Dashboard ↗
-            </Link>
-          </div>
-        ) : null}
-      </div>
-
-      <form
-        method="post"
-        action="/api/admin/apps"
-        className="max-w-2xl space-y-5 rounded-2xl border border-line bg-white p-6 shadow-xs"
-      >
-        <input type="hidden" name="id" value={app.id} />
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        {/* Main Form Column (Col 7-8 / 12) */}
+        <div className="lg:col-span-7 xl:col-span-8">
+          <form
+            method="post"
+            action="/api/admin/apps"
+            className="space-y-5 rounded-2xl border border-line bg-white p-5 sm:p-6 shadow-xs"
+          >
+            <input type="hidden" name="id" value={app.id} />
 
         {/* Section Header */}
         <div className="flex items-center justify-between border-b border-line pb-3">
@@ -566,33 +515,185 @@ function EditAppForm({ app }: { app: EditAppData }) {
             Cancel
           </Link>
         </div>
-      </form>
+          </form>
+        </div>
 
-      {/* Danger Zone */}
-      <div className="mt-8 max-w-2xl rounded-2xl border border-rose-200 bg-rose-50/30 p-5">
-        <h4 className="text-sm font-semibold text-rose-800">Danger Zone</h4>
-        <p className="mt-1 text-xs text-muted">
-          Permanently remove this app listing from the PickMacApps database and public catalog.
-        </p>
-        <form
-          method="post"
-          action="/api/admin/apps"
-          className="mt-3"
-          onSubmit={(e) => {
-            if (!confirm(`Are you sure you want to permanently delete "${app.name}"?`)) {
-              e.preventDefault();
-            }
-          }}
-        >
-          <input type="hidden" name="intent" value="delete" />
-          <input type="hidden" name="id" value={app.id} />
-          <button
-            type="submit"
-            className="rounded-xl border border-rose-300 bg-white px-3.5 py-1.5 text-xs font-semibold text-rose-700 hover:bg-rose-50 hover:border-rose-400 transition cursor-pointer"
-          >
-            Delete Listing Permanently
-          </button>
-        </form>
+        {/* Studio Sidebar: Live Preview & App Details (Col 5 / 12) */}
+        <div className="lg:col-span-5 xl:col-span-4 space-y-4 lg:sticky lg:top-4 lg:self-start">
+          {/* 1. Live Interactive Preview Card */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-2.5">
+              <span className="text-xs font-semibold text-ink flex items-center gap-1.5">
+                <span>👁️</span> Live App Card Preview
+              </span>
+              <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-bold text-stone-600">
+                Visitor View
+              </span>
+            </div>
+
+            <div className="mt-3 rounded-xl border border-line bg-stone-50/50 p-3.5 space-y-3">
+              <div className="flex items-start gap-3">
+                {icon ? (
+                  <img
+                    src={icon}
+                    alt=""
+                    className="h-11 w-11 rounded-xl object-cover ring-1 ring-line/80 shadow-2xs"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = "none";
+                    }}
+                  />
+                ) : (
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-stone-200 text-sm font-bold text-stone-700">
+                    {(name || "App").slice(0, 2).toUpperCase()}
+                  </div>
+                )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-1.5">
+                    <span className="font-semibold text-sm text-ink truncate">{name || "Untitled App"}</span>
+                    {editorChoice ? (
+                      <span className="shrink-0 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
+                        {featuredTier === "article" ? "🌟 Gold" : "🔹 Blue"}
+                      </span>
+                    ) : null}
+                    {isHot ? (
+                      <span className="shrink-0 rounded bg-rose-100 px-1 text-[9.5px] font-bold text-rose-700">
+                        🔥
+                      </span>
+                    ) : null}
+                  </div>
+                  <p className="mt-0.5 text-xs text-muted line-clamp-2">
+                    {tagline || "Your app one-liner tagline will appear right here."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between text-xs pt-2 border-t border-line/60">
+                <span className="rounded-md bg-white px-2 py-0.5 text-[10.5px] font-medium text-stone-700 border border-line capitalize">
+                  {category} · {pricing}
+                </span>
+                <span className="font-semibold text-ink text-[11px] underline">
+                  Try App →
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* 2. Analytics & Engagement Summary */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+              Engagement & Stats
+            </span>
+            <div className="mt-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-xl border border-line bg-stone-50/70 p-2.5">
+                <div className="text-[10px] font-medium text-muted uppercase">Card Clicks</div>
+                <div className="mt-1 text-lg font-bold text-ink">{app.clickCount ?? 0}</div>
+              </div>
+              <div className="rounded-xl border border-line bg-stone-50/70 p-2.5">
+                <div className="text-[10px] font-medium text-muted uppercase">Try Referrals</div>
+                <div className="mt-1 text-lg font-bold text-emerald-600">{app.tryCount ?? 0}</div>
+              </div>
+              <div className="rounded-xl border border-line bg-stone-50/70 p-2.5">
+                <div className="text-[10px] font-medium text-muted uppercase">Upvotes</div>
+                <div className="mt-1 text-lg font-bold text-ink">▲ {app.upvoteCount ?? 0}</div>
+              </div>
+            </div>
+
+            {/* Hot Remaining Days */}
+            {app.isHot && (
+              <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/50 p-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-rose-800">🔥 Hot Status Active</span>
+                  <span className="rounded-md bg-rose-100/90 px-2 py-0.5 text-[10.5px] font-bold text-rose-900 ring-1 ring-rose-300">
+                    {(() => {
+                      const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
+                      const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
+                      const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                      const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      return `${daysLeft} days remaining (${formatted})`;
+                    })()}
+                  </span>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Submitter & Quick Shortcuts Hub */}
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs space-y-3">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">
+              Submitter & Quick Links
+            </span>
+
+            <div className="space-y-2 text-xs">
+              {app.dashboardToken ? (
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-indigo-950">Submitter Dashboard</span>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100 rounded px-1.5 py-0.5">Private</span>
+                  </div>
+                  <Link
+                    to="/dashboard/$token"
+                    params={{ token: app.dashboardToken }}
+                    target="_blank"
+                    className="block w-full rounded-lg bg-indigo-600 py-1.5 text-center text-xs font-semibold text-white hover:bg-indigo-700 transition"
+                  >
+                    Open Creator Mini-Dashboard ↗
+                  </Link>
+                </div>
+              ) : null}
+
+              {app.status === "published" && (
+                <Link
+                  to="/app/$slug"
+                  params={{ slug: app.slug }}
+                  target="_blank"
+                  className="flex items-center justify-between rounded-xl border border-line bg-stone-50/70 p-2.5 font-medium text-ink hover:bg-stone-100 transition"
+                >
+                  <span>View Public Listing</span>
+                  <span>↗</span>
+                </Link>
+              )}
+
+              {app.website && (
+                <a
+                  href={app.website}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex items-center justify-between rounded-xl border border-line bg-stone-50/70 p-2.5 font-medium text-muted hover:text-ink transition"
+                >
+                  <span className="truncate">Visit {app.website}</span>
+                  <span className="shrink-0 ml-1">↗</span>
+                </a>
+              )}
+            </div>
+          </div>
+
+          {/* 4. Danger Zone */}
+          <div className="rounded-2xl border border-rose-200 bg-rose-50/30 p-4">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-rose-800">Danger Zone</h4>
+            <p className="mt-1 text-xs text-muted">
+              Permanently remove this listing from the database and public directory.
+            </p>
+            <form
+              method="post"
+              action="/api/admin/apps"
+              className="mt-3"
+              onSubmit={(e) => {
+                if (!confirm(`Are you sure you want to permanently delete "${app.name}"?`)) {
+                  e.preventDefault();
+                }
+              }}
+            >
+              <input type="hidden" name="intent" value="delete" />
+              <input type="hidden" name="id" value={app.id} />
+              <button
+                type="submit"
+                className="w-full rounded-xl border border-rose-300 bg-white py-2 text-xs font-semibold text-rose-700 hover:bg-rose-50 hover:border-rose-400 transition cursor-pointer"
+              >
+                Delete Listing Permanently
+              </button>
+            </form>
+          </div>
+        </div>
       </div>
     </AdminShell>
   );

@@ -38,24 +38,50 @@ function TelegramAdminPage() {
     >
       <Notice {...notice} />
 
-      <div className="max-w-3xl space-y-6">
-        <section className="rounded-2xl border border-line bg-white p-6 shadow-xs">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-ink">Bot Connection Status</h2>
-              <span
-                className={`rounded-full px-2.5 py-0.5 text-xs font-bold ${
-                  configured ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"
-                }`}
-              >
-                {configured ? "Active & Configured" : "Configuration Needed"}
+      <div className="max-w-4xl space-y-6">
+        {/* Status Deck */}
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">Bot Service</span>
+            <div className="mt-1 flex items-center gap-2">
+              <span className={`h-2.5 w-2.5 rounded-full ${configured ? "bg-emerald-500 animate-pulse" : "bg-amber-400"}`} />
+              <span className="text-xl font-bold text-ink">
+                {configured ? "Online" : "Needs Config"}
               </span>
+            </div>
+            <p className="mt-0.5 text-xs text-muted">Telegram Bot API</p>
+          </div>
+
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">Push Notifications</span>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-xl font-bold text-ink">Instant</span>
+              <span className="rounded bg-sky-100 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">Real-time</span>
+            </div>
+            <p className="mt-0.5 text-xs text-muted">New submissions delivery</p>
+          </div>
+
+          <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted">Inline Moderation</span>
+            <div className="mt-1 flex items-center gap-2">
+              <span className="text-xl font-bold text-emerald-600">Active</span>
+            </div>
+            <p className="mt-0.5 text-xs text-muted">Approve, Reject & Badge Check</p>
+          </div>
+        </div>
+
+        {/* Connection & Webhook Configuration */}
+        <section className="rounded-2xl border border-line bg-white p-5 sm:p-6 shadow-xs">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-line pb-4">
+            <div>
+              <h2 className="text-base font-semibold text-ink">Webhook & Bot Connection</h2>
+              <p className="text-xs text-muted">Manage the Telegram webhook endpoint for instant server callbacks.</p>
             </div>
             <form method="post" action="/api/admin/telegram">
               <button
                 type="submit"
                 disabled={!configured}
-                className="rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-canvas hover:opacity-90 disabled:opacity-40 transition cursor-pointer"
+                className="w-full sm:w-auto rounded-xl bg-ink px-4 py-2 text-xs font-semibold text-canvas hover:opacity-90 disabled:opacity-40 transition cursor-pointer"
               >
                 Connect & Test Webhook
               </button>
@@ -70,12 +96,13 @@ function TelegramAdminPage() {
                   Interactive moderation buttons are active. When a creator submits an app, the bot delivers:
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-body/90 pl-1">
-                  <li>Submission notification with live details</li>
-                  <li>🔍 Check Badge live on website</li>
-                  <li>Approve & Publish / Make Hot buttons</li>
+                  <li>Submission notification with live app details & creator info</li>
+                  <li>🔍 Check Badge button (live reciprocal link audit)</li>
+                  <li>Approve Free & Approve + Hot 30-day buttons</li>
                   <li>Reject submission button</li>
-                  <li>5 ready-to-use X post template selectors</li>
-                  <li>Submitter Mini-Dashboard secret link</li>
+                  <li>📋 Draft Submitter Confirmation DM button with mini-dashboard link</li>
+                  <li>Direct link to creator's 𝕏 handle profile</li>
+                  <li>5 ready-to-use 𝕏 launch post templates upon approval</li>
                 </ul>
               </>
             ) : (

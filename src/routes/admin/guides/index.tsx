@@ -143,88 +143,8 @@ function GuidesPage() {
         </div>
       </div>
 
-      {/* Modern Guides Table */}
+      {/* Modern Guides Table & Mobile Cards */}
       <div className="overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left text-sm">
-            <thead className="bg-stone-50/60 text-[11px] font-semibold uppercase tracking-wider text-muted border-b border-line">
-              <tr>
-                <th className="px-5 py-3">Guide / Article</th>
-                <th className="px-4 py-3">Published Date</th>
-                <th className="px-4 py-3">Read Time</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-5 py-3 text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {shown.map((guide) => (
-                <tr key={guide.slug} className="group transition hover:bg-stone-50/40">
-                  <td className="px-5 py-4">
-                    <div className="flex flex-col">
-                      <Link
-                        to="/admin/guides/$slug"
-                        params={{ slug: guide.slug }}
-                        preload="intent"
-                        className="font-semibold text-ink group-hover:text-accent transition-colors"
-                      >
-                        {guide.title}
-                      </Link>
-                      {guide.excerpt ? (
-                        <p className="mt-1 line-clamp-1 max-w-xl text-xs text-muted">
-                          {guide.excerpt}
-                        </p>
-                      ) : null}
-                      <span className="mt-1 text-[11px] font-mono text-muted/70">
-                        /blog/{guide.slug}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4 text-xs text-muted whitespace-nowrap">
-                    {guide.date || "—"}
-                  </td>
-                  <td className="px-4 py-4 text-xs text-body whitespace-nowrap">
-                    <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[11px] text-stone-700">
-                      <span>⏱</span>
-                      <span>{guide.minutes || 3} min</span>
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 whitespace-nowrap">
-                    <Pill tone={statusTone(guide.status)}>{guide.status}</Pill>
-                  </td>
-                  <td className="px-5 py-4 text-right whitespace-nowrap">
-                    <div className="flex items-center justify-end gap-2">
-                      {guide.status === "published" ? (
-                        <Link
-                          to="/blog/$slug"
-                          params={{ slug: guide.slug }}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="inline-flex items-center gap-1 rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-body hover:text-ink hover:border-line-2 transition"
-                        >
-                          <span>Live</span>
-                          <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                            <polyline points="15 3 21 3 21 9" />
-                            <line x1="10" y1="14" x2="21" y2="3" />
-                          </svg>
-                        </Link>
-                      ) : null}
-                      <Link
-                        to="/admin/guides/$slug"
-                        params={{ slug: guide.slug }}
-                        preload="intent"
-                        className="inline-flex items-center gap-1 rounded-lg bg-ink px-3 py-1 text-xs font-semibold text-canvas transition hover:opacity-90"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
         {shown.length === 0 ? (
           <div className="p-12 text-center">
             <p className="text-sm font-medium text-ink">No guides match your query</p>
@@ -240,7 +160,141 @@ function GuidesPage() {
               Reset Search
             </button>
           </div>
-        ) : null}
+        ) : (
+          <>
+            {/* Desktop Table View (hidden on mobile) */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-stone-50/60 text-[11px] font-semibold uppercase tracking-wider text-muted border-b border-line">
+                  <tr>
+                    <th className="px-5 py-3">Guide / Article</th>
+                    <th className="px-4 py-3">Published Date</th>
+                    <th className="px-4 py-3">Read Time</th>
+                    <th className="px-4 py-3">Status</th>
+                    <th className="px-5 py-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-line">
+                  {shown.map((guide) => (
+                    <tr key={guide.slug} className="group transition hover:bg-stone-50/40">
+                      <td className="px-5 py-4">
+                        <div className="flex flex-col">
+                          <Link
+                            to="/admin/guides/$slug"
+                            params={{ slug: guide.slug }}
+                            preload="intent"
+                            className="font-semibold text-ink group-hover:text-accent transition-colors"
+                          >
+                            {guide.title}
+                          </Link>
+                          {guide.excerpt ? (
+                            <p className="mt-1 line-clamp-1 max-w-xl text-xs text-muted">
+                              {guide.excerpt}
+                            </p>
+                          ) : null}
+                          <span className="mt-1 text-[11px] font-mono text-muted/70">
+                            /blog/{guide.slug}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-xs text-muted whitespace-nowrap">
+                        {guide.date || "—"}
+                      </td>
+                      <td className="px-4 py-4 text-xs text-body whitespace-nowrap">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[11px] text-stone-700">
+                          <span>⏱</span>
+                          <span>{guide.minutes || 3} min</span>
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 whitespace-nowrap">
+                        <Pill tone={statusTone(guide.status)}>{guide.status}</Pill>
+                      </td>
+                      <td className="px-5 py-4 text-right whitespace-nowrap">
+                        <div className="flex items-center justify-end gap-2">
+                          {guide.status === "published" ? (
+                            <Link
+                              to="/blog/$slug"
+                              params={{ slug: guide.slug }}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 rounded-lg border border-line bg-white px-2.5 py-1 text-xs font-medium text-body hover:text-ink hover:border-line-2 transition"
+                            >
+                              <span>Live</span>
+                              <svg className="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                                <polyline points="15 3 21 3 21 9" />
+                                <line x1="10" y1="14" x2="21" y2="3" />
+                              </svg>
+                            </Link>
+                          ) : null}
+                          <Link
+                            to="/admin/guides/$slug"
+                            params={{ slug: guide.slug }}
+                            preload="intent"
+                            className="inline-flex items-center gap-1 rounded-lg bg-ink px-3 py-1 text-xs font-semibold text-canvas transition hover:opacity-90"
+                          >
+                            Edit
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Mobile Article Card Stack (hidden on desktop) */}
+            <div className="block md:hidden divide-y divide-line">
+              {shown.map((guide) => (
+                <div key={guide.slug} className="p-4 space-y-2.5">
+                  <div className="flex items-start justify-between gap-2">
+                    <Link
+                      to="/admin/guides/$slug"
+                      params={{ slug: guide.slug }}
+                      preload="intent"
+                      className="font-semibold text-sm text-ink hover:underline"
+                    >
+                      {guide.title}
+                    </Link>
+                    <Pill tone={statusTone(guide.status)}>{guide.status}</Pill>
+                  </div>
+
+                  {guide.excerpt ? (
+                    <p className="text-xs text-muted line-clamp-2">{guide.excerpt}</p>
+                  ) : null}
+
+                  <div className="flex items-center justify-between text-xs text-muted pt-1">
+                    <span className="font-mono text-[11px]">/blog/{guide.slug}</span>
+                    <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[10.5px] text-stone-700">
+                      ⏱ {guide.minutes || 3} min
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 pt-1 border-t border-line/60">
+                    {guide.status === "published" ? (
+                      <Link
+                        to="/blog/$slug"
+                        params={{ slug: guide.slug }}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="rounded-xl border border-line bg-white px-3 py-1.5 text-xs font-semibold text-body hover:text-ink"
+                      >
+                        Live ↗
+                      </Link>
+                    ) : null}
+                    <Link
+                      to="/admin/guides/$slug"
+                      params={{ slug: guide.slug }}
+                      className="rounded-xl bg-ink px-4 py-1.5 text-xs font-semibold text-canvas"
+                    >
+                      Edit Guide
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
     </AdminShell>
   );
