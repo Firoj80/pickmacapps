@@ -440,10 +440,10 @@ function EditAppForm({ app }: { app: EditAppData }) {
                   className={fieldClass}
                 >
                   <option value="featured">
-                    🔹 Blue Badge — Featured Placement ($99) ({Math.max(0, 3 - blueActive)}/3 available)
+                    🔹 Blue Badge — Featured Placement ({Math.max(0, 3 - blueActive)}/3 available)
                   </option>
                   <option value="article">
-                    🌟 Golden Badge — Featured + Medium Article ($120) ({Math.max(0, 3 - goldActive)}/3 available)
+                    🌟 Golden Badge — Featured + Medium Article ({Math.max(0, 3 - goldActive)}/3 available)
                   </option>
                 </select>
                 <p className="mt-1 text-[11px] text-muted">

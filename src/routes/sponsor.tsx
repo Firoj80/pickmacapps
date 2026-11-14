@@ -63,7 +63,7 @@ function SponsorPage() {
       <section className="mx-auto max-w-[1240px] px-4 pt-12 pb-6 text-center sm:px-6 md:pt-16 md:pb-10">
         <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-xs font-semibold text-violet-600 dark:text-violet-400 backdrop-blur-md">
           <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
-          Reach 15,000+ Mac Enthusiasts & Power Users
+          Reach Engaged Mac Enthusiasts & Power Users
         </div>
 
         <h1 className="mt-5 text-[38px] font-bold tracking-tight text-ink sm:text-[56px] md:text-[64px] leading-[1.08]">
@@ -223,7 +223,7 @@ function SponsorPage() {
           <FeatureCard
             icon="✍️"
             title="Medium Profile Deep-Dive"
-            description="With the $120 tier, receive a comprehensive dedicated review article published on Firoj's Medium profile."
+            description={`With the $${articlePrice} Featured + Article tier, receive a comprehensive dedicated review article published on Firoj's Medium profile.`}
           />
           <FeatureCard
             icon="🔗"

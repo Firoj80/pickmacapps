@@ -483,7 +483,7 @@ function SubmitPage() {
                     </div>
                   </div>
 
-                  {/* Option 3: Featured + Medium Article ($120 - Gold Badge) */}
+                  {/* Option 3: Featured + Medium Article (Gold Badge) */}
                   <div
                     onClick={() => {
                       if (!articleSlots.isFull) {
@@ -1252,7 +1252,7 @@ function SubmitPage() {
                         <div>
                           <p className="font-semibold text-ink">What is the Medium article?</p>
                           <p className="mt-0.5 text-muted">
-                            For the $120 tier, Firoj Alam writes and publishes a dedicated in-depth review article featuring your app on his high-authority Medium publication with dofollow backlinks.
+                            For the Featured + Article tier (${articlePrice}), Firoj Alam writes and publishes a dedicated in-depth review article featuring your app on his high-authority Medium publication with dofollow backlinks.
                           </p>
                         </div>
                         <div className="pt-2 border-t border-line/60">

@@ -410,10 +410,10 @@ function NewAppPage() {
                 className={fieldClass}
               >
                 <option value="featured">
-                  🔹 Blue Badge — Featured Placement ($99 Tier)
+                  🔹 Blue Badge — Featured Placement
                 </option>
                 <option value="article">
-                  🌟 Golden Badge — Featured + Medium Article ($120 Tier)
+                  🌟 Golden Badge — Featured + Medium Article
                 </option>
               </select>
               <p className="text-[11px] text-muted">

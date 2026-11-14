@@ -152,7 +152,7 @@ function AdminHome() {
         {/* Gold Article Tier Slots */}
         <div className="group rounded-2xl border border-line bg-white p-4 shadow-xs transition hover:border-ink/20">
           <div className="flex items-center justify-between">
-            <span className="text-[12px] font-medium text-muted">🌟 Gold Article ($120)</span>
+            <span className="text-[12px] font-medium text-muted">🌟 Gold Article Tier</span>
             <span
               className={`rounded-md px-1.5 py-0.5 text-[10px] font-semibold ${
                 (data.stats.goldChoice ?? 0) >= 3
@@ -741,7 +741,7 @@ function AdminHome() {
         <section className="rounded-2xl border border-line bg-white p-5 shadow-xs">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-ink flex items-center gap-1.5">
-              <span>🌟</span> Featured + Medium Article ($120 Tier)
+              <span>🌟</span> Featured + Medium Article (Gold Tier)
             </h2>
             <div className="flex items-center gap-1.5">
               <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300">

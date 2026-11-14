@@ -136,7 +136,7 @@ function SubmissionsPage() {
                         {item.plan === "choice" ? (
                           <div className="flex flex-col items-start gap-1">
                             <Pill tone="choice">
-                              {item.tier === "article" ? "🌟 Gold ($120)" : "🔹 Blue ($99)"}
+                              {item.tier === "article" ? "🌟 Gold (Article)" : "🔹 Blue (Featured)"}
                             </Pill>
                           </div>
                         ) : (
@@ -275,7 +275,7 @@ function SubmissionsPage() {
                       <span className="text-muted">Tier:</span>
                       {item.plan === "choice" ? (
                         <span className="font-semibold text-amber-700">
-                          {item.tier === "article" ? "🌟 Gold ($120)" : "🔹 Blue ($99)"}
+                          {item.tier === "article" ? "🌟 Gold (Article)" : "🔹 Blue (Featured)"}
                         </span>
                       ) : (
                         <div className="flex items-center gap-1.5">
