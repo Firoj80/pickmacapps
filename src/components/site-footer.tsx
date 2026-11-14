@@ -70,6 +70,11 @@ export function SiteFooter() {
                 </Link>
               </li>
               <li>
+                <Link to="/leaderboard" className="text-muted transition-colors hover:text-ink flex items-center gap-1.5">
+                  <span>Leaderboard</span>
+                </Link>
+              </li>
+              <li>
                 <Link to="/compare" className="text-muted transition-colors hover:text-ink">
                   Alternatives
                 </Link>

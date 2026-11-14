@@ -14,6 +14,7 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as AiDottxtRouteImport } from './routes/ai[.]txt'
 import { Route as CategoriesRouteImport } from './routes/categories'
 import { Route as HowWePickRouteImport } from './routes/how-we-pick'
+import { Route as LeaderboardRouteImport } from './routes/leaderboard'
 import { Route as LlmsFullDottxtRouteImport } from './routes/llms-full[.]txt'
 import { Route as LlmsDottxtRouteImport } from './routes/llms[.]txt'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -81,6 +82,11 @@ const CategoriesRoute = CategoriesRouteImport.update({
 const HowWePickRoute = HowWePickRouteImport.update({
   id: '/how-we-pick',
   path: '/how-we-pick',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LeaderboardRoute = LeaderboardRouteImport.update({
+  id: '/leaderboard',
+  path: '/leaderboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LlmsFullDottxtRoute = LlmsFullDottxtRouteImport.update({
@@ -305,6 +311,7 @@ export interface FileRoutesByFullPath {
   '/ai.txt': typeof AiDottxtRoute
   '/categories': typeof CategoriesRoute
   '/how-we-pick': typeof HowWePickRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -355,6 +362,7 @@ export interface FileRoutesByTo {
   '/ai.txt': typeof AiDottxtRoute
   '/categories': typeof CategoriesRoute
   '/how-we-pick': typeof HowWePickRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -406,6 +414,7 @@ export interface FileRoutesById {
   '/ai.txt': typeof AiDottxtRoute
   '/categories': typeof CategoriesRoute
   '/how-we-pick': typeof HowWePickRoute
+  '/leaderboard': typeof LeaderboardRoute
   '/llms-full.txt': typeof LlmsFullDottxtRoute
   '/llms.txt': typeof LlmsDottxtRoute
   '/privacy': typeof PrivacyRoute
@@ -458,6 +467,7 @@ export interface FileRouteTypes {
     | '/ai.txt'
     | '/categories'
     | '/how-we-pick'
+    | '/leaderboard'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -508,6 +518,7 @@ export interface FileRouteTypes {
     | '/ai.txt'
     | '/categories'
     | '/how-we-pick'
+    | '/leaderboard'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -558,6 +569,7 @@ export interface FileRouteTypes {
     | '/ai.txt'
     | '/categories'
     | '/how-we-pick'
+    | '/leaderboard'
     | '/llms-full.txt'
     | '/llms.txt'
     | '/privacy'
@@ -609,6 +621,7 @@ export interface RootRouteChildren {
   AiDottxtRoute: typeof AiDottxtRoute
   CategoriesRoute: typeof CategoriesRoute
   HowWePickRoute: typeof HowWePickRoute
+  LeaderboardRoute: typeof LeaderboardRoute
   LlmsFullDottxtRoute: typeof LlmsFullDottxtRoute
   LlmsDottxtRoute: typeof LlmsDottxtRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -689,6 +702,13 @@ declare module '@tanstack/react-router' {
       path: '/how-we-pick'
       fullPath: '/how-we-pick'
       preLoaderRoute: typeof HowWePickRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/leaderboard': {
+      id: '/leaderboard'
+      path: '/leaderboard'
+      fullPath: '/leaderboard'
+      preLoaderRoute: typeof LeaderboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/llms-full.txt': {
@@ -1001,6 +1021,7 @@ const rootRouteChildren: RootRouteChildren = {
   AiDottxtRoute: AiDottxtRoute,
   CategoriesRoute: CategoriesRoute,
   HowWePickRoute: HowWePickRoute,
+  LeaderboardRoute: LeaderboardRoute,
   LlmsFullDottxtRoute: LlmsFullDottxtRoute,
   LlmsDottxtRoute: LlmsDottxtRoute,
   PrivacyRoute: PrivacyRoute,

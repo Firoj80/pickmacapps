@@ -9,7 +9,7 @@ function coverSrc(demo: string) {
   return clean;
 }
 
-function getOrSetVisitorId(): string {
+export function getOrSetVisitorId(): string {
   if (typeof window === "undefined") return "";
   let vid = localStorage.getItem("pma_vid");
   if (!vid) {
@@ -19,7 +19,7 @@ function getOrSetVisitorId(): string {
   return vid;
 }
 
-function trackClick(appId: string, type: "click" | "try") {
+export function trackClick(appId: string, type: "click" | "try") {
   if (typeof window === "undefined" || !appId) return;
   fetch("/api/track", {
     method: "POST",

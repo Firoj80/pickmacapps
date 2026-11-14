@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
+import { LeaderboardBanner } from "@/components/leaderboard-banner";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -246,20 +247,8 @@ function Home() {
             <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
           </div>
 
-          {/* Direct Category Quick Links for Crawler & User Discovery (hidden on mobile) */}
-          <nav aria-label="Top Categories" className="mt-5 hidden sm:flex sm:flex-wrap sm:items-center sm:justify-center sm:gap-2">
-            {chipCategories.map((c) => (
-              <Link
-                key={c.slug}
-                to="/category/$slug"
-                params={{ slug: c.slug }}
-                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface/80 px-3.5 py-1.5 text-xs font-medium text-body transition-all hover:border-accent hover:bg-surface hover:text-ink hover:shadow-xs"
-              >
-                <span>{c.emoji || "📁"}</span>
-                <span>{c.name}</span>
-              </Link>
-            ))}
-          </nav>
+          {/* Running Banner Style Leaderboard (Top 10 Apps by Upvotes) */}
+          <LeaderboardBanner apps={list} />
 
           {directory ? null : (
             <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
