@@ -190,3 +190,24 @@ test("admin apps marked for badge check appear in monitored badges list", async 
   assert.ok(found, "Admin app with checkBadge = true is included in monitored free-listing badges");
   assert.equal(found?.checkBadge, true);
 });
+
+test("getSubmissionById resolves admin-created apps for Telegram callbacks and DM/X templates", async () => {
+  const { getSubmissionById } = await import("./directory.server.ts");
+  const result = await createAdminApp({
+    name: "Telegram Admin Test App",
+    tagline: "Checking telegram callback resolution",
+    description: "Detailed description",
+    website: "https://tgap.example.com",
+    pricing: "freemium",
+    category: "productivity",
+    xHandle: "tgappmaker",
+  });
+
+  const resolved = await getSubmissionById(result.id);
+  assert.ok(resolved, "getSubmissionById finds admin-created app by id");
+  assert.equal(resolved?.appName, "Telegram Admin Test App");
+  assert.equal(resolved?.xHandle, "tgappmaker");
+  assert.equal(resolved?.approvedSlug, result.slug);
+  assert.equal(resolved?.dashboardToken, result.dashboardToken);
+  assert.equal(resolved?.status, "published");
+});

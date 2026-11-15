@@ -1,12 +1,15 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  buildAdminAppDevDmText,
   buildConfirmationInlineKeyboard,
   buildSubmissionInlineKeyboard,
   buildSubmitterConfirmationText,
   buildXPostInlineKeyboard,
   buildXPostTemplates,
   escapeTelegramHtml,
+  formatAdminAppCreatedMessage,
+  formatAdminAppDevDmMessage,
   formatSubmissionNotification,
   formatSubmitterConfirmationMessage,
   formatXPostTelegramMessage,
@@ -201,4 +204,45 @@ test("buildSubmitterConfirmationText and formatSubmitterConfirmationMessage cont
   assert.ok(buttons.some((b) => b.text.includes("@focusbell") && b.url === "https://x.com/focusbell"));
   assert.ok(buttons.some((b) => b.text.includes("Open Dashboard") && b.url === "https://pickmacapps.store/dashboard/secret-token-1234"));
   assert.ok(buttons.some((b) => b.url === "https://focusbell.app/"));
+});
+
+test("buildAdminAppDevDmText and formatAdminAppDevDmMessage format developer DM with live URL and secret dashboard link", () => {
+  const adminApp = {
+    name: "ScreenPro",
+    slug: "screenpro",
+    dashboardToken: "admin-dash-tok-5678",
+    xHandle: "screenproapp",
+  };
+  const text = buildAdminAppDevDmText(adminApp);
+  assert.ok(text.includes("Hey @screenproapp 👋"));
+  assert.ok(text.includes("We just featured ScreenPro on PickMacApps! "));
+  assert.ok(text.includes("https://pickmacapps.store/app/screenpro"));
+  assert.ok(text.includes("https://pickmacapps.store/dashboard/admin-dash-tok-5678"));
+  assert.ok(text.includes("Track real-time card views and \"Try App\" referral clicks"));
+  assert.ok(text.includes("Grab your PickMacApps badge code for your site"));
+
+  const msg = formatAdminAppDevDmMessage(adminApp);
+  assert.match(msg, /DM Template for ScreenPro Creator<\/b> \(@screenproapp\)/);
+  assert.match(msg, /<pre>[\s\S]*https:\/\/pickmacapps\.store\/dashboard\/admin-dash-tok-5678[\s\S]*<\/pre>/);
+});
+
+test("formatAdminAppCreatedMessage formats admin app creation card with secret dashboard link and app details", () => {
+  const appNotice = formatAdminAppCreatedMessage({
+    id: "app-id-123",
+    name: "ScreenPro <Studio>",
+    slug: "screenpro-studio",
+    tagline: "Pro screen recordings for Mac",
+    website: "https://screenpro.app",
+    pricing: "Paid · $29",
+    category: "Video",
+    xHandle: "@screenproapp",
+    dashboardToken: "tok-abc-123",
+  });
+  assert.match(appNotice, /NEW APP ADDED BY ADMIN/);
+  assert.match(appNotice, /ScreenPro &lt;Studio&gt;/);
+  assert.match(appNotice, /Paid · \$29 · Video/);
+  assert.match(appNotice, /https:\/\/screenpro\.app/);
+  assert.match(appNotice, /@screenproapp/);
+  assert.match(appNotice, /https:\/\/pickmacapps\.store\/app\/screenpro-studio/);
+  assert.match(appNotice, /https:\/\/pickmacapps\.store\/dashboard\/tok-abc-123/);
 });

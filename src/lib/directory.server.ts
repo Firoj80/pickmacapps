@@ -6,7 +6,12 @@ import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
 import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
 import { cleanXHandle } from "@/lib/metadata.server";
-import { isTelegramConfigured, notifyTelegramSubmission, type TelegramSubmissionInfo } from "@/lib/telegram.server";
+import {
+  isTelegramConfigured,
+  notifyTelegramAdminAppCreated,
+  notifyTelegramSubmission,
+  type TelegramSubmissionInfo,
+} from "@/lib/telegram.server";
 import type { AppItem, FeaturedTier, Post, Pricing } from "@/lib/catalog";
 
 type AppRow = {
@@ -792,6 +797,24 @@ export async function createAdminApp(input: {
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
+
+  await notifyTelegramAdminAppCreated({
+    id,
+    name: input.name.trim(),
+    slug,
+    tagline: input.tagline.trim(),
+    website: input.website.trim(),
+    pricing: cleanPricing(input.pricing),
+    category: category.name,
+    xHandle: xHandleClean,
+    dashboardToken,
+    editorChoice: isChoice,
+    featuredTier: tier,
+    isHot: input.isHot === true,
+  }).catch((err) => {
+    console.error("[telegram] notify admin app created failed:", err);
+  });
+
   return { id, slug, dashboardToken };
 }
 
@@ -1127,7 +1150,49 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     [id],
   );
   const row = rows[0];
-  if (!row) return null;
+  if (!row) {
+    const appRows = await sql.query<{
+      id: string;
+      name: string;
+      slug: string;
+      tagline: string;
+      website: string;
+      pricing: string;
+      category: string;
+      editor_choice: boolean;
+      featured_tier: string | null;
+      x_handle: string | null;
+      submitter_x: string | null;
+      dashboard_token: string | null;
+      status: string;
+    }>(
+      `select id, name, slug, tagline, website, pricing, category, editor_choice, featured_tier, x_handle, submitter_x, dashboard_token, status
+         from apps
+        where id = $1
+        limit 1`,
+      [id],
+    );
+    const app = appRows[0];
+    if (!app) return null;
+    return {
+      id: app.id,
+      appName: app.name,
+      website: app.website,
+      tagline: app.tagline,
+      email: "",
+      xHandle: app.x_handle || app.submitter_x || undefined,
+      plan: app.editor_choice ? "choice" : "free",
+      tier: app.featured_tier || "featured",
+      pricing: app.pricing || undefined,
+      category: app.category || undefined,
+      badgeOk: true,
+      status: app.status || "approved",
+      approvedSlug: app.slug,
+      existingSlug: app.slug,
+      isUpdate: false,
+      dashboardToken: app.dashboard_token || undefined,
+    };
+  }
   return {
     id: row.id,
     appName: row.app_name,

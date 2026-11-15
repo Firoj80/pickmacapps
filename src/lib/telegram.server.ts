@@ -420,6 +420,103 @@ export function buildSubmitterConfirmationText(submission: TelegramSubmissionInf
   ].join("\n");
 }
 
+export function buildAdminAppDevDmText(app: {
+  name: string;
+  slug: string;
+  dashboardToken?: string;
+  xHandle?: string;
+}): string {
+  const name = app.name.trim();
+  const liveUrl = `${PRIMARY_ORIGIN}/app/${app.slug}`;
+  const token = app.dashboardToken || "";
+  const dashUrl = token ? `${PRIMARY_ORIGIN}/dashboard/${token}` : `${PRIMARY_ORIGIN}/dashboard`;
+  const creator = normalizeCreatorMention(app.xHandle);
+
+  return [
+    `Hey ${creator ? creator : `${name} Dev`} 👋`,
+    ``,
+    `We just featured ${name} on PickMacApps! `,
+    ``,
+    `🔗 Live listing: ${liveUrl}`,
+    `🔑 Developer dashboard: ${dashUrl}`,
+    ``,
+    `With your private dashboard, you can:`,
+    `• 📊 Track real-time card views and "Try App" referral clicks`,
+    `• 👁️ Preview how your listing appears to Mac users`,
+    `• ✏️ Update your description, screenshots, pricing, and links`,
+    `• 🛡️ Grab your PickMacApps badge code for your site`,
+    ``,
+    `Feel free to share the link or grab the badge if you'd like! Excited to have ${name} on PickMacApps 🚀`,
+  ].join("\n");
+}
+
+export function formatAdminAppDevDmMessage(app: {
+  name: string;
+  slug: string;
+  dashboardToken?: string;
+  xHandle?: string;
+}): string {
+  const text = buildAdminAppDevDmText(app);
+  const creator = normalizeCreatorMention(app.xHandle);
+
+  return [
+    `💬 <b>DM Template for ${escapeTelegramHtml(app.name)} Creator</b>${creator ? ` (${escapeTelegramHtml(creator)})` : ""} <i>(tap text below to copy)</i>`,
+    ``,
+    `<pre>${escapeTelegramHtml(text)}</pre>`,
+    ``,
+    `👇 Quick actions for this creator:`,
+  ].join("\n");
+}
+
+export interface AdminAppNotificationInput {
+  id: string;
+  name: string;
+  slug: string;
+  tagline: string;
+  website: string;
+  pricing?: string;
+  category?: string;
+  xHandle?: string;
+  dashboardToken?: string;
+  editorChoice?: boolean;
+  featuredTier?: string | null;
+  isHot?: boolean;
+}
+
+export function formatAdminAppCreatedMessage(app: AdminAppNotificationInput): string {
+  const appUrl = `${PRIMARY_ORIGIN}/app/${app.slug}`;
+  const dashUrl = app.dashboardToken
+    ? `${PRIMARY_ORIGIN}/dashboard/${app.dashboardToken}`
+    : `${PRIMARY_ORIGIN}/dashboard`;
+  const creator = normalizeCreatorMention(app.xHandle);
+
+  const lines: string[] = [
+    `🎉 <b>NEW APP ADDED BY ADMIN</b>`,
+    ``,
+    `📱 <b>App:</b> ${escapeTelegramHtml(app.name)}`,
+  ];
+  if (app.category || app.pricing) {
+    const meta = [app.pricing, app.category].filter(Boolean).join(" · ");
+    lines.push(`📂 <b>Details:</b> ${escapeTelegramHtml(meta)}`);
+  }
+  lines.push(
+    `🌐 <b>Website:</b> ${escapeTelegramHtml(app.website)}`,
+    `💬 <b>Tagline:</b> ${escapeTelegramHtml(app.tagline)}`,
+  );
+  if (creator) {
+    lines.push(`👤 <b>Creator:</b> ${escapeTelegramHtml(creator)}`);
+  }
+  lines.push(
+    `🚀 <b>Live URL:</b> ${appUrl}`,
+    ``,
+    `🔑 <b>Secret Submitter Dashboard Link:</b>`,
+    `<code>${escapeTelegramHtml(dashUrl)}</code>`,
+    ``,
+    `<i>Share this secret link with the maker so they can track views, referral clicks, and edit their listing.</i>`,
+  );
+  return lines.join("\n");
+}
+
 export function formatSubmitterConfirmationMessage(submission: TelegramSubmissionInfo): string {
   const text = buildSubmitterConfirmationText(submission);
   const creator = normalizeCreatorMention(submission.xHandle);
@@ -527,6 +624,71 @@ export async function notifyTelegramSubmission(
   const text = formatSubmissionNotification(submission, { kind });
   const keyboard = buildSubmissionInlineKeyboard(submission);
   await sendTelegramMessage(adminChatId, text, keyboard);
+}
+
+export async function notifyTelegramAdminAppCreated(app: AdminAppNotificationInput) {
+  const adminChatId = env("TELEGRAM_ADMIN_CHAT_ID");
+  if (!adminChatId || !env("TELEGRAM_BOT_TOKEN")) return;
+
+  const appUrl = `${PRIMARY_ORIGIN}/app/${app.slug}`;
+  const dashUrl = app.dashboardToken
+    ? `${PRIMARY_ORIGIN}/dashboard/${app.dashboardToken}`
+    : `${PRIMARY_ORIGIN}/dashboard`;
+  const creator = normalizeCreatorMention(app.xHandle);
+  const cleanHandle = creator ? creator.replace(/^@/, "") : "";
+  const websiteUrl = safeHttpUrl(app.website);
+
+  // 1. App Added Notice + Secret Dashboard Link Card
+  const mainText = formatAdminAppCreatedMessage(app);
+  const mainRow1: TelegramInlineButton[] = [
+    { text: "🌐 View Live Listing", url: appUrl },
+    { text: "🔑 Open Dashboard", url: dashUrl },
+  ];
+  const mainRow2: TelegramInlineButton[] = [];
+  if (cleanHandle) {
+    mainRow2.push({ text: `𝕏 @${cleanHandle}`, url: `https://x.com/${cleanHandle}` });
+  }
+  mainRow2.push({ text: "⚙️ Admin Edit", url: `${PRIMARY_ORIGIN}/admin/apps/${app.id}` });
+
+  await sendTelegramMessage(adminChatId, mainText, {
+    inline_keyboard: [mainRow1, mainRow2],
+  });
+
+  // 2. DM Template Card (tap text to copy, ready to DM creator on X or Email)
+  const dmText = formatAdminAppDevDmMessage(app);
+  const dmRow: TelegramInlineButton[] = [];
+  if (cleanHandle) {
+    dmRow.push({ text: `𝕏 Open @${cleanHandle}`, url: `https://x.com/${cleanHandle}` });
+  }
+  dmRow.push({ text: "🔑 Open Dashboard", url: dashUrl });
+  if (websiteUrl) {
+    dmRow.push({ text: "🌐 Visit Website", url: websiteUrl });
+  }
+  await sendTelegramMessage(adminChatId, dmText, {
+    inline_keyboard: [dmRow],
+  });
+
+  // 3. X Post Template Card (with interactive 1-5 template buttons and 1-tap "Post on X" intent button)
+  const submissionInfo: TelegramSubmissionInfo = {
+    id: app.id,
+    appName: app.name,
+    website: app.website,
+    tagline: app.tagline,
+    email: "",
+    xHandle: app.xHandle,
+    plan: app.editorChoice ? "choice" : "free",
+    tier: app.featuredTier || "featured",
+    pricing: app.pricing,
+    category: app.category,
+    badgeOk: true,
+    status: "approved",
+    approvedSlug: app.slug,
+    dashboardToken: app.dashboardToken,
+  };
+
+  const xText = formatXPostTelegramMessage(submissionInfo, 1, app.slug);
+  const xKb = buildXPostInlineKeyboard(submissionInfo, 1, app.slug);
+  await sendTelegramMessage(adminChatId, xText, xKb);
 }
 
 export async function registerTelegramWebhook(origin: string) {
