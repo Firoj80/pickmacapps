@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { hasPickMacAppsBadge, publicUrl } from "./badge.ts";
-import { normalizeWebsiteDomain } from "./directory.server.ts";
+import {
+  createAdminApp,
+  generateAppDashboardToken,
+  getAppRow,
+  normalizeWebsiteDomain,
+  regenerateAppDashboardToken,
+  saveApp,
+} from "./directory.server.ts";
 
 test("hasPickMacAppsBadge rejects third-party badge assets without PickMacApps", () => {
   // Scenario matching shedi.app (which links to TryMacApps with badge.png)
@@ -70,4 +77,75 @@ test("normalizeWebsiteDomain strips protocol, www, and paths to match root domai
   assert.equal(normalizeWebsiteDomain("http://www.hardebell.app/download"), "hardebell.app");
   assert.equal(normalizeWebsiteDomain("hardebell.app"), "hardebell.app");
   assert.equal(normalizeWebsiteDomain("https://WWW.Hardebell.App/"), "hardebell.app");
+});
+
+test("admin can create app with x_handle, check_badge, and automated dashboard token", async () => {
+  const result = await createAdminApp({
+    name: "Test Admin App",
+    tagline: "A test admin app with badge check and x handle",
+    description: "Detailed description",
+    website: "https://testadminapp.example.com",
+    pricing: "free",
+    category: "utility",
+    checkBadge: true,
+    xHandle: "@macdev_test",
+  });
+
+  assert.ok(result.id, "App ID generated");
+  assert.ok(result.dashboardToken, "Dashboard token generated automatically");
+
+  const app = await getAppRow(result.id);
+  assert.ok(app, "App row retrieved");
+  assert.equal(app.checkBadge, true, "checkBadge is true");
+  assert.equal(app.xHandle, "macdev_test", "xHandle is stored cleanly without leading @");
+  assert.equal(app.dashboardToken, result.dashboardToken, "dashboardToken matches");
+
+  // Update app with new x_handle and check_badge = false
+  await saveApp({
+    id: result.id,
+    name: "Test Admin App Updated",
+    slug: app.slug,
+    tagline: "Updated tagline",
+    description: "Updated description",
+    icon: "",
+    demo: "",
+    website: "https://testadminapp.example.com",
+    pricing: "freemium",
+    category: "utility",
+    editorChoice: false,
+    status: "published",
+    checkBadge: false,
+    xHandle: "new_handle",
+  });
+
+  const updated = await getAppRow(result.id);
+  assert.ok(updated);
+  assert.equal(updated.checkBadge, false, "checkBadge updated to false");
+  assert.equal(updated.xHandle, "new_handle", "xHandle updated to new_handle");
+});
+
+test("admin can generate and regenerate secret dashboard tokens for apps", async () => {
+  const result = await createAdminApp({
+    name: "Dashboard Token Test App",
+    tagline: "Testing token generation",
+    description: "Testing token generation description",
+    website: "https://tokentest.example.com",
+    pricing: "free",
+    category: "productivity",
+  });
+
+  const initialToken = await generateAppDashboardToken(result.id);
+  assert.ok(initialToken, "Initial token retrieved");
+
+  // Calling generate again returns existing token
+  const secondCall = await generateAppDashboardToken(result.id);
+  assert.equal(secondCall, initialToken, "Calling generateAppDashboardToken returns existing token if present");
+
+  // Regenerate creates a fresh new token
+  const freshToken = await regenerateAppDashboardToken(result.id);
+  assert.ok(freshToken);
+  assert.notEqual(freshToken, initialToken, "Regenerate creates a distinct new token");
+
+  const app = await getAppRow(result.id);
+  assert.equal(app?.dashboardToken, freshToken, "Database updated with fresh token");
 });

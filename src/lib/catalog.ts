@@ -29,6 +29,8 @@ export type AppItem = {
   tryCount?: number;
   upvoteCount?: number;
   dashboardToken?: string | null;
+  checkBadge?: boolean;
+  xHandle?: string | null;
   createdAt: string;
   updatedAt?: string;
   demo: string;

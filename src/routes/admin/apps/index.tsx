@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
-import { AdminShell, Pill, statusTone } from "@/components/admin-shell";
+import { AdminShell, Notice, Pill, statusTone, useAdminNotice } from "@/components/admin-shell";
 import { pricingLabel } from "@/lib/catalog";
 import { fetchAdminApps, ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -41,6 +41,7 @@ type FilterId = (typeof filters)[number]["id"];
 
 function AppsPage() {
   const apps = Route.useLoaderData();
+  const notice = useAdminNotice();
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState<FilterId>("all");
 
@@ -102,6 +103,8 @@ function AppsPage() {
         </div>
       }
     >
+      <Notice {...notice} />
+
       {/* Real-time Summary Cards */}
       <div className="mb-6 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
         <div className="rounded-2xl border border-line bg-white p-3.5 shadow-xs">
@@ -336,18 +339,25 @@ function AppsPage() {
                   <td className="px-4 py-3.5 text-xs whitespace-nowrap">
                     {app.editorChoice ? (
                       <span className="text-muted/80 italic">Not required (Paid)</span>
-                    ) : app.badgeStatus === "ok" ? (
-                      <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
-                        <span>✓</span>
-                        <span>Badge Active</span>
-                      </span>
-                    ) : app.badgeStatus === "fail" ? (
-                      <span className="inline-flex items-center gap-1 text-rose-600 font-medium">
-                        <span>✕</span>
-                        <span>Missing Badge</span>
-                      </span>
+                    ) : app.checkBadge || app.isUserSubmitted ? (
+                      app.badgeStatus === "ok" ? (
+                        <span className="inline-flex items-center gap-1 text-emerald-700 dark:text-emerald-400 font-medium">
+                          <span>✓</span>
+                          <span>Badge Active</span>
+                        </span>
+                      ) : app.badgeStatus === "fail" || app.badgeStatus === "missing" ? (
+                        <span className="inline-flex items-center gap-1 text-rose-600 font-medium">
+                          <span>✕</span>
+                          <span>Missing Badge</span>
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 text-sky-700 font-medium">
+                          <span>🛡️</span>
+                          <span>Monitored ({app.badgeStatus || "Pending"})</span>
+                        </span>
+                      )
                     ) : (
-                      <span className="text-muted">{app.badgeStatus || "Unchecked"}</span>
+                      <span className="text-muted/70">Exempt (Check off)</span>
                     )}
                   </td>
 
@@ -387,6 +397,32 @@ function AppsPage() {
                   {/* Actions */}
                   <td className="px-5 py-3.5 text-right whitespace-nowrap">
                     <div className="flex items-center justify-end gap-2">
+                      {app.dashboardToken ? (
+                        <Link
+                          to="/dashboard/$token"
+                          params={{ token: app.dashboardToken }}
+                          target="_blank"
+                          title="Open secret submitter dashboard"
+                          className="inline-flex items-center gap-1 rounded-lg border border-indigo-200 bg-indigo-50/70 px-2 py-1 text-xs font-semibold text-indigo-700 hover:bg-indigo-100 hover:border-indigo-300 transition"
+                        >
+                          <span>🔑</span>
+                          <span>Dashboard</span>
+                        </Link>
+                      ) : (
+                        <form method="post" action="/api/admin/apps" className="inline">
+                          <input type="hidden" name="intent" value="generate_dashboard_token" />
+                          <input type="hidden" name="id" value={app.id} />
+                          <input type="hidden" name="return_to" value="/admin/apps?saved=token_generated" />
+                          <button
+                            type="submit"
+                            title="Generate secret submitter dashboard link"
+                            className="inline-flex items-center gap-1 rounded-lg border border-line bg-white px-2 py-1 text-xs font-medium text-muted hover:text-indigo-700 hover:border-indigo-300 hover:bg-indigo-50/40 transition cursor-pointer"
+                          >
+                            <span>+</span>
+                            <span>Dashboard</span>
+                          </button>
+                        </form>
+                      )}
                       {app.status === "published" ? (
                         <Link
                           to="/app/$slug"
@@ -490,14 +526,20 @@ function AppsPage() {
                 )
               ) : null}
 
-              {app.badgeStatus === "ok" ? (
-                <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
-                  <span>✓</span> Badge Active
-                </span>
-              ) : app.badgeStatus === "fail" ? (
-                <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 font-medium">
-                  <span>✕</span> Missing Badge
-                </span>
+              {app.checkBadge || app.isUserSubmitted ? (
+                app.badgeStatus === "ok" ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium">
+                    <span>✓</span> Badge Active
+                  </span>
+                ) : app.badgeStatus === "fail" || app.badgeStatus === "missing" ? (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-rose-600 font-medium">
+                    <span>✕</span> Missing Badge
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-[11px] text-sky-700 font-medium">
+                    <span>🛡️</span> Monitored
+                  </span>
+                )
               ) : null}
             </div>
 
@@ -543,13 +585,35 @@ function AppsPage() {
                 </button>
               </form>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
+                {app.dashboardToken ? (
+                  <Link
+                    to="/dashboard/$token"
+                    params={{ token: app.dashboardToken }}
+                    target="_blank"
+                    className="rounded-xl border border-indigo-200 bg-indigo-50/70 px-2.5 py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-100"
+                  >
+                    🔑 Dash
+                  </Link>
+                ) : (
+                  <form method="post" action="/api/admin/apps" className="inline">
+                    <input type="hidden" name="intent" value="generate_dashboard_token" />
+                    <input type="hidden" name="id" value={app.id} />
+                    <input type="hidden" name="return_to" value="/admin/apps?saved=token_generated" />
+                    <button
+                      type="submit"
+                      className="rounded-xl border border-line bg-stone-50 px-2 py-1.5 text-xs font-medium text-muted hover:text-indigo-700 hover:border-indigo-300 cursor-pointer"
+                    >
+                      + Dash
+                    </button>
+                  </form>
+                )}
                 {app.status === "published" ? (
                   <Link
                     to="/app/$slug"
                     params={{ slug: app.slug }}
                     target="_blank"
-                    className="rounded-xl border border-line bg-stone-50 px-3 py-1.5 text-xs font-semibold text-body hover:text-ink"
+                    className="rounded-xl border border-line bg-stone-50 px-2.5 py-1.5 text-xs font-semibold text-body hover:text-ink"
                   >
                     Live ↗
                   </Link>
@@ -557,9 +621,9 @@ function AppsPage() {
                 <Link
                   to="/admin/apps/$id"
                   params={{ id: app.id }}
-                  className="rounded-xl bg-ink px-4 py-1.5 text-xs font-semibold text-canvas shadow-xs hover:opacity-90"
+                  className="rounded-xl bg-ink px-3 py-1.5 text-xs font-semibold text-canvas shadow-xs hover:opacity-90"
                 >
-                  Edit App
+                  Edit
                 </Link>
               </div>
             </div>

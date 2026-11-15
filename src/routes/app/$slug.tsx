@@ -405,6 +405,22 @@ function AppPage() {
                     <dd className="mt-0.5 font-medium text-ink">{app.updatedAt}</dd>
                   </div>
                 ) : null}
+                {app.xHandle || app.submitterX ? (
+                  <div>
+                    <dt className="text-muted">Developer on X</dt>
+                    <dd className="mt-0.5 font-medium text-ink">
+                      <a
+                        href={`https://x.com/${(app.xHandle || app.submitterX || "").replace(/^@/, "")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-ink hover:text-accent hover:underline"
+                      >
+                        <span>@{(app.xHandle || app.submitterX || "").replace(/^@/, "")}</span>
+                        <span className="text-[10px] text-muted">↗</span>
+                      </a>
+                    </dd>
+                  </div>
+                ) : null}
               </dl>
             </div>
 

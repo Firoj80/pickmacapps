@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
-import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn } from "@/lib/directory.fn";
+import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn, generateDashboardTokenFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 
@@ -63,6 +63,11 @@ function EditAppForm({ app }: { app: EditAppData }) {
     (app.featuredTier as "featured" | "article") || "featured",
   );
   const [isHot, setIsHot] = useState(Boolean(app.isHot));
+  const [xHandle, setXHandle] = useState(app.xHandle || "");
+  const [checkBadge, setCheckBadge] = useState(Boolean(app.checkBadge));
+  const [dashboardToken, setDashboardToken] = useState(app.dashboardToken || "");
+  const [copied, setCopied] = useState(false);
+  const [generatingToken, setGeneratingToken] = useState(false);
 
   // Auto-fetch state
   const [fetching, setFetching] = useState(false);
@@ -71,6 +76,33 @@ function EditAppForm({ app }: { app: EditAppData }) {
 
   const blueActive = (app.otherFeaturedCount ?? 0) + (app.editorChoice && app.featuredTier !== "article" ? 1 : 0);
   const goldActive = (app.otherArticleCount ?? 0) + (app.editorChoice && app.featuredTier === "article" ? 1 : 0);
+
+  async function handleGenerateToken(regenerate = false) {
+    if (regenerate && !confirm("Generate a new secret dashboard link? The previous link will no longer work.")) {
+      return;
+    }
+    setGeneratingToken(true);
+    try {
+      const res = await generateDashboardTokenFn({ data: { appId: app.id, regenerate } });
+      if (res.ok && res.token) {
+        setDashboardToken(res.token);
+      }
+    } catch (err) {
+      console.error("Failed to generate token:", err);
+    } finally {
+      setGeneratingToken(false);
+    }
+  }
+
+  function handleCopyDashboardUrl() {
+    if (!dashboardToken) return;
+    const origin = typeof window !== "undefined" ? window.location.origin : "https://pickmacapps.com";
+    const fullUrl = `${origin}/dashboard/${dashboardToken}`;
+    navigator.clipboard.writeText(fullUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {});
+  }
 
   async function handleAutoFetch() {
     const target = website.trim();
@@ -94,12 +126,14 @@ function EditAppForm({ app }: { app: EditAppData }) {
         if (data.demo) setDemo(data.demo);
         if (data.pricing) setPricing(data.pricing);
         if (data.category) setCategory(data.category);
+        if (data.xHandle && !xHandle) setXHandle(data.xHandle.replace(/^@/, ""));
 
         const fetchedFields: string[] = [];
         if (data.name) fetchedFields.push("name");
         if (data.tagline) fetchedFields.push("tagline");
         if (data.icon) fetchedFields.push("icon");
         if (data.demo) fetchedFields.push("preview image");
+        if (data.xHandle && !xHandle) fetchedFields.push("X handle");
 
         setFetchStatus("success");
         setFetchMessage(
@@ -322,16 +356,30 @@ function EditAppForm({ app }: { app: EditAppData }) {
           </Field>
         </div>
 
-        {/* 3. Tagline */}
-        <Field label="Tagline *" hint="Short 1-sentence value proposition">
-          <input
-            name="tagline"
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            required
-            className={fieldClass}
-          />
-        </Field>
+        {/* 3. Tagline & X Handle */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tagline *" hint="Short 1-sentence value proposition">
+            <input
+              name="tagline"
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              required
+              className={fieldClass}
+            />
+          </Field>
+          <Field label="X (Twitter) Handle" hint="Optional — @handle for creator attribution">
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-muted">@</span>
+              <input
+                name="x_handle"
+                value={xHandle}
+                onChange={(e) => setXHandle(e.target.value.replace(/^@/, ""))}
+                placeholder="creator_handle"
+                className={`${fieldClass} pl-7`}
+              />
+            </div>
+          </Field>
+        </div>
 
         {/* 4. Description */}
         <Field label="Description *" hint="Comprehensive markdown overview">
@@ -499,6 +547,48 @@ function EditAppForm({ app }: { app: EditAppData }) {
           </label>
         </div>
 
+        {/* 10. Automated Badge Check */}
+        <div className="rounded-xl border border-sky-200 bg-sky-50/40 p-4 space-y-3">
+          <label className="flex items-start gap-2.5 text-sm text-ink cursor-pointer">
+            <input
+              type="checkbox"
+              name="check_badge"
+              checked={checkBadge}
+              onChange={(e) => setCheckBadge(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-sky-300 text-sky-600 focus:ring-sky-500"
+            />
+            <div className="flex-1">
+              <span className="font-semibold text-sky-950 flex items-center gap-1.5">
+                <span>🛡️ Mark for Automated PickMacApps Badge Check</span>
+              </span>
+              <p className="mt-0.5 text-xs text-sky-900 leading-relaxed">
+                When enabled, the automated cron system verifies that this app's website displays the PickMacApps backlink badge. If missing, the app is auto-unpublished until restored.
+              </p>
+            </div>
+          </label>
+
+          {/* Current Badge Status Display */}
+          <div className="rounded-lg border border-sky-200/80 bg-white p-3 text-xs space-y-1.5">
+            <div className="flex items-center justify-between">
+              <span className="text-muted font-medium">Monitoring Status:</span>
+              <span className={`font-semibold ${checkBadge || app.isUserSubmitted ? "text-emerald-700" : "text-stone-500"}`}>
+                {checkBadge || app.isUserSubmitted ? "Active (Monitored)" : "Disabled (Exempt)"}
+              </span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-muted font-medium">Last Checked Result:</span>
+              <span className="font-semibold text-ink">
+                {app.badgeStatus === "ok" ? "✓ Badge Active" : app.badgeStatus === "missing" ? "✕ Badge Missing" : app.badgeStatus || "Unchecked"}
+              </span>
+            </div>
+            {app.badgeDetail ? (
+              <div className="text-[11px] text-muted border-t border-line/50 pt-1.5">
+                Detail: {app.badgeDetail}
+              </div>
+            ) : null}
+          </div>
+        </div>
+
         {/* Actions */}
         <div className="flex items-center justify-between pt-3 border-t border-line/70">
           <button
@@ -624,22 +714,101 @@ function EditAppForm({ app }: { app: EditAppData }) {
             </span>
 
             <div className="space-y-2 text-xs">
-              {app.dashboardToken ? (
-                <div className="rounded-xl border border-indigo-200 bg-indigo-50/50 p-3 space-y-2">
+              {dashboardToken ? (
+                <div className="rounded-xl border border-indigo-200 bg-indigo-50/60 p-3.5 space-y-2.5">
                   <div className="flex items-center justify-between">
-                    <span className="font-semibold text-indigo-950">Submitter Dashboard</span>
-                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100 rounded px-1.5 py-0.5">Private</span>
+                    <span className="font-semibold text-indigo-950 flex items-center gap-1.5">
+                      <span>🔑</span> Secret Dashboard URL
+                    </span>
+                    <span className="text-[10px] font-bold text-indigo-700 bg-indigo-100/90 rounded px-1.5 py-0.5">Private</span>
                   </div>
-                  <Link
-                    to="/dashboard/$token"
-                    params={{ token: app.dashboardToken }}
-                    target="_blank"
-                    className="block w-full rounded-lg bg-indigo-600 py-1.5 text-center text-xs font-semibold text-white hover:bg-indigo-700 transition"
-                  >
-                    Open Creator Mini-Dashboard ↗
-                  </Link>
+
+                  <p className="text-[11px] text-indigo-900/80 leading-relaxed">
+                    Share this secret link with the app developer so they can edit their listing and view real-time stats.
+                  </p>
+
+                  <div className="flex items-center gap-1.5 rounded-lg border border-indigo-200 bg-white px-2.5 py-1.5 font-mono text-[11px] text-stone-700 truncate">
+                    <span className="truncate">/dashboard/{dashboardToken}</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={handleCopyDashboardUrl}
+                      className={`inline-flex items-center justify-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-semibold shadow-2xs transition cursor-pointer ${
+                        copied
+                          ? "bg-emerald-600 text-white"
+                          : "bg-indigo-600 text-white hover:bg-indigo-700"
+                      }`}
+                    >
+                      {copied ? (
+                        <>
+                          <CheckIcon className="h-3.5 w-3.5" />
+                          <span>Copied!</span>
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                          </svg>
+                          <span>Copy Link</span>
+                        </>
+                      )}
+                    </button>
+
+                    <Link
+                      to="/dashboard/$token"
+                      params={{ token: dashboardToken }}
+                      target="_blank"
+                      className="inline-flex items-center justify-center gap-1 rounded-lg border border-indigo-300 bg-white py-1.5 text-xs font-semibold text-indigo-700 hover:bg-indigo-50 transition"
+                    >
+                      <span>Open ↗</span>
+                    </Link>
+                  </div>
+
+                  <div className="pt-1 text-center">
+                    <button
+                      type="button"
+                      disabled={generatingToken}
+                      onClick={() => void handleGenerateToken(true)}
+                      className="text-[10.5px] text-indigo-600/80 hover:text-indigo-800 underline cursor-pointer disabled:opacity-50"
+                    >
+                      {generatingToken ? "Regenerating…" : "Regenerate secret link"}
+                    </button>
+                  </div>
                 </div>
-              ) : null}
+              ) : (
+                <div className="rounded-xl border border-stone-200 bg-stone-50/80 p-3.5 space-y-2.5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-semibold text-ink flex items-center gap-1.5">
+                      <span>🔑</span> Secret Dashboard
+                    </span>
+                    <span className="text-[10px] font-medium text-muted bg-stone-200/80 rounded px-1.5 py-0.5">Not Generated</span>
+                  </div>
+                  <p className="text-[11px] text-muted leading-relaxed">
+                    No secret dashboard token has been created for this app yet. Generate one to share listing access with the app creator.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={generatingToken}
+                    onClick={() => void handleGenerateToken(false)}
+                    className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-xs font-semibold text-canvas hover:opacity-90 transition cursor-pointer disabled:opacity-50 shadow-xs"
+                  >
+                    {generatingToken ? (
+                      <>
+                        <SpinnerIcon className="h-3.5 w-3.5" />
+                        <span>Generating…</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>⚡</span>
+                        <span>Generate Secret Dashboard URL</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              )}
 
               {app.status === "published" && (
                 <Link

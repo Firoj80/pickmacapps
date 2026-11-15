@@ -1,4 +1,4 @@
-import { randomUUID } from "node:crypto";
+import { randomBytes, randomUUID } from "node:crypto";
 import raw from "@/data/catalog.json";
 import { shouldSeedCatalogApps } from "@/lib/app-seed";
 import { findShelfCategory, shelfCategories, type ShelfCategory } from "@/lib/shelf-categories";
@@ -43,6 +43,8 @@ type AppRow = {
   try_count?: number | string;
   upvote_count?: number | string;
   dashboard_token?: string | null;
+  check_badge?: boolean;
+  x_handle?: string | null;
 };
 
 type GuideRow = {
@@ -113,6 +115,8 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     tryCount: Number(row.try_count ?? 0),
     upvoteCount: Number(row.upvote_count ?? 0),
     dashboardToken: row.dashboard_token ?? null,
+    checkBadge: asBool(row.check_badge),
+    xHandle: row.x_handle || row.submitter_x || null,
   };
 }
 
@@ -281,6 +285,9 @@ async function ensureSeed(sql: Sql) {
   try {
     await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
     await sql.query("alter table apps add column if not exists is_user_submitted boolean not null default false");
+    await sql.query("alter table apps add column if not exists check_badge boolean not null default false");
+    await sql.query("alter table apps add column if not exists x_handle text not null default ''");
+    await sql.query("alter table apps add column if not exists dashboard_token text unique");
   } catch (err) {
     console.error("ensureSeed is_hot & flags failed:", err);
   }
@@ -353,6 +360,9 @@ async function ensureSeed(sql: Sql) {
   try {
     await sql.query("alter table apps add column if not exists is_hot boolean not null default false");
     await sql.query("alter table apps add column if not exists is_user_submitted boolean not null default false");
+    await sql.query("alter table apps add column if not exists check_badge boolean not null default false");
+    await sql.query("alter table apps add column if not exists x_handle text not null default ''");
+    await sql.query("alter table apps add column if not exists dashboard_token text unique");
   } catch (err) {
     console.error("ensureSeed is_hot & flags failed:", err);
   }
@@ -723,10 +733,13 @@ export async function createAdminApp(input: {
   editorChoice?: boolean;
   featuredTier?: FeaturedTier | null;
   isHot?: boolean;
+  checkBadge?: boolean;
+  xHandle?: string;
   status?: string;
 }) {
   const sql = await directorySql();
   const id = randomUUID();
+  const dashboardToken = randomBytes(24).toString("hex");
   let slug = (input.slug?.trim() || input.name.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-")).replace(/^-+|-+$/g, "");
   if (!slug) slug = `app-${id.slice(0, 8)}`;
 
@@ -754,11 +767,13 @@ export async function createAdminApp(input: {
     emoji: foundCategory?.emoji ?? "🔧",
   };
 
+  const xHandleClean = (input.xHandle || "").trim().replace(/^@/, "");
+
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, is_hot, status, demo, is_user_submitted, created_at, updated_at
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '30 days' else null end, $14, $15, $16, false, now(), now())`,
+      editor_choice, featured_tier, featured_until, is_hot, status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '30 days' else null end, $14, $15, $16, false, $17, $18, $19, $20, now(), now())`,
     [
       id,
       input.name.trim(),
@@ -776,11 +791,15 @@ export async function createAdminApp(input: {
       input.isHot === true,
       status,
       input.demo?.trim() || "",
+      input.checkBadge === true,
+      xHandleClean,
+      xHandleClean,
+      dashboardToken,
     ],
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
-  return { id, slug };
+  return { id, slug, dashboardToken };
 }
 
 async function audit(sql: Sql, action: string, target: string, detail = "") {
@@ -842,6 +861,8 @@ export async function saveApp(input: {
   editorChoice: boolean;
   featuredTier?: FeaturedTier | null;
   isHot?: boolean;
+  checkBadge?: boolean;
+  xHandle?: string;
   status: string;
 }) {
   const sql = await directorySql();
@@ -876,12 +897,17 @@ export async function saveApp(input: {
   if (slugConflict.length > 0) {
     throw new Error(`The slug "${cleanSlug}" is already in use by another app.`);
   }
+
+  const cleanX = input.xHandle !== undefined ? input.xHandle.trim().replace(/^@/, "") : (row.x_handle ?? "");
+
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
       featured_tier = $12,
       featured_until = case when $11 then coalesce(featured_until, now() + interval '30 days') else null end,
-      status = $13, icon = $14, demo = $15, is_hot = $16, updated_at = now()
+      status = $13, icon = $14, demo = $15, is_hot = $16,
+      check_badge = $17, x_handle = $18, submitter_x = coalesce(nullif($18, ''), submitter_x),
+      updated_at = now()
      where id = $1`,
     [
       input.id,
@@ -900,9 +926,38 @@ export async function saveApp(input: {
       input.icon.trim(),
       input.demo.trim(),
       input.isHot === true,
+      input.checkBadge !== undefined ? input.checkBadge === true : Boolean(row.check_badge),
+      cleanX,
     ],
   );
   await audit(sql, "save-app", input.slug, status);
+}
+
+export async function generateAppDashboardToken(appId: string): Promise<string> {
+  const sql = await directorySql();
+  const existing = await sql.query<{ dashboard_token: string | null }>(
+    "select dashboard_token from apps where id = $1 limit 1",
+    [appId],
+  );
+  if (existing[0]?.dashboard_token) {
+    return existing[0].dashboard_token;
+  }
+  const token = randomBytes(24).toString("hex");
+  await sql.query(
+    "update apps set dashboard_token = $2, updated_at = now() where id = $1",
+    [appId, token],
+  );
+  return token;
+}
+
+export async function regenerateAppDashboardToken(appId: string): Promise<string> {
+  const sql = await directorySql();
+  const token = randomBytes(24).toString("hex");
+  await sql.query(
+    "update apps set dashboard_token = $2, updated_at = now() where id = $1",
+    [appId, token],
+  );
+  return token;
 }
 
 export async function deleteApp(id: string) {
@@ -1584,7 +1639,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
 export async function runBadgeChecks() {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>(
-    "select * from apps where status in ('published', 'unpublished') and editor_choice = false and is_user_submitted = true",
+    "select * from apps where status in ('published', 'unpublished') and editor_choice = false and (is_user_submitted = true or check_badge = true)",
   );
   const results: { slug: string; result: string; detail: string; action: "published" | "unpublished" | "unchanged" }[] = [];
   for (const row of rows) {

@@ -76,6 +76,8 @@ const savedCopy: Record<string, string> = {
   telegram: "Telegram webhook connected and test message sent.",
   badge_ok: "PickMacApps badge verified on website! You can now approve this listing.",
   deleted: "Listing permanently deleted. The URL now serves the Alternatives Hub.",
+  token_generated: "Secret submitter dashboard token generated successfully.",
+  token_regenerated: "New secret dashboard link generated and updated.",
 };
 
 export function Notice({ error, saved }: { error: string; saved: string }) {

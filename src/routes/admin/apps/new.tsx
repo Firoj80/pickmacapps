@@ -44,6 +44,8 @@ function NewAppPage() {
   const [editorChoice, setEditorChoice] = useState(false);
   const [featuredTier, setFeaturedTier] = useState<"featured" | "article">("featured");
   const [isHot, setIsHot] = useState(false);
+  const [xHandle, setXHandle] = useState("");
+  const [checkBadge, setCheckBadge] = useState(false);
 
   // Auto-fetch status state
   const [fetching, setFetching] = useState(false);
@@ -86,6 +88,7 @@ function NewAppPage() {
         if (data.demo) setDemo(data.demo);
         if (data.pricing) setPricing(data.pricing);
         if (data.category) setCategory(data.category);
+        if (data.xHandle) setXHandle(data.xHandle.replace(/^@/, ""));
 
         const fetchedFields: string[] = [];
         if (data.name) fetchedFields.push("name");
@@ -93,6 +96,7 @@ function NewAppPage() {
         if (data.icon) fetchedFields.push("icon");
         if (data.demo) fetchedFields.push("preview image");
         if (data.category) fetchedFields.push("category");
+        if (data.xHandle) fetchedFields.push("X handle");
 
         setFetchStatus("success");
         setFetchMessage(
@@ -116,7 +120,7 @@ function NewAppPage() {
   return (
     <AdminShell
       title="Add New App"
-      lede="Direct admin publication with auto-fetch. Admin-created apps are permanently exempt from reciprocal badge checks."
+      lede="Direct admin publication with auto-fetch metadata, X handle insertion, and optional automated PickMacApps badge checking."
       active="add_app"
       actions={
         <Link
@@ -292,17 +296,31 @@ function NewAppPage() {
           </Field>
         </div>
 
-        {/* 3. Tagline */}
-        <Field label="Tagline *" hint="Short 1-sentence value proposition">
-          <input
-            name="tagline"
-            value={tagline}
-            onChange={(e) => setTagline(e.target.value)}
-            placeholder="e.g. An extendable launcher built for macOS productivity."
-            required
-            className={fieldClass}
-          />
-        </Field>
+        {/* 3. Tagline & X Handle */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Tagline *" hint="Short 1-sentence value proposition">
+            <input
+              name="tagline"
+              value={tagline}
+              onChange={(e) => setTagline(e.target.value)}
+              placeholder="e.g. An extendable launcher built for macOS productivity."
+              required
+              className={fieldClass}
+            />
+          </Field>
+          <Field label="X (Twitter) Handle" hint="Optional — @handle for creator attribution">
+            <div className="relative">
+              <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-xs text-muted">@</span>
+              <input
+                name="x_handle"
+                value={xHandle}
+                onChange={(e) => setXHandle(e.target.value.replace(/^@/, ""))}
+                placeholder="creator_handle"
+                className={`${fieldClass} pl-7`}
+              />
+            </div>
+          </Field>
+        </div>
 
         {/* 4. Description */}
         <Field label="Description *" hint="Comprehensive markdown or text overview of features">
@@ -442,7 +460,28 @@ function NewAppPage() {
           </label>
         </div>
 
-        {/* 10. Actions */}
+        {/* 10. Automated Badge Check */}
+        <div className="rounded-xl border border-sky-200 bg-sky-50/40 p-3.5">
+          <label className="flex items-start gap-2.5 text-sm text-ink cursor-pointer">
+            <input
+              type="checkbox"
+              name="check_badge"
+              checked={checkBadge}
+              onChange={(e) => setCheckBadge(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-sky-300 text-sky-600 focus:ring-sky-500"
+            />
+            <div className="flex-1">
+              <span className="font-semibold text-sky-950 flex items-center gap-1.5">
+                <span>🛡️ Mark for Automated PickMacApps Badge Check</span>
+              </span>
+              <p className="mt-0.5 text-xs text-sky-900 leading-relaxed">
+                When enabled, the automated cron system checks the app’s website for the PickMacApps backlink badge. If not found, the app is auto-unpublished until the badge is restored.
+              </p>
+            </div>
+          </label>
+        </div>
+
+        {/* 11. Actions */}
         <div className="flex items-center gap-3 pt-3">
           <button
             type="submit"

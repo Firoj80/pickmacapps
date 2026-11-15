@@ -337,3 +337,22 @@ export const fetchDashboardAppFn = createServerFn({ method: "GET" })
     const { getDashboardByToken } = await import("./directory.server");
     return getDashboardByToken(data.token);
   });
+
+export const generateDashboardTokenFn = createServerFn({ method: "POST" })
+  .validator((input: unknown) => {
+    const data =
+      typeof input === "object" && input && "appId" in input
+        ? (input as { appId: string; regenerate?: boolean })
+        : { appId: "" };
+    return {
+      appId: String(data.appId ?? ""),
+      regenerate: Boolean(data.regenerate),
+    };
+  })
+  .handler(async ({ data }) => {
+    const { generateAppDashboardToken, regenerateAppDashboardToken } = await import("./directory.server");
+    const token = data.regenerate
+      ? await regenerateAppDashboardToken(data.appId)
+      : await generateAppDashboardToken(data.appId);
+    return { ok: true, token };
+  });

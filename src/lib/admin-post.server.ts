@@ -7,6 +7,8 @@ import {
   createAdminApp,
   deleteApp,
   deleteGuide,
+  generateAppDashboardToken,
+  regenerateAppDashboardToken,
   publishAllUnpublishedApps,
   rejectSubmission,
   runBadgeChecks,
@@ -72,6 +74,22 @@ export async function handleAdminPost(request: Request) {
         await deleteApp(String(form.get("id") ?? ""));
         return redirect("/admin/apps?saved=deleted");
       }
+      if (intent === "generate_dashboard_token") {
+        const appId = String(form.get("id") ?? "");
+        if (appId) {
+          await generateAppDashboardToken(appId);
+        }
+        const returnTo = String(form.get("return_to") ?? `/admin/apps/${appId}?saved=token_generated`);
+        return redirect(returnTo);
+      }
+      if (intent === "regenerate_dashboard_token") {
+        const appId = String(form.get("id") ?? "");
+        if (appId) {
+          await regenerateAppDashboardToken(appId);
+        }
+        const returnTo = String(form.get("return_to") ?? `/admin/apps/${appId}?saved=token_regenerated`);
+        return redirect(returnTo);
+      }
       if (intent === "create" || !form.get("id")) {
         const { id } = await createAdminApp({
           name: String(form.get("name") ?? ""),
@@ -86,6 +104,8 @@ export async function handleAdminPost(request: Request) {
           editorChoice: form.get("editor_choice") === "on",
           featuredTier: (form.get("featured_tier") as "article" | "featured") || "featured",
           isHot: form.get("is_hot") === "on" || form.get("is_hot") === "true",
+          checkBadge: form.get("check_badge") === "on" || form.get("check_badge") === "true",
+          xHandle: String(form.get("x_handle") ?? ""),
           status: String(form.get("status") ?? "published"),
         });
         return redirect(`/admin/apps/${id}?saved=created`);
@@ -104,6 +124,8 @@ export async function handleAdminPost(request: Request) {
         editorChoice: form.get("editor_choice") === "on",
         featuredTier: (form.get("featured_tier") as "article" | "featured") || "featured",
         isHot: form.get("is_hot") === "on" || form.get("is_hot") === "true",
+        checkBadge: form.get("check_badge") === "on" || form.get("check_badge") === "true",
+        xHandle: String(form.get("x_handle") ?? ""),
         status: String(form.get("status") ?? ""),
       });
       return redirect(`/admin/apps/${form.get("id")}?saved=1`);
