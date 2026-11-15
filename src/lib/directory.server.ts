@@ -379,55 +379,73 @@ export async function directorySql() {
 }
 
 export async function publishedDirectory() {
-  const sql = await directorySql();
-  const appRows = await sql.query<AppRow>(
-    `select a.*, 0 as views_7d
-     from apps a
-     where a.status = 'published'
-     order by a.created_at asc, a.name asc`,
-  );
-  const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
-  const apps = appRows.map(toApp);
-  let categories: ShelfCategory[] = [];
   try {
-    const categoryRows = await sql.query<{
-      slug: string;
-      name: string;
-      emoji: string;
-      paragraphs: unknown;
-      tips: unknown;
-    }>("select slug, name, emoji, paragraphs, tips from categories order by sort_order asc, name asc");
-    categories = categoryRows.map((row) => ({
-      slug: row.slug,
-      name: row.name,
-      emoji: row.emoji,
-      paragraphs: asStringList(row.paragraphs),
-      tips: asStringList(row.tips),
-      faqs: findShelfCategory(row.slug)?.faqs ?? [],
-    }));
-  } catch (err) {
-    console.error("published categories failed:", err);
-  }
-  let tombstones: { slug: string; name?: string; category?: string }[] = [];
-  try {
-    const tombRows = await sql.query<{ slug: string; name: string | null; category: string | null }>(
-      "select slug, name, category from app_tombstones",
+    const sql = await directorySql();
+    const appRows = await sql.query<AppRow>(
+      `select a.*, 0 as views_7d
+       from apps a
+       where a.status = 'published'
+       order by a.created_at asc, a.name asc`,
     );
-    tombstones = tombRows.map((r) => ({
-      slug: r.slug,
-      name: r.name || undefined,
-      category: r.category || undefined,
-    }));
+    const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
+    const apps = appRows.map(toApp);
+    let categories: ShelfCategory[] = [];
+    try {
+      const categoryRows = await sql.query<{
+        slug: string;
+        name: string;
+        emoji: string;
+        paragraphs: unknown;
+        tips: unknown;
+      }>("select slug, name, emoji, paragraphs, tips from categories order by sort_order asc, name asc");
+      categories = categoryRows.map((row) => ({
+        slug: row.slug,
+        name: row.name,
+        emoji: row.emoji,
+        paragraphs: asStringList(row.paragraphs),
+        tips: asStringList(row.tips),
+        faqs: findShelfCategory(row.slug)?.faqs ?? [],
+      }));
+    } catch (err) {
+      console.error("published categories failed:", err);
+    }
+    let tombstones: { slug: string; name?: string; category?: string }[] = [];
+    try {
+      const tombRows = await sql.query<{ slug: string; name: string | null; category: string | null }>(
+        "select slug, name, category from app_tombstones",
+      );
+      tombstones = tombRows.map((r) => ({
+        slug: r.slug,
+        name: r.name || undefined,
+        category: r.category || undefined,
+      }));
+    } catch (err) {
+      console.error("published tombstones failed:", err);
+    }
+    return {
+      apps,
+      posts: guideRows.map(toPost),
+      editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
+      categories,
+      tombstones,
+    };
   } catch (err) {
-    console.error("published tombstones failed:", err);
+    console.error("[directory] publishedDirectory DB query failed, using static fallback:", err);
+    const seedApps = (raw.apps as unknown as AppItem[]).map((app) => ({
+      ...app,
+      editorChoice: Boolean(app.editorChoice),
+      status: "published",
+      badgeStatus: "verified",
+      badgeDetail: "",
+    }));
+    return {
+      apps: seedApps,
+      posts: raw.posts as unknown as Post[],
+      editors: seedApps.filter((app) => app.editorChoice).map((app) => app.slug),
+      categories: shelfCategories,
+      tombstones: [],
+    };
   }
-  return {
-    apps,
-    posts: guideRows.map(toPost),
-    editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
-    categories,
-    tombstones,
-  };
 }
 
 export const MAX_EDITOR_CHOICE_SLOTS = 6;
@@ -509,83 +527,114 @@ export type PublicOffer = {
 };
 
 export async function publicOffer(): Promise<PublicOffer> {
-  const sql = await directorySql();
-  const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
-  const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
-  let featuredPriceCents = Number(map.featured_price_cents ?? map.choice_price_cents ?? 9900);
-  const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
-  let articlePriceCents = Number(map.article_price_cents ?? 12000);
-  const articleCompareCents = Number(map.article_compare_cents ?? 24900);
+  try {
+    const sql = await directorySql();
+    const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
+    const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
+    let featuredPriceCents = Number(map.featured_price_cents ?? map.choice_price_cents ?? 9900);
+    const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
+    let articlePriceCents = Number(map.article_price_cents ?? 12000);
+    const articleCompareCents = Number(map.article_compare_cents ?? 24900);
 
-  const liveFeatured = await readDodoPrice("featured");
-  if (liveFeatured != null && liveFeatured !== featuredPriceCents) {
-    featuredPriceCents = liveFeatured;
-    await sql.query(
-      `insert into settings (key, value) values ('featured_price_cents', $1), ('choice_price_cents', $1)
-       on conflict (key) do update set value = excluded.value`,
-      [String(liveFeatured)],
-    );
-  }
+    const liveFeatured = await readDodoPrice("featured");
+    if (liveFeatured != null && liveFeatured !== featuredPriceCents) {
+      featuredPriceCents = liveFeatured;
+      await sql.query(
+        `insert into settings (key, value) values ('featured_price_cents', $1), ('choice_price_cents', $1)
+         on conflict (key) do update set value = excluded.value`,
+        [String(liveFeatured)],
+      );
+    }
 
-  const liveArticle = await readDodoPrice("article");
-  if (liveArticle != null && liveArticle !== articlePriceCents) {
-    articlePriceCents = liveArticle;
-    await sql.query(
-      `insert into settings (key, value) values ('article_price_cents', $1)
-       on conflict (key) do update set value = excluded.value`,
-      [String(liveArticle)],
-    );
-  }
+    const liveArticle = await readDodoPrice("article");
+    if (liveArticle != null && liveArticle !== articlePriceCents) {
+      articlePriceCents = liveArticle;
+      await sql.query(
+        `insert into settings (key, value) values ('article_price_cents', $1)
+         on conflict (key) do update set value = excluded.value`,
+        [String(liveArticle)],
+      );
+    }
 
-  const [activeTotal, activeFeatured, activeArticle, featuredOpenDates, articleOpenDates] = await Promise.all([
-    countActiveEditorChoiceApps(),
-    countActiveTierApps("featured"),
-    countActiveTierApps("article"),
-    getPaidSlotDates("featured"),
-    getPaidSlotDates("article"),
-  ]);
+    const [activeTotal, activeFeatured, activeArticle, featuredOpenDates, articleOpenDates] = await Promise.all([
+      countActiveEditorChoiceApps(),
+      countActiveTierApps("featured"),
+      countActiveTierApps("article"),
+      getPaidSlotDates("featured"),
+      getPaidSlotDates("article"),
+    ]);
 
-  const nextDate = getNextCycleLabel();
-  const featuredRemaining = Math.max(0, MAX_TIER_SLOTS - activeFeatured);
-  const articleRemaining = Math.max(0, MAX_TIER_SLOTS - activeArticle);
-  const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
+    const nextDate = getNextCycleLabel();
+    const featuredRemaining = Math.max(0, MAX_TIER_SLOTS - activeFeatured);
+    const articleRemaining = Math.max(0, MAX_TIER_SLOTS - activeArticle);
+    const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
 
-  const featuredSlots: EditorChoiceSlotsInfo = {
-    total: MAX_TIER_SLOTS,
-    active: activeFeatured,
-    remaining: featuredRemaining,
-    isFull: featuredRemaining === 0,
-    nextDate,
-    openDates: featuredOpenDates,
-  };
-
-  const articleSlots: EditorChoiceSlotsInfo = {
-    total: MAX_TIER_SLOTS,
-    active: activeArticle,
-    remaining: articleRemaining,
-    isFull: articleRemaining === 0,
-    nextDate,
-    openDates: articleOpenDates,
-  };
-
-  return {
-    featuredPriceCents,
-    featuredCompareCents,
-    articlePriceCents,
-    articleCompareCents,
-    featuredSlots,
-    articleSlots,
-    priceCents: featuredPriceCents,
-    compareCents: featuredCompareCents,
-    slots: {
-      total: MAX_EDITOR_CHOICE_SLOTS,
-      active: activeTotal,
-      remaining: totalRemaining,
-      isFull: totalRemaining === 0,
+    const featuredSlots: EditorChoiceSlotsInfo = {
+      total: MAX_TIER_SLOTS,
+      active: activeFeatured,
+      remaining: featuredRemaining,
+      isFull: featuredRemaining === 0,
       nextDate,
-      openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
-    },
-  };
+      openDates: featuredOpenDates,
+    };
+
+    const articleSlots: EditorChoiceSlotsInfo = {
+      total: MAX_TIER_SLOTS,
+      active: activeArticle,
+      remaining: articleRemaining,
+      isFull: articleRemaining === 0,
+      nextDate,
+      openDates: articleOpenDates,
+    };
+
+    return {
+      featuredPriceCents,
+      featuredCompareCents,
+      articlePriceCents,
+      articleCompareCents,
+      featuredSlots,
+      articleSlots,
+      priceCents: featuredPriceCents,
+      compareCents: featuredCompareCents,
+      slots: {
+        total: MAX_EDITOR_CHOICE_SLOTS,
+        active: activeTotal,
+        remaining: totalRemaining,
+        isFull: totalRemaining === 0,
+        nextDate,
+        openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
+      },
+    };
+  } catch (err) {
+    console.error("[directory] publicOffer DB query failed, using defaults:", err);
+    const nextDate = getNextCycleLabel();
+    const fallbackSlots: EditorChoiceSlotsInfo = {
+      total: MAX_TIER_SLOTS,
+      active: 0,
+      remaining: MAX_TIER_SLOTS,
+      isFull: false,
+      nextDate,
+      openDates: [],
+    };
+    return {
+      featuredPriceCents: 9900,
+      featuredCompareCents: 19900,
+      articlePriceCents: 12000,
+      articleCompareCents: 24900,
+      featuredSlots: fallbackSlots,
+      articleSlots: fallbackSlots,
+      priceCents: 9900,
+      compareCents: 19900,
+      slots: {
+        total: MAX_EDITOR_CHOICE_SLOTS,
+        active: 0,
+        remaining: MAX_EDITOR_CHOICE_SLOTS,
+        isFull: false,
+        nextDate,
+        openDates: [],
+      },
+    };
+  }
 }
 
 export async function adminStats() {

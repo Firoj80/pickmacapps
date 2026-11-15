@@ -27,6 +27,8 @@ function getCachedOrigin(): string | Promise<string> {
 
 const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var adm=/^\\/admin(\\/|$)/.test(location.pathname);var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";var dark=!adm&&(t==="dark"||(t==="system"&&m.matches));d.dataset.theme=adm?"light":t;d.classList.toggle("dark",dark);var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content",dark?"#08090a":"#ffffff")}a();m.addEventListener("change",a)}catch(e){}})()`;
 
+const TSR_FALLBACK_GUARD = `(function(){try{if(typeof window!=="undefined"&&!window.$_TSR){window.$_TSR={buffer:[],router:{manifest:{},matches:[]},initialized:false,e:function(){},h:function(){}}}}catch(e){}})()`;
+
 const MINILYTICS_HOST = "https://minilytics.firojstats.workers.dev";
 const MINILYTICS_ADMIN_GUARD = `(function(){try{var w=window,l=w.location,u="${MINILYTICS_HOST}";if(w.__mlAdminGuard)return;w.__mlAdminGuard=1;function isAdm(){return /^\\/admin(\\/|$)/.test(l.pathname)}var origFetch=w.fetch;if(origFetch){w.fetch=function(input){var target=typeof input==="string"?input:input&&typeof input==="object"&&"url"in input?String(input.url):"";if(isAdm()&&target.indexOf(u)===0)return Promise.resolve(new Response(null,{status:204}));return origFetch.apply(this,arguments)}}var nav=w.navigator;if(nav&&nav.sendBeacon){var origBeacon=nav.sendBeacon.bind(nav);nav.sendBeacon=function(target){if(isAdm()&&typeof target==="string"&&target.indexOf(u)===0)return true;return origBeacon.apply(nav,arguments)}}}catch(e){}})()`;
 
@@ -148,6 +150,7 @@ export const Route = createRootRoute({
         ...(missingMeta?.links ?? []),
       ],
       scripts: [
+        { children: TSR_FALLBACK_GUARD },
         { children: THEME_SCRIPT },
         ...(!isAdminRoute
           ? [
