@@ -149,3 +149,24 @@ test("admin can generate and regenerate secret dashboard tokens for apps", async
   const app = await getAppRow(result.id);
   assert.equal(app?.dashboardToken, freshToken, "Database updated with fresh token");
 });
+
+test("admin created apps are permanently preserved across database re-seeding", async () => {
+  const { directorySql } = await import("./directory.server.ts");
+  const result = await createAdminApp({
+    name: "Permanent Admin App",
+    tagline: "Should never be pruned or auto-deleted",
+    description: "Detailed description",
+    website: "https://permanentapp.example.com",
+    pricing: "free",
+    category: "utility",
+  });
+
+  const sql = await directorySql();
+  const rowsBefore = await sql.query<{ id: string }>("select id from apps where id = $1", [result.id]);
+  assert.equal(rowsBefore.length, 1, "App exists in database");
+
+  // Re-run directorySql / seed check
+  const sqlAgain = await directorySql();
+  const rowsAfter = await sqlAgain.query<{ id: string }>("select id from apps where id = $1", [result.id]);
+  assert.equal(rowsAfter.length, 1, "App is never deleted by seed logic");
+});
