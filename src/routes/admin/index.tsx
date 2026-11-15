@@ -365,7 +365,7 @@ function AdminHome() {
                 Free-Listing Badges
               </h3>
               <p className="mt-1 text-xs text-muted line-clamp-2">
-                Audit backlink badges on user-submitted apps and run instant verification checks.
+                Audit backlink badges on user-submitted and admin-monitored free apps and run instant verification checks.
               </p>
             </div>
             <div className="mt-3 flex items-center text-xs font-semibold text-ink">

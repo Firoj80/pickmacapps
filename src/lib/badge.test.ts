@@ -170,3 +170,23 @@ test("admin created apps are permanently preserved across database re-seeding", 
   const rowsAfter = await sqlAgain.query<{ id: string }>("select id from apps where id = $1", [result.id]);
   assert.equal(rowsAfter.length, 1, "App is never deleted by seed logic");
 });
+
+test("admin apps marked for badge check appear in monitored badges list", async () => {
+  const result = await createAdminApp({
+    name: "Monitored Admin App",
+    tagline: "Should appear in Free-Listing Badges",
+    description: "Detailed description",
+    website: "https://monitoredbadge.example.com",
+    pricing: "free",
+    category: "utility",
+    checkBadge: true,
+  });
+
+  const { listApps } = await import("./directory.server.ts");
+  const allApps = await listApps();
+  const monitoredBadges = allApps.filter((app) => !app.editorChoice && (app.isUserSubmitted || app.checkBadge));
+
+  const found = monitoredBadges.find((app) => app.id === result.id);
+  assert.ok(found, "Admin app with checkBadge = true is included in monitored free-listing badges");
+  assert.equal(found?.checkBadge, true);
+});

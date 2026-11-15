@@ -36,7 +36,7 @@ function BadgesAdminPage() {
   return (
     <AdminShell
       title="Free-Listing Badges"
-      lede="Automatic verification for reciprocal backlinks on user-submitted free apps."
+      lede="Automatic verification for reciprocal backlinks on user-submitted and admin-monitored free apps."
       active="badges"
     >
       <Notice {...notice} />
@@ -47,7 +47,7 @@ function BadgesAdminPage() {
           <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
             <div className="text-xs font-semibold uppercase tracking-wider text-muted">Free Apps Monitored</div>
             <div className="mt-1 text-2xl font-bold text-ink">{total}</div>
-            <div className="mt-0.5 text-xs text-muted">User submissions only</div>
+            <div className="mt-0.5 text-xs text-muted">User submissions & admin-monitored</div>
           </div>
           <div className="rounded-2xl border border-line bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between">
@@ -89,7 +89,7 @@ function BadgesAdminPage() {
           </div>
 
           {data.badges.length === 0 ? (
-            <p className="px-5 py-12 text-center text-sm text-muted">No user-submitted free listings found.</p>
+            <p className="px-5 py-12 text-center text-sm text-muted">No monitored free listings found.</p>
           ) : (
             <>
               {/* Desktop Table View (hidden on mobile) */}
@@ -108,7 +108,20 @@ function BadgesAdminPage() {
                   <tbody className="divide-y divide-line">
                     {data.badges.map((app) => (
                       <tr key={app.id} className="hover:bg-stone-50/40 transition">
-                        <td className="px-5 py-3.5 font-semibold text-ink">{app.name}</td>
+                        <td className="px-5 py-3.5">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-ink">{app.name}</span>
+                            {app.checkBadge ? (
+                              <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800" title="Admin marked for badge check">
+                                Admin Monitored
+                              </span>
+                            ) : (
+                              <span className="rounded-full bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600" title="User-submitted free listing">
+                                User Submitted
+                              </span>
+                            )}
+                          </div>
+                        </td>
                         <td className="px-4 py-3.5">
                           <a
                             href={app.website}
@@ -167,7 +180,14 @@ function BadgesAdminPage() {
                   <div key={app.id} className="p-4 space-y-3">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <span className="text-sm font-semibold text-ink">{app.name}</span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-sm font-semibold text-ink">{app.name}</span>
+                          {app.checkBadge ? (
+                            <span className="rounded-full bg-sky-100 px-1.5 py-0.2 text-[9px] font-semibold text-sky-800">
+                              Admin Monitored
+                            </span>
+                          ) : null}
+                        </div>
                         <div className="mt-0.5">
                           <a
                             href={app.website}
