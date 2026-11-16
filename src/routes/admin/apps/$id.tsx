@@ -5,6 +5,7 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn, generateDashboardTokenFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { getHotDaysRemaining } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/apps/$id")({
   beforeLoad: async () => {
@@ -695,10 +696,7 @@ function EditAppForm({ app }: { app: EditAppData }) {
                   <span className="font-semibold text-rose-800">🔥 Hot Status Active</span>
                   <span className="rounded-md bg-rose-100/90 px-2 py-0.5 text-[10.5px] font-bold text-rose-900 ring-1 ring-rose-300">
                     {(() => {
-                      const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
-                      const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                      const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
-                      const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                       return `${daysLeft} days remaining (${formatted})`;
                     })()}
                   </span>

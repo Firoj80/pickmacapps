@@ -1,7 +1,14 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
-import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, type AppItem } from "./catalog.ts";
+import {
+  appPriorityWeight,
+  featuredTierWeight,
+  getHeroAppIcons,
+  getHotDaysRemaining,
+  HOT_APP_DURATION_DAYS,
+  type AppItem,
+} from "./catalog.ts";
 
 test("getNextCycleLabel returns the 30-day rollover date", () => {
   // 2026-10-31 + 30 days is Nov 30
@@ -113,4 +120,22 @@ test("getHeroAppIcons avoids duplicating apps if an app is both paid and hot", (
   assert.equal(result.length, 2);
   assert.equal(result[0].slug, "p1");
   assert.equal(result[1].slug, "h1");
+});
+
+test("HOT_APP_DURATION_DAYS is strictly 7 days and getHotDaysRemaining computes remaining days", () => {
+  assert.equal(HOT_APP_DURATION_DAYS, 7);
+
+  // App marked 2 days ago: exactly 5 days left
+  const twoDaysAgo = new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString();
+  const info = getHotDaysRemaining(twoDaysAgo);
+  assert.equal(info.daysLeft, 5);
+
+  // App marked 8 days ago: expired, 0 days left
+  const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
+  const expiredInfo = getHotDaysRemaining(eightDaysAgo);
+  assert.equal(expiredInfo.daysLeft, 0);
+
+  // App just marked now: 7 days left
+  const nowInfo = getHotDaysRemaining(new Date().toISOString());
+  assert.equal(nowInfo.daysLeft, 7);
 });

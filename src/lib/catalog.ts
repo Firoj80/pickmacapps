@@ -347,3 +347,20 @@ export function alternativesInCategory(categorySlug: string) {
   const slugs = new Set(apps.filter((app) => app.category === categorySlug).map((app) => app.slug));
   return alternatives.filter((item) => item.appSlugs.some((slug) => slugs.has(slug)));
 }
+
+/** Hot tag active duration in days before automated expiry */
+export const HOT_APP_DURATION_DAYS = 7;
+
+export function getHotDaysRemaining(
+  hotMarkedAt?: string | null,
+  createdAt?: string | null,
+): { daysLeft: number; expiry: Date; formatted: string } {
+  const marked = new Date(hotMarkedAt || createdAt || Date.now());
+  const expiry = new Date(marked.getTime() + HOT_APP_DURATION_DAYS * 24 * 60 * 60 * 1000);
+  const daysLeft = Math.max(
+    0,
+    Math.min(HOT_APP_DURATION_DAYS, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))),
+  );
+  const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  return { daysLeft, expiry, formatted };
+}

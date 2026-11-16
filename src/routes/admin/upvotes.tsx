@@ -79,7 +79,7 @@ function UpvotesAdminPage() {
         <section className="rounded-2xl border border-line bg-white p-5 sm:p-6 shadow-xs">
           <h2 className="text-base font-semibold text-ink">Configure Upvoting & Promotion Rules</h2>
           <p className="mt-1 text-xs text-muted leading-relaxed">
-            Visitors can upvote any Mac app once without creating an account. When an app receives enough votes, it can be automatically promoted to the Hot Apps shelf for 30 days.
+            Visitors can upvote any Mac app once without creating an account. When an app receives enough votes, it can be automatically promoted to the Hot Apps shelf for 7 days.
           </p>
 
           <form method="post" action="/api/admin/update-upvote-settings" className="mt-6 space-y-4">

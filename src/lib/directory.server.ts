@@ -12,7 +12,13 @@ import {
   notifyTelegramSubmission,
   type TelegramSubmissionInfo,
 } from "@/lib/telegram.server";
-import type { AppItem, FeaturedTier, Post, Pricing } from "@/lib/catalog";
+import {
+  HOT_APP_DURATION_DAYS,
+  type AppItem,
+  type FeaturedTier,
+  type Post,
+  type Pricing,
+} from "@/lib/catalog";
 
 type AppRow = {
   id: string;
@@ -1809,8 +1815,10 @@ export async function runBadgeChecks() {
 }
 
 // -------------------------------------------------------------
-// Hot Auto-Expiry
+// Hot Auto-Expiry (7 days)
 // -------------------------------------------------------------
+export { HOT_APP_DURATION_DAYS };
+
 export async function expireOldHotApps(): Promise<number> {
   const sql = await directorySql();
   const rows = await sql.query<{ id: string }>(
@@ -1818,11 +1826,11 @@ export async function expireOldHotApps(): Promise<number> {
      set is_hot = false, hot_marked_at = null, updated_at = now()
      where is_hot = true
        and hot_marked_at is not null
-       and hot_marked_at < now() - interval '30 days'
+       and hot_marked_at < now() - interval '${HOT_APP_DURATION_DAYS} days'
      returning id`,
   );
   if (rows.length > 0) {
-    await audit(sql, "expire_hot", `${rows.length} apps`, `Expired hot tags older than 30 days`);
+    await audit(sql, "expire_hot", `${rows.length} apps`, `Expired hot tags older than ${HOT_APP_DURATION_DAYS} days`);
   }
   return rows.length;
 }

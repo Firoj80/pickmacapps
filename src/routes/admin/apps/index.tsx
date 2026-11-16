@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, Pill, statusTone, useAdminNotice } from "@/components/admin-shell";
-import { pricingLabel } from "@/lib/catalog";
+import { getHotDaysRemaining, pricingLabel } from "@/lib/catalog";
 import { fetchAdminApps, ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -383,10 +383,7 @@ function AppsPage() {
                       <div className="mt-1">
                         <span className="inline-block rounded-md bg-rose-50 px-2 py-0.5 text-[10.5px] font-bold text-rose-700 ring-1 ring-rose-200/70">
                           {(() => {
-                            const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
-                            const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                            const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
-                            const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                            const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                             return `Expires: ${formatted} (${daysLeft} days left)`;
                           })()}
                         </span>
@@ -558,10 +555,7 @@ function AppsPage() {
             {app.isHot ? (
               <div className="text-[10.5px] font-bold text-rose-800 bg-rose-50 rounded-lg px-2.5 py-1 ring-1 ring-rose-200/70">
                 {(() => {
-                  const marked = new Date(app.hotMarkedAt || app.createdAt || Date.now());
-                  const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                  const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
-                  const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                   return `🔥 Hot expires: ${formatted} (${daysLeft}d left)`;
                 })()}
               </div>
