@@ -349,14 +349,11 @@ function SubmitPage() {
           <div>
             {/* Header Hero */}
             <div className="mx-auto max-w-3xl text-center mb-8 sm:mb-10">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-accent/20 bg-accent/5 px-3 py-1 text-xs font-semibold text-accent uppercase tracking-wider mb-2.5">
-                Mac App Directory Submission
-              </span>
               <h1 className="font-display text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight text-ink">
                 Submit Your Mac App
               </h1>
               <p className="mt-2.5 text-sm sm:text-base text-body max-w-xl mx-auto leading-relaxed">
-                Join 250+ hand-picked macOS apps. Choose between free reciprocal community listing or guaranteed top spot visibility.
+                Join 100+ hand-picked macOS apps. Choose between free reciprocal community listing or guaranteed top spot visibility.
               </p>
             </div>
 
@@ -1125,18 +1122,17 @@ function SubmitPage() {
                   <h4 className="text-xs font-bold text-muted uppercase tracking-wider mb-3">
                     Directory Reach & SEO Power
                   </h4>
-                  <div className="grid grid-cols-3 gap-2 text-center">
-                    <div className="rounded-xl bg-stone-50/80 p-2.5">
-                      <div className="font-display text-lg font-bold text-ink">250+</div>
-                      <div className="text-[10px] text-muted">Curated Apps</div>
+                  <div className="grid grid-cols-2 gap-3 text-center">
+                    <div className="rounded-xl bg-stone-50/80 p-3">
+                      <div className="font-display text-lg sm:text-xl font-bold text-ink">100+</div>
+                      <div className="text-[11px] text-muted mt-0.5">Curated Apps</div>
                     </div>
-                    <div className="rounded-xl bg-stone-50/80 p-2.5">
-                      <div className="font-display text-lg font-bold text-ink">30k+</div>
-                      <div className="text-[10px] text-muted">Monthly Views</div>
-                    </div>
-                    <div className="rounded-xl bg-stone-50/80 p-2.5">
-                      <div className="font-display text-lg font-bold text-ink">Top 3</div>
-                      <div className="text-[10px] text-muted">Search Ranks</div>
+                    <div className="rounded-xl bg-stone-50/80 p-3">
+                      <div className="font-display text-lg sm:text-xl font-bold text-ink flex items-baseline justify-center gap-1">
+                        <span>2k</span>
+                        <span className="text-[10px] font-normal text-emerald-600">(growing rapidly)</span>
+                      </div>
+                      <div className="text-[11px] text-muted mt-0.5">Monthly Views</div>
                     </div>
                   </div>
                 </div>
