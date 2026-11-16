@@ -99,7 +99,7 @@ export function AppAlternatives({ discontinued, allApps }: AppAlternativesProps)
                   <strong>{discontinued.name}</strong> is no longer listed or maintained on PickMacApps.
                 </p>
                 <p className="text-xs text-amber-900/90 dark:text-amber-300 leading-relaxed">
-                  Looking for reliable macOS {discontinued.categoryName.toLowerCase()} tools? We have curated the top-rated,
+                  Looking for reliable macOS {discontinued.categoryName.toLowerCase()} tools? We have hand-picked the top-rated,
                   actively maintained alternatives below — vetted for clean native Swift performance, Apple Gatekeeper notarization, and fair pricing.
                 </p>
               </div>
@@ -217,7 +217,7 @@ export function AppAlternatives({ discontinued, allApps }: AppAlternativesProps)
                 Explore the Complete {discontinued.categoryName} Mac Shelf
               </h3>
               <p className="mt-1 text-xs text-muted max-w-xl leading-relaxed">
-                Browse our full curated catalog of {discontinued.categoryName.toLowerCase()} utilities. Compare pricing, review feature breakdowns, and discover indie Mac software.
+                Browse our full hand-picked catalog of {discontinued.categoryName.toLowerCase()} utilities. Compare pricing, review feature breakdowns, and discover indie Mac software.
               </p>
             </div>
             <Link

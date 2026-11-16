@@ -43,7 +43,7 @@ function HowWePickPage() {
           Listing Guidelines & Editorial Policy
         </h1>
         <p className="mt-4 text-lg text-body">
-          PickMacApps is a curated directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.
+          PickMacApps is a hand-picked directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.
         </p>
       </header>
 

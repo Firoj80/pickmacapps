@@ -118,7 +118,7 @@ export const shelfCategories: ShelfCategory[] = [
     emoji: "✦",
     paragraphs: [
       "The next generation of Mac AI applications leverages Apple Silicon Neural Engines to deliver private, on-device intelligence without leaking sensitive data to external cloud servers. From local speech-to-text dictation to personal knowledge bases, these tools run directly on your hardware.",
-      "Browse hand-curated Mac AI software that respects user privacy, requires zero recurring API tokens, and offers instant system-wide hotkey access anywhere in macOS.",
+      "Browse hand-picked Mac AI software that respects user privacy, requires zero recurring API tokens, and offers instant system-wide hotkey access anywhere in macOS.",
     ],
     tips: [
       "On-Device vs Cloud Inference: Prioritize apps powered by local CoreML or whisper models for zero latency and complete privacy.",
@@ -151,7 +151,7 @@ export const shelfCategories: ShelfCategory[] = [
     emoji: "✍️",
     paragraphs: [
       "Mac writing apps combine typographical precision with distraction-free environments for novelists, technical authors, journalists, and note-takers. These editors prioritize plain-text longevity, local markdown files, and fluid keyboard navigation.",
-      "Whether you need an opinionated markdown drafting tool like iA Writer or a networked, local-first database like Anytype, our curated selection focuses on speed, typographic elegance, and zero cloud lock-in.",
+      "Whether you need an opinionated markdown drafting tool like iA Writer or a networked, local-first database like Anytype, our hand-picked selection focuses on speed, typographic elegance, and zero cloud lock-in.",
     ],
     tips: [
       "Plain-Text Future-Proofing: Store your writing in standard Markdown (.md) or plain text so your words remain readable decades from now in any editor.",
@@ -216,7 +216,7 @@ export const shelfCategories: ShelfCategory[] = [
     name: "Design",
     emoji: "🎨",
     paragraphs: [
-      "Curated Mac design tools for UI/UX designers, illustrators, and visual creators. From pixel-perfect screenshot measurement to palette generators and vector canvas tools, these utilities enhance your creative precision.",
+      "Hand-picked Mac design tools for UI/UX designers, illustrators, and visual creators. From pixel-perfect screenshot measurement to palette generators and vector canvas tools, these utilities enhance your creative precision.",
       "Explore lightweight design companions that integrate into your menu bar or hotkey flow, enabling rapid asset extraction, OCR text grabbing, and design feedback.",
     ],
     tips: [
@@ -307,7 +307,7 @@ export const shelfCategories: ShelfCategory[] = [
     emoji: "📷",
     paragraphs: [
       "Mac photography applications for photo organization, batch resizing, EXIF editing, and image enhancement. Built to take full advantage of Apple Silicon image processing pipelines.",
-      "Browse hand-curated tools that respect your photo library structure, avoid proprietary cloud lock-in, and process RAW files with speed.",
+      "Browse hand-picked tools that respect your photo library structure, avoid proprietary cloud lock-in, and process RAW files with speed.",
     ],
     tips: [
       "Non-Destructive Workflows: Ensure editors save adjustments as metadata or sidecar files rather than overwriting originals.",

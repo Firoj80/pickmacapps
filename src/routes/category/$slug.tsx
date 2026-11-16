@@ -84,9 +84,9 @@ export const Route = createFileRoute("/category/$slug")({
     const seo = buildMetadata({
       title: `Best ${category.name} Mac Apps (2026) | PickMacApps`,
       description: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
-      ogTitle: `Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      ogTitle: `Best ${category.name} Mac Apps (2026) — Hand-Picked Shelf`,
       ogDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
-      twitterTitle: `Best ${category.name} Mac Apps (2026) — Curated Shelf`,
+      twitterTitle: `Best ${category.name} Mac Apps (2026) — Hand-Picked Shelf`,
       twitterDescription: category.paragraphs[0] ?? `${category.name} apps for Mac.`,
       path: `/category/${slug}`,
       origin,
@@ -127,9 +127,18 @@ function CategoryPage() {
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
-      <div className="mx-auto max-w-[1200px] px-4 py-8 sm:px-6 lg:py-12">
+      <div className="w-full px-5 md:px-8 xl:px-10 py-6 sm:py-8 lg:py-10">
         {/* Breadcrumbs */}
         <nav aria-label="Breadcrumb" className="mb-6 flex items-center gap-2 text-xs text-muted">
+          <Link
+            to="/"
+            aria-label="Back to collection"
+            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition hover:bg-surface-2 hover:text-ink cursor-pointer"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+          </Link>
           <Link to="/" className="hover:text-ink transition-colors">
             Home
           </Link>
@@ -141,7 +150,7 @@ function CategoryPage() {
         <header className="border-b border-line pb-10">
           <div className="flex flex-wrap items-center gap-2.5">
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
-              <span>Curated Shelf</span>
+              <span>Hand-Picked Shelf</span>
             </span>
             <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted">
               <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
@@ -163,7 +172,7 @@ function CategoryPage() {
           <div className="mt-8 flex flex-wrap items-center gap-3 sm:gap-6 text-xs text-muted">
             <div className="flex items-center gap-2">
               <span className="font-semibold text-ink text-sm">{listed.length}</span>
-              <span>Curated Apps</span>
+              <span>Hand-Picked Apps</span>
             </div>
             <span className="hidden sm:inline text-line">•</span>
             <div className="flex items-center gap-2">
@@ -204,7 +213,7 @@ function CategoryPage() {
               </Link>
             </div>
           ) : (
-            <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
               {listed.map((app) => (
                 <AppCard key={app.id} app={app} />
               ))}
@@ -341,7 +350,7 @@ function CategoryPage() {
             Built an indie Mac {category.name.toLowerCase()} app?
           </h2>
           <p className="mx-auto mt-2 max-w-xl text-sm text-body">
-            PickMacApps is hand-curated and reviewed. Submit your Mac application for our editorial review and get discovered by thousands of Mac power users.
+            PickMacApps is hand-picked and reviewed. Submit your Mac application for our editorial review and get discovered by thousands of Mac power users.
           </p>
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             <Link

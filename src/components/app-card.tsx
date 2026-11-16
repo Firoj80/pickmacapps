@@ -90,28 +90,22 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
   const isGold = choice && app.featuredTier === "article";
   const isBlue = choice && app.featuredTier !== "article";
   const isHotCard = Boolean(app.isHot) && !choice;
-  const isAnimated = isGold || isBlue || isHotCard;
+  const isAnimated = isGold || isBlue;
 
   const outerFrameClass = isGold
     ? "relative overflow-hidden rounded-2xl bg-amber-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(245,158,11,0.38)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(245,158,11,0.48)] dark:bg-amber-500/25"
     : isBlue
     ? "relative overflow-hidden rounded-2xl bg-sky-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(14,165,233,0.34)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(14,165,233,0.45)] dark:bg-sky-500/25"
-    : isHotCard
-    ? "relative overflow-hidden rounded-2xl bg-rose-400/40 p-[2px] shadow-[0_6px_24px_-8px_rgba(244,63,94,0.32)] transition-all duration-300 group-hover:shadow-[0_14px_32px_-6px_rgba(244,63,94,0.42)] dark:bg-rose-500/25"
     : "relative overflow-hidden rounded-2xl border border-line/60 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)]";
 
   const waveRingClass = isGold
     ? "card-wave-ring card-wave-ring-gold"
-    : isBlue
-    ? "card-wave-ring card-wave-ring-blue"
-    : "card-wave-ring card-wave-ring-hot";
+    : "card-wave-ring card-wave-ring-blue";
 
   const hoverWaveClass = isGold
     ? "card-hover-wave card-hover-wave-gold z-15"
     : isBlue
     ? "card-hover-wave card-hover-wave-blue z-15"
-    : isHotCard
-    ? "card-hover-wave card-hover-wave-hot z-15"
     : "card-hover-wave card-hover-wave-neutral z-15";
 
   return (
@@ -171,8 +165,8 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
             </div>
           )}
 
-          {/* Badges on Preview Canvas (Top-Left: Featured or Hot tier only) */}
-          {isGold || isBlue || isHotCard ? (
+          {/* Badges on Preview Canvas (Top-Left: Featured tier only) */}
+          {isGold || isBlue ? (
             <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5">
               {isGold ? (
                 <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2.5 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
@@ -182,14 +176,6 @@ export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" |
                 <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
                   ✦ Featured
                 </span>
-              ) : isHotCard ? (
-                <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-rose-300/40">
-                  <span className="relative flex h-1.5 w-1.5">
-                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-amber-200 opacity-85" />
-                    <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-white" />
-                  </span>
-                  <span>🔥 Hot</span>
-                </div>
               ) : null}
             </div>
           ) : null}

@@ -1,10 +1,12 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
 import { AppErrorComponent } from "@/lib/error-component";
 import { Missing } from "@/components/missing";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { SiteSidebar } from "@/components/site-sidebar";
+import { SearchModal } from "@/components/search-modal";
 import { buildMetadata, fetchSiteOrigin, originFrom, PRIMARY_ORIGIN } from "@/lib/seo";
 import {
   getCachedDirectory,
@@ -56,6 +58,7 @@ function Frame() {
   const { directory } = Route.useRouteContext();
   const admin = path.startsWith("/admin");
   const wasAdminRef = useRef(admin);
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // Synchronously seed directory cache on client during initial render
   if (typeof window !== "undefined" && !admin && directory) {
@@ -73,14 +76,39 @@ function Frame() {
     }
   }, [admin, directory]);
 
+  if (admin) {
+    return (
+      <>
+        <NavigationProgressBar />
+        <Outlet />
+      </>
+    );
+  }
+
   return (
     <>
       <NavigationProgressBar />
-      {admin ? null : <SiteHeader />}
-      <div className="flex-1">
-        <Outlet />
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
+      <div className="lg:grid lg:h-dvh lg:grid-cols-[264px_minmax(0,1fr)] lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:bg-canvas">
+        {/* Desktop Fixed Left Sidebar */}
+        <SiteSidebar onOpenSearch={() => setSearchOpen(true)} />
+
+        {/* Right Shell Box (Floating rounded surface on desktop, natural layout on mobile) */}
+        <div className="min-w-0 lg:h-full lg:min-h-0 lg:py-2.5 lg:pr-2.5">
+          <div className="site-shell-box min-h-[calc(100vh-20px)] lg:h-full lg:overflow-y-auto lg:overscroll-y-contain lg:rounded-[24px] lg:border lg:border-line/70 flex flex-col justify-between">
+            {/* Mobile Header (Hidden on lg+) */}
+            <SiteHeader onOpenSearch={() => setSearchOpen(true)} />
+
+            {/* Page Content */}
+            <div className="flex-1">
+              <Outlet />
+            </div>
+
+            {/* Site Footer */}
+            <SiteFooter />
+          </div>
+        </div>
       </div>
-      {admin ? null : <SiteFooter />}
     </>
   );
 }

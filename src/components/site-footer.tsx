@@ -17,8 +17,8 @@ export function SiteFooter() {
     .sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
 
   return (
-    <footer className="mt-auto border-t border-line bg-canvas">
-      <div className="mx-auto max-w-[1360px] px-4 py-12 sm:px-6 lg:py-16">
+    <footer className="mt-auto border-t border-line/70 bg-surface">
+      <div className="w-full px-5 md:px-8 xl:px-10 py-12 sm:py-16">
         {/* 4-Column Main Layout matching Macapp Supply reference */}
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-12 lg:gap-10">
           {/* Column 1: Brand & Creator */}
@@ -27,10 +27,10 @@ export function SiteFooter() {
               <span>PickMacApps</span>
             </Link>
             <p className="mt-3 max-w-[28ch] text-[13px] leading-relaxed text-muted">
-              A curated shelf of beautifully designed macOS apps.
+              A hand-picked shelf of beautifully designed macOS apps.
             </p>
 
-            {/* Curated by badge pill */}
+            {/* Hand-picked by badge pill */}
             <div className="mt-5">
               <a
                 href={creatorUrl}
@@ -48,7 +48,7 @@ export function SiteFooter() {
                   className="h-6 w-6 shrink-0 rounded-full object-cover"
                 />
                 <div className="flex items-center gap-1.5 text-[13px]">
-                  <span className="text-muted">Curated by</span>
+                  <span className="text-muted">Hand-picked by</span>
                   <span className="font-semibold text-ink group-hover:underline">Firoj Alam</span>
                 </div>
               </a>
@@ -202,7 +202,7 @@ export function SiteFooter() {
           </div>
 
           <p className="max-w-xl text-[11.5px] leading-relaxed text-muted sm:text-right">
-            A manually curated collection. Some outbound links may be affiliate links. Not affiliated with Apple Inc. — all app marks belong to their respective owners.
+            A manually hand-picked collection. Some outbound links may be affiliate links. Not affiliated with Apple Inc. — all app marks belong to their respective owners.
           </p>
         </div>
       </div>

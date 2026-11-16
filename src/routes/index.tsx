@@ -9,10 +9,10 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "Best Mac Apps in 2026 | Curated Mac Software";
+const homeTitle = "Best Mac Apps in 2026 | Hand-Picked Mac Software";
 const homeDescription =
-  "Discover the best Mac apps for productivity, development, design and everyday work. Explore curated macOS software, free apps and useful alternatives.";
-const homeImageAlt = "Best Mac Apps in 2026 | Curated Mac Software";
+  "Discover the best Mac apps for productivity, development, design and everyday work. Explore hand-picked macOS software, free apps and useful alternatives.";
+const homeImageAlt = "Best Mac Apps in 2026 | Hand-Picked Mac Software";
 const homeH1 = "Discover the Best Mac Apps Worth Installing";
 
 const homeFaqs = [
@@ -198,7 +198,8 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
 }
 
 function Home() {
-  const { q = "", cat = "all", sort = "hot" } = Route.useSearch();
+  const rawSearch = Route.useSearch();
+  const { q = "", cat = "all", sort = "hot" } = rawSearch;
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
@@ -217,6 +218,8 @@ function Home() {
     sort,
   );
 
+  const isFiltered = Boolean(rawSearch.sort || (rawSearch.cat && rawSearch.cat !== "all") || rawSearch.q);
+
   function updateSearch(next: { q?: string; cat?: string; sort?: HeroSort }) {
     navigate({
       to: "/",
@@ -230,36 +233,72 @@ function Home() {
 
   return (
     <main className="flex-1">
-      {/* Hero Section */}
-      <section className="relative overflow-hidden border-b border-line px-4 pt-8 pb-7 sm:px-6 md:pt-12 md:pb-10 hero-grid">
-        <div className="mx-auto flex w-full max-w-[860px] flex-col items-center text-center">
-          <h1 className="text-[30px] leading-[1.12] font-bold tracking-[-0.03em] text-ink sm:text-[40px] md:text-[46px]">
-            {homeH1.split("Mac")[0]}
-            <MacLogo className="mx-1 inline h-[0.76em] w-[0.76em] -translate-y-[0.06em]" />
-            Mac{homeH1.split("Mac")[1]}
-          </h1>
-          <p className="mt-2.5 max-w-2xl text-[14.5px] leading-relaxed text-body sm:text-[16px] md:leading-6">
-            {homeDescription}
-          </p>
+      {isFiltered ? (
+        /* Direct Section Header when Discover or Category filter is clicked */
+        <section className="px-5 md:px-8 xl:px-10 pt-8 pb-3">
+          <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
+            <h1 className="font-display text-[26px] sm:text-[32px] md:text-[36px] font-bold tracking-tight text-ink flex items-center gap-2.5">
+              {cat === "pick" ? (
+                <>
+                  <span>Featured Mac apps</span>
+                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent text-sm">
+                    ★
+                  </span>
+                </>
+              ) : sort === "new" ? (
+                <span>Latest Mac apps</span>
+              ) : sort === "trending" ? (
+                <span>Trending Mac apps</span>
+              ) : sort === "hot" ? (
+                <span>🔥 Hot Mac apps</span>
+              ) : cat !== "all" ? (
+                <span>
+                  {chipCategories.find((c) => c.slug === cat)?.name || cat} Mac apps
+                </span>
+              ) : (
+                <span>Mac apps</span>
+              )}
+            </h1>
+            <span className="text-xs font-medium text-muted">
+              {shown.length} {shown.length === 1 ? "app" : "apps"}
+            </span>
+          </div>
+        </section>
+      ) : (
+        /* Hero Section matching macapp.supply (only shown on root homepage) */
+        <section className="px-5 md:px-8 xl:px-10 pt-10 pb-8 md:pt-14 md:pb-12 lg:pt-14">
+          <div className="max-w-4xl">
+            <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[46px] md:text-[54px] xl:text-[60px]">
+              A hand-picked shelf of{" "}
+              <span className="text-muted">beautifully designed</span>{" "}
+              <span className="inline-flex items-center align-middle">
+                <MacLogo className="mx-1 inline h-[0.78em] w-[0.78em] -translate-y-[0.06em] text-ink" />
+              </span>
+              macOS apps.
+            </h1>
+            <p className="mt-3.5 text-[15px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
+              Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
+            </p>
 
-          {/* Curved app icons stack - Paid apps (up to 6), with top Hot apps toggled when < 6 paid apps available */}
-          <div className="mt-3 w-full">
-            <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+            {/* App Icons Arc */}
+            <div className="mt-4 flex items-center">
+              <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+            </div>
+
+            {directory ? null : (
+              <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
+            )}
           </div>
 
-          {directory ? null : (
-            <p className="mt-2 text-sm text-muted">The app list could not be loaded. Try again in a moment.</p>
-          )}
-        </div>
+          {/* Running Banner Style Leaderboard (Top Apps) */}
+          <div className="w-full mt-6 sm:mt-8">
+            <LeaderboardBanner apps={list} />
+          </div>
+        </section>
+      )}
 
-        {/* Running Banner Style Leaderboard (Top 10 Apps by Upvotes) - matching full page width (max-w-[1360px]) */}
-        <div className="mx-auto w-full max-w-[1360px] mt-6 sm:mt-8">
-          <LeaderboardBanner apps={list} />
-        </div>
-      </section>
-
-      {/* Filter and Content section */}
-      <div className="mx-auto w-full max-w-[1360px] px-4 py-6 sm:px-6 lg:py-8">
+      {/* Direct Apps Grid */}
+      <div className="w-full px-5 md:px-8 xl:px-10 py-6">
         <AppGrid
           apps={shown}
           query={q}
@@ -272,25 +311,29 @@ function Home() {
           onSort={(value) => updateSearch({ sort: value })}
         />
 
-        <GuideStrip posts={directory?.posts ?? posts} />
+        {!isFiltered && (
+          <>
+            <GuideStrip posts={directory?.posts ?? posts} />
 
-        <section className="mt-20">
-          <div className="flex items-center gap-5">
-            <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Questions</h2>
-            <span aria-hidden="true" className="h-px flex-1 bg-line" />
-            <Link to="/how-we-pick" className="text-[13px] font-medium text-body hover:text-ink">
-              How we pick
-            </Link>
-          </div>
-          <div className="mt-6 space-y-3">
-            {homeFaqs.map((faq) => (
-              <details key={faq.q} className="rounded-xl border border-line bg-surface px-5 py-4">
-                <summary className="cursor-pointer text-[15px] font-medium text-ink">{faq.q}</summary>
-                <p className="mt-3 text-sm leading-relaxed text-body">{faq.a}</p>
-              </details>
-            ))}
-          </div>
-        </section>
+            <section className="mt-20">
+              <div className="flex items-center gap-5">
+                <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Questions</h2>
+                <span aria-hidden="true" className="h-px flex-1 bg-line" />
+                <Link to="/how-we-pick" className="text-[13px] font-medium text-body hover:text-ink">
+                  How we pick
+                </Link>
+              </div>
+              <div className="mt-6 space-y-3">
+                {homeFaqs.map((faq) => (
+                  <details key={faq.q} className="rounded-xl border border-line bg-surface px-5 py-4">
+                    <summary className="cursor-pointer text-[15px] font-medium text-ink">{faq.q}</summary>
+                    <p className="mt-3 text-sm leading-relaxed text-body">{faq.a}</p>
+                  </details>
+                ))}
+              </div>
+            </section>
+          </>
+        )}
       </div>
     </main>
   );

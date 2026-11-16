@@ -82,9 +82,18 @@ function LeaderboardPage() {
   }
 
   return (
-    <main className="mx-auto w-full max-w-[1240px] px-3.5 py-5 sm:px-6 sm:py-8 lg:py-12">
+    <main className="w-full px-5 md:px-8 xl:px-10 py-6 sm:py-8 lg:py-10">
       {/* Breadcrumb Navigation */}
       <nav aria-label="Breadcrumb" className="mb-4 sm:mb-6 flex items-center gap-2 text-xs text-muted">
+        <Link
+          to="/"
+          aria-label="Back to collection"
+          className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition hover:bg-surface-2 hover:text-ink cursor-pointer"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+        </Link>
         <Link to="/" className="hover:text-ink transition-colors">
           Home
         </Link>

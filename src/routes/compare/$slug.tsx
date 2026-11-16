@@ -96,10 +96,19 @@ function ComparePage() {
   return (
     <main className="flex-1">
       {/* Modern Hero Section */}
-      <section className="relative overflow-hidden border-b border-line px-4 pt-10 pb-10 sm:px-6 md:pt-14 md:pb-12 hero-grid">
-        <div className="mx-auto max-w-[1360px]">
+      <section className="relative overflow-hidden border-b border-line px-5 md:px-8 xl:px-10 pt-8 pb-10 md:pt-12 md:pb-12">
+        <div className="w-full">
           {/* Breadcrumb Navigation */}
           <nav className="mb-6 flex flex-wrap items-center gap-2 text-xs font-medium text-muted">
+            <Link
+              to="/compare"
+              aria-label="Back to comparisons"
+              className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-line bg-surface text-muted transition hover:bg-surface-2 hover:text-ink cursor-pointer"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </Link>
             <Link to="/" className="transition hover:text-ink">
               Home
             </Link>
@@ -221,7 +230,7 @@ function ComparePage() {
       </section>
 
       {/* Main Breakdown Section */}
-      <div className="mx-auto w-full max-w-[1360px] px-4 py-8 sm:px-6 lg:py-12">
+      <div className="w-full px-5 md:px-8 xl:px-10 py-6 sm:py-8 lg:py-10">
         {/* Full Visual App Cards */}
         <section className="mb-12">
           <div className="mb-4 flex items-center gap-4">
@@ -353,7 +362,7 @@ function ComparePage() {
           <section className="mb-12 rounded-2xl border border-line bg-surface p-6 shadow-xs">
             <h3 className="text-base font-semibold text-ink">Editorial Context</h3>
             <p className="mt-1 text-sm text-body leading-relaxed">
-              Both {pair.left.name} and {pair.right.name} were analyzed together in our curated editorial guides:
+              Both {pair.left.name} and {pair.right.name} were analyzed together in our hand-picked editorial guides:
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
               {pair.guides.map((guide) => (

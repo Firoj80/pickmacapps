@@ -4,12 +4,12 @@ export const PRIMARY_ORIGIN = "https://pickmacapps.store";
 export const site = {
   name: "PickMacApps",
   url: PRIMARY_ORIGIN,
-  title: "Best Mac Apps in 2026 | Curated Mac Software",
+  title: "Best Mac Apps in 2026 | Hand-Picked Mac Software",
   description:
-    "Discover the best Mac apps for productivity, development, design and everyday work. Explore curated macOS software, free apps and useful alternatives.",
+    "Discover the best Mac apps for productivity, development, design and everyday work. Explore hand-picked macOS software, free apps and useful alternatives.",
   logoPath: "/favicon.svg",
   ogImage: "/og-v2.jpg",
-  ogImageAlt: "PickMacApps — Curated Mac Software & Best Mac Apps in 2026",
+  ogImageAlt: "PickMacApps — Hand-Picked Mac Software & Best Mac Apps in 2026",
   ogImageWidth: "1200",
   ogImageHeight: "630",
   policyUpdated: "2026-10-27",
@@ -33,12 +33,12 @@ export const pageCopy = {
   },
   about: {
     title: "About PickMacApps & Firoj Alam",
-    description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+    description: "Indie hacker and Mac and iOS app developer who hand-picks Mac apps on PickMacApps.",
   },
   howWePick: {
     title: "Listing Guidelines — PickMacApps",
     description:
-      "PickMacApps is a curated directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.",
+      "PickMacApps is a hand-picked directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.",
   },
   sponsor: {
     title: "Sponsor — PickMacApps",

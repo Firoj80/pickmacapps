@@ -76,7 +76,7 @@ function websiteNode(origin: string, withSearch: boolean, description?: string) 
       {
         "@type": "SiteNavigationElement",
         name: "Listing Guidelines",
-        description: "PickMacApps is a curated directory of beautifully designed macOS apps",
+        description: "PickMacApps is a hand-picked directory of beautifully designed macOS apps",
         url: absoluteUrl(origin, "/how-we-pick"),
       },
       {
@@ -149,7 +149,7 @@ export function homeGraph(
   faqs?: { q: string; a: string }[],
   copy?: { name: string; description: string },
 ) {
-  const pageName = copy?.name ?? "Beautifully designed macOS apps, curated";
+  const pageName = copy?.name ?? "Beautifully designed macOS apps, hand-picked";
   const nodes: unknown[] = [
     organizationNode(origin),
     websiteNode(origin, true, copy?.description),
@@ -286,7 +286,7 @@ export function guideGraph(origin: string, post: Post, faqs?: { q: string; a: st
         name: "Firoj Alam",
         url: absoluteUrl(origin, "/about"),
         jobTitle: "Indie Hacker & Mac/iOS App Developer",
-        description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+        description: "Indie hacker and Mac and iOS app developer who hand-picks Mac apps on PickMacApps.",
       },
       publisher: {
         "@type": "Organization",
@@ -484,14 +484,14 @@ export function aboutGraph(origin: string) {
       "@id": `${absoluteUrl(origin, path)}#page`,
       name: "About PickMacApps & Curator Firoj Alam",
       url: absoluteUrl(origin, path),
-      description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+      description: "Indie hacker and Mac and iOS app developer who hand-picks Mac apps on PickMacApps.",
       mainEntity: {
         "@type": "Person",
         "@id": `${absoluteUrl(origin, path)}#author`,
         name: "Firoj Alam",
         url: absoluteUrl(origin, path),
         jobTitle: "Indie Hacker & Mac/iOS App Developer",
-        description: "Indie hacker and Mac and iOS app developer who curates Mac apps on PickMacApps.",
+        description: "Indie hacker and Mac and iOS app developer who hand-picks Mac apps on PickMacApps.",
         email: "mailto:firojalama80@gmail.com",
         worksFor: { "@id": orgId(origin) },
       },
@@ -513,7 +513,7 @@ export function howWePickGraph(origin: string) {
       name: "Listing Guidelines & Editorial Policy | PickMacApps",
       url: absoluteUrl(origin, path),
       description:
-        "PickMacApps is a curated directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.",
+        "PickMacApps is a hand-picked directory of beautifully designed macOS apps. Review our editorial policy, review criteria, and listing guidelines.",
     },
   ]);
 }
