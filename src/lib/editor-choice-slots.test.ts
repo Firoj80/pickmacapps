@@ -22,9 +22,9 @@ test("getNextCycleLabel returns the 30-day rollover date", () => {
   assert.equal(labelNov, "1 Dec");
 });
 
-test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is strictly 3 per tier", () => {
-  assert.equal(MAX_EDITOR_CHOICE_SLOTS, 6);
-  assert.equal(MAX_TIER_SLOTS, 3);
+test("MAX_EDITOR_CHOICE_SLOTS is strictly 12 and MAX_TIER_SLOTS is strictly 6 per tier", () => {
+  assert.equal(MAX_EDITOR_CHOICE_SLOTS, 12);
+  assert.equal(MAX_TIER_SLOTS, 6);
   assert.equal(MAX_TIER_SLOTS * 2, MAX_EDITOR_CHOICE_SLOTS);
 });
 
@@ -56,13 +56,13 @@ test("appPriorityWeight places Hot apps directly below Gold and Blue featured ap
   assert.ok(appPriorityWeight(hotApp) > appPriorityWeight(standardApp));
 });
 
-test("getHeroAppIcons returns strictly paid apps when 6 or more are available", () => {
-  const paidApps: AppItem[] = Array.from({ length: 7 }, (_, i) => ({
+test("getHeroAppIcons returns strictly paid apps when 12 or more are available", () => {
+  const paidApps: AppItem[] = Array.from({ length: 14 }, (_, i) => ({
     id: `paid-${i}`,
     slug: `paid-${i}`,
     name: `Paid App ${i}`,
     editorChoice: true,
-    featuredTier: i < 3 ? "article" : "featured",
+    featuredTier: i < 6 ? "article" : "featured",
     isHot: false,
     createdAt: "2026-11-01",
   } as AppItem));
@@ -76,14 +76,14 @@ test("getHeroAppIcons returns strictly paid apps when 6 or more are available", 
     createdAt: "2026-11-02",
   } as AppItem));
 
-  const result = getHeroAppIcons([...hotApps, ...paidApps], 6);
-  assert.equal(result.length, 6);
+  const result = getHeroAppIcons([...hotApps, ...paidApps], 12);
+  assert.equal(result.length, 12);
   assert.ok(result.every((app) => app.editorChoice));
-  // Hot apps must NOT be toggled when 6 paid apps are available
+  // Hot apps must NOT be toggled when 12 paid apps are available
   assert.ok(result.every((app) => !app.slug.startsWith("hot-")));
 });
 
-test("getHeroAppIcons toggles on top hot apps when fewer than 6 paid apps are available", () => {
+test("getHeroAppIcons toggles on top hot apps when fewer than 12 paid apps are available", () => {
   const paidApps: AppItem[] = [
     { id: "paid-1", slug: "paid-1", name: "Paid Gold", editorChoice: true, featuredTier: "article", createdAt: "2026-10-01" } as AppItem,
     { id: "paid-2", slug: "paid-2", name: "Paid Blue", editorChoice: true, featuredTier: "featured", createdAt: "2026-10-02" } as AppItem,
@@ -110,6 +110,34 @@ test("getHeroAppIcons toggles on top hot apps when fewer than 6 paid apps are av
   // hot-3 (newer) and standardApp must NOT be in the hero
   assert.equal(result.some((a) => a.slug === "hot-3"), false);
   assert.equal(result.some((a) => a.slug === "std-1"), false);
+});
+
+test("getHeroAppIcons auto-fills up to default 12 slots combining paid and hot apps", () => {
+  const paidApps: AppItem[] = Array.from({ length: 4 }, (_, i) => ({
+    id: `paid-${i}`,
+    slug: `paid-${i}`,
+    name: `Paid App ${i}`,
+    editorChoice: true,
+    featuredTier: i < 2 ? "article" : "featured",
+    isHot: false,
+    createdAt: "2026-11-01",
+  } as AppItem));
+  const hotApps: AppItem[] = Array.from({ length: 10 }, (_, i) => ({
+    id: `hot-${i}`,
+    slug: `hot-${i}`,
+    name: `Hot App ${i}`,
+    editorChoice: false,
+    isHot: true,
+    views7d: 100 - i,
+    createdAt: `2026-10-${String(i + 1).padStart(2, "0")}`,
+  } as AppItem));
+
+  const result = getHeroAppIcons([...hotApps, ...paidApps]);
+  assert.equal(result.length, 12);
+  // First 4 must be the paid apps
+  assert.ok(result.slice(0, 4).every((a) => a.editorChoice));
+  // Next 8 must be hot apps
+  assert.ok(result.slice(4).every((a) => a.isHot));
 });
 
 test("getHeroAppIcons avoids duplicating apps if an app is both paid and hot", () => {

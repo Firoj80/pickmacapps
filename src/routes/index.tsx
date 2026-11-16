@@ -134,19 +134,24 @@ export const Route = createFileRoute("/")({
 
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
-  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (max 6 apps)
-  const shown = apps.slice(0, 6);
+  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (auto-arranged up to 12 apps)
+  const shown = apps.slice(0, 12);
   const count = shown.length;
   const mid = (count - 1) / 2;
 
+  // Dynamic overlap: as icon count increases from 6 up to 12, smoothly adjust overlap so they always fit comfortably
+  // At 6 icons: -14px overlap. At 12 icons: -24px overlap.
+  const overlap = count <= 6 ? -14 : Math.round(-14 - ((count - 6) / 6) * 10);
+
   return (
-    <div className="relative flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-2">
+    <div className="relative flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-1">
       <div className="flex items-center justify-center">
         {shown.map((app, index) => {
           const offset = index - mid;
-          // Arc calculation: lift center up, curve down on sides
-          const translateY = Math.pow(Math.abs(offset), 1.35) * 4;
-          const rotate = offset * 4.5;
+          const normalized = mid > 0 ? offset / mid : 0;
+          // Smooth parabolic arc curve: center icons lifted higher, outward icons lower
+          const translateY = Math.pow(Math.abs(normalized), 1.35) * (count > 6 ? 11 : 9);
+          const rotate = normalized * (count > 6 ? 14 : 11);
           const zIndex = Math.round(50 - Math.abs(offset) * 2);
           const isHot = Boolean(app.isHot && !isEditorChoice(app));
 
@@ -158,12 +163,12 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
               title={isHot ? `${app.name} 🔥 Hot` : app.name}
               style={{
                 zIndex,
-                marginLeft: index === 0 ? 0 : -14,
+                marginLeft: index === 0 ? 0 : overlap,
                 transform: `translateY(${translateY}px) rotate(${rotate}deg)`,
               }}
-              className="group relative h-13 w-13 shrink-0 rounded-[16px] bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.14)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2 hover:!rotate-0 hover:scale-110 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)] sm:h-15 sm:w-15 sm:rounded-[18px]"
+              className="group relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-[15px] sm:rounded-[17px] bg-surface shadow-[0_8px_20px_rgba(0,0,0,0.14)] ring-2 ring-line transition-all duration-200 hover:!z-[99] hover:!-translate-y-2.5 hover:!rotate-0 hover:scale-115 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)]"
             >
-              <div className="h-full w-full overflow-hidden rounded-[16px] sm:rounded-[18px]">
+              <div className="h-full w-full overflow-hidden rounded-[15px] sm:rounded-[17px]">
                 <img
                   alt={app.name}
                   src={appIconUrl(app.icon)}
@@ -185,7 +190,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                 <span
                   title="Hot App"
                   aria-label="Hot App"
-                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-rose-600 text-[10px] shadow-md ring-1.5 ring-surface"
+                  className="absolute -top-1 -right-1 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-rose-600 text-[9px] shadow-md ring-1.5 ring-surface"
                 >
                   🔥
                 </span>
@@ -289,7 +294,7 @@ function Home() {
             {/* Desktop: App Icons Arc strictly side-by-side with Black Friday Countdown */}
             <div className="hidden sm:flex items-center gap-4 lg:gap-6 mt-4">
               <div className="shrink-0">
-                <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+                <ChoiceIcons apps={getHeroAppIcons(list, 12)} />
               </div>
               <div className="shrink-0">
                 <BlackFridayCountdown />

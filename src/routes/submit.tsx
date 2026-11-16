@@ -186,16 +186,16 @@ function SubmitPage() {
   );
 
   const featuredSlots = offer.featuredSlots ?? {
-    total: 3,
+    total: 6,
     active: 0,
-    remaining: 3,
+    remaining: 6,
     isFull: false,
     nextDate: offer.slots?.nextDate ?? "30 days",
   };
   const articleSlots = offer.articleSlots ?? {
-    total: 3,
+    total: 6,
     active: 0,
-    remaining: 3,
+    remaining: 6,
     isFull: false,
     nextDate: offer.slots?.nextDate ?? "30 days",
   };

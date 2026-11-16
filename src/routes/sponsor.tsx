@@ -106,7 +106,7 @@ function SponsorPage() {
 
         <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px]">
           Get immediate visibility, high-intent traffic, and trusted editorial placement on PickMacApps. 
-          Limited to only 6 featured hero slots at a time.
+          Limited to only 12 featured hero slots at a time.
         </p>
 
         {/* Live Metrics Bar */}
@@ -116,7 +116,7 @@ function SponsorPage() {
             <p className="text-[11px] sm:text-[12px] text-muted">Review turnaround</p>
           </div>
           <div className="border-x border-line px-1 sm:px-2">
-            <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 6</p>
+            <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 12</p>
             <p className="text-[11px] sm:text-[12px] text-muted">Hero spots capped</p>
           </div>
           <div>
@@ -319,7 +319,7 @@ function SponsorPage() {
               Yes! Through Dodo Payments Adaptive Currency checkout, your payment is processed directly in your local currency. You can select your preferred currency above or pay in your native currency with localized payment methods supported worldwide (UPI/Cards in India, iDEAL/SEPA in Europe, Apple Pay, Google Pay, and international credit cards).
             </Faq>
             <Faq q="How long does the hero spotlight last?">
-              Featured apps hold the top hero spot and featured placement across the directory for a full 30 days, capped at 6 active apps to ensure each sponsor receives prime visibility. After 30 days, your app stays listed permanently in the directory.
+              Featured apps hold the top hero spot and featured placement across the directory for a full 30 days, capped at 12 active apps to ensure each sponsor receives prime visibility. After 30 days, your app stays listed permanently in the directory.
             </Faq>
           </div>
         </div>

@@ -181,12 +181,12 @@ export function appPriorityWeight(app: AppItem): number {
 }
 
 /**
- * Hero app icons logic for homepage hero section (capped at 6 apps):
+ * Hero app icons logic for homepage hero section (capped at max 12 apps):
  * Priority 1: Paid apps (Editor's Choice, sorted by featuredTier weight: Gold article first, then Blue featured).
- * If 6 paid apps are NOT available, then toggle/include the top Hot apps (isHot: true) to fill the remaining slots up to 6.
- * If 6 paid apps ARE available, only the paid apps are shown (no hot apps toggled).
+ * If 12 paid apps are NOT available, then toggle/include the top Hot apps (isHot: true) to fill the remaining slots up to max.
+ * If 12 paid apps ARE available, only the paid apps are shown (no hot apps toggled).
  */
-export function getHeroAppIcons(list: readonly AppItem[], max = 6): AppItem[] {
+export function getHeroAppIcons(list: readonly AppItem[], max = 12): AppItem[] {
   const paidApps = [...list.filter((app) => isEditorChoice(app))].sort((a, b) => {
     const wDiff = featuredTierWeight(b) - featuredTierWeight(a);
     if (wDiff !== 0) return wDiff;
@@ -195,12 +195,12 @@ export function getHeroAppIcons(list: readonly AppItem[], max = 6): AppItem[] {
     return timeA - timeB || a.name.localeCompare(b.name);
   });
 
-  // If 6 or more paid apps are available, use strictly the paid apps
+  // If max or more paid apps are available, use strictly the paid apps
   if (paidApps.length >= max) {
     return paidApps.slice(0, max);
   }
 
-  // If 6 paid apps are not available, toggle on the top hot apps to fill the remaining slots
+  // If max paid apps are not available, toggle on the top hot apps to fill the remaining slots
   const remainingSlots = max - paidApps.length;
   const paidSlugs = new Set(paidApps.map((a) => a.slug));
 
