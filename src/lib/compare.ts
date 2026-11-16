@@ -30,11 +30,25 @@ function pairSlug(left: string, right: string) {
   return `${a}-vs-${b}`;
 }
 
+const comparePairsCache = new WeakMap<object, ComparePair[]>();
+let staticComparePairsCache: ComparePair[] | null = null;
+
+export function invalidateComparePairsCache() {
+  staticComparePairsCache = null;
+}
+
 /**
  * The only gate for comparison pages. Routes, the sitemap, the hub, and
  * related links all call this. Guides outside the size range are not a source.
  */
 export function comparePairs(source?: { apps: AppItem[]; posts: Post[] }): ComparePair[] {
+  if (source && comparePairsCache.has(source)) {
+    return comparePairsCache.get(source)!;
+  }
+  if (!source && staticComparePairsCache) {
+    return staticComparePairsCache;
+  }
+
   const list = source?.apps ?? apps;
   const guideList = source?.posts ?? posts;
   const found = new Map<string, { left: AppItem; right: AppItem; guides: Post[]; groupSize: number }>();
@@ -71,6 +85,13 @@ export function comparePairs(source?: { apps: AppItem[]; posts: Post[] }): Compa
     kept.push({ slug, left: item.left, right: item.right, guides: item.guides, groupSize: item.groupSize });
   }
   kept.sort((a, b) => a.slug.localeCompare(b.slug));
+
+  if (source) {
+    comparePairsCache.set(source, kept);
+  } else {
+    staticComparePairsCache = kept;
+  }
+
   return kept;
 }
 

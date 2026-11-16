@@ -438,6 +438,15 @@ export function cleanXHandle(raw: string): string {
   return handle ? `@${handle}` : "";
 }
 
+const metadataCache = new Map<string, { result: FetchMetadataResult; timestamp: number }>();
+const METADATA_CACHE_TTL_MS = 15 * 60 * 1000; // 15 minutes cache for fetched app metadata
+const MAX_METADATA_CACHE_SIZE = 100;
+
+export function invalidateMetadataCache(url?: string) {
+  if (url) metadataCache.delete(url.toLowerCase());
+  else metadataCache.clear();
+}
+
 export async function fetchAppMetadata(rawUrl: string): Promise<FetchMetadataResult> {
   let targetUrl = rawUrl.trim();
   if (!targetUrl) {
@@ -454,6 +463,12 @@ export async function fetchAppMetadata(rawUrl: string): Promise<FetchMetadataRes
       ok: false,
       error: "Please enter a valid, public website URL (e.g. https://yourapp.com). Local and internal IPs are not permitted.",
     };
+  }
+
+  const cacheKey = validatedUrl.href.toLowerCase();
+  const cached = metadataCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < METADATA_CACHE_TTL_MS) {
+    return cached.result;
   }
 
   try {
@@ -490,11 +505,19 @@ export async function fetchAppMetadata(rawUrl: string): Promise<FetchMetadataRes
 
     const parsed = parseAppMetadataFromHtml(html, response.url || validatedUrl.href);
 
-    return {
+    const result: FetchMetadataResult = {
       ok: true,
       data: parsed,
       message: "App details successfully fetched from website! Please review and customize before submitting.",
     };
+
+    if (metadataCache.size >= MAX_METADATA_CACHE_SIZE) {
+      const oldestKey = metadataCache.keys().next().value;
+      if (oldestKey) metadataCache.delete(oldestKey);
+    }
+    metadataCache.set(cacheKey, { result, timestamp: Date.now() });
+
+    return result;
   } catch (err: unknown) {
     const isTimeout =
       (err && typeof err === "object" && "name" in err && err.name === "TimeoutError") ||

@@ -384,57 +384,87 @@ export async function directorySql() {
   return sql;
 }
 
-export async function publishedDirectory() {
+export type PublishedDirectory = {
+  apps: AppItem[];
+  posts: Post[];
+  editors: string[];
+  categories: ShelfCategory[];
+  tombstones: { slug: string; name?: string; category?: string }[];
+};
+
+let cachedDirectory: { data: PublishedDirectory; timestamp: number } | null = null;
+const DIRECTORY_SERVER_CACHE_TTL_MS = 60 * 1000; // 60 seconds server-side in-memory cache
+
+export function invalidatePublishedDirectoryCache() {
+  cachedDirectory = null;
+}
+
+export async function publishedDirectory(): Promise<PublishedDirectory> {
+  if (cachedDirectory && Date.now() - cachedDirectory.timestamp < DIRECTORY_SERVER_CACHE_TTL_MS) {
+    return cachedDirectory.data;
+  }
+
   try {
     const sql = await directorySql();
-    const appRows = await sql.query<AppRow>(
-      `select a.*, 0 as views_7d
-       from apps a
-       where a.status = 'published'
-       order by a.created_at asc, a.name asc`,
-    );
-    const guideRows = await sql.query<GuideRow>("select * from guides where status = 'published' order by date desc");
+    // Run all 4 queries concurrently on Postgres
+    const [appRows, guideRows, categoryRowsResult, tombRowsResult] = await Promise.all([
+      sql.query<AppRow>(
+        `select a.*, 0 as views_7d
+         from apps a
+         where a.status = 'published'
+         order by a.created_at asc, a.name asc`,
+      ),
+      sql.query<GuideRow>("select * from guides where status = 'published' order by date desc"),
+      sql
+        .query<{
+          slug: string;
+          name: string;
+          emoji: string;
+          paragraphs: unknown;
+          tips: unknown;
+        }>("select slug, name, emoji, paragraphs, tips from categories order by sort_order asc, name asc")
+        .catch((err) => {
+          console.error("published categories failed:", err);
+          return [];
+        }),
+      sql
+        .query<{ slug: string; name: string | null; category: string | null }>(
+          "select slug, name, category from app_tombstones",
+        )
+        .catch((err) => {
+          console.error("published tombstones failed:", err);
+          return [];
+        }),
+    ]);
+
     const apps = appRows.map(toApp);
-    let categories: ShelfCategory[] = [];
-    try {
-      const categoryRows = await sql.query<{
-        slug: string;
-        name: string;
-        emoji: string;
-        paragraphs: unknown;
-        tips: unknown;
-      }>("select slug, name, emoji, paragraphs, tips from categories order by sort_order asc, name asc");
-      categories = categoryRows.map((row) => ({
-        slug: row.slug,
-        name: row.name,
-        emoji: row.emoji,
-        paragraphs: asStringList(row.paragraphs),
-        tips: asStringList(row.tips),
-        faqs: findShelfCategory(row.slug)?.faqs ?? [],
-      }));
-    } catch (err) {
-      console.error("published categories failed:", err);
-    }
-    let tombstones: { slug: string; name?: string; category?: string }[] = [];
-    try {
-      const tombRows = await sql.query<{ slug: string; name: string | null; category: string | null }>(
-        "select slug, name, category from app_tombstones",
-      );
-      tombstones = tombRows.map((r) => ({
-        slug: r.slug,
-        name: r.name || undefined,
-        category: r.category || undefined,
-      }));
-    } catch (err) {
-      console.error("published tombstones failed:", err);
-    }
-    return {
+    const categories: ShelfCategory[] = categoryRowsResult.length
+      ? categoryRowsResult.map((row) => ({
+          slug: row.slug,
+          name: row.name,
+          emoji: row.emoji,
+          paragraphs: asStringList(row.paragraphs),
+          tips: asStringList(row.tips),
+          faqs: findShelfCategory(row.slug)?.faqs ?? [],
+        }))
+      : shelfCategories;
+
+    const tombstones: { slug: string; name?: string; category?: string }[] = tombRowsResult.map((r) => ({
+      slug: r.slug,
+      name: r.name || undefined,
+      category: r.category || undefined,
+    }));
+
+    const result: PublishedDirectory = {
       apps,
       posts: guideRows.map(toPost),
       editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
       categories,
       tombstones,
     };
+
+    cachedDirectory = { data: result, timestamp: Date.now() };
+    return result;
   } catch (err) {
     console.error("[directory] publishedDirectory DB query failed, using static fallback:", err);
     const seedApps = (raw.apps as unknown as AppItem[]).map((app) => ({
@@ -861,6 +891,7 @@ export async function toggleAppHot(id: string) {
     "update apps set is_hot = $1, hot_marked_at = case when $1 then now() else null end, updated_at = now() where id = $2",
     [nextHot, id],
   );
+  invalidatePublishedDirectoryCache();
   await audit(sql, nextHot ? "mark_hot" : "unmark_hot", id, `Hot set to ${nextHot}`);
   return { id, isHot: nextHot };
 }
@@ -870,6 +901,7 @@ export async function publishAllUnpublishedApps() {
   const res = await sql.query<{ id: string }>(
     "update apps set status = 'published', updated_at = now() where status = 'unpublished' or status = 'pending' returning id",
   );
+  invalidatePublishedDirectoryCache();
   await audit(sql, "publish_all", "apps", `Published ${res.length} unpublished/pending apps`);
   return res.length;
 }
@@ -953,6 +985,7 @@ export async function createAdminApp(input: {
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
   invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
   await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
 
   await notifyTelegramAdminAppCreated({
@@ -1104,6 +1137,7 @@ export async function saveApp(input: {
     ],
   );
   invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
   await audit(sql, "save-app", input.slug, status);
 }
 
@@ -1156,6 +1190,7 @@ export async function deleteApp(id: string) {
     console.error("app tombstone failed:", err);
   }
   invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
   await audit(sql, "delete-app", row.slug);
 }
 
@@ -1208,6 +1243,7 @@ export async function saveGuide(input: {
     );
     if (!updated.length) throw new Error("Guide not found");
   }
+  invalidatePublishedDirectoryCache();
   await audit(sql, "save-guide", slug, status);
   return slug;
 }
@@ -1215,6 +1251,7 @@ export async function saveGuide(input: {
 export async function deleteGuide(slug: string) {
   const sql = await directorySql();
   await sql.query("delete from guides where slug = $1", [slug]);
+  invalidatePublishedDirectoryCache();
   await audit(sql, "delete-guide", slug);
 }
 
@@ -1800,6 +1837,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     await sql.query("delete from app_tombstones where slug = $1", [existingApp.slug]);
     await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, existingApp.id]);
     invalidatePublicOfferCache();
+    invalidatePublishedDirectoryCache();
     await audit(sql, isChoice ? "upgrade_sponsor" : "update_app", existingApp.slug, submission.plan);
     return {
       id: existingApp.id,
@@ -1852,6 +1890,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
   invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
   await audit(sql, "approve", slug, submission.plan);
   return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier, dashboardToken };
 }
@@ -1937,6 +1976,7 @@ export async function expireOldHotApps(): Promise<number> {
      returning id`,
   );
   if (rows.length > 0) {
+    invalidatePublishedDirectoryCache();
     await audit(sql, "expire_hot", `${rows.length} apps`, `Expired hot tags older than ${HOT_APP_DURATION_DAYS} days`);
   }
   return rows.length;
@@ -2178,6 +2218,7 @@ export async function updateAppByToken(
       current.id,
     ],
   );
+  invalidatePublishedDirectoryCache();
   await audit(sql, "dashboard_edit", current.id, `Submitter edited listing via dashboard`);
   return true;
 }
@@ -2191,20 +2232,33 @@ export type UpvoteSettings = {
   hotThreshold: number;
 };
 
+let cachedUpvoteSettings: { data: UpvoteSettings; timestamp: number } | null = null;
+const UPVOTE_SETTINGS_CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes in-memory cache
+
+export function invalidateUpvoteSettingsCache() {
+  cachedUpvoteSettings = null;
+}
+
 export async function getUpvoteSettings(): Promise<UpvoteSettings> {
+  if (cachedUpvoteSettings && Date.now() - cachedUpvoteSettings.timestamp < UPVOTE_SETTINGS_CACHE_TTL_MS) {
+    return cachedUpvoteSettings.data;
+  }
   const sql = await directorySql();
   const rows = await sql.query<{ key: string; value: string }>(
     "select key, value from settings where key in ('upvotes_enabled', 'upvote_auto_hot_enabled', 'upvote_hot_threshold')",
   );
   const map = Object.fromEntries(rows.map((r) => [r.key, r.value]));
-  return {
+  const result: UpvoteSettings = {
     upvotesEnabled: map.upvotes_enabled === undefined ? true : asBool(map.upvotes_enabled),
     autoHotEnabled: map.upvote_auto_hot_enabled === undefined ? true : asBool(map.upvote_auto_hot_enabled),
     hotThreshold: Number(map.upvote_hot_threshold ?? 15) || 15,
   };
+  cachedUpvoteSettings = { data: result, timestamp: Date.now() };
+  return result;
 }
 
 export async function updateUpvoteSettings(settings: Partial<UpvoteSettings>): Promise<void> {
+  invalidateUpvoteSettingsCache();
   const sql = await directorySql();
   if (settings.upvotesEnabled !== undefined) {
     await sql.query(
@@ -2278,6 +2332,7 @@ export async function submitAppUpvote(appId: string, fingerprint: string): Promi
       "update apps set is_hot = true, hot_marked_at = now(), updated_at = now() where id = $1",
       [appId],
     );
+    invalidatePublishedDirectoryCache();
     await audit(sql, "auto_promote_hot", appId, `Auto-promoted to Hot via ${newCount} upvotes (threshold: ${settings.hotThreshold})`);
     promotedToHot = true;
   }
@@ -2305,6 +2360,7 @@ export async function promoteEligibleUpvotedApps(): Promise<number> {
     [settings.hotThreshold],
   );
   if (rows.length > 0) {
+    invalidatePublishedDirectoryCache();
     await audit(sql, "cron_promote_hot", `${rows.length} apps`, `Promoted to hot via upvotes cron (threshold: ${settings.hotThreshold})`);
   }
   return rows.length;

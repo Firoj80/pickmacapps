@@ -52,11 +52,27 @@ export function hasPickMacAppsBadge(html: string): boolean {
   return hasBacklink || hasBadgeAsset;
 }
 
+const badgeCheckCache = new Map<string, { result: { ok: boolean; message: string }; timestamp: number }>();
+const BADGE_CHECK_CACHE_TTL_MS = 2 * 60 * 1000; // 2 minutes in-memory cache
+const MAX_BADGE_CACHE_SIZE = 100;
+
+export function invalidateBadgeCheckCache(url?: string) {
+  if (url) badgeCheckCache.delete(url.toLowerCase());
+  else badgeCheckCache.clear();
+}
+
 export async function checkBadgeOnPage(value: string) {
   const url = publicUrl(value.trim());
   if (!url) {
     return { ok: false, message: "Enter a public website URL, including https://" };
   }
+
+  const cacheKey = url.href.toLowerCase();
+  const cached = badgeCheckCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < BADGE_CHECK_CACHE_TTL_MS) {
+    return cached.result;
+  }
+
   try {
     const response = await fetch(url, {
       redirect: "follow",
@@ -71,10 +87,17 @@ export async function checkBadgeOnPage(value: string) {
     }
     const html = (await response.text()).slice(0, 1_500_000);
     const found = hasPickMacAppsBadge(html);
-    if (!found) {
-      return { ok: false, message: "We couldn't find the PickMacApps badge or reciprocal link on that page yet." };
+    const result = !found
+      ? { ok: false, message: "We couldn't find the PickMacApps badge or reciprocal link on that page yet." }
+      : { ok: true, message: "Badge found. You can submit your app." };
+
+    if (badgeCheckCache.size >= MAX_BADGE_CACHE_SIZE) {
+      const oldestKey = badgeCheckCache.keys().next().value;
+      if (oldestKey) badgeCheckCache.delete(oldestKey);
     }
-    return { ok: true, message: "Badge found. You can submit your app." };
+    badgeCheckCache.set(cacheKey, { result, timestamp: Date.now() });
+
+    return result;
   } catch {
     return { ok: false, message: "We couldn't reach that page. Check the URL and try again." };
   }
