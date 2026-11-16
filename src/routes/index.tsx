@@ -266,7 +266,7 @@ function Home() {
         </section>
       ) : (
         /* Hero Section matching macapp.supply (only shown on root homepage) */
-        <section className="px-5 md:px-8 xl:px-10 pt-10 pb-8 md:pt-14 md:pb-12 lg:pt-14">
+        <section className="px-5 md:px-8 xl:px-10 pt-8 sm:pt-10 md:pt-14 pb-2.5 sm:pb-6 md:pb-10">
           <div className="max-w-4xl">
             <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[46px] md:text-[54px] xl:text-[60px]">
               A hand-picked shelf of{" "}
@@ -276,12 +276,12 @@ function Home() {
               </span>
               macOS apps.
             </h1>
-            <p className="mt-3.5 text-[15px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
+            <p className="mt-3 text-[14px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
               Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
             </p>
 
             {/* App Icons Arc */}
-            <div className="mt-4 flex items-center">
+            <div className="mt-3.5 sm:mt-4 flex items-center">
               <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
             </div>
 
@@ -291,16 +291,16 @@ function Home() {
           </div>
 
           {/* Running Banner Style Leaderboard (Top Apps) */}
-          <div className="w-full mt-6 sm:mt-8">
+          <div className="w-full mt-4 sm:mt-6 md:mt-8">
             <LeaderboardBanner apps={list} />
           </div>
         </section>
       )}
 
       {/* Direct Apps Grid */}
-      <div className="w-full px-5 md:px-8 xl:px-10 py-6">
+      <div className="w-full px-5 md:px-8 xl:px-10 pt-1 sm:pt-3 md:pt-6 pb-6">
         {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) */}
-        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 pb-4">
+        <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
           <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
             {/* Featured */}
             <Link

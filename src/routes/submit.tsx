@@ -59,32 +59,40 @@ const checks = [
 
 const testimonials = [
   {
-    quote: "I liked this idea of sharing Mac Apps made by indie hackers so I've submitted my one to be listed here 😊",
-    name: "Paweł Karniej",
-    role: "Indie Mac App Developer",
-    initials: "PK",
+    quote: "I liked this idea of sharing Mac Apps made by indie hackers so I've submitted Photsy to be listed here 😊",
+    name: "Shravan",
+    xHandle: "shrav_10",
+    role: "Founder, Photsy",
+    initials: "SH",
     avatarBg: "bg-indigo-600",
+    avatarUrl: "https://unavatar.io/x/shrav_10",
   },
   {
-    quote: "Looks solid! Thanks for including LocalCan 💜",
-    name: "Jarek",
-    role: "Founder, LocalCan",
-    initials: "JK",
+    quote: "Looks solid! Thanks for including Shedi 💜",
+    name: "Abdiraimov",
+    xHandle: "abdiraimov_",
+    role: "Founder, Shedi",
+    initials: "AB",
     avatarBg: "bg-purple-600",
+    avatarUrl: "https://unavatar.io/x/abdiraimov_",
   },
   {
-    quote: "Thanks for including both Klack and Alcove!",
-    name: "Henrik",
-    role: "Founder, Klack & Alcove",
-    initials: "HA",
+    quote: "Thanks for including both Notchy and Peekaboo!",
+    name: "Vishva Variya",
+    xHandle: "vishvavariya",
+    role: "Founder, Notchy & Peekaboo",
+    initials: "VV",
     avatarBg: "bg-emerald-600",
+    avatarUrl: "https://unavatar.io/x/vishvavariya",
   },
   {
-    quote: "great to see lookaway in the list! thank you for including it",
-    name: "kush",
-    role: "Founder, Lookaway",
-    initials: "KL",
+    quote: "great to see Hoply in the list! thank you for including it",
+    name: "Milos",
+    xHandle: "milos5611",
+    role: "Founder, Hoply",
+    initials: "MI",
     avatarBg: "bg-amber-600",
+    avatarUrl: "https://unavatar.io/x/milos5611",
   },
 ];
 
@@ -804,14 +812,46 @@ function SubmitPage() {
                       {t.quote}
                     </p>
                     <div className="mt-4 flex items-center gap-3">
-                      <div
-                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold text-white shadow-2xs ${t.avatarBg}`}
-                      >
-                        {t.initials}
+                      <div className="relative h-9 w-9 shrink-0">
+                        <div
+                          className={`flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-white shadow-2xs ${t.avatarBg}`}
+                        >
+                          {t.initials}
+                        </div>
+                        {t.avatarUrl && (
+                          <img
+                            src={t.avatarUrl}
+                            alt={t.name}
+                            loading="lazy"
+                            decoding="async"
+                            width={36}
+                            height={36}
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = "none";
+                            }}
+                            className="absolute inset-0 h-9 w-9 rounded-full object-cover ring-1 ring-line/80 shadow-2xs"
+                          />
+                        )}
                       </div>
                       <div className="min-w-0">
-                        <div className="text-xs sm:text-sm font-semibold text-ink leading-tight">
-                          {t.name}
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <span className="text-xs sm:text-sm font-semibold text-ink leading-tight">
+                            {t.name}
+                          </span>
+                          {t.xHandle && (
+                            <a
+                              href={`https://x.com/${t.xHandle}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[11px] font-medium text-accent hover:underline inline-flex items-center gap-0.5"
+                            >
+                              <span>@{t.xHandle}</span>
+                              <svg className="h-2.5 w-2.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M7 17L17 7" />
+                                <path d="M8 7h9v9" />
+                              </svg>
+                            </a>
+                          )}
                         </div>
                         <div className="text-[11px] text-muted mt-0.5">{t.role}</div>
                       </div>
