@@ -45,20 +45,6 @@ export function SiteHeader({ onOpenSearch }: { onOpenSearch?: () => void }) {
 
           {/* Action Controls */}
           <div className="flex shrink-0 items-center gap-2">
-            {onOpenSearch && (
-              <button
-                type="button"
-                onClick={onOpenSearch}
-                className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-surface text-muted hover:text-ink cursor-pointer"
-                aria-label="Search apps"
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8" />
-                  <path d="m21 21-4.3-4.3" />
-                </svg>
-              </button>
-            )}
-
             <HeaderThemeToggle />
 
             <Link
