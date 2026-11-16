@@ -7,15 +7,44 @@
   ],
   "redirects": [
     {
-      "source": "/:path*",
+      "source": "/",
       "has": [
         {
           "type": "host",
           "value": "www.pickmacapps.store"
         }
       ],
-      "destination": "https://pickmacapps.store/:path*",
+      "destination": "https://pickmacapps.store/",
       "permanent": true
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "www.pickmacapps.store"
+        }
+      ],
+      "destination": "https://pickmacapps.store/$1",
+      "permanent": true
+    }
+  ],
+  "headers": [
+    {
+      "source": "/_serverFn/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, *" }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        { "key": "Access-Control-Allow-Origin", "value": "*" },
+        { "key": "Access-Control-Allow-Methods", "value": "GET, POST, OPTIONS" },
+        { "key": "Access-Control-Allow-Headers", "value": "Content-Type, Authorization, *" }
+      ]
     }
   ]
 }

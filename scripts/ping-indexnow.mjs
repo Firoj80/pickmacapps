@@ -1,7 +1,7 @@
 import { sectionUrls, SITEMAP_SECTIONS } from "../src/lib/sitemap.ts";
 import { indexNowKey } from "../src/lib/indexnow.ts";
 
-const origin = "https://www.pickmacapps.store";
+const origin = "https://pickmacapps.store";
 const key = indexNowKey() || "e4d7a8c392f1b0a56e8d2c1f9b3a7e50";
 
 const urls = [];
@@ -12,7 +12,7 @@ for (const section of SITEMAP_SECTIONS) {
 }
 
 const payload = {
-  host: "www.pickmacapps.store",
+  host: "pickmacapps.store",
   key,
   keyLocation: `${origin}/${key}.txt`,
   urlList: [...new Set(urls)],

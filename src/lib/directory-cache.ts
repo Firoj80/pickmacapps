@@ -61,6 +61,8 @@ export function isChunkOrSkewError(error: unknown): boolean {
       : "";
   if (!msg) return false;
   return (
+    /Failed to fetch/i.test(msg) ||
+    /NetworkError/i.test(msg) ||
     /Failed to fetch dynamically imported module/i.test(msg) ||
     /Importing a module script failed/i.test(msg) ||
     /error loading dynamically imported module/i.test(msg) ||

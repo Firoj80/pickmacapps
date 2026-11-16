@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { createRootRoute, HeadContent, Outlet, Scripts, useRouterState } from "@tanstack/react-router";
 import { AuthProvider } from "@/lib/auth/provider";
+import { AppErrorComponent } from "@/lib/error-component";
 import { Missing } from "@/components/missing";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -20,10 +21,16 @@ export { invalidateDirectoryCache };
 // --- Origin cache ---
 function getCachedOrigin(): string | Promise<string> {
   if (typeof window !== "undefined") {
-    return window.location.origin || PRIMARY_ORIGIN;
+    const origin = window.location.origin;
+    if (origin && origin.includes("www.pickmacapps.store")) {
+      return PRIMARY_ORIGIN;
+    }
+    return origin || PRIMARY_ORIGIN;
   }
   return fetchSiteOrigin().catch(() => PRIMARY_ORIGIN);
 }
+
+const CANONICAL_GUARD = `(function(){try{if(window.location.hostname==="www.pickmacapps.store"){window.location.replace("https://pickmacapps.store"+window.location.pathname+window.location.search+window.location.hash)}}catch(e){}})()`;
 
 const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var adm=/^\\/admin(\\/|$)/.test(location.pathname);var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";var dark=!adm&&(t==="dark"||(t==="system"&&m.matches));d.dataset.theme=adm?"light":t;d.classList.toggle("dark",dark);var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content",dark?"#08090a":"#ffffff")}a();m.addEventListener("change",a)}catch(e){}})()`;
 
@@ -80,6 +87,11 @@ function Frame() {
 
 export const Route = createRootRoute({
   beforeLoad: async ({ context, location }) => {
+    // Immediate client-side redirect if on www subdomain
+    if (typeof window !== "undefined" && window.location.hostname === "www.pickmacapps.store") {
+      window.location.replace("https://pickmacapps.store" + window.location.pathname + window.location.search + window.location.hash);
+      return { origin: PRIMARY_ORIGIN, directory: null };
+    }
     // For admin pages, resolve instantly without querying public directory
     if (location.pathname.startsWith("/admin")) {
       return { origin: "", directory: null };
@@ -91,6 +103,7 @@ export const Route = createRootRoute({
     const directory = directoryOrPromise instanceof Promise ? await directoryOrPromise : directoryOrPromise;
     return { origin, directory };
   },
+  errorComponent: AppErrorComponent,
   notFoundComponent: () => (
     <Missing title="Page not found" body="That page isn't part of the directory." />
   ),
@@ -150,6 +163,7 @@ export const Route = createRootRoute({
         ...(missingMeta?.links ?? []),
       ],
       scripts: [
+        { children: CANONICAL_GUARD },
         { children: TSR_FALLBACK_GUARD },
         { children: THEME_SCRIPT },
         ...(!isAdminRoute
