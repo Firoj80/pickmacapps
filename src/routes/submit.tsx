@@ -116,11 +116,11 @@ function SubmitPage() {
     nextDate: offer.slots?.nextDate ?? "30 days",
   };
 
-  // Default to Editor's Choice ("featured") matching macapp.supply/submit design
+  // Default to Free listing (first pill) unless specific tier specified
   const [selectedPlan, setSelectedPlan] = useState<"featured" | "free" | "article">(() => {
     if (tier === "article" && !articleSlots.isFull) return "article";
-    if (tier === "free") return "free";
-    return "featured";
+    if (tier === "featured") return "featured";
+    return "free";
   });
 
   const isPaid = selectedPlan === "featured" || selectedPlan === "article";
@@ -165,7 +165,12 @@ function SubmitPage() {
     tier?: string | null;
   } | null>(null);
 
-  const currentPrice = selectedPlan === "article" ? articlePrice : featuredPrice;
+  const currentPrice =
+    selectedPlan === "free"
+      ? "0"
+      : selectedPlan === "article"
+      ? articlePrice
+      : featuredPrice;
   const currentCompare = selectedPlan === "article" ? articleCompare : featuredCompare;
   const isSelectedTierFull =
     (selectedPlan === "featured" && featuredSlots.isFull) ||
@@ -399,47 +404,49 @@ function SubmitPage() {
           </div>
         ) : (
           <div>
-            {/* Top Heading matching macapp.supply/submit screenshot */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+            {/* Top Heading & Plan Switcher Pills placed directly below heading as in image */}
+            <div className="mb-6 sm:mb-8 space-y-3.5">
               <h1 className="font-display text-2xl sm:text-3xl lg:text-[34px] font-bold tracking-tight text-ink">
                 Submit Your Mac App
               </h1>
 
               {/* Discreet Plan Switcher Pills */}
-              <div className="inline-flex items-center rounded-xl border border-line bg-surface p-1 shadow-2xs">
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("featured")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                    selectedPlan === "featured"
-                      ? "bg-ink text-canvas shadow-xs"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Editor's Choice ($39)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("free")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                    selectedPlan === "free"
-                      ? "bg-ink text-canvas shadow-xs"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Free Listing ($0)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSelectedPlan("article")}
-                  className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                    selectedPlan === "article"
-                      ? "bg-ink text-canvas shadow-xs"
-                      : "text-muted hover:text-ink"
-                  }`}
-                >
-                  Gold Spotlight ($120)
-                </button>
+              <div>
+                <div className="inline-flex items-center rounded-xl border border-line bg-surface p-1 shadow-2xs">
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlan("free")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      selectedPlan === "free"
+                        ? "bg-ink text-canvas shadow-xs"
+                        : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    Free Listing ($0)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlan("featured")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      selectedPlan === "featured"
+                        ? "bg-ink text-canvas shadow-xs"
+                        : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    Editor's Choice (${featuredPrice})
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedPlan("article")}
+                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
+                      selectedPlan === "article"
+                        ? "bg-ink text-canvas shadow-xs"
+                        : "text-muted hover:text-ink"
+                    }`}
+                  >
+                    Gold Spotlight (${articlePrice})
+                  </button>
+                </div>
               </div>
             </div>
 

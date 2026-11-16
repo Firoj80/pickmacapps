@@ -299,6 +299,71 @@ function Home() {
 
       {/* Direct Apps Grid */}
       <div className="w-full px-5 md:px-8 xl:px-10 py-6">
+        {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 border-b border-line/60 pb-4">
+          <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
+            {/* Featured */}
+            <Link
+              to="/"
+              search={{ sort: "hot", cat: "pick" }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                cat === "pick"
+                  ? "bg-ink text-canvas shadow-xs"
+                  : "text-muted hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              <span className="text-amber-500">★</span>
+              <span>Featured</span>
+            </Link>
+
+            {/* Hot */}
+            <Link
+              to="/"
+              search={{ sort: "hot", cat: "all" }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                sort === "hot" && cat !== "pick"
+                  ? "bg-ink text-canvas shadow-xs"
+                  : "text-muted hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              <span>🔥</span>
+              <span>Hot</span>
+            </Link>
+
+            {/* Latest */}
+            <Link
+              to="/"
+              search={{ sort: "new", cat: "all" }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                sort === "new"
+                  ? "bg-ink text-canvas shadow-xs"
+                  : "text-muted hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              <span>✨</span>
+              <span>Latest</span>
+            </Link>
+
+            {/* Trending */}
+            <Link
+              to="/"
+              search={{ sort: "trending", cat: "all" }}
+              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                sort === "trending"
+                  ? "bg-ink text-canvas shadow-xs"
+                  : "text-muted hover:bg-surface-2 hover:text-ink"
+              }`}
+            >
+              <span>📈</span>
+              <span>Trending</span>
+            </Link>
+          </div>
+
+          <span className="text-xs font-medium text-muted">
+            {shown.length} {shown.length === 1 ? "app" : "apps"}
+          </span>
+        </div>
+
         <AppGrid
           apps={shown}
           query={q}

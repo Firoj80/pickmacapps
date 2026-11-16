@@ -321,7 +321,11 @@ function AppPage() {
                   ) : null}
 
                   {app.isHot ? (
-                    <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-rose-600 to-orange-500 px-3 py-1 text-[11px] font-bold text-white shadow-2xs">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-2.5 py-1 text-[11px] font-bold text-white shadow-2xs">
+                      <span className="relative flex h-2 w-2 items-center justify-center">
+                        <span className="absolute inline-flex h-3 w-3 animate-ping rounded-full bg-white/50 opacity-75"></span>
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-white ring-2 ring-white/40"></span>
+                      </span>
                       <span>🔥 Hot</span>
                     </span>
                   ) : null}
