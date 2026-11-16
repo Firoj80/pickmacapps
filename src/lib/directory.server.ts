@@ -718,6 +718,54 @@ export async function adminStats() {
     console.error("adminStats occupants query error:", err);
   }
 
+  let recentAudit: {
+    id: string;
+    actor: string;
+    action: string;
+    target: string;
+    detail: string;
+    createdAt: string;
+  }[] = [];
+  try {
+    const auditRows = await sql.query<{
+      id: string;
+      actor: string;
+      action: string;
+      target: string;
+      detail: string;
+      created_at: string | Date;
+    }>("select id, actor, action, target, detail, created_at from audit_log order by created_at desc limit 5");
+    recentAudit = auditRows.map((r) => ({
+      id: r.id,
+      actor: r.actor,
+      action: r.action,
+      target: r.target,
+      detail: r.detail,
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    }));
+  } catch (err) {
+    console.error("adminStats recentAudit error:", err);
+  }
+
+  const topPerforming = live
+    .slice()
+    .sort(
+      (a, b) =>
+        Number(b.try_count ?? 0) * 3 +
+        Number(b.click_count ?? 0) -
+        (Number(a.try_count ?? 0) * 3 + Number(a.click_count ?? 0)),
+    )
+    .slice(0, 3)
+    .map((a) => ({
+      id: a.id,
+      name: a.name,
+      slug: a.slug,
+      icon: a.icon,
+      clickCount: Number(a.click_count ?? 0),
+      tryCount: Number(a.try_count ?? 0),
+      category: a.category_name,
+    }));
+
   const upvoteSettings = await getUpvoteSettings();
 
   return {
@@ -744,6 +792,8 @@ export async function adminStats() {
     upvoteSettings,
     totalCardClicks,
     totalTryClicks,
+    recentAudit,
+    topPerforming,
   };
 }
 
