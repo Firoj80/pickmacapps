@@ -30,9 +30,13 @@ function calculateTimeLeft(): TimeLeft {
 export function BlackFridayCountdown({
   className = "",
   isMobile = false,
+  isSubmitPage = false,
+  onApplyCoupon,
 }: {
   className?: string;
   isMobile?: boolean;
+  isSubmitPage?: boolean;
+  onApplyCoupon?: () => void;
 }) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
   const [copied, setCopied] = useState(false);
@@ -60,6 +64,95 @@ export function BlackFridayCountdown({
 
   if (timeLeft.expired) {
     return null;
+  }
+
+  // Submit page layout: wide banner placed at top of submit page
+  if (isSubmitPage) {
+    return (
+      <div
+        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 text-white shadow-lg backdrop-blur-md ${className}`}
+      >
+        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/15 blur-2xl" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs">
+                🔥 Black Friday Sale
+              </span>
+              <span className="text-sm sm:text-base font-bold text-white tracking-tight">
+                50% OFF All Paid Listings
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-white/80 mt-0.5">
+              <span>Use coupon code:</span>
+              <button
+                type="button"
+                onClick={(e) => {
+                  copyCoupon(e);
+                  onApplyCoupon?.();
+                }}
+                title="Click to copy & apply coupon code"
+                className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/20 px-2 py-0.5 font-mono text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition cursor-pointer active:scale-95"
+              >
+                <span>{BFCM_COUPON_CODE}</span>
+                <span className="text-[10px] text-amber-200 font-sans">
+                  {copied ? "✓ Copied & Applied" : "Copy & Apply"}
+                </span>
+              </button>
+              <span className="text-white/60">· Valid till Nov 30</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Live Countdown Timer */}
+            <div className="flex items-center gap-1.5 font-mono">
+              <div className="flex flex-col items-center">
+                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
+              </div>
+            </div>
+
+            {/* Direct Action Button */}
+            <button
+              type="button"
+              onClick={() => {
+                onApplyCoupon?.();
+                setCopied(true);
+                setTimeout(() => setCopied(false), 2000);
+              }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:scale-105 hover:shadow-amber-500/25 active:scale-95 cursor-pointer"
+            >
+              <span>{copied ? "✓ 50% Applied!" : "Apply 50% Discount"}</span>
+              <span className="text-sm leading-none">→</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Mobile layout: sleek horizontal banner placed below site title
@@ -133,7 +226,7 @@ export function BlackFridayCountdown({
   // Desktop layout: placed next to the hot app icons in hero
   return (
     <div
-      className={`relative flex items-center gap-4 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 py-2.5 px-4 text-white shadow-lg backdrop-blur-md transition-all hover:border-amber-400/60 ${className}`}
+      className={`relative shrink-0 inline-flex items-center gap-3.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 py-2 px-3.5 text-white shadow-lg backdrop-blur-md transition-all hover:border-amber-400/60 ${className}`}
     >
       {/* Decorative ambient flare */}
       <div className="pointer-events-none absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-amber-500/15 blur-lg" />

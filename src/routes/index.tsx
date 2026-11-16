@@ -268,7 +268,7 @@ function Home() {
       ) : (
         /* Hero Section matching macapp.supply (only shown on root homepage) */
         <section className="px-5 md:px-8 xl:px-10 pt-8 sm:pt-10 md:pt-14 pb-2.5 sm:pb-6 md:pb-10">
-          <div className="max-w-4xl">
+          <div className="max-w-5xl xl:max-w-6xl">
             <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[46px] md:text-[54px] xl:text-[60px]">
               A hand-picked shelf of{" "}
               <span className="text-muted">beautifully designed</span>{" "}
@@ -281,20 +281,19 @@ function Home() {
               Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
             </p>
 
-            {/* Mobile: Black Friday Sale Countdown (below the site title) */}
+            {/* Mobile: Black Friday Sale Countdown (below the site title, hot app icons hidden for now) */}
             <div className="block sm:hidden mt-3.5">
               <BlackFridayCountdown isMobile />
             </div>
 
-            {/* Mobile: App Icons Arc */}
-            <div className="sm:hidden mt-2 flex justify-center">
-              <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
-            </div>
-
-            {/* Desktop: App Icons Arc next to Black Friday Countdown */}
-            <div className="hidden sm:flex flex-wrap items-center gap-4 lg:gap-6 mt-4">
-              <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
-              <BlackFridayCountdown />
+            {/* Desktop: App Icons Arc strictly side-by-side with Black Friday Countdown */}
+            <div className="hidden sm:flex items-center gap-4 lg:gap-6 mt-4">
+              <div className="shrink-0">
+                <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+              </div>
+              <div className="shrink-0">
+                <BlackFridayCountdown />
+              </div>
             </div>
 
             {directory ? null : (

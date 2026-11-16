@@ -9,6 +9,7 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CurrencySelector } from "@/components/currency-selector";
+import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import {
   type CurrencyCode,
   detectLocalCurrency,
@@ -491,6 +492,14 @@ function SubmitPage() {
           </div>
         ) : (
           <div>
+            {/* Black Friday Sale Discount Banner at top of page */}
+            <div className="mb-6 sm:mb-8">
+              <BlackFridayCountdown
+                isSubmitPage
+                onApplyCoupon={() => applyCoupon("BFCM50")}
+              />
+            </div>
+
             {/* Top Heading & Plan Switcher Pills placed directly below heading as in image */}
             <div className="mb-6 sm:mb-8 space-y-3.5">
               <h1 className="font-display text-2xl sm:text-3xl lg:text-[34px] font-bold tracking-tight text-ink">
