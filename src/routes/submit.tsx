@@ -23,6 +23,7 @@ export type SubmitSearch = {
   subscription_id?: string;
   status?: string;
   currency?: string;
+  coupon?: string;
 };
 
 export const Route = createFileRoute("/submit")({
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/submit")({
     subscription_id: search.subscription_id ? String(search.subscription_id) : undefined,
     status: search.status ? String(search.status) : undefined,
     currency: typeof search.currency === "string" ? String(search.currency).slice(0, 10) : undefined,
+    coupon: typeof search.coupon === "string" ? String(search.coupon).trim().slice(0, 20) : undefined,
   }),
   loader: () => fetchOffer(),
   component: SubmitPage,
@@ -111,7 +113,30 @@ const field =
 function SubmitPage() {
   const offer = Route.useLoaderData();
   const search = Route.useSearch();
-  const { tier, payment_id, submitted, currency: searchCurrency } = search;
+  const { tier, payment_id, submitted, currency: searchCurrency, coupon: searchCoupon } = search;
+
+  const [couponInput, setCouponInput] = useState(() => (searchCoupon ?? "").toUpperCase());
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(() => {
+    const raw = (searchCoupon ?? "").trim().toUpperCase();
+    return raw === "BFCM50" ? "BFCM50" : null;
+  });
+  const [couponError, setCouponError] = useState<string | null>(null);
+
+  const applyCoupon = (code: string) => {
+    const upper = code.trim().toUpperCase();
+    if (upper === "BFCM50") {
+      setAppliedCoupon("BFCM50");
+      setCouponError(null);
+    } else if (upper) {
+      setCouponError("Invalid coupon code.");
+    } else {
+      setAppliedCoupon(null);
+      setCouponError(null);
+    }
+  };
+
+  const isBfcm = appliedCoupon === "BFCM50";
+  const discountMultiplier = isBfcm ? 0.5 : 1.0;
 
   const [currency, setCurrency] = useState<CurrencyCode>(() => {
     if (searchCurrency && searchCurrency.toUpperCase() in SUPPORTED_CURRENCIES) {
@@ -127,10 +152,15 @@ function SubmitPage() {
     }
   };
 
-  const featuredBaseDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
-  const featuredCompareDollars = Math.round((offer.featuredCompareCents ?? offer.compareCents) / 100);
-  const articleBaseDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
-  const articleCompareDollars = Math.round((offer.articleCompareCents ?? 24900) / 100);
+  const rawFeaturedDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
+  const rawFeaturedCompareDollars = Math.round((offer.featuredCompareCents ?? offer.compareCents) / 100);
+  const rawArticleDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
+  const rawArticleCompareDollars = Math.round((offer.articleCompareCents ?? 24900) / 100);
+
+  const featuredBaseDollars = Math.round(rawFeaturedDollars * discountMultiplier);
+  const featuredCompareDollars = isBfcm ? rawFeaturedDollars : rawFeaturedCompareDollars;
+  const articleBaseDollars = Math.round(rawArticleDollars * discountMultiplier);
+  const articleCompareDollars = isBfcm ? rawArticleDollars : rawArticleCompareDollars;
 
   const featuredPrice = String(featuredBaseDollars);
   const featuredCompare = String(featuredCompareDollars);
@@ -377,6 +407,7 @@ function SubmitPage() {
           plan: isPaid ? "choice" : "free",
           tier: selectedPlan === "article" ? "article" : "featured",
           currency,
+          coupon: appliedCoupon ?? undefined,
           mlVisitorId: attr.ml_visitor_id,
           mlSessionId: attr.ml_session_id,
         },
@@ -561,6 +592,24 @@ function SubmitPage() {
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             <span>Auto-converted via Dodo Payments Adaptive Pricing</span>
                           </p>
+                        )}
+
+                        {selectedPlan !== "free" && isBfcm && (
+                          <div className="mt-2.5 inline-flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
+                            <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                            <span>🔥 Black Friday 50% OFF Applied (BFCM50)</span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setAppliedCoupon(null);
+                                setCouponInput("");
+                              }}
+                              className="ml-1 text-[11px] text-muted hover:text-ink cursor-pointer"
+                              title="Remove coupon"
+                            >
+                              ✕
+                            </button>
+                          </div>
                         )}
 
                         {selectedPlan === "free" ? (
@@ -1084,6 +1133,41 @@ function SubmitPage() {
                       </div>
                     </div>
                   )}
+                </div>
+
+                {/* Coupon Code Input */}
+                <div className="pt-2 border-t border-line">
+                  <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="modal_coupon" className="text-xs font-medium text-body">
+                      Coupon Code
+                    </label>
+                    {isBfcm && (
+                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
+                        ✓ BFCM50 applied (50% OFF)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2">
+                    <input
+                      id="modal_coupon"
+                      type="text"
+                      placeholder="e.g. BFCM50"
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        setCouponError(null);
+                      }}
+                      className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs font-mono font-bold text-ink uppercase placeholder:normal-case placeholder:font-normal focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => applyCoupon(couponInput)}
+                      className="shrink-0 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink hover:bg-surface transition cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {couponError && <p className="mt-1 text-xs text-rose-500">{couponError}</p>}
                 </div>
 
                 <div className="pt-2">

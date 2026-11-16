@@ -71,6 +71,7 @@ export const submitListingFn = createServerFn({ method: "POST" })
       plan: data.plan === "choice" ? "choice" : "free",
       tier: data.tier === "article" ? "article" : "featured",
       currency: typeof data.currency === "string" ? data.currency.slice(0, 10) : undefined,
+      coupon: typeof data.coupon === "string" ? data.coupon.trim().slice(0, 20) : undefined,
       mlVisitorId: typeof data.mlVisitorId === "string" ? data.mlVisitorId.slice(0, 100) : undefined,
       mlSessionId: typeof data.mlSessionId === "string" ? data.mlSessionId.slice(0, 100) : undefined,
     };

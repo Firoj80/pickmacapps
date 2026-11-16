@@ -58,6 +58,7 @@ export async function createChoiceCheckout(input: {
   returnUrl: string;
   tier?: "featured" | "article";
   currency?: string;
+  discountCode?: string;
   mlVisitorId?: string;
   mlSessionId?: string;
   metadata?: Record<string, string>;
@@ -75,11 +76,15 @@ export async function createChoiceCheckout(input: {
     metadata: {
       submission_id: input.submissionId,
       tier,
+      discount_code: input.discountCode ?? "",
       ml_visitor_id: input.mlVisitorId ?? "",
       ml_session_id: input.mlSessionId ?? "",
       ...(input.metadata ?? {}),
     },
   };
+  if (input.discountCode) {
+    payload.discount_code = input.discountCode.trim();
+  }
   if (input.currency && input.currency.toUpperCase() !== "USD") {
     payload.currency = input.currency.toUpperCase();
   }

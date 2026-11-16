@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { LeaderboardBanner } from "@/components/leaderboard-banner";
+import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -139,7 +140,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   const mid = (count - 1) / 2;
 
   return (
-    <div className="relative mt-4 flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-2">
+    <div className="relative flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-2">
       <div className="flex items-center justify-center">
         {shown.map((app, index) => {
           const offset = index - mid;
@@ -280,9 +281,20 @@ function Home() {
               Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
             </p>
 
-            {/* App Icons Arc */}
-            <div className="mt-3.5 sm:mt-4 flex items-center">
+            {/* Mobile: Black Friday Sale Countdown (below the site title) */}
+            <div className="block sm:hidden mt-3.5">
+              <BlackFridayCountdown isMobile />
+            </div>
+
+            {/* Mobile: App Icons Arc */}
+            <div className="sm:hidden mt-2 flex justify-center">
               <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+            </div>
+
+            {/* Desktop: App Icons Arc next to Black Friday Countdown */}
+            <div className="hidden sm:flex flex-wrap items-center gap-4 lg:gap-6 mt-4">
+              <ChoiceIcons apps={getHeroAppIcons(list, 6)} />
+              <BlackFridayCountdown />
             </div>
 
             {directory ? null : (

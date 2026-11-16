@@ -81,6 +81,17 @@ test("convertPrice handles USD, zero, and conversions correctly", () => {
   assert.equal(chfCustom.formatted, "45 CHF");
 });
 
+test("convertPrice supports 50% discount for BFCM", () => {
+  const baseUsd = 49;
+  const bfcmUsd = Math.round(baseUsd * 0.5); // 25
+  const converted = convertPrice(bfcmUsd, "USD");
+  assert.equal(converted.amount, 25);
+  assert.equal(converted.formatted, "$25");
+
+  const inrBfcm = convertPrice(bfcmUsd, "INR");
+  assert.ok(inrBfcm.amount > 2000 && inrBfcm.amount < 3000);
+});
+
 test("getLiveExchangeRates returns a valid rates map", async () => {
   const rates = await getLiveExchangeRates();
   assert.ok(rates);

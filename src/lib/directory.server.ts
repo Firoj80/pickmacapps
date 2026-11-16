@@ -1529,6 +1529,7 @@ export async function submitListing(
     plan: string;
     tier?: string;
     currency?: string;
+    coupon?: string;
   },
   origin: string,
   attribution?: { mlVisitorId?: string; mlSessionId?: string },
@@ -1622,6 +1623,7 @@ export async function submitListing(
     };
   }
   try {
+    const isBfcm = input.coupon?.trim().toUpperCase() === "BFCM50";
     const checkout = await createChoiceCheckout({
       submissionId: id,
       email,
@@ -1629,12 +1631,16 @@ export async function submitListing(
       returnUrl: `${origin}/dashboard/${submissionToken}?paid=1`,
       tier: tier === "article" ? "article" : "featured",
       currency: input.currency,
+      discountCode: isBfcm ? "BFCM50" : undefined,
       mlVisitorId: attribution?.mlVisitorId,
       mlSessionId: attribution?.mlSessionId,
     });
     if (checkout.paymentId) {
       const offer = await publicOffer();
-      const amountCents = tier === "article" ? offer.articlePriceCents : offer.featuredPriceCents;
+      let amountCents = tier === "article" ? offer.articlePriceCents : offer.featuredPriceCents;
+      if (isBfcm) {
+        amountCents = Math.round(amountCents * 0.5);
+      }
       const paymentCurrency = (input.currency && input.currency.trim().toUpperCase()) || "USD";
       await sql.query(
         `insert into payments (id, submission_id, provider_payment_id, amount_cents, currency, status)

@@ -124,6 +124,24 @@ function SponsorPage() {
             <p className="text-[11px] sm:text-[12px] text-muted">Curated guarantee</p>
           </div>
         </div>
+
+        {/* Black Friday Cyber Monday 50% OFF Sale Banner */}
+        <div className="mx-auto mt-6 max-w-2xl">
+          <Link
+            to="/submit"
+            search={{ coupon: "BFCM50", currency }}
+            className="group flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-3 sm:px-4 text-white shadow-md transition hover:border-amber-400"
+          >
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
+              <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+              <span>🔥 Black Friday 50% OFF Sale with code <strong className="font-mono text-amber-300">BFCM50</strong> (Valid till Nov 30)</span>
+            </div>
+            <span className="text-xs font-bold text-amber-400 group-hover:underline flex items-center gap-1">
+              <span>Claim 50% OFF</span>
+              <span>→</span>
+            </span>
+          </Link>
+        </div>
       </section>
 
       {/* Pricing Cards Section */}
@@ -179,7 +197,7 @@ function SponsorPage() {
 
             <Link
               to="/submit"
-              search={{ tier: "featured", currency }}
+              search={{ tier: "featured", currency, coupon: "BFCM50" }}
               data-ml-goal="pricing_cta"
               data-ml-goal-plan="featured"
               className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
@@ -231,7 +249,7 @@ function SponsorPage() {
 
             <Link
               to="/submit"
-              search={{ tier: "article", currency }}
+              search={{ tier: "article", currency, coupon: "BFCM50" }}
               data-ml-goal="pricing_cta"
               data-ml-goal-plan="article"
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
