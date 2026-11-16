@@ -15,13 +15,13 @@ const featured = [
 ];
 
 const story = [
-  "Featured as Editor's Choice (Gold) for 30 days",
-  "Golden verified choice badge 🌟",
+  "Featured as Gold Spotlight for 30 days",
+  "Golden verified choice badge 🌟 for 30 days",
   "⚡ Approved within 2 hours (Express)",
   "#1 priority hero spot for 30 days",
   "Dedicated in-depth Medium review article",
   "High-authority SEO backlink to your app",
-  "Permanent listing in directory",
+  "Permanent listing in directory after 30 days",
   "Social shoutout to Mac enthusiasts",
   "Priority placement across alternative tables",
 ];
@@ -155,8 +155,8 @@ function SponsorPage() {
             <div>
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-white">Featured + Medium Article</h3>
-                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Maximum reach & organic SEO backlinks</p>
+                  <h3 className="text-xl font-bold text-white">Gold Spotlight + Medium Article</h3>
+                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Top #1 Hero spot for 30 days & organic SEO backlinks</p>
                 </div>
               </div>
 
@@ -188,7 +188,7 @@ function SponsorPage() {
               data-ml-goal-plan="article"
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
-              Claim Spot + Article — ${articlePrice} 🚀
+              Claim Gold Spotlight (30 Days) — ${articlePrice} 🚀
             </Link>
           </div>
         </div>
