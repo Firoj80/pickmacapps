@@ -1,9 +1,15 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { useState, useMemo, type ReactNode } from "react";
 import { fetchOffer } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
+import { CurrencySelector } from "@/components/currency-selector";
+import {
+  type CurrencyCode,
+  detectLocalCurrency,
+  convertPrice,
+} from "@/lib/currency";
 
 const featured = [
   "Featured as Editor's Choice for 30 days",
@@ -52,8 +58,31 @@ export const Route = createFileRoute("/sponsor")({
 
 function SponsorPage() {
   const offer = Route.useLoaderData();
-  const featuredPrice = ((offer.featuredPriceCents ?? offer.priceCents) / 100).toFixed(0);
-  const articlePrice = ((offer.articlePriceCents ?? 12000) / 100).toFixed(0);
+  const [currency, setCurrency] = useState<CurrencyCode>(() => {
+    return detectLocalCurrency(offer?.country);
+  });
+
+  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
+    setCurrency(newCurrency);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pma_currency", newCurrency);
+    }
+  };
+
+  const featuredBaseDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
+  const articleBaseDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
+
+  const featuredConv = useMemo(
+    () => convertPrice(featuredBaseDollars, currency, offer?.rates),
+    [featuredBaseDollars, currency, offer?.rates]
+  );
+  const articleConv = useMemo(
+    () => convertPrice(articleBaseDollars, currency, offer?.rates),
+    [articleBaseDollars, currency, offer?.rates]
+  );
+
+  const featuredPrice = String(featuredBaseDollars);
+  const articlePrice = String(articleBaseDollars);
 
   return (
     <main className="relative overflow-hidden">
@@ -99,6 +128,15 @@ function SponsorPage() {
 
       {/* Pricing Cards Section */}
       <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 lg:py-12">
+        {/* Currency Switcher Bar */}
+        <div className="mx-auto mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 px-2">
+          <div className="flex items-center gap-2 text-xs text-muted">
+            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Prices auto-converted to your local currency via Dodo Payments</span>
+          </div>
+          <CurrencySelector value={currency} onChange={handleCurrencyChange} />
+        </div>
+
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-8 max-w-4xl mx-auto">
           {/* Card 1: Featured */}
           <div className="relative flex flex-col justify-between rounded-3xl border border-line bg-surface/90 p-7 sm:p-9 shadow-lg backdrop-blur-xl transition hover:border-violet-500/40 hover:shadow-xl">
@@ -113,9 +151,14 @@ function SponsorPage() {
                 </span>
               </div>
 
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-5xl font-extrabold tracking-tight text-ink">${featuredPrice}</span>
+              <div className="mt-6 flex items-baseline gap-2 flex-wrap">
+                <span className="text-5xl font-extrabold tracking-tight text-ink">{featuredConv.formatted}</span>
                 <span className="text-sm font-medium text-muted">one-time payment</span>
+                {currency !== "USD" && (
+                  <span className="inline-flex items-center rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
+                    ~${featuredBaseDollars} USD
+                  </span>
+                )}
               </div>
 
               <p className="mt-2 text-xs text-muted">No recurring fees. App stays listed permanently.</p>
@@ -136,12 +179,12 @@ function SponsorPage() {
 
             <Link
               to="/submit"
-              search={{ tier: "featured" }}
+              search={{ tier: "featured", currency }}
               data-ml-goal="pricing_cta"
               data-ml-goal-plan="featured"
               className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
             >
-              Get Featured — ${featuredPrice}
+              Get Featured — {featuredConv.formatted} {currency !== "USD" ? `(~$${featuredBaseDollars})` : ""}
             </Link>
           </div>
 
@@ -160,9 +203,14 @@ function SponsorPage() {
                 </div>
               </div>
 
-              <div className="mt-6 flex items-baseline gap-2">
-                <span className="text-5xl font-extrabold tracking-tight text-white">${articlePrice}</span>
+              <div className="mt-6 flex items-baseline gap-2 flex-wrap">
+                <span className="text-5xl font-extrabold tracking-tight text-white">{articleConv.formatted}</span>
                 <span className="text-sm font-medium text-fuchsia-200/70">one-time payment</span>
+                {currency !== "USD" && (
+                  <span className="inline-flex items-center rounded-md bg-amber-400/20 px-2 py-0.5 text-xs font-semibold text-amber-300">
+                    ~${articleBaseDollars} USD
+                  </span>
+                )}
               </div>
 
               <p className="mt-2 text-xs text-fuchsia-200/60">Complete package with full editorial story.</p>
@@ -183,12 +231,12 @@ function SponsorPage() {
 
             <Link
               to="/submit"
-              search={{ tier: "article" }}
+              search={{ tier: "article", currency }}
               data-ml-goal="pricing_cta"
               data-ml-goal-plan="article"
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
-              Claim Gold Spotlight (30 Days) — ${articlePrice} 🚀
+              Claim Gold Spotlight (30 Days) — {articleConv.formatted} {currency !== "USD" ? `(~$${articleBaseDollars})` : ""} 🚀
             </Link>
           </div>
         </div>
@@ -248,6 +296,9 @@ function SponsorPage() {
             </Faq>
             <Faq q="Do I need to submit the app first or pay first?">
               You can start right from the packages above. You will be guided through entering your app name, URL, screenshot, and details before checkout.
+            </Faq>
+            <Faq q="Can I pay in my local currency (INR, EUR, GBP, CAD, etc.)?">
+              Yes! Through Dodo Payments Adaptive Currency checkout, your payment is processed directly in your local currency. You can select your preferred currency above or pay in your native currency with localized payment methods supported worldwide (UPI/Cards in India, iDEAL/SEPA in Europe, Apple Pay, Google Pay, and international credit cards).
             </Faq>
             <Faq q="How long does the hero spotlight last?">
               Featured apps hold the top hero spot and featured placement across the directory for a full 30 days, capped at 6 active apps to ensure each sponsor receives prime visibility. After 30 days, your app stays listed permanently in the directory.

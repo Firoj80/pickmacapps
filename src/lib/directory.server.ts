@@ -1528,6 +1528,7 @@ export async function submitListing(
     xHandle?: string;
     plan: string;
     tier?: string;
+    currency?: string;
   },
   origin: string,
   attribution?: { mlVisitorId?: string; mlSessionId?: string },
@@ -1627,16 +1628,18 @@ export async function submitListing(
       name,
       returnUrl: `${origin}/dashboard/${submissionToken}?paid=1`,
       tier: tier === "article" ? "article" : "featured",
+      currency: input.currency,
       mlVisitorId: attribution?.mlVisitorId,
       mlSessionId: attribution?.mlSessionId,
     });
     if (checkout.paymentId) {
       const offer = await publicOffer();
       const amountCents = tier === "article" ? offer.articlePriceCents : offer.featuredPriceCents;
+      const paymentCurrency = (input.currency && input.currency.trim().toUpperCase()) || "USD";
       await sql.query(
         `insert into payments (id, submission_id, provider_payment_id, amount_cents, currency, status)
-         values ($1,$2,$3,$4,'USD','pending')`,
-        [randomUUID(), id, checkout.paymentId, amountCents],
+         values ($1,$2,$3,$4,$5,'pending')`,
+        [randomUUID(), id, checkout.paymentId, amountCents, paymentCurrency],
       );
     }
     await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {

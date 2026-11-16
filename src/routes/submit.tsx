@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { CheckIcon, ChevronIcon, QuoteIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
 import { shelfCategories } from "@/lib/shelf-categories";
@@ -8,6 +8,13 @@ import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { CurrencySelector } from "@/components/currency-selector";
+import {
+  type CurrencyCode,
+  detectLocalCurrency,
+  convertPrice,
+  SUPPORTED_CURRENCIES,
+} from "@/lib/currency";
 
 export type SubmitSearch = {
   tier?: "featured" | "article" | "free";
@@ -15,6 +22,7 @@ export type SubmitSearch = {
   payment_id?: string;
   subscription_id?: string;
   status?: string;
+  currency?: string;
 };
 
 export const Route = createFileRoute("/submit")({
@@ -27,6 +35,7 @@ export const Route = createFileRoute("/submit")({
     payment_id: search.payment_id ? String(search.payment_id) : undefined,
     subscription_id: search.subscription_id ? String(search.subscription_id) : undefined,
     status: search.status ? String(search.status) : undefined,
+    currency: typeof search.currency === "string" ? String(search.currency).slice(0, 10) : undefined,
   }),
   loader: () => fetchOffer(),
   component: SubmitPage,
@@ -102,12 +111,48 @@ const field =
 function SubmitPage() {
   const offer = Route.useLoaderData();
   const search = Route.useSearch();
-  const { tier, payment_id, submitted } = search;
+  const { tier, payment_id, submitted, currency: searchCurrency } = search;
 
-  const featuredPrice = ((offer.featuredPriceCents ?? offer.priceCents) / 100).toFixed(0);
-  const featuredCompare = ((offer.featuredCompareCents ?? offer.compareCents) / 100).toFixed(0);
-  const articlePrice = ((offer.articlePriceCents ?? 12000) / 100).toFixed(0);
-  const articleCompare = ((offer.articleCompareCents ?? 24900) / 100).toFixed(0);
+  const [currency, setCurrency] = useState<CurrencyCode>(() => {
+    if (searchCurrency && searchCurrency.toUpperCase() in SUPPORTED_CURRENCIES) {
+      return searchCurrency.toUpperCase() as CurrencyCode;
+    }
+    return detectLocalCurrency(offer?.country);
+  });
+
+  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
+    setCurrency(newCurrency);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("pma_currency", newCurrency);
+    }
+  };
+
+  const featuredBaseDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
+  const featuredCompareDollars = Math.round((offer.featuredCompareCents ?? offer.compareCents) / 100);
+  const articleBaseDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
+  const articleCompareDollars = Math.round((offer.articleCompareCents ?? 24900) / 100);
+
+  const featuredPrice = String(featuredBaseDollars);
+  const featuredCompare = String(featuredCompareDollars);
+  const articlePrice = String(articleBaseDollars);
+  const articleCompare = String(articleCompareDollars);
+
+  const featuredConv = useMemo(
+    () => convertPrice(featuredBaseDollars, currency, offer?.rates),
+    [featuredBaseDollars, currency, offer?.rates]
+  );
+  const featuredCompareConv = useMemo(
+    () => convertPrice(featuredCompareDollars, currency, offer?.rates),
+    [featuredCompareDollars, currency, offer?.rates]
+  );
+  const articleConv = useMemo(
+    () => convertPrice(articleBaseDollars, currency, offer?.rates),
+    [articleBaseDollars, currency, offer?.rates]
+  );
+  const articleCompareConv = useMemo(
+    () => convertPrice(articleCompareDollars, currency, offer?.rates),
+    [articleCompareDollars, currency, offer?.rates]
+  );
 
   const featuredSlots = offer.featuredSlots ?? {
     total: 3,
@@ -180,6 +225,8 @@ function SubmitPage() {
       ? articlePrice
       : featuredPrice;
   const currentCompare = selectedPlan === "article" ? articleCompare : featuredCompare;
+  const activeConv = selectedPlan === "article" ? articleConv : featuredConv;
+  const activeCompareConv = selectedPlan === "article" ? articleCompareConv : featuredCompareConv;
   const isSelectedTierFull =
     (selectedPlan === "featured" && featuredSlots.isFull) ||
     (selectedPlan === "article" && articleSlots.isFull);
@@ -329,6 +376,7 @@ function SubmitPage() {
           xHandle: xHandle.trim(),
           plan: isPaid ? "choice" : "free",
           tier: selectedPlan === "article" ? "article" : "featured",
+          currency,
           mlVisitorId: attr.ml_visitor_id,
           mlSessionId: attr.ml_session_id,
         },
@@ -418,8 +466,8 @@ function SubmitPage() {
                 Submit Your Mac App
               </h1>
 
-              {/* Discreet Plan Switcher Pills */}
-              <div>
+              {/* Discreet Plan Switcher Pills + Currency Selector */}
+              <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="inline-flex items-center rounded-xl border border-line bg-surface p-1 shadow-2xs">
                   <button
                     type="button"
@@ -441,7 +489,7 @@ function SubmitPage() {
                         : "text-muted hover:text-ink"
                     }`}
                   >
-                    Editor's Choice (${featuredPrice})
+                    Editor's Choice ({featuredConv.formatted})
                   </button>
                   <button
                     type="button"
@@ -452,9 +500,11 @@ function SubmitPage() {
                         : "text-muted hover:text-ink"
                     }`}
                   >
-                    Gold Spotlight (${articlePrice})
+                    Gold Spotlight ({articleConv.formatted})
                   </button>
                 </div>
+
+                <CurrencySelector value={currency} onChange={handleCurrencyChange} />
               </div>
             </div>
 
@@ -486,20 +536,32 @@ function SubmitPage() {
                           </span>
                         )}
 
-                        <div className="mt-3 flex items-baseline gap-2">
+                        <div className="mt-3 flex items-baseline gap-2 flex-wrap">
                           <span className="font-display text-3xl sm:text-4xl font-extrabold text-ink">
-                            ${currentPrice}
+                            {selectedPlan === "free" ? "$0" : activeConv.formatted}
                           </span>
                           {selectedPlan !== "free" && (
                             <>
-                              <span className="text-sm text-muted line-through">${currentCompare}</span>
+                              <span className="text-sm text-muted line-through">{activeCompareConv.formatted}</span>
                               <span className="text-sm text-muted">one-time</span>
+                              {currency !== "USD" && (
+                                <span className="inline-flex items-center rounded-md bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
+                                  ~${currentPrice} USD
+                                </span>
+                              )}
                             </>
                           )}
                           {selectedPlan === "free" && (
                             <span className="text-xs text-muted">free forever</span>
                           )}
                         </div>
+
+                        {selectedPlan !== "free" && currency !== "USD" && (
+                          <p className="mt-1.5 text-[11px] text-muted flex items-center gap-1.5">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            <span>Auto-converted via Dodo Payments Adaptive Pricing</span>
+                          </p>
+                        )}
 
                         {selectedPlan === "free" ? (
                           <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
@@ -800,7 +862,7 @@ function SubmitPage() {
                     >
                       {isSelectedTierFull
                         ? "Sold Out for this week"
-                        : `Get listed for $${currentPrice}`}
+                        : `Get listed for ${activeConv.formatted}${currency !== "USD" ? ` (~$${currentPrice})` : ""}`}
                     </button>
                     <p className="mt-3 text-center text-xs text-muted">
                       {selectedPlan === "article"
@@ -891,7 +953,10 @@ function SubmitPage() {
               <div className="flex items-center justify-between border-b border-line pb-3">
                 <div>
                   <h3 className="text-base font-bold text-ink">
-                    Get listed for ${currentPrice}
+                    Get listed for {activeConv.formatted}
+                    {currency !== "USD" && (
+                      <span className="ml-1 text-xs font-normal text-muted">(~${currentPrice} USD)</span>
+                    )}
                   </h3>
                   <p className="text-xs text-muted mt-0.5">
                     {selectedPlan === "article"
@@ -1027,7 +1092,9 @@ function SubmitPage() {
                     disabled={sending || !hasEmail || !hasXHandle || !website.trim()}
                     className="w-full rounded-xl bg-ink py-3 px-5 text-sm font-bold text-canvas transition hover:opacity-90 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    {sending ? "Redirecting to checkout…" : `Proceed to Secure Checkout ($${currentPrice}) →`}
+                    {sending
+                      ? "Redirecting to checkout…"
+                      : `Proceed to Secure Checkout (${activeConv.formatted}${currency !== "USD" ? ` / ~$${currentPrice}` : ""}) →`}
                   </button>
                   <p className="mt-2 text-center text-[11px] text-muted">
                     Instant access to private submitter dashboard after payment.

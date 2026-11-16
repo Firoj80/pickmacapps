@@ -7,7 +7,28 @@ export const fetchDirectory = createServerFn({ method: "GET" }).handler(async ()
 
 export const fetchOffer = createServerFn({ method: "GET" }).handler(async () => {
   const { publicOffer } = await import("./directory.server");
-  return publicOffer();
+  const offer = await publicOffer();
+  let country: string | null = null;
+  try {
+    const { getRequest } = await import("@tanstack/react-start/server");
+    const request = getRequest();
+    if (request) {
+      country =
+        request.headers.get("x-vercel-ip-country") ||
+        request.headers.get("cf-ipcountry") ||
+        request.headers.get("x-country-code") ||
+        null;
+    }
+  } catch {
+    // ignore
+  }
+  const { getLiveExchangeRates } = await import("./currency");
+  const rates = await getLiveExchangeRates().catch(() => null);
+  return {
+    ...offer,
+    country,
+    rates,
+  };
 });
 export const fetchAppMetadataFn = createServerFn({ method: "POST" })
   .validator((input: unknown) => {
@@ -49,6 +70,7 @@ export const submitListingFn = createServerFn({ method: "POST" })
       xHandle: String(data.xHandle ?? data.x_handle ?? "").slice(0, 80),
       plan: data.plan === "choice" ? "choice" : "free",
       tier: data.tier === "article" ? "article" : "featured",
+      currency: typeof data.currency === "string" ? data.currency.slice(0, 10) : undefined,
       mlVisitorId: typeof data.mlVisitorId === "string" ? data.mlVisitorId.slice(0, 100) : undefined,
       mlSessionId: typeof data.mlSessionId === "string" ? data.mlSessionId.slice(0, 100) : undefined,
     };

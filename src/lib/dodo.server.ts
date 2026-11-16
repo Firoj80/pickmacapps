@@ -57,6 +57,7 @@ export async function createChoiceCheckout(input: {
   name: string;
   returnUrl: string;
   tier?: "featured" | "article";
+  currency?: string;
   mlVisitorId?: string;
   mlSessionId?: string;
   metadata?: Record<string, string>;
@@ -67,24 +68,28 @@ export async function createChoiceCheckout(input: {
   if (!apiKey || !productId) {
     throw new Error(`Dodo is not configured. Set DODO_PAYMENTS_API_KEY and DODO_PRODUCT_ID_${tier.toUpperCase()} (or DODO_PRODUCT_ID).`);
   }
+  const payload: Record<string, unknown> = {
+    product_cart: [{ product_id: productId, quantity: 1 }],
+    customer: { email: input.email, name: input.name },
+    return_url: input.returnUrl,
+    metadata: {
+      submission_id: input.submissionId,
+      tier,
+      ml_visitor_id: input.mlVisitorId ?? "",
+      ml_session_id: input.mlSessionId ?? "",
+      ...(input.metadata ?? {}),
+    },
+  };
+  if (input.currency && input.currency.toUpperCase() !== "USD") {
+    payload.currency = input.currency.toUpperCase();
+  }
   const response = await fetch(`${dodoBase()}/checkouts`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      product_cart: [{ product_id: productId, quantity: 1 }],
-      customer: { email: input.email, name: input.name },
-      return_url: input.returnUrl,
-      metadata: {
-        submission_id: input.submissionId,
-        tier,
-        ml_visitor_id: input.mlVisitorId ?? "",
-        ml_session_id: input.mlSessionId ?? "",
-        ...(input.metadata ?? {}),
-      },
-    }),
+    body: JSON.stringify(payload),
   });
   const text = await response.text();
   if (!response.ok) throw new Error(`Dodo checkout failed (${response.status}).`);
