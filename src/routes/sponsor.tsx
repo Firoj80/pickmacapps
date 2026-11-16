@@ -6,6 +6,7 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
 const featured = [
+  "Featured as Editor's Choice for 30 days",
   "Blue verified featured badge 🔹",
   "Approved within 24 hours",
   "Top hero spot for 30 days",
@@ -14,6 +15,7 @@ const featured = [
 ];
 
 const story = [
+  "Featured as Editor's Choice (Gold) for 30 days",
   "Golden verified choice badge 🌟",
   "⚡ Approved within 2 hours (Express)",
   "#1 priority hero spot for 30 days",

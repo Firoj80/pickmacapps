@@ -482,7 +482,7 @@ function SubmitPage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center rounded-md border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-ink">
-                            Editor's Choice
+                            Editor's Choice · 30 Days Featured
                           </span>
                         )}
 
@@ -534,7 +534,13 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              <strong className="text-ink font-semibold">#1 Priority Top Placement</strong> on our directory for 30 days
+                              <strong className="text-ink font-semibold">Featured as Editor's Choice (Gold Tier)</strong> for 30 days
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                            <span>
+                              <strong className="text-ink font-semibold">#1 Priority Top Placement</strong> across our directory
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
@@ -598,13 +604,19 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              <strong className="text-ink font-semibold">Top 3 placement</strong> on our directory for 1 week
+                              <strong className="text-ink font-semibold">Featured as Editor's Choice</strong> on our directory for 30 days
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              After 1 week, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
+                              <strong className="text-ink font-semibold">Top placement & Blue badge</strong> across the directory
+                            </span>
+                          </li>
+                          <li className="flex items-start gap-2.5">
+                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
+                            <span>
+                              After 30 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
@@ -791,7 +803,7 @@ function SubmitPage() {
                         : `Get listed for $${currentPrice}`}
                     </button>
                     <p className="mt-3 text-center text-xs text-muted">
-                      You'll get a form link to submit your app details after successful payment.
+                      Featured as Editor's Choice for 30 days, then listed permanently. You'll get a form link to submit app details after payment.
                     </p>
                   </div>
                 )}
@@ -880,7 +892,9 @@ function SubmitPage() {
                     Get listed for ${currentPrice}
                   </h3>
                   <p className="text-xs text-muted mt-0.5">
-                    {selectedPlan === "article" ? "Gold Spotlight Tier" : "Editor's Choice Placement"}
+                    {selectedPlan === "article"
+                      ? "Gold Spotlight Tier · Featured as Editor's Choice for 30 days"
+                      : "Featured as Editor's Choice for 30 days"}
                   </p>
                 </div>
                 <button
