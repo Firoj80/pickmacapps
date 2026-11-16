@@ -299,8 +299,8 @@ function Home() {
 
       {/* Direct Apps Grid */}
       <div className="w-full px-5 md:px-8 xl:px-10 pt-1 sm:pt-3 md:pt-6 pb-6">
-        {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) */}
-        <div className="mb-4 sm:mb-6 flex flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
+        {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) - Mobile only (desktop uses left sidebar) */}
+        <div className="mb-4 sm:mb-6 flex lg:hidden flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
           <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
             {/* Featured */}
             <Link
