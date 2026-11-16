@@ -4,7 +4,7 @@ import { shouldSeedCatalogApps } from "@/lib/app-seed";
 import { findShelfCategory, shelfCategories, type ShelfCategory } from "@/lib/shelf-categories";
 import { getSql, type Sql } from "@/lib/db";
 import { checkBadgeOnPage } from "@/lib/badge";
-import { createChoiceCheckout, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
+import { createChoiceCheckout, invalidateDodoPriceCache, readDodoPrice, updateDodoPrice } from "@/lib/dodo.server";
 import { cleanXHandle } from "@/lib/metadata.server";
 import {
   isTelegramConfigured,
@@ -532,43 +532,91 @@ export type PublicOffer = {
   compareCents: number;
 };
 
+let cachedPublicOffer: { data: PublicOffer; timestamp: number } | null = null;
+const PUBLIC_OFFER_CACHE_TTL_MS = 30 * 1000; // 30 seconds in-memory cache for fast SSR
+
+export function invalidatePublicOfferCache() {
+  cachedPublicOffer = null;
+}
+
 export async function publicOffer(): Promise<PublicOffer> {
+  if (cachedPublicOffer && Date.now() - cachedPublicOffer.timestamp < PUBLIC_OFFER_CACHE_TTL_MS) {
+    return cachedPublicOffer.data;
+  }
+
   try {
     const sql = await directorySql();
-    const rows = await sql.query<{ key: string; value: string }>("select key, value from settings");
-    const map = Object.fromEntries(rows.map((row) => [row.key, row.value]));
+
+    // Concurrently fetch settings, aggregated slot counts, slot expiration dates, and Dodo prices
+    const [settingsRows, countsRows, datesRows, livePrices] = await Promise.all([
+      sql.query<{ key: string; value: string }>("select key, value from settings"),
+      sql.query<{
+        active_total: string;
+        active_featured: string;
+        active_article: string;
+      }>(`
+        select
+          count(*) filter (where editor_choice = true and status = 'published')::text as active_total,
+          count(*) filter (where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = 'featured')::text as active_featured,
+          count(*) filter (where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = 'article')::text as active_article
+        from apps
+      `),
+      sql.query<{ tier: string; featured_until: string | Date | null }>(`
+        select coalesce(featured_tier, 'featured') as tier, featured_until
+        from apps
+        where editor_choice = true
+          and status = 'published'
+          and featured_until is not null
+          and featured_until > now()
+        order by featured_until asc
+      `),
+      Promise.all([readDodoPrice("featured"), readDodoPrice("article")]),
+    ]);
+
+    const map = Object.fromEntries(settingsRows.map((row) => [row.key, row.value]));
     let featuredPriceCents = Number(map.featured_price_cents ?? map.choice_price_cents ?? 9900);
     const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
     let articlePriceCents = Number(map.article_price_cents ?? 12000);
     const articleCompareCents = Number(map.article_compare_cents ?? 24900);
 
-    const liveFeatured = await readDodoPrice("featured");
+    const [liveFeatured, liveArticle] = livePrices;
     if (liveFeatured != null && liveFeatured !== featuredPriceCents) {
       featuredPriceCents = liveFeatured;
-      await sql.query(
-        `insert into settings (key, value) values ('featured_price_cents', $1), ('choice_price_cents', $1)
-         on conflict (key) do update set value = excluded.value`,
-        [String(liveFeatured)],
-      );
+      void sql
+        .query(
+          `insert into settings (key, value) values ('featured_price_cents', $1), ('choice_price_cents', $1)
+           on conflict (key) do update set value = excluded.value`,
+          [String(liveFeatured)],
+        )
+        .catch(() => {});
     }
 
-    const liveArticle = await readDodoPrice("article");
     if (liveArticle != null && liveArticle !== articlePriceCents) {
       articlePriceCents = liveArticle;
-      await sql.query(
-        `insert into settings (key, value) values ('article_price_cents', $1)
-         on conflict (key) do update set value = excluded.value`,
-        [String(liveArticle)],
-      );
+      void sql
+        .query(
+          `insert into settings (key, value) values ('article_price_cents', $1)
+           on conflict (key) do update set value = excluded.value`,
+          [String(liveArticle)],
+        )
+        .catch(() => {});
     }
 
-    const [activeTotal, activeFeatured, activeArticle, featuredOpenDates, articleOpenDates] = await Promise.all([
-      countActiveEditorChoiceApps(),
-      countActiveTierApps("featured"),
-      countActiveTierApps("article"),
-      getPaidSlotDates("featured"),
-      getPaidSlotDates("article"),
-    ]);
+    const counts = countsRows[0] ?? { active_total: "0", active_featured: "0", active_article: "0" };
+    const activeTotal = Number(counts.active_total ?? 0);
+    const activeFeatured = Number(counts.active_featured ?? 0);
+    const activeArticle = Number(counts.active_article ?? 0);
+
+    const featuredOpenDates: string[] = [];
+    const articleOpenDates: string[] = [];
+    for (const r of datesRows) {
+      const iso = r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until);
+      if (r.tier === "article") {
+        articleOpenDates.push(iso);
+      } else {
+        featuredOpenDates.push(iso);
+      }
+    }
 
     const nextDate = getNextCycleLabel();
     const featuredRemaining = Math.max(0, MAX_TIER_SLOTS - activeFeatured);
@@ -593,7 +641,7 @@ export async function publicOffer(): Promise<PublicOffer> {
       openDates: articleOpenDates,
     };
 
-    return {
+    const result: PublicOffer = {
       featuredPriceCents,
       featuredCompareCents,
       articlePriceCents,
@@ -611,6 +659,9 @@ export async function publicOffer(): Promise<PublicOffer> {
         openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
       },
     };
+
+    cachedPublicOffer = { data: result, timestamp: Date.now() };
+    return result;
   } catch (err) {
     console.error("[directory] publicOffer DB query failed, using defaults:", err);
     const nextDate = getNextCycleLabel();
@@ -901,6 +952,7 @@ export async function createAdminApp(input: {
     ],
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
+  invalidatePublicOfferCache();
   await audit(sql, "create_app", slug, `Admin created app "${input.name}"`);
 
   await notifyTelegramAdminAppCreated({
@@ -1051,6 +1103,7 @@ export async function saveApp(input: {
       cleanX,
     ],
   );
+  invalidatePublicOfferCache();
   await audit(sql, "save-app", input.slug, status);
 }
 
@@ -1102,6 +1155,7 @@ export async function deleteApp(id: string) {
   } catch (err) {
     console.error("app tombstone failed:", err);
   }
+  invalidatePublicOfferCache();
   await audit(sql, "delete-app", row.slug);
 }
 
@@ -1197,6 +1251,7 @@ export async function setPackagePrice(tier: "featured" | "article", amountCents:
       [String(amountCents), String(compareCents)],
     );
   }
+  invalidatePublicOfferCache();
   await audit(sql, "price", tier, String(amountCents));
 }
 
@@ -1744,6 +1799,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
 
     await sql.query("delete from app_tombstones where slug = $1", [existingApp.slug]);
     await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, existingApp.id]);
+    invalidatePublicOfferCache();
     await audit(sql, isChoice ? "upgrade_sponsor" : "update_app", existingApp.slug, submission.plan);
     return {
       id: existingApp.id,
@@ -1795,6 +1851,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
   await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
+  invalidatePublicOfferCache();
   await audit(sql, "approve", slug, submission.plan);
   return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier, dashboardToken };
 }

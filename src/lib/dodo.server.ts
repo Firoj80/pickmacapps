@@ -112,28 +112,47 @@ function dodoFailure(action: string, status: number, body: string) {
   return `Dodo rejected ${action} (${status}).${message}`;
 }
 
+// In-memory cache for Dodo product prices to prevent blocking SSR on external API calls
+const dodoPriceCache: Record<string, { price: number; timestamp: number }> = {};
+const DODO_PRICE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
+export function invalidateDodoPriceCache() {
+  delete dodoPriceCache.featured;
+  delete dodoPriceCache.article;
+}
+
 /** The amount Dodo will charge, in cents. Null when the product cannot be read. */
 export async function readDodoPrice(tier: "featured" | "article" = "featured") {
+  const cached = dodoPriceCache[tier];
+  if (cached && Date.now() - cached.timestamp < DODO_PRICE_CACHE_TTL_MS) {
+    return cached.price;
+  }
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
   const productId = getDodoProductId(tier);
   if (!apiKey || !productId) return null;
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 1200);
     const response = await fetch(`${dodoBase()}/products/${productId}`, {
       headers: { Authorization: `Bearer ${apiKey}`, Accept: "application/json" },
-    });
-    if (!response.ok) return null;
+      signal: controller.signal,
+    }).finally(() => clearTimeout(timeout));
+
+    if (!response.ok) return cached?.price ?? null;
     const json = (await response.json()) as { price?: { price?: number; currency?: string } };
     const amount = json.price?.price;
-    if (json.price?.currency && json.price.currency !== "USD") return null;
-    if (typeof amount !== "number" || !Number.isInteger(amount) || amount < 100) return null;
+    if (json.price?.currency && json.price.currency !== "USD") return cached?.price ?? null;
+    if (typeof amount !== "number" || !Number.isInteger(amount) || amount < 100) return cached?.price ?? null;
+    dodoPriceCache[tier] = { price: amount, timestamp: Date.now() };
     return amount;
   } catch {
-    return null;
+    return cached?.price ?? null;
   }
 }
 
 /** Updates the Dodo product. The amount is the server setting, never a browser field. */
 export async function updateDodoPrice(amountCents: number, tier: "featured" | "article" = "featured") {
+  invalidateDodoPriceCache();
   const apiKey = process.env.DODO_PAYMENTS_API_KEY?.trim();
   const productId = getDodoProductId(tier);
   if (!apiKey || !productId) {
