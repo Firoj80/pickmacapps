@@ -2,6 +2,7 @@ import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
 import { fetchAdminHome, ensureAdminSession, getCachedAdminHome, seedAdminHomeCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
+import { getHotDaysRemaining } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/")({
   beforeLoad: async () => {
@@ -665,10 +666,7 @@ function AdminHome() {
                           <span>·</span>
                           <span className="rounded-md bg-rose-100/90 px-2 py-0.5 text-[11px] font-bold tracking-tight text-rose-900 ring-1 ring-rose-300/80">
                             {(() => {
-                              const marked = new Date(h.hotMarkedAt || Date.now());
-                              const expiry = new Date(marked.getTime() + 30 * 24 * 60 * 60 * 1000);
-                              const daysLeft = Math.max(0, Math.min(30, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
-                              const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                              const { daysLeft, formatted } = getHotDaysRemaining(h.hotMarkedAt);
                               return `${daysLeft} days remaining (${formatted})`;
                             })()}
                           </span>

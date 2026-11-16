@@ -357,10 +357,8 @@ export function getHotDaysRemaining(
 ): { daysLeft: number; expiry: Date; formatted: string } {
   const marked = new Date(hotMarkedAt || createdAt || Date.now());
   const expiry = new Date(marked.getTime() + HOT_APP_DURATION_DAYS * 24 * 60 * 60 * 1000);
-  const daysLeft = Math.max(
-    0,
-    Math.min(HOT_APP_DURATION_DAYS, Math.round((expiry.getTime() - Date.now()) / (24 * 60 * 60 * 1000))),
-  );
+  const msLeft = expiry.getTime() - Date.now();
+  const daysLeft = msLeft <= 0 ? 0 : Math.min(HOT_APP_DURATION_DAYS, Math.ceil(msLeft / (24 * 60 * 60 * 1000)));
   const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return { daysLeft, expiry, formatted };
 }
