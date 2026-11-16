@@ -107,6 +107,18 @@ const faqs = [
 const field =
   "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
 
+function Radio({ selected }: { selected: boolean }) {
+  return (
+    <div
+      className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+        selected ? "border-ink bg-ink" : "border-stone-300 bg-white"
+      }`}
+    >
+      {selected ? <div className="h-1.5 w-1.5 rounded-full bg-white" /> : null}
+    </div>
+  );
+}
+
 function SubmitPage() {
   const offer = Route.useLoaderData();
   const search = Route.useSearch();
@@ -132,11 +144,10 @@ function SubmitPage() {
     nextDate: offer.slots?.nextDate ?? "30 days",
   };
 
+  // Free plan is default selected unless a specific paid tier is explicitly requested in search params
   const [selectedPlan, setSelectedPlan] = useState<"free" | "featured" | "article">(() => {
     if (tier === "article" && !articleSlots.isFull) return "article";
     if (tier === "featured" && !featuredSlots.isFull) return "featured";
-    if (!featuredSlots.isFull) return "featured";
-    if (!articleSlots.isFull) return "article";
     return "free";
   });
 
@@ -345,7 +356,7 @@ function SubmitPage() {
                 Submit Your Mac App
               </h1>
               <p className="mt-2.5 text-sm sm:text-base text-body max-w-xl mx-auto leading-relaxed">
-                Join 250+ hand-picked macOS apps. Choose between guaranteed top spot visibility or free reciprocal community listing.
+                Join 250+ hand-picked macOS apps. Choose between free reciprocal community listing or guaranteed top spot visibility.
               </p>
             </div>
 
@@ -353,91 +364,176 @@ function SubmitPage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
               {/* Left Column: Form, Intent Selection, Checklist & CTA */}
               <div className="lg:col-span-7 xl:col-span-7 space-y-5">
-                {/* Mode Selector (Zero-Confusion Switcher) */}
-                <div className="rounded-2xl border border-line bg-surface p-2 shadow-xs">
-                  <div className="grid grid-cols-2 gap-2 text-center">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedPlan(selectedPlan === "article" ? "article" : "featured");
-                        trackGoal("select_plan", { plan: "featured" });
-                      }}
-                      className={`relative flex flex-col items-center justify-center rounded-xl py-3 px-2 text-xs font-semibold transition-all cursor-pointer ${
-                        isPaid
-                          ? "bg-ink text-canvas shadow-xs"
-                          : "text-muted hover:text-ink hover:bg-stone-50"
-                      }`}
-                    >
-                      <span className="flex items-center gap-1.5 text-sm font-bold">
-                        <span>⭐</span> Featured Sponsor
-                      </span>
-                      <span className={`text-[11px] mt-0.5 ${isPaid ? "text-stone-300" : "text-muted"}`}>
-                        No badge · Top spot · Fast review
-                      </span>
-                    </button>
-
+                {/* 3-Plan Selector Strip: Free on Left (Default), Blue in Middle, Gold on Right */}
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="text-xs font-bold text-muted uppercase tracking-wider">
+                      Select Your Plan
+                    </label>
+                    <span className="text-[11px] text-muted">
+                      {isPaid ? "✨ No badge required" : "🔄 Reciprocal badge required"}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {/* 1. Free Community (Left - Default Selected) */}
                     <button
                       type="button"
                       onClick={() => {
                         setSelectedPlan("free");
                         trackGoal("select_plan", { plan: "free" });
                       }}
-                      className={`relative flex flex-col items-center justify-center rounded-xl py-3 px-2 text-xs font-semibold transition-all cursor-pointer ${
-                        !isPaid
-                          ? "bg-ink text-canvas shadow-xs"
-                          : "text-muted hover:text-ink hover:bg-stone-50"
+                      className={`relative flex flex-col justify-between rounded-2xl p-3.5 text-left border-2 transition-all cursor-pointer ${
+                        selectedPlan === "free"
+                          ? "border-ink bg-stone-50/90 shadow-xs ring-1 ring-ink/10"
+                          : "border-line bg-surface hover:border-stone-300"
                       }`}
                     >
-                      <span className="flex items-center gap-1.5 text-sm font-bold">
-                        <span>🆓</span> Free Listing
-                      </span>
-                      <span className={`text-[11px] mt-0.5 ${!isPaid ? "text-stone-300" : "text-muted"}`}>
-                        Free forever · Reciprocal badge
-                      </span>
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="rounded-md bg-stone-200/80 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-stone-700">
+                            Community
+                          </span>
+                          <Radio selected={selectedPlan === "free"} />
+                        </div>
+                        <div className="mt-2 font-display text-2xl font-extrabold text-ink">$0</div>
+                        <div className="text-xs font-bold text-ink mt-0.5">Free Listing</div>
+                      </div>
+                      <div className="mt-2.5 text-[11px] text-muted leading-tight">
+                        Reciprocal badge required
+                      </div>
+                    </button>
+
+                    {/* 2. Blue Featured ($99 - Middle) */}
+                    <button
+                      type="button"
+                      disabled={featuredSlots.isFull}
+                      onClick={() => {
+                        if (!featuredSlots.isFull) {
+                          setSelectedPlan("featured");
+                          trackGoal("select_plan", { plan: "featured" });
+                        }
+                      }}
+                      className={`relative flex flex-col justify-between rounded-2xl p-3.5 text-left border-2 transition-all ${
+                        featuredSlots.isFull
+                          ? "border-line bg-stone-100 opacity-60 cursor-not-allowed"
+                          : selectedPlan === "featured"
+                            ? "border-sky-500 bg-sky-50/50 shadow-xs ring-1 ring-sky-500/30 cursor-pointer"
+                            : "border-line bg-surface hover:border-sky-300 cursor-pointer"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="rounded-md bg-sky-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-sky-800">
+                            🔹 Blue Tier
+                          </span>
+                          <Radio selected={selectedPlan === "featured"} />
+                        </div>
+                        <div className="mt-2 flex items-baseline gap-1.5">
+                          <span className="font-display text-2xl font-extrabold text-ink">${featuredPrice}</span>
+                          <span className="text-xs text-muted line-through">${featuredCompare}</span>
+                        </div>
+                        <div className="text-xs font-bold text-ink mt-0.5">Featured Spot</div>
+                      </div>
+                      <div className="mt-2.5 text-[11px] text-muted leading-tight">
+                        Top 6 spot · No badge
+                      </div>
+                    </button>
+
+                    {/* 3. Gold Article ($120 - Right) */}
+                    <button
+                      type="button"
+                      disabled={articleSlots.isFull}
+                      onClick={() => {
+                        if (!articleSlots.isFull) {
+                          setSelectedPlan("article");
+                          trackGoal("select_plan", { plan: "article" });
+                        }
+                      }}
+                      className={`relative flex flex-col justify-between rounded-2xl p-3.5 text-left border-2 transition-all ${
+                        articleSlots.isFull
+                          ? "border-line bg-stone-100 opacity-60 cursor-not-allowed"
+                          : selectedPlan === "article"
+                            ? "border-amber-500 bg-amber-50/50 shadow-xs ring-1 ring-amber-500/30 cursor-pointer"
+                            : "border-line bg-surface hover:border-amber-300 cursor-pointer"
+                      }`}
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="rounded-md bg-gradient-to-r from-amber-500 to-fuchsia-600 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-white">
+                            🌟 Gold Tier
+                          </span>
+                          <Radio selected={selectedPlan === "article"} />
+                        </div>
+                        <div className="mt-2 flex items-baseline gap-1.5">
+                          <span className="font-display text-2xl font-extrabold text-ink">${articlePrice}</span>
+                          <span className="text-xs text-muted line-through">${articleCompare}</span>
+                        </div>
+                        <div className="text-xs font-bold text-ink mt-0.5">Top Spot + Article</div>
+                      </div>
+                      <div className="mt-2.5 text-[11px] text-muted leading-tight">
+                        #1 Spot + Medium review
+                      </div>
                     </button>
                   </div>
                 </div>
 
-                {/* Pricing / Plan Card (Based on Reference Design) */}
+                {/* Pricing / Plan Details Card (Matching Reference Design) */}
                 <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs space-y-4">
-                  {isPaid ? (
+                  {selectedPlan === "free" ? (
                     <>
-                      {/* Tier Toggle (Blue vs Gold) */}
-                      <div className="flex items-center justify-between border-b border-line pb-3">
-                        <span className="text-xs font-semibold text-muted uppercase tracking-wider">
-                          Sponsor Tier
-                        </span>
-                        <div className="flex items-center gap-1.5 rounded-lg bg-stone-100 p-1 text-xs">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPlan("featured")}
-                            className={`rounded-md px-2.5 py-1 font-semibold transition-all cursor-pointer ${
-                              selectedPlan === "featured"
-                                ? "bg-white text-ink shadow-2xs"
-                                : "text-muted hover:text-ink"
-                            }`}
-                          >
-                            🔹 Blue (${featuredPrice})
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedPlan("article")}
-                            className={`rounded-md px-2.5 py-1 font-semibold transition-all cursor-pointer ${
-                              selectedPlan === "article"
-                                ? "bg-gradient-to-r from-amber-500 to-fuchsia-600 text-white shadow-2xs"
-                                : "text-muted hover:text-ink"
-                            }`}
-                          >
-                            🌟 Gold + Medium (${articlePrice})
-                          </button>
+                      {/* Free Community Details */}
+                      <div>
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700">
+                            Community Free Tier
+                          </span>
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-stone-700">
+                            <CheckIcon className="h-3 w-3" />
+                          </span>
+                        </div>
+
+                        <div className="mt-2.5 flex items-baseline gap-2">
+                          <span className="font-display text-3xl font-extrabold text-ink">$0</span>
+                          <span className="text-xs text-muted">free forever</span>
+                        </div>
+
+                        <div className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
+                          * Requires PickMacApps backlink badge on your website landing page
                         </div>
                       </div>
 
-                      {/* Plan Header & Price */}
+                      <ul className="space-y-2.5 text-xs text-body pt-1">
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-600" />
+                          <span>
+                            <strong className="text-ink font-semibold">Permanent directory catalog listing</strong> in category & search
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-600" />
+                          <span>
+                            <strong className="text-ink font-semibold">Standard dofollow catalog backlink</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <span className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600">⚠️</span>
+                          <span>
+                            <strong className="text-ink font-semibold">Reciprocal badge required</strong> on your landing page before approval
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <span className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600">⏳</span>
+                          <span>Standard manual review queue (3–5 business days)</span>
+                        </li>
+                      </ul>
+                    </>
+                  ) : selectedPlan === "featured" ? (
+                    <>
+                      {/* Blue Featured Details */}
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1 rounded-md bg-accent/10 px-2 py-0.5 text-xs font-semibold text-accent">
-                            {selectedPlan === "article" ? "🌟 Gold Tier" : "Editor's Choice"}
+                          <span className="inline-flex items-center gap-1 rounded-md bg-sky-100 px-2 py-0.5 text-xs font-semibold text-sky-800">
+                            Editor's Choice · 🔹 Blue Verified
                           </span>
                           <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white">
                             <CheckIcon className="h-3 w-3" />
@@ -445,10 +541,8 @@ function SubmitPage() {
                         </div>
 
                         <div className="mt-2.5 flex items-baseline gap-2">
-                          <span className="font-display text-3xl font-extrabold text-ink">${currentPrice}</span>
-                          <span className="text-sm text-muted line-through">
-                            ${selectedPlan === "article" ? articleCompare : featuredCompare}
-                          </span>
+                          <span className="font-display text-3xl font-extrabold text-ink">${featuredPrice}</span>
+                          <span className="text-sm text-muted line-through">${featuredCompare}</span>
                           <span className="text-xs text-muted">one-time</span>
                         </div>
 
@@ -456,13 +550,9 @@ function SubmitPage() {
                         <div className="mt-2 text-xs font-medium text-emerald-600 flex items-center gap-1.5">
                           <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
                           <span>
-                            {selectedPlan === "article"
-                              ? articleSlots.isFull
-                                ? "🔴 Sold out for this cycle"
-                                : `* Only ${articleSlots.remaining} spot${articleSlots.remaining === 1 ? "" : "s"} remaining for this cycle`
-                              : featuredSlots.isFull
-                                ? "🔴 Sold out for this cycle"
-                                : `* Only ${featuredSlots.remaining} spot${featuredSlots.remaining === 1 ? "" : "s"} remaining for this cycle`}
+                            {featuredSlots.isFull
+                              ? "🔴 Sold out for this cycle"
+                              : `* Only ${featuredSlots.remaining} spot${featuredSlots.remaining === 1 ? "" : "s"} remaining for this cycle`}
                           </span>
                         </div>
                       </div>
@@ -472,7 +562,7 @@ function SubmitPage() {
                         <li className="flex items-start gap-2.5">
                           <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
                           <span>
-                            <strong className="text-ink font-semibold">Top {selectedPlan === "article" ? "#1 priority" : "6"} placement</strong> on our directory for 30 days
+                            <strong className="text-ink font-semibold">Top 6 placement</strong> on directory homepage and shelf for 30 days
                           </span>
                         </li>
                         <li className="flex items-start gap-2.5">
@@ -487,14 +577,6 @@ function SubmitPage() {
                             <strong className="text-ink font-semibold">Featured at the top</strong> of competitor alternative pages
                           </span>
                         </li>
-                        {selectedPlan === "article" ? (
-                          <li className="flex items-start gap-2.5">
-                            <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
-                            <span>
-                              <strong className="text-ink font-semibold">Dedicated Medium blog post</strong> featuring your app with comparisons
-                            </span>
-                          </li>
-                        ) : null}
                         <li className="flex items-start gap-2.5">
                           <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
                           <span>
@@ -510,6 +592,12 @@ function SubmitPage() {
                         <li className="flex items-start gap-2.5">
                           <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
                           <span>
+                            <strong className="text-ink font-semibold">Express approval</strong> within 24 hours
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+                          <span>
                             <strong className="text-ink font-semibold">Hundreds of monthly Mac users</strong> discovering and testing your app
                           </span>
                         </li>
@@ -517,49 +605,77 @@ function SubmitPage() {
                     </>
                   ) : (
                     <>
-                      {/* Free Plan Body */}
+                      {/* Gold Tier Details */}
                       <div>
                         <div className="flex items-center justify-between gap-2">
-                          <span className="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700">
-                            Community Listing
+                          <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-500 to-fuchsia-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
+                            🌟 Gold Verified Badge · Best Exposure 🔥
                           </span>
-                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-stone-200 text-stone-700">
+                          <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-white">
                             <CheckIcon className="h-3 w-3" />
                           </span>
                         </div>
 
                         <div className="mt-2.5 flex items-baseline gap-2">
-                          <span className="font-display text-3xl font-extrabold text-ink">$0</span>
-                          <span className="text-xs text-muted">free forever</span>
+                          <span className="font-display text-3xl font-extrabold text-ink">${articlePrice}</span>
+                          <span className="text-sm text-muted line-through">${articleCompare}</span>
+                          <span className="text-xs text-muted">one-time</span>
                         </div>
 
-                        <div className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
-                          * Requires PickMacApps backlink badge on your website
+                        {/* Scarcity Signal (Live Spot Counter) */}
+                        <div className="mt-2 text-xs font-medium text-emerald-600 flex items-center gap-1.5">
+                          <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>
+                            {articleSlots.isFull
+                              ? "🔴 Sold out for this cycle"
+                              : `* Only ${articleSlots.remaining} spot${articleSlots.remaining === 1 ? "" : "s"} remaining for this cycle`}
+                          </span>
                         </div>
                       </div>
 
+                      {/* Value Props Bullet List */}
                       <ul className="space-y-2.5 text-xs text-body pt-1">
                         <li className="flex items-start gap-2.5">
-                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-600" />
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
                           <span>
-                            <strong className="text-ink font-semibold">Permanent directory catalog listing</strong> in category & search
+                            <strong className="text-ink font-semibold">#1 Priority Top Spot</strong> on directory for 30 days
                           </span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-stone-600" />
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
                           <span>
-                            <strong className="text-ink font-semibold">Standard catalog backlink</strong>
+                            <strong className="text-ink font-semibold">Dedicated Medium blog post</strong> featuring your app with comparisons
                           </span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <span className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600">⚠️</span>
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
                           <span>
-                            <strong className="text-ink font-semibold">Reciprocal badge required</strong> on your landing page before approval
+                            <strong className="text-ink font-semibold">Express 2-hour review turnaround</strong> and approval
                           </span>
                         </li>
                         <li className="flex items-start gap-2.5">
-                          <span className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-600">⏳</span>
-                          <span>Standard review queue (3–5 business days)</span>
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          <span>
+                            <strong className="text-ink font-semibold">High-authority SEO backlinks</strong> from Medium & directory
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          <span>
+                            <strong className="text-ink font-semibold">No reciprocal badge required</strong> on your website
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          <span>
+                            <strong className="text-ink font-semibold">Golden verified badge</strong> on your cards & app pages
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2.5">
+                          <CheckIcon className="mt-0.5 h-3.5 w-3.5 shrink-0 text-amber-500" />
+                          <span>
+                            Permanent listing in the catalog after 30 days
+                          </span>
                         </li>
                       </ul>
                     </>
