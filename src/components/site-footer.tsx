@@ -1,5 +1,6 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { FooterThemeSwitcher } from "@/components/theme-toggle";
+import { PickMacAppsIcon } from "@/components/brand-logo";
 import { featuredTierWeight, isEditorChoice } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appIconUrl } from "@/lib/image-opt";
@@ -23,7 +24,8 @@ export function SiteFooter() {
         <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:grid-cols-12 lg:gap-10">
           {/* Column 1: Brand & Creator */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-4">
-            <Link to="/" className="inline-flex items-center gap-2 text-[17px] font-semibold tracking-tight text-ink">
+            <Link to="/" className="inline-flex items-center gap-2.5 text-[17px] font-semibold tracking-tight text-ink">
+              <PickMacAppsIcon className="h-5.5 w-5.5 shrink-0" />
               <span>PickMacApps</span>
             </Link>
             <p className="mt-3 max-w-[28ch] text-[13px] leading-relaxed text-muted">

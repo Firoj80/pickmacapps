@@ -1,5 +1,6 @@
 import { useState, useEffect, type ReactNode } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { PickMacAppsIcon } from "@/components/brand-logo";
 
 export type AdminSection =
   | "overview"
@@ -162,10 +163,8 @@ export function AdminShell({
             </svg>
           </button>
 
-          <Link to="/admin" className="flex items-center gap-2 font-display text-base font-bold text-ink">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink text-xs text-canvas">
-              🍎
-            </span>
+          <Link to="/admin" className="flex items-center gap-2.5 font-display text-base font-bold text-ink">
+            <PickMacAppsIcon className="h-6 w-6 shrink-0" />
             <span>PickMacApps</span>
           </Link>
         </div>
@@ -200,10 +199,8 @@ export function AdminShell({
           <div className="relative flex h-full w-[280px] max-w-[85vw] flex-col border-r border-line bg-white shadow-2xl">
             {/* Drawer Header */}
             <div className="flex h-14 items-center justify-between border-b border-line px-5">
-              <div className="flex items-center gap-2 font-display text-base font-bold text-ink">
-                <span className="flex h-6 w-6 items-center justify-center rounded-md bg-ink text-xs text-canvas">
-                  🍎
-                </span>
+              <div className="flex items-center gap-2.5 font-display text-base font-bold text-ink">
+                <PickMacAppsIcon className="h-5.5 w-5.5 shrink-0" />
                 <span>Console Menu</span>
               </div>
               <button
@@ -349,9 +346,7 @@ export function AdminShell({
             preload="intent"
             className="flex items-center gap-2.5 font-display text-[18px] font-semibold tracking-tight text-ink transition hover:opacity-85"
           >
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-ink text-sm text-canvas">
-              🍎
-            </span>
+            <PickMacAppsIcon className="h-6 w-6 shrink-0" />
             <span>PickMacApps</span>
           </Link>
           <div className="mt-1 flex items-center justify-between">

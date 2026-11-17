@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <!-- Background subtle gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="60%" stop-color="#FCFCFD" />
+      <stop offset="100%" stop-color="#F8FAFC" />
+    </linearGradient>
+
+    <!-- Mesh Gradient Orb Filters & Layers -->
+    <filter id="softGlow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="85" result="blur" />
+    </filter>
+
+    <radialGradient id="orbViolet" cx="45%" cy="40%" r="55%">
+      <stop offset="0%" stop-color="#C084FC" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#818CF8" stop-opacity="0.75" />
+      <stop offset="100%" stop-color="#6366F1" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="orbBlue" cx="65%" cy="50%" r="55%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#3B82F6" stop-opacity="0.8" />
+      <stop offset="100%" stop-color="#1D4ED8" stop-opacity="0" />
+    </radialGradient>
+
+    <radialGradient id="orbPink" cx="40%" cy="65%" r="50%">
+      <stop offset="0%" stop-color="#F472B6" stop-opacity="0.7" />
+      <stop offset="50%" stop-color="#FB7185" stop-opacity="0.5" />
+      <stop offset="100%" stop-color="#F43F5E" stop-opacity="0" />
+    </radialGradient>
+
+    <filter id="cardShadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="24" flood-color="#000000" flood-opacity="0.06" />
+    </filter>
+  </defs>
+
+  <style>
+    .headline {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", "Helvetica Neue", sans-serif;
+      font-weight: 700;
+      font-size: 78px;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      fill: #0A0A0C;
+    }
+    .brand-text {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", sans-serif;
+      font-weight: 700;
+      font-size: 34px;
+      letter-spacing: -0.03em;
+      fill: #0A0A0C;
+    }
+    .smile-stroke {
+      stroke: #FFFFFF;
+      stroke-width: 7;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+  </style>
+
+  <!-- Clean Base Canvas -->
+  <rect width="1200" height="630" fill="url(#bgGrad)" />
+
+  <!-- Right Side: Glowing Multi-Layer Pastel Orb -->
+  <g transform="translate(860, 315)">
+    <!-- Blur Aura Spheres -->
+    <circle cx="-30" cy="-20" r="240" fill="url(#orbViolet)" filter="url(#softGlow)" />
+    <circle cx="50" cy="20" r="250" fill="url(#orbBlue)" filter="url(#softGlow)" />
+    <circle cx="-20" cy="60" r="220" fill="url(#orbPink)" filter="url(#softGlow)" />
+
+    <!-- Sharp Vibrant Inner Orb -->
+    <circle cx="0" cy="0" r="215" fill="url(#orbViolet)" opacity="0.65" />
+    <circle cx="20" cy="15" r="210" fill="url(#orbBlue)" opacity="0.75" />
+    <circle cx="-15" cy="30" r="190" fill="url(#orbPink)" opacity="0.55" />
+
+    <!-- Minimalist Friendly Smiling Face in Center of Orb -->
+    <g transform="translate(0, -10)">
+      <!-- Left Eye (Happy closed arch ^) -->
+      <path d="M -56 -24 Q -42 -44 -28 -24" class="smile-stroke" />
+      
+      <!-- Right Eye (Happy closed arch ^) -->
+      <path d="M 28 -24 Q 42 -44 56 -24" class="smile-stroke" />
+
+      <!-- Friendly Smile Arc -->
+      <path d="M -50 18 Q 0 76 50 18" class="smile-stroke" stroke-width="8" />
+    </g>
+  </g>
+
+  <!-- Left Side: Editorial Typography -->
+  <g transform="translate(100, 140)">
+    <text class="headline">
+      <tspan x="0" y="0">Try hand-picked</tspan>
+      <tspan x="0" y="88">Mac apps</tspan>
+      <tspan x="0" y="176">on the internet</tspan>
+    </text>
+  </g>
+
+  <!-- Bottom Left: Brand Icon & Logo Wordmark -->
+  <g transform="translate(100, 480)">
+    <!-- Squircle Icon Container -->
+    <rect x="0" y="0" width="56" height="56" rx="16" fill="#0A0A0C" />
+    
+    <!-- Stylized Minimal Mac Smiling Display inside squircle -->
+    <g transform="translate(28, 28) scale(0.65)">
+      <!-- Left Eye -->
+      <path d="M -16 -8 Q -10 -16 -4 -8" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" fill="none" />
+      <!-- Right Eye -->
+      <path d="M 4 -8 Q 10 -16 16 -8" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" fill="none" />
+      <!-- Smile -->
+      <path d="M -14 6 Q 0 22 14 6" stroke="#FFFFFF" stroke-width="3.5" stroke-linecap="round" fill="none" />
+    </g>
+
+    <!-- Wordmark -->
+    <text x="74" y="39" class="brand-text">PickMacApps</text>
+  </g>
+</svg>
