@@ -46,7 +46,7 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
           <span className="flex h-5 w-5 items-center justify-center rounded-md bg-amber-500/15 text-xs text-amber-500">
             🏆
           </span>
-          <span className="font-semibold text-ink">Top 10 Leaderboard</span>
+          <h2 className="font-semibold text-ink text-xs inline">Top 10 Leaderboard</h2>
           <span className="hidden sm:inline-block rounded-full bg-surface-2 px-2 py-0.5 text-[10.5px] font-medium text-muted">
             Ranked by Community Upvotes
           </span>

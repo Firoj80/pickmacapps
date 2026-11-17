@@ -10,11 +10,11 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "Best Mac Apps in 2026 | Hand-Picked Mac Software";
+const homeTitle = "A hand-picked shelf of beautifully designed macOS apps — PickMacApps";
 const homeDescription =
-  "Discover the best Mac apps for productivity, development, design and everyday work. Explore hand-picked macOS software, free apps and useful alternatives.";
-const homeImageAlt = "Best Mac Apps in 2026 | Hand-Picked Mac Software";
-const homeH1 = "Discover the Best Mac Apps Worth Installing";
+  "Discover the best Mac apps in one place. Explore a growing collection of handpicked macOS apps for productivity, development, design, AI, and more, built by talented developers worldwide.";
+const homeImageAlt = "A hand-picked shelf of beautifully designed macOS apps — PickMacApps";
+const homeH1 = "Try the best hand-picked mac apps on the internet";
 
 const homeFaqs = [
   {
@@ -335,15 +335,15 @@ function Home() {
         <section className="px-5 md:px-8 xl:px-10 pt-8 sm:pt-10 md:pt-14 pb-2.5 sm:pb-6 md:pb-10">
           <div className="max-w-5xl xl:max-w-6xl">
             <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[46px] md:text-[54px] xl:text-[60px]">
-              A hand-picked shelf of{" "}
-              <span className="text-muted">beautifully designed</span>{" "}
+              Try the best hand-picked{" "}
+              <span className="text-muted">Mac apps</span>{" "}
               <span className="inline-flex items-center align-middle">
                 <MacLogo className="mx-1 inline h-[0.78em] w-[0.78em] -translate-y-[0.06em] text-ink" />
               </span>
-              macOS apps.
+              on the internet.
             </h1>
             <p className="mt-3 text-[14px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
-              Discover thoughtfully crafted tools, utilities, and indie software for your Mac.
+              Discover the best Mac apps in one place. Explore a growing collection of handpicked macOS apps for productivity, development, design, AI, and more, built by talented developers worldwide.
             </p>
 
             {/* Mobile: Black Friday Sale Countdown (below the site title, hot app icons hidden for now) */}
@@ -375,6 +375,15 @@ function Home() {
 
       {/* Direct Apps Grid */}
       <div className="w-full px-5 md:px-8 xl:px-10 pt-1 sm:pt-3 md:pt-6 pb-6">
+        <h2 className="sr-only">
+          {sort === "hot"
+            ? "Hot Mac apps"
+            : sort === "new"
+            ? "Latest Mac apps"
+            : sort === "trending"
+            ? "Trending Mac apps"
+            : "Featured Mac apps"}
+        </h2>
         {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) - Mobile only (desktop uses left sidebar) */}
         <div className="mb-4 sm:mb-6 flex lg:hidden flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
           <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">

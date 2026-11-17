@@ -9,7 +9,7 @@ export function GuideStrip({ posts }: { posts: Post[] }) {
   return (
     <section className="mt-20">
       <div className="flex items-center gap-5">
-        <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Guides to the best Mac apps</h2>
+        <h2 className="shrink-0 text-[19px] font-[550] tracking-[-0.025em] text-ink">Latest guides</h2>
         <span aria-hidden="true" className="h-px flex-1 bg-line" />
         <Link
           to="/blog"
