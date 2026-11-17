@@ -5,13 +5,13 @@ import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
 
-export type HeroSort = "hot" | "new" | "trending" | "free";
+export type HeroSort = "featured" | "hot" | "new" | "trending" | "free";
 
 export function AppGrid({
   apps,
   query,
   category = "all",
-  sort = "hot",
+  sort = "featured",
   categories = [],
   onQuery,
   onCategory,

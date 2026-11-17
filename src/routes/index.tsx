@@ -35,7 +35,7 @@ const homeFaqs = [
   },
 ];
 
-type HeroSort = "hot" | "new" | "trending" | "free";
+type HeroSort = "featured" | "hot" | "new" | "trending" | "free";
 
 function inHeroCategory(app: AppItem, category: string) {
   if (category === "all") return true;
@@ -81,7 +81,21 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
     });
     return next;
   }
-  // Hot tab (default): Gold apps (1st, oldest first), Blue apps (2nd, oldest first), Hot 🔥 apps (3rd, oldest first), then standard apps (oldest first)
+  if (sort === "hot") {
+    // Hot 🔥 apps tab: prioritize Hot apps on top, then Featured apps, then standard apps
+    next.sort((a, b) => {
+      const hotA = a.isHot ? 1 : 0;
+      const hotB = b.isHot ? 1 : 0;
+      if (hotB !== hotA) return hotB - hotA;
+      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
+      if (pDiff !== 0) return pDiff;
+      const timeA = new Date(a.createdAt).getTime() || 0;
+      const timeB = new Date(b.createdAt).getTime() || 0;
+      return timeA - timeB || a.name.localeCompare(b.name);
+    });
+    return next;
+  }
+  // Featured tab (default): Gold apps (1st, oldest first), Blue apps (2nd, oldest first), Hot 🔥 apps (3rd, oldest first), then standard apps (oldest first)
   return shelfApps(next);
 }
 
@@ -98,14 +112,16 @@ export const Route = createFileRoute("/")({
     const next: { q?: string; cat?: string; sort?: HeroSort } = {};
     if (typeof search.q === "string" && search.q) next.q = search.q;
     if (typeof search.cat === "string" && search.cat && search.cat !== "all") next.cat = search.cat;
-    if (search.sort === "new" || search.sort === "trending" || search.sort === "hot" || search.sort === "free") next.sort = search.sort;
+    if (search.sort === "featured" || search.sort === "new" || search.sort === "trending" || search.sort === "hot" || search.sort === "free") {
+      next.sort = search.sort;
+    }
     return next;
   },
   component: Home,
   head: ({ matches }) => {
     const origin = originFrom(matches);
     const search = matches.at(-1)?.search as { q?: string; cat?: string; sort?: HeroSort } | undefined;
-    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all") || search?.sort);
+    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all") || (search?.sort && search.sort !== "featured"));
     const seo = buildMetadata({
       title: homeTitle,
       description: homeDescription,
@@ -115,7 +131,7 @@ export const Route = createFileRoute("/")({
     });
     const directory = matches[0]?.context.directory;
     const list = publishedApps(directory);
-    const topApps = arrangeHero(list, "hot");
+    const topApps = arrangeHero(list, "featured");
     const lcpCover = topApps[0]?.demo ? appCoverUrl(topApps[0].demo) : "";
     const lcpPreload: Array<{ rel: "preload"; as: "image"; href: string; fetchPriority: "high" | "low" | "auto" }> = lcpCover
       ? [{ rel: "preload", as: "image", href: lcpCover, fetchPriority: "high" }]
@@ -205,7 +221,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
 
 function Home() {
   const rawSearch = Route.useSearch();
-  const { q = "", cat = "all", sort = "hot" } = rawSearch;
+  const { q = "", cat = "all", sort = "featured" } = rawSearch;
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
@@ -224,7 +240,11 @@ function Home() {
     sort,
   );
 
-  const isFiltered = Boolean(rawSearch.sort || (rawSearch.cat && rawSearch.cat !== "all") || rawSearch.q);
+  const isFiltered = Boolean(
+    (rawSearch.sort && rawSearch.sort !== "featured") ||
+    (rawSearch.cat && rawSearch.cat !== "all") ||
+    rawSearch.q
+  );
 
   function updateSearch(next: { q?: string; cat?: string; sort?: HeroSort }) {
     navigate({
@@ -244,7 +264,7 @@ function Home() {
         <section className="px-5 md:px-8 xl:px-10 pt-8 pb-3">
           <div className="flex items-center justify-between gap-4 border-b border-line pb-4">
             <h1 className="font-display text-[26px] sm:text-[32px] md:text-[36px] font-bold tracking-tight text-ink flex items-center gap-2.5">
-              {cat === "pick" ? (
+              {cat === "pick" || sort === "featured" ? (
                 <>
                   <span>Featured Mac apps</span>
                   <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent text-sm">
@@ -321,9 +341,9 @@ function Home() {
             {/* Featured */}
             <Link
               to="/"
-              search={{ sort: "hot", cat: "pick" }}
+              search={{ sort: "featured", cat: "all" }}
               className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-                cat === "pick"
+                sort === "featured" || cat === "pick"
                   ? "bg-ink text-canvas shadow-xs"
                   : "text-muted hover:bg-surface-2 hover:text-ink"
               }`}

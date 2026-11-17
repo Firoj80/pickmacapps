@@ -19,8 +19,9 @@ export function SiteSidebarContent({
   const topCategories = categories.slice(0, 8);
 
   const isHome = currentPath === "/";
-  const activeSort = isHome ? (currentSearch.sort || "hot") : "";
+  const activeSort = isHome ? (currentSearch.sort || "featured") : "";
   const isPick = isHome && currentSearch.cat === "pick";
+  const isFeatured = isHome && (activeSort === "featured" || isPick);
 
   const handleLinkClick = () => {
     if (onClose) onClose();
@@ -99,10 +100,10 @@ export function SiteSidebarContent({
         <div className="mt-1.5 space-y-0.5">
           <Link
             to="/"
-            search={{ sort: "hot", cat: "pick" }}
+            search={{ sort: "featured", cat: "all" }}
             onClick={handleLinkClick}
             className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
-              isHome && isPick
+              isFeatured
                 ? "bg-surface font-semibold text-ink shadow-2xs border border-line/60"
                 : "text-muted hover:bg-surface/70 hover:text-ink"
             }`}
