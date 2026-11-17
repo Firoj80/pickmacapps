@@ -12,9 +12,9 @@ import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
 const homeTitle = "A hand-picked shelf of beautifully designed macOS apps — PickMacApps";
 const homeDescription =
-  "Discover the best Mac apps in one place. Explore a growing collection of handpicked macOS apps for productivity, development, design, AI, and more, built by talented developers worldwide.";
-const homeImageAlt = "A hand-picked shelf of beautifully designed macOS apps — PickMacApps";
-const homeH1 = "Try the best hand-picked mac apps on the internet";
+  "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps";
+const homeImageAlt = "Try hand-picked mac apps on the internet — PickMacApps";
+const homeH1 = "Try hand-picked mac apps on the internet";
 
 const homeFaqs = [
   {
@@ -125,6 +125,10 @@ export const Route = createFileRoute("/")({
     const seo = buildMetadata({
       title: homeTitle,
       description: homeDescription,
+      ogTitle: "Try hand-picked mac apps on the internet",
+      twitterTitle: "Try hand-picked mac apps on the internet",
+      ogDescription: "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps",
+      twitterDescription: "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps",
       path: "/",
       origin,
       imageAlt: homeImageAlt,
@@ -335,7 +339,7 @@ function Home() {
         <section className="px-5 md:px-8 xl:px-10 pt-8 sm:pt-10 md:pt-14 pb-2.5 sm:pb-6 md:pb-10">
           <div className="max-w-5xl xl:max-w-6xl">
             <h1 className="font-display text-[34px] font-bold leading-[1.06] tracking-[-0.035em] text-ink sm:text-[46px] md:text-[54px] xl:text-[60px]">
-              Try the best hand-picked{" "}
+              Try hand-picked{" "}
               <span className="text-muted">Mac apps</span>{" "}
               <span className="inline-flex items-center align-middle">
                 <MacLogo className="mx-1 inline h-[0.78em] w-[0.78em] -translate-y-[0.06em] text-ink" />
@@ -343,7 +347,7 @@ function Home() {
               on the internet.
             </h1>
             <p className="mt-3 text-[14px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
-              Discover the best Mac apps in one place. Explore a growing collection of handpicked macOS apps for productivity, development, design, AI, and more, built by talented developers worldwide.
+              Explore a hand-picked collection of beautiful, useful, and powerful Mac apps.
             </p>
 
             {/* Mobile: Black Friday Sale Countdown (below the site title, hot app icons hidden for now) */}

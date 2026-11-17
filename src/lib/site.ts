@@ -6,7 +6,7 @@ export const site = {
   url: PRIMARY_ORIGIN,
   title: "A hand-picked shelf of beautifully designed macOS apps — PickMacApps",
   description:
-    "Discover the best Mac apps in one place. Explore a growing collection of handpicked macOS apps for productivity, development, design, AI, and more, built by talented developers worldwide.",
+    "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps",
   logoPath: "/favicon.svg",
   ogImage: "/og-v2.jpg",
   ogImageAlt: "PickMacApps — Hand-Picked Mac Software & Best Mac Apps in 2026",
