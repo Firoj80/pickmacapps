@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { AppAlternatives } from "@/components/app-alternatives";
@@ -13,6 +13,7 @@ import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy, site } from "@/lib/site";
 import { trackGoal } from "@/lib/analytics";
+import { getAppTotalClicks, trackAppClick } from "@/lib/click-tracking";
 
 function appShareImage(demo?: string) {
   const clean = demo?.trim() ?? "";
@@ -22,15 +23,6 @@ function appShareImage(demo?: string) {
 
 function appMetaDescription(app: AppItem): string {
   return `Discover ${app.name} for Mac. Explore its features, pricing, compatibility and alternatives.`;
-}
-
-function trackTryApp(appId?: string) {
-  if (typeof window === "undefined" || !appId) return;
-  fetch("/api/track", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ appId, type: "try" }),
-  }).catch(() => {});
 }
 
 function formatTimeAgo(dateString?: string): string {
@@ -166,12 +158,12 @@ function AppPage() {
   const related = [...explicitRelated, ...sameCategory, ...others].slice(0, 4);
   const choice = isEditorChoice(app);
 
-  const realClicks = Number(app.clickCount ?? 0) + Number(app.tryCount ?? 0);
-  const [clicks, setClicks] = useState(
-    realClicks > 0
-      ? realClicks
-      : Math.max(14, ((app.name.charCodeAt(0) * 17) % 160) + 24)
-  );
+  const initialClicks = getAppTotalClicks(app);
+  const [clicks, setClicks] = useState(initialClicks);
+
+  useEffect(() => {
+    setClicks(getAppTotalClicks(app));
+  }, [app.id, app.slug, app.clickCount, app.tryCount]);
   const [copied, setCopied] = useState(false);
 
   let authorName = app.developerName || "Indie Developer";
@@ -341,8 +333,12 @@ function AppPage() {
                   data-ml-goal="try_app"
                   onClick={() => {
                     trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website });
-                    trackTryApp(app.id);
                     setClicks((c) => c + 1);
+                    void trackAppClick(app.id, app.slug, "try").then((res) => {
+                      if (res.ok && typeof res.totalClicks === "number") {
+                        setClicks(res.totalClicks);
+                      }
+                    });
                   }}
                   className="flex flex-1 items-center justify-center gap-2 rounded-full bg-ink px-5 py-3 text-[14px] font-semibold text-canvas transition-all duration-200 hover:opacity-90 shadow-2xs active:scale-[0.99] cursor-pointer"
                 >

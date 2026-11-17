@@ -1994,14 +1994,42 @@ export async function expireOldHotApps(): Promise<number> {
 // -------------------------------------------------------------
 // Click & Try-App Tracking
 // -------------------------------------------------------------
-export async function recordAppClick(appId: string, type: "click" | "try"): Promise<boolean> {
+export type RecordClickResult = {
+  ok: boolean;
+  clickCount: number;
+  tryCount: number;
+  totalClicks: number;
+};
+
+export async function recordAppClick(
+  appIdOrSlug: string,
+  type: "click" | "try",
+): Promise<RecordClickResult> {
+  if (!appIdOrSlug || typeof appIdOrSlug !== "string") {
+    return { ok: false, clickCount: 0, tryCount: 0, totalClicks: 0 };
+  }
+  const cleanTarget = appIdOrSlug.trim();
   const sql = await directorySql();
   const column = type === "try" ? "try_count" : "click_count";
-  const rows = await sql.query<{ id: string }>(
-    `update apps set ${column} = coalesce(${column}, 0) + 1 where id = $1 returning id`,
-    [appId],
+  const rows = await sql.query<AppRow>(
+    `update apps
+     set ${column} = coalesce(${column}, 0) + 1, updated_at = now()
+     where id = $1 or slug = $1
+     returning id, click_count, try_count`,
+    [cleanTarget],
   );
-  return rows.length > 0;
+  if (rows.length > 0) {
+    invalidatePublishedDirectoryCache();
+    const clickCount = Number(rows[0].click_count ?? 0);
+    const tryCount = Number(rows[0].try_count ?? 0);
+    return {
+      ok: true,
+      clickCount,
+      tryCount,
+      totalClicks: clickCount + tryCount,
+    };
+  }
+  return { ok: false, clickCount: 0, tryCount: 0, totalClicks: 0 };
 }
 
 // -------------------------------------------------------------

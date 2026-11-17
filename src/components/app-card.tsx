@@ -9,6 +9,8 @@ function coverSrc(demo: string) {
   return clean;
 }
 
+import { trackAppClick } from "@/lib/click-tracking";
+
 export function getOrSetVisitorId(): string {
   if (typeof window === "undefined") return "";
   let vid = localStorage.getItem("pma_vid");
@@ -19,13 +21,8 @@ export function getOrSetVisitorId(): string {
   return vid;
 }
 
-export function trackClick(appId: string, type: "click" | "try") {
-  if (typeof window === "undefined" || !appId) return;
-  fetch("/api/track", {
-    method: "POST",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ appId, type }),
-  }).catch(() => {});
+export function trackClick(appId: string, type: "click" | "try" = "click") {
+  void trackAppClick(appId, undefined, type);
 }
 
 export function AppCard({ app, priority = false }: { app: AppItem; size?: "lg" | "md" | "sm"; priority?: boolean }) {
