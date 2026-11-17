@@ -4,7 +4,7 @@ export const PRIMARY_ORIGIN = "https://pickmacapps.store";
 export const site = {
   name: "PickMacApps",
   url: PRIMARY_ORIGIN,
-  title: "A hand-picked shelf of beautifully designed macOS apps — PickMacApps",
+  title: "PickMacApps - Discover the best hand-picked mac apps",
   description:
     "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps",
   logoPath: "/favicon.svg",

@@ -10,7 +10,7 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 
-const homeTitle = "A hand-picked shelf of beautifully designed macOS apps — PickMacApps";
+const homeTitle = "PickMacApps - Discover the best hand-picked mac apps";
 const homeDescription =
   "Explore a hand-picked collection of beautiful, useful, and powerful Mac apps";
 const homeImageAlt = "Try hand-picked mac apps on the internet — PickMacApps";
