@@ -95,7 +95,10 @@ function Frame() {
 
         {/* Right Shell Box (Floating rounded surface on desktop, natural layout on mobile) */}
         <div className="min-w-0 lg:h-full lg:min-h-0 lg:py-2.5 lg:pr-2.5">
-          <div className="site-shell-box min-h-[calc(100vh-20px)] lg:h-full lg:overflow-y-auto lg:overscroll-y-contain lg:rounded-[24px] lg:border lg:border-line/70 flex flex-col justify-between">
+          <div
+            data-scroll-restoration-id="site-shell-box"
+            className="site-shell-box min-h-[calc(100vh-20px)] lg:h-full lg:overflow-y-auto lg:overscroll-y-contain lg:rounded-[24px] lg:border lg:border-line/70 flex flex-col justify-between"
+          >
             {/* Mobile Header (Hidden on lg+) */}
             <SiteHeader onOpenSearch={() => setSearchOpen(true)} />
 

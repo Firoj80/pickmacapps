@@ -14,6 +14,8 @@ if (typeof window !== "undefined") {
 export function getRouter() {
   return createRouter({
     routeTree,
+    scrollRestoration: true,
+    scrollToTopSelectors: [".site-shell-box", '[data-scroll-restoration-id="site-shell-box"]'],
     defaultPreload: "intent",
     defaultPreloadStaleTime: 300_000,
     defaultStaleTime: 300_000,
