@@ -5,8 +5,13 @@ import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
+const MAX_HOME_TIER_SLOTS = 3; // 3 Gold + 3 Blue = 6 total sponsored home slots
 
 export type HeroSort = "featured" | "hot" | "new" | "trending" | "free";
+
+type GridItem =
+  | { kind: "app"; app: AppItem; priority: boolean }
+  | { kind: "claim"; tier: "article" | "featured" };
 
 export function AppGrid({
   apps,
@@ -34,6 +39,7 @@ export function AppGrid({
   const [order, setOrder] = useState<"oldest" | "newest" | "name" | "free">("oldest");
   const [page, setPage] = useState(0);
 
+  // Standard filtered view (search, category, sort tabs)
   const visible = useMemo(() => {
     if (!arranged) return shelfApps(apps, query, category, order);
     const needle = query.trim().toLowerCase();
@@ -46,42 +52,61 @@ export function AppGrid({
     setPage(0);
   }, [query, category, order, sort]);
 
+  // Default home feed: no search, all categories, featured sort
   const isDefaultHomeFeed =
     category === "all" &&
     !query.trim() &&
     (sort === "featured" || !sort);
 
-  const { topRow1, topRow2, followingApps } = useMemo(() => {
-    if (!isDefaultHomeFeed) {
-      return { topRow1: [], topRow2: [], followingApps: [] };
-    }
+  // Build the fluid priority-queue display list for the default home feed
+  const displayItems = useMemo((): GridItem[] => {
+    if (!isDefaultHomeFeed) return [];
 
-    const sortOldest = (a: AppItem, b: AppItem) => {
-      const timeA = new Date(a.createdAt).getTime() || 0;
-      const timeB = new Date(b.createdAt).getTime() || 0;
-      return timeA - timeB || a.name.localeCompare(b.name);
+    const byOldest = (a: AppItem, b: AppItem) => {
+      const tA = new Date(a.createdAt).getTime() || 0;
+      const tB = new Date(b.createdAt).getTime() || 0;
+      return tA - tB || a.name.localeCompare(b.name);
     };
 
-    const goldApps = [...apps.filter((a) => isEditorChoice(a) && a.featuredTier === "article")].sort(sortOldest);
-    const blueApps = [...apps.filter((a) => isEditorChoice(a) && a.featuredTier !== "article")].sort(sortOldest);
+    // Priority 1: Gold badge apps (editorChoice + featuredTier="article"), oldest first, max 3
+    const goldApps = apps
+      .filter((a) => isEditorChoice(a) && a.featuredTier === "article")
+      .sort(byOldest)
+      .slice(0, MAX_HOME_TIER_SLOTS);
 
-    const topGold = goldApps.slice(0, 3);
-    const extraGold = goldApps.slice(3);
+    // Priority 2: Blue badge apps (editorChoice + featuredTier="featured"), oldest first, max 3
+    const blueApps = apps
+      .filter((a) => isEditorChoice(a) && a.featuredTier !== "article")
+      .sort(byOldest)
+      .slice(0, MAX_HOME_TIER_SLOTS);
 
-    const topBlue = blueApps.slice(0, 3);
-    const extraBlue = blueApps.slice(3);
+    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first
+    const hotApps = apps
+      .filter((a) => Boolean(a.isHot) && !isEditorChoice(a))
+      .sort(byOldest);
 
-    const otherApps = apps.filter((a) => !isEditorChoice(a));
+    // Priority 4: All other apps (not editor choice, not hot), oldest first
+    const otherApps = apps
+      .filter((a) => !isEditorChoice(a) && !a.isHot)
+      .sort(byOldest);
 
-    return {
-      topRow1: topGold,
-      topRow2: topBlue,
-      followingApps: [...extraGold, ...extraBlue, ...otherApps],
-    };
+    const goldFull = goldApps.length >= MAX_HOME_TIER_SLOTS;
+    const blueFull = blueApps.length >= MAX_HOME_TIER_SLOTS;
+
+    return [
+      // Gold badge apps first
+      ...goldApps.map((app, i) => ({ kind: "app" as const, app, priority: i < 2 })),
+      // Blue badge apps next
+      ...blueApps.map((app) => ({ kind: "app" as const, app, priority: false })),
+      // Claim cards appear together right after all badge apps
+      ...(!goldFull ? [{ kind: "claim" as const, tier: "article" as const }] : []),
+      ...(!blueFull ? [{ kind: "claim" as const, tier: "featured" as const }] : []),
+      // Hot apps
+      ...hotApps.map((app) => ({ kind: "app" as const, app, priority: false })),
+      // All remaining apps, oldest first
+      ...otherApps.map((app) => ({ kind: "app" as const, app, priority: false })),
+    ];
   }, [apps, isDefaultHomeFeed]);
-
-  const totalFeedItems = isDefaultHomeFeed ? 6 + followingApps.length : visible.length;
-  const pages = Math.ceil(totalFeedItems / PAGE);
 
   const categoryList =
     categories.length > 0
@@ -91,10 +116,21 @@ export function AppGrid({
           ...shelfCategories.map((c) => ({ id: c.slug, label: c.name })),
         ];
 
+  // Pagination
+  const totalItems = isDefaultHomeFeed ? displayItems.length : visible.length;
+  const pages = Math.ceil(totalItems / PAGE);
+  const start = page * PAGE;
+  const end = Math.min(start + PAGE, totalItems);
+
+  // Count actual app items (excluding claim cards) for display label
+  const appCount = isDefaultHomeFeed
+    ? displayItems.filter((item) => item.kind === "app").length
+    : visible.length;
+
   let contentNodes: ReactNode = null;
   let countLabel = "";
 
-  if (visible.length === 0) {
+  if (!isDefaultHomeFeed && visible.length === 0) {
     contentNodes = (
       <div className="mt-8 rounded-2xl border border-dashed border-line p-8 text-center">
         <p className="text-[15px] font-medium text-ink">No apps match that filter</p>
@@ -103,57 +139,34 @@ export function AppGrid({
     );
     countLabel = "Showing 0 apps";
   } else if (isDefaultHomeFeed) {
-    if (page === 0) {
-      const page0Followers = followingApps.slice(0, PAGE - 6);
-      const appsOnPage = topRow1.length + topRow2.length + page0Followers.length;
-      countLabel = `Showing 1–${Math.min(apps.length, appsOnPage)} of ${apps.length} apps`;
+    const pageItems = displayItems.slice(start, end);
+    const pageAppCount = pageItems.filter((item) => item.kind === "app").length;
+    // Count apps shown so far (not claim cards)
+    const appsBeforePage = displayItems.slice(0, start).filter((i) => i.kind === "app").length;
+    const appsEndPage = appsBeforePage + pageAppCount;
+    countLabel =
+      appCount === 0
+        ? "Showing 0 apps"
+        : `Showing ${appsBeforePage + 1}–${appsEndPage} of ${appCount} apps`;
 
-      contentNodes = (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-          {/* Row 1: Dedicated top 3 Golden Badge spots */}
-          {[0, 1, 2].map((i) => {
-            const goldApp = topRow1[i];
-            return goldApp ? (
-              <AppCard key={goldApp.id} app={goldApp} priority />
-            ) : (
-              <ClaimSpotCard key={`gold-spot-${i + 1}`} tier="article" spotIndex={i + 1} />
-            );
-          })}
-
-          {/* Row 2: Dedicated top 3 Blue Badge spots */}
-          {[0, 1, 2].map((i) => {
-            const blueApp = topRow2[i];
-            return blueApp ? (
-              <AppCard key={blueApp.id} app={blueApp} priority={false} />
-            ) : (
-              <ClaimSpotCard key={`blue-spot-${i + 1}`} tier="featured" spotIndex={i + 1} />
-            );
-          })}
-
-          {/* Following Rows: Remaining Gold/Blue apps, followed by Hot and standard catalog apps */}
-          {page0Followers.map((app) => (
-            <AppCard key={app.id} app={app} />
-          ))}
-        </div>
-      );
-    } else {
-      const startIdx = (PAGE - 6) + (page - 1) * PAGE;
-      const pageFollowers = followingApps.slice(startIdx, startIdx + PAGE);
-      const startAppNum = topRow1.length + topRow2.length + (PAGE - 6) + (page - 1) * PAGE + 1;
-      const endAppNum = Math.min(apps.length, startAppNum + pageFollowers.length - 1);
-      countLabel = `Showing ${startAppNum}–${endAppNum} of ${apps.length} apps`;
-
-      contentNodes = (
-        <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-          {pageFollowers.map((app) => (
-            <AppCard key={app.id} app={app} />
-          ))}
-        </div>
-      );
-    }
+    contentNodes = (
+      <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        {pageItems.map((item, i) => {
+          if (item.kind === "claim") {
+            return <ClaimSpotCard key={`claim-${item.tier}`} tier={item.tier} />;
+          }
+          return (
+            <AppCard
+              key={item.app.id}
+              app={item.app}
+              priority={item.priority}
+            />
+          );
+        })}
+      </div>
+    );
   } else {
-    const start = page * PAGE;
-    const slice = visible.slice(start, start + PAGE);
+    const slice = visible.slice(start, end);
     const last = Math.min(start + PAGE, visible.length);
     countLabel = `Showing ${start + 1}–${last} of ${visible.length} apps`;
 
@@ -172,17 +185,15 @@ export function AppGrid({
 
       {pages > 1 ? (
         <nav className="mt-8 flex items-center justify-center gap-2" aria-label="App pages">
-          <PageButton label="Previous page" disabled={page === 0} onClick={() => setPage((value) => value - 1)}>
+          <PageButton label="Previous page" disabled={page === 0} onClick={() => setPage((v) => v - 1)}>
             <path d="M20 12H4M11 19l-7-7 7-7" />
           </PageButton>
-          <PageButton label="Next page" disabled={page >= pages - 1} onClick={() => setPage((value) => value + 1)}>
+          <PageButton label="Next page" disabled={page >= pages - 1} onClick={() => setPage((v) => v + 1)}>
             <path d="M4 12h16M13 5l7 7-7 7" />
           </PageButton>
         </nav>
       ) : null}
-      <p className="mt-4 text-center text-[13px] text-muted">
-        {countLabel}
-      </p>
+      <p className="mt-4 text-center text-[13px] text-muted">{countLabel}</p>
     </section>
   );
 }
@@ -206,7 +217,16 @@ function PageButton({
       onClick={onClick}
       className="inline-flex h-9 w-9 items-center justify-center rounded-lg border border-line bg-surface text-ink transition-colors hover:border-line-2 disabled:cursor-not-allowed disabled:opacity-40"
     >
-      <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <svg
+        className="h-3.5 w-3.5"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
         {children}
       </svg>
     </button>

@@ -484,8 +484,8 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
   }
 }
 
-export const MAX_EDITOR_CHOICE_SLOTS = 12;
-export const MAX_TIER_SLOTS = 6; // 6 Blue (Featured) + 6 Gold (Article) = 12 total
+export const MAX_EDITOR_CHOICE_SLOTS = 6;
+export const MAX_TIER_SLOTS = 3; // 3 Blue (Featured) + 3 Gold (Article) = 6 total
 export const FEATURED_APP_DURATION_DAYS = 7;
 
 export function getNextCycleLabel(now = new Date()): string {
