@@ -69,6 +69,9 @@ function LeaderboardPage() {
       ? sortedApps.slice(3, 30)
       : sortedApps.slice(startIndex, startIndex + pageSize);
 
+  // Mobile always displays all 30 apps of the page in the thinner card view
+  const mobileApps = sortedApps.slice(startIndex, startIndex + pageSize);
+
   const baseRank = currentPage === 1 ? 4 : startIndex + 1;
 
   function goToPage(p: number) {
@@ -138,9 +141,9 @@ function LeaderboardPage() {
         </div>
       </header>
 
-      {/* Top 3 Podium Cards on Page 1 - Strictly 1 then 2 then 3 */}
+      {/* Top 3 Podium Cards on Page 1 - Strictly 1 then 2 then 3 (Desktop only; on mobile all apps render in the unified thin feed) */}
       {currentPage === 1 && sortedApps.length >= 3 ? (
-        <section aria-label="Top 3 Ranked Apps" className="mb-6 sm:mb-10">
+        <section aria-label="Top 3 Ranked Apps" className="mb-6 sm:mb-10 hidden sm:block">
           <div className="mb-3 sm:mb-4 flex items-center justify-between">
             <h2 className="text-xs sm:text-sm font-bold uppercase tracking-wider text-muted flex items-center gap-1.5">
               <span>🏆</span>
@@ -149,8 +152,8 @@ function LeaderboardPage() {
             <span className="text-[11px] sm:text-xs text-muted">Rank #1 to #3</span>
           </div>
 
-          {/* Strictly 1, then 2, then 3 for both mobile single-column and desktop 3-column */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4">
+          {/* Strictly 1, then 2, then 3 for desktop 3-column */}
+          <div className="grid sm:grid-cols-3 gap-4">
             {/* Rank 1 (Gold) */}
             <PodiumCard app={sortedApps[0]} rank={1} tone="gold" />
             {/* Rank 2 (Silver) */}
@@ -168,7 +171,7 @@ function LeaderboardPage() {
             <h2 className="text-sm sm:text-base font-bold text-ink">Catalog Rankings</h2>
             <p className="text-[11px] sm:text-xs text-muted">
               {currentPage === 1
-                ? `Showing apps #4 to #${Math.min(30, totalApps)} of ${totalApps} (Top 3 featured in Podium above)`
+                ? `Showing apps #1 to #${Math.min(30, totalApps)} of ${totalApps}`
                 : `Showing apps #${startIndex + 1} to #${Math.min(startIndex + pageSize, totalApps)} of ${totalApps}`}
             </p>
           </div>
@@ -179,15 +182,26 @@ function LeaderboardPage() {
           </div>
         </div>
 
-        {listApps.length === 0 ? (
+        {mobileApps.length === 0 ? (
           <div className="p-8 sm:p-12 text-center text-xs sm:text-sm text-muted">No apps found on this page.</div>
         ) : (
-          <div className="divide-y divide-line">
-            {listApps.map((app, idx) => {
-              const rank = baseRank + idx;
-              return <LeaderboardRow key={app.id || app.slug} app={app} rank={rank} />;
-            })}
-          </div>
+          <>
+            {/* MOBILE VIEW (< sm): Thinner cards list with ranking */}
+            <div className="sm:hidden p-2.5 space-y-2.5">
+              {mobileApps.map((app, idx) => {
+                const rank = startIndex + idx + 1;
+                return <LeaderboardMobileCard key={app.id || app.slug} app={app} rank={rank} />;
+              })}
+            </div>
+
+            {/* DESKTOP VIEW (>= sm): Table rows */}
+            <div className="hidden sm:block divide-y divide-line">
+              {listApps.map((app, idx) => {
+                const rank = baseRank + idx;
+                return <LeaderboardRow key={app.id || app.slug} app={app} rank={rank} />;
+              })}
+            </div>
+          </>
         )}
 
         {/* Pagination Bar - Mobile touch-optimized */}
@@ -524,5 +538,272 @@ function LeaderboardUpvoteButton({ app }: { app: AppItem }) {
       <span>{upvotes}</span>
       {hasVoted ? <span className="text-[10px] font-normal text-muted">voted</span> : null}
     </button>
+  );
+}
+
+function LeaderboardMobileCard({ app, rank }: { app: AppItem; rank: number }) {
+  const [upvotes, setUpvotes] = useState(app.upvoteCount ?? 0);
+  const [hasVoted, setHasVoted] = useState(false);
+  const [voting, setVoting] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && app.id) {
+      try {
+        const votedList = JSON.parse(localStorage.getItem("pma_voted") || "[]");
+        if (Array.isArray(votedList) && votedList.includes(app.id)) {
+          setHasVoted(true);
+        }
+      } catch {}
+    }
+  }, [app.id]);
+
+  const handleUpvote = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (hasVoted || voting || !app.id) return;
+
+    setVoting(true);
+    setUpvotes((prev) => prev + 1);
+    setHasVoted(true);
+
+    try {
+      const votedList = JSON.parse(localStorage.getItem("pma_voted") || "[]");
+      if (Array.isArray(votedList)) {
+        votedList.push(app.id);
+        localStorage.setItem("pma_voted", JSON.stringify(votedList));
+      }
+    } catch {}
+
+    const visitorId = getOrSetVisitorId();
+    fetch("/api/upvote", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ appId: app.id, visitorId }),
+    })
+      .then((res) => res.json())
+      .then((data: { ok?: boolean; upvoteCount?: number }) => {
+        if (data.ok && typeof data.upvoteCount === "number") {
+          setUpvotes(data.upvoteCount);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setVoting(false));
+  };
+
+  const domain = app.website
+    ? app.website
+        .replace(/^https?:\/\//i, "")
+        .replace(/^www\./i, "")
+        .split("/")[0]
+        .split("?")[0]
+    : "";
+
+  const categoryLabel = app.categoryName || app.category || "Utility";
+  const visits =
+    (app.tryCount ?? 0) > 0
+      ? `${app.tryCount} visits`
+      : (app.views7d ?? 0) > 0
+      ? `${app.views7d} visits`
+      : null;
+
+  const isGold = rank === 1 || (app.editorChoice && app.featuredTier === "article");
+  const isSilver = rank === 2;
+  const isBronze = rank === 3;
+  const isTopRanked = rank <= 2;
+
+  const cardClass = isGold
+    ? "relative overflow-hidden rounded-2xl border-1.5 border-amber-500/70 bg-gradient-to-r from-amber-500/[0.14] via-amber-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(245,158,11,0.22)] transition-all active:scale-[0.99]"
+    : isSilver
+    ? "relative overflow-hidden rounded-2xl border-1.5 border-amber-500/60 bg-gradient-to-r from-amber-500/[0.12] via-amber-500/[0.03] to-surface p-3 shadow-[0_4px_20px_rgba(245,158,11,0.18)] transition-all active:scale-[0.99]"
+    : isBronze
+    ? "relative overflow-hidden rounded-2xl border border-stone-700/80 bg-surface/90 p-3 shadow-2xs transition-all active:scale-[0.99]"
+    : app.isHot
+    ? "relative overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-500/[0.09] via-rose-500/[0.03] to-surface p-3 shadow-[0_4px_16px_rgba(244,63,94,0.15)] transition-all active:scale-[0.99]"
+    : "relative overflow-hidden rounded-2xl border border-line/80 bg-surface/90 p-3 shadow-2xs transition-all active:scale-[0.99] hover:border-line-2";
+
+  return (
+    <Link
+      to="/app/$slug"
+      params={{ slug: app.slug }}
+      onClick={() => trackClick(app.id, "click")}
+      className="group block"
+    >
+      <div className={cardClass}>
+        <div className="flex items-center gap-2.5">
+          {/* Rank Column */}
+          <div className="flex flex-col items-center justify-center shrink-0 w-6">
+            {rank === 1 ? (
+              <div className="flex flex-col items-center">
+                <span className="text-[11px] leading-none text-amber-400 select-none">👑</span>
+                <span className="flex h-5 w-5 items-center justify-center rounded-full border border-amber-400/80 bg-amber-400/15 text-[10px] font-bold text-amber-300 shadow-2xs mt-0.5">
+                  1
+                </span>
+              </div>
+            ) : rank === 2 ? (
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full border border-amber-400/60 bg-amber-400/10 text-[10.5px] font-bold text-amber-300/90 shadow-2xs">
+                2
+              </span>
+            ) : rank === 3 ? (
+              <span className="flex h-5.5 w-5.5 items-center justify-center rounded-full border border-amber-700/60 bg-amber-700/15 text-[10.5px] font-bold text-amber-500/90 shadow-2xs">
+                3
+              </span>
+            ) : (
+              <span className="text-[12px] font-semibold text-muted/70">
+                {rank}
+              </span>
+            )}
+          </div>
+
+          {/* App Icon with Center Perched Crown */}
+          <div className="relative shrink-0 pt-1">
+            {app.icon ? (
+              <img
+                alt={`${app.name} icon`}
+                src={appIconUrl(app.icon)}
+                loading="lazy"
+                decoding="async"
+                width={50}
+                height={50}
+                className={`h-12 w-12 rounded-[14px] object-cover shadow-sm bg-surface-2 ${
+                  isTopRanked
+                    ? "ring-2 ring-amber-400/90"
+                    : isBronze
+                    ? "ring-1.5 ring-amber-700/60"
+                    : "ring-1 ring-line/80"
+                }`}
+              />
+            ) : (
+              <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-surface-2 text-xs font-bold text-muted ring-1 ring-line/80">
+                {app.name.slice(0, 2).toUpperCase()}
+              </div>
+            )}
+
+            {/* Top-center Perched Crown for Rank 1 & 2 */}
+            {isTopRanked ? (
+              <span className="absolute -top-1 left-1/2 -translate-x-1/2 text-xs leading-none drop-shadow-sm select-none">
+                👑
+              </span>
+            ) : null}
+          </div>
+
+          {/* Center Column: Name, Badges, Tagline, Meta */}
+          <div className="min-w-0 flex-1 flex flex-col justify-center">
+            {/* Row 1: Name + Verified Check + Boosted Tag */}
+            <div className="flex items-center gap-1.5 min-w-0">
+              <h3 className="truncate text-[14.5px] font-bold tracking-tight text-ink group-hover:text-accent transition-colors">
+                {app.name}
+              </h3>
+
+              {/* Verified checkmark badge */}
+              <span title="Verified Mac App" className="flex shrink-0 items-center text-amber-400">
+                <svg className="h-3.5 w-3.5 fill-amber-400" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                </svg>
+              </span>
+
+              {/* Boosted / Featured Tag */}
+              {isTopRanked ? (
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-bold bg-amber-400/20 text-amber-300 ring-1 ring-amber-400/40">
+                  <svg className="h-2.5 w-2.5 fill-current" viewBox="0 0 24 24">
+                    <path d="M12 4l-6.5 7.5h4v8.5h5v-8.5h4z" />
+                  </svg>
+                  <span>Boosted</span>
+                </span>
+              ) : app.editorChoice ? (
+                <span className="inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.2 text-[9.5px] font-bold bg-sky-400/20 text-sky-300 ring-1 ring-sky-400/40">
+                  <span>✦</span>
+                  <span>Featured</span>
+                </span>
+              ) : app.isHot ? (
+                <span className="inline-flex shrink-0 items-center gap-0.5 rounded px-1.5 py-0.2 text-[9.5px] font-bold bg-rose-500/20 text-rose-300 ring-1 ring-rose-500/40">
+                  <span>🔥</span>
+                  <span>Hot</span>
+                </span>
+              ) : null}
+            </div>
+
+            {/* Row 2: Tagline */}
+            <p className="mt-0.5 line-clamp-1 text-[12px] text-muted leading-tight">
+              {app.tagline || app.description}
+            </p>
+
+            {/* Row 3: Meta line (domain, category, visits) */}
+            <div className="mt-1 flex items-center gap-2 text-[10.5px] text-muted overflow-hidden">
+              {domain ? (
+                <span className="inline-flex items-center gap-1 truncate max-w-[85px]">
+                  <svg className="h-3 w-3 shrink-0 text-amber-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="10" />
+                    <line x1="2" y1="12" x2="22" y2="12" />
+                    <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                  </svg>
+                  <span className="truncate">{domain}</span>
+                </span>
+              ) : null}
+
+              <span className="inline-flex items-center gap-1 shrink-0">
+                <svg className="h-3 w-3 shrink-0 text-muted/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M20.6 13.4 12 22l-8-8V4h10l6.6 6.6a2 2 0 0 1 0 2.8z" />
+                  <circle cx="8.2" cy="8.2" r="1.4" />
+                </svg>
+                <span className="truncate max-w-[70px]">{categoryLabel}</span>
+              </span>
+
+              {visits ? (
+                <span className="inline-flex items-center gap-0.5 shrink-0 text-muted/90">
+                  <span className="text-[10px]">✨</span>
+                  <span>{visits}</span>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-0.5 shrink-0 text-muted">
+                  {app.pricing}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Right Upvote Squircle Box (Matching Reference Image) */}
+          <button
+            type="button"
+            onClick={handleUpvote}
+            title={hasVoted ? "You upvoted this app" : "Upvote this app"}
+            className={`shrink-0 flex flex-col items-center justify-between w-12 h-13 rounded-2xl py-1 px-1 transition-all cursor-pointer select-none active:scale-95 shadow-sm ${
+              isTopRanked
+                ? "bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 ring-1 ring-amber-200/80 hover:brightness-105"
+                : hasVoted
+                ? "border border-amber-500/50 bg-amber-500/15 ring-1 ring-amber-500/30"
+                : "border border-line/80 bg-surface-2 hover:border-line-2 shadow-2xs"
+            }`}
+          >
+            {/* Embedded Dark Pill / Squircle for Up-arrow */}
+            <div
+              className={`flex items-center justify-center w-7 h-5.5 rounded-lg shadow-2xs ${
+                isTopRanked
+                  ? "bg-stone-950/85 text-amber-400"
+                  : hasVoted
+                  ? "bg-amber-500/25 text-amber-300"
+                  : "bg-surface text-muted"
+              }`}
+            >
+              <svg className="h-3 w-3 fill-current" viewBox="0 0 24 24">
+                <path d="M12 4l-6.5 7.5h4v8.5h5v-8.5h4z" />
+              </svg>
+            </div>
+
+            {/* Bottom Bold Vote Count */}
+            <span
+              className={`text-[12.5px] font-black leading-none mb-0.5 ${
+                isTopRanked
+                  ? "text-stone-950"
+                  : hasVoted
+                  ? "text-amber-400"
+                  : "text-ink"
+              }`}
+            >
+              {upvotes}
+            </span>
+          </button>
+        </div>
+      </div>
+    </Link>
   );
 }

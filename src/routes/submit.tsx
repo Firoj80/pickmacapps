@@ -8,14 +8,7 @@ import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CurrencySelector } from "@/components/currency-selector";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
-import {
-  type CurrencyCode,
-  detectLocalCurrency,
-  convertPrice,
-  SUPPORTED_CURRENCIES,
-} from "@/lib/currency";
 
 export type SubmitSearch = {
   tier?: "featured" | "article" | "free";
@@ -139,19 +132,7 @@ function SubmitPage() {
   const isBfcm = appliedCoupon === "BFCM50";
   const discountMultiplier = isBfcm ? 0.5 : 1.0;
 
-  const [currency, setCurrency] = useState<CurrencyCode>(() => {
-    if (searchCurrency && searchCurrency.toUpperCase() in SUPPORTED_CURRENCIES) {
-      return searchCurrency.toUpperCase() as CurrencyCode;
-    }
-    return detectLocalCurrency(offer?.country);
-  });
-
-  const handleCurrencyChange = (newCurrency: CurrencyCode) => {
-    setCurrency(newCurrency);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("pma_currency", newCurrency);
-    }
-  };
+  const currency = "USD";
 
   const rawFeaturedDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
   const rawFeaturedCompareDollars = Math.round((offer.featuredCompareCents ?? offer.compareCents) / 100);
@@ -168,22 +149,10 @@ function SubmitPage() {
   const articlePrice = String(articleBaseDollars);
   const articleCompare = String(articleCompareDollars);
 
-  const featuredConv = useMemo(
-    () => convertPrice(featuredBaseDollars, currency, offer?.rates),
-    [featuredBaseDollars, currency, offer?.rates]
-  );
-  const featuredCompareConv = useMemo(
-    () => convertPrice(featuredCompareDollars, currency, offer?.rates),
-    [featuredCompareDollars, currency, offer?.rates]
-  );
-  const articleConv = useMemo(
-    () => convertPrice(articleBaseDollars, currency, offer?.rates),
-    [articleBaseDollars, currency, offer?.rates]
-  );
-  const articleCompareConv = useMemo(
-    () => convertPrice(articleCompareDollars, currency, offer?.rates),
-    [articleCompareDollars, currency, offer?.rates]
-  );
+  const featuredConv = { formatted: `$${featuredBaseDollars}`, amount: featuredBaseDollars };
+  const featuredCompareConv = { formatted: `$${featuredCompareDollars}`, amount: featuredCompareDollars };
+  const articleConv = { formatted: `$${articleBaseDollars}`, amount: articleBaseDollars };
+  const articleCompareConv = { formatted: `$${articleCompareDollars}`, amount: articleCompareDollars };
 
   const featuredSlots = offer.featuredSlots ?? {
     total: 3,
@@ -543,8 +512,6 @@ function SubmitPage() {
                     Gold Spotlight ({articleConv.formatted})
                   </button>
                 </div>
-
-                <CurrencySelector value={currency} onChange={handleCurrencyChange} />
               </div>
             </div>
 
@@ -584,24 +551,12 @@ function SubmitPage() {
                             <>
                               <span className="text-sm text-muted line-through">{activeCompareConv.formatted}</span>
                               <span className="text-sm text-muted">one-time</span>
-                              {currency !== "USD" && (
-                                <span className="inline-flex items-center rounded-md bg-accent/10 px-2 py-0.5 text-[11px] font-semibold text-accent">
-                                  ~${currentPrice} USD
-                                </span>
-                              )}
                             </>
                           )}
                           {selectedPlan === "free" && (
                             <span className="text-xs text-muted">free forever</span>
                           )}
                         </div>
-
-                        {selectedPlan !== "free" && currency !== "USD" && (
-                          <p className="mt-1.5 text-[11px] text-muted flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>Auto-converted via Dodo Payments Adaptive Pricing</span>
-                          </p>
-                        )}
 
                         {selectedPlan !== "free" && isBfcm && (
                           <div className="mt-2.5 inline-flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
@@ -920,7 +875,7 @@ function SubmitPage() {
                     >
                       {isSelectedTierFull
                         ? "Sold Out for this week"
-                        : `Get listed for ${activeConv.formatted}${currency !== "USD" ? ` (~$${currentPrice})` : ""}`}
+                        : `Get listed for ${activeConv.formatted}`}
                     </button>
                     <p className="mt-3 text-center text-xs text-muted">
                       {selectedPlan === "article"
@@ -1012,9 +967,6 @@ function SubmitPage() {
                 <div>
                   <h3 className="text-base font-bold text-ink">
                     Get listed for {activeConv.formatted}
-                    {currency !== "USD" && (
-                      <span className="ml-1 text-xs font-normal text-muted">(~${currentPrice} USD)</span>
-                    )}
                   </h3>
                   <p className="text-xs text-muted mt-0.5">
                     {selectedPlan === "article"
@@ -1187,7 +1139,7 @@ function SubmitPage() {
                   >
                     {sending
                       ? "Redirecting to checkout…"
-                      : `Proceed to Secure Checkout (${activeConv.formatted}${currency !== "USD" ? ` / ~$${currentPrice}` : ""}) →`}
+                      : `Proceed to Secure Checkout (${activeConv.formatted}) →`}
                   </button>
                   <p className="mt-2 text-center text-[11px] text-muted">
                     Instant access to private submitter dashboard after payment.

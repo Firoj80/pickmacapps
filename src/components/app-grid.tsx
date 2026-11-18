@@ -152,8 +152,8 @@ export function AppGrid({
         : `Showing ${appsBeforePage + 1}–${appsEndPage} of ${appCount} apps`;
 
     contentNodes = (
-      <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
-        {pageItems.map((item, i) => {
+      <div className="grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        {pageItems.map((item) => {
           if (item.kind === "claim") {
             return (
               <ClaimSpotCard
@@ -179,9 +179,13 @@ export function AppGrid({
     countLabel = `Showing ${start + 1}–${last} of ${visible.length} apps`;
 
     contentNodes = (
-      <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
         {slice.map((app, index) => (
-          <AppCard key={app.id} app={app} priority={page === 0 && index < 2} />
+          <AppCard
+            key={app.id}
+            app={app}
+            priority={page === 0 && index < 2}
+          />
         ))}
       </div>
     );
