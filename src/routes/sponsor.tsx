@@ -1,21 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { type ReactNode } from "react";
 import { fetchOffer } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
-
-const story = [
-  "Featured as Gold Spotlight for 7 days",
-  "Golden verified choice badge 🌟 for 7 days",
-  "⚡ Approved within 2 hours (Express)",
-  "#1 priority hero spot for 7 days",
-  "Dedicated in-depth Medium review article",
-  "High-authority SEO backlink to your app",
-  "Permanent listing in directory after 7 days",
-  "Social shoutout to Mac enthusiasts",
-  "Priority placement across alternative tables",
-];
 
 export const Route = createFileRoute("/sponsor")({
   loader: () => fetchOffer(),
@@ -41,225 +28,295 @@ export const Route = createFileRoute("/sponsor")({
   },
 });
 
+function BadgeCheckIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
 function SponsorPage() {
   const offer = Route.useLoaderData();
 
-  const articleBaseDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
-
-  const articleConv = { formatted: `$${articleBaseDollars}` };
-
-  const articlePrice = String(articleBaseDollars);
+  const rawDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
+  const saleDollars = Math.round(rawDollars * 0.5);
+  const salePrice = `$${saleDollars}`;
+  const originalPrice = `$${rawDollars}`;
 
   return (
-    <main className="relative overflow-hidden">
-      {/* Background ambient colorful glowing orbs */}
-      <div className="pointer-events-none absolute -top-40 left-1/2 -z-10 h-[550px] w-[900px] -translate-x-1/2 rounded-full bg-gradient-to-tr from-violet-600/20 via-fuchsia-500/20 to-amber-400/20 blur-[130px]" />
-      <div className="pointer-events-none absolute top-1/3 -right-40 -z-10 h-[450px] w-[500px] rounded-full bg-gradient-to-bl from-cyan-500/15 via-indigo-500/15 to-transparent blur-[120px]" />
-
-      {/* Hero Header Section */}
-      <section className="mx-auto max-w-[1240px] px-4 pt-12 pb-6 text-center sm:px-6 md:pt-16 md:pb-10">
-        <div className="inline-flex items-center gap-2 rounded-full border border-violet-500/30 bg-violet-500/10 px-4 py-1.5 text-xs font-semibold text-violet-600 dark:text-violet-400 backdrop-blur-md">
-          <span className="flex h-2 w-2 rounded-full bg-violet-500 animate-pulse" />
-          Reach Engaged Mac Enthusiasts & Power Users
-        </div>
-
-        <h1 className="mt-5 text-[38px] font-bold tracking-tight text-ink sm:text-[56px] md:text-[64px] leading-[1.08]">
-          Put your Mac app in the{" "}
-          <span className="bg-gradient-to-r from-violet-600 via-fuchsia-500 to-amber-500 bg-clip-text text-transparent">
-            Spotlight
-          </span>
-        </h1>
-
-        <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px]">
-          Get immediate visibility, high-intent traffic, and trusted editorial placement on PickMacApps. 
-          Limited to only 6 Gold Spotlight spots at a time.
-        </p>
-
-        {/* Live Metrics Bar */}
-        <div className="mx-auto mt-8 grid max-w-2xl grid-cols-3 gap-2 sm:gap-3 rounded-2xl border border-line bg-surface/80 p-3 sm:p-4 backdrop-blur-xl shadow-sm text-center">
-          <div>
-            <p className="text-lg sm:text-2xl font-bold text-ink tracking-tight">2h – 24h</p>
-            <p className="text-[11px] sm:text-[12px] text-muted">Review turnaround</p>
-          </div>
-          <div className="border-x border-line px-1 sm:px-2">
-            <p className="text-lg sm:text-2xl font-bold bg-gradient-to-r from-violet-600 to-fuchsia-500 bg-clip-text text-transparent tracking-tight">Top 6</p>
-            <p className="text-[11px] sm:text-[12px] text-muted">Hero spots capped</p>
-          </div>
-          <div>
-            <p className="text-lg sm:text-2xl font-bold text-ink tracking-tight">100%</p>
-            <p className="text-[11px] sm:text-[12px] text-muted">Curated guarantee</p>
-          </div>
-        </div>
-
-        {/* Black Friday Cyber Monday 50% OFF Sale Banner */}
-        <div className="mx-auto mt-6 max-w-2xl">
-          <Link
-            to="/submit"
-            search={{ coupon: "BFCM50" }}
-            className="group flex flex-wrap items-center justify-between gap-2.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-3 sm:px-4 text-white shadow-md transition hover:border-amber-400"
-          >
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold">
-              <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-              <span>🔥 Black Friday 50% OFF Sale with code <strong className="font-mono text-amber-300">BFCM50</strong> (Valid till Nov 30)</span>
-            </div>
-            <span className="text-xs font-bold text-amber-400 group-hover:underline flex items-center gap-1">
-              <span>Claim 50% OFF</span>
-              <span>→</span>
+    <div className="mx-auto w-full max-w-[880px] px-6 md:px-10">
+      <main className="pt-12 pb-8 md:pt-20">
+        {/* Header / Intro matching macapp.supply */}
+        <div className="max-w-[640px]">
+          <span className="inline-flex items-center gap-2 rounded-full bg-amber-500/15 px-4 py-1.5 text-[15px] font-semibold text-amber-500">
+            <span className="inline-flex">
+              <BadgeCheckIcon className="h-5 w-5 shrink-0 fill-amber-500 text-stone-950" />
             </span>
-          </Link>
+            Get featured
+          </span>
+
+          <h1 className="mt-5 font-display text-[36px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[52px]">
+            Feature your app for 7 days
+          </h1>
+
+          <p className="mt-5 text-[15px] leading-relaxed text-muted md:text-[16px]">
+            PickMacApps is a hand-curated directory of{" "}
+            <span className="text-ink">beautifully designed macOS apps</span>. A sponsorship puts your app in the
+            hero spot at the top of the collection for a full 7 days — seen by designers, developers and Mac power users
+            who come here specifically to find new software.
+          </p>
         </div>
-      </section>
 
-      {/* Pricing Cards Section */}
-      <section className="mx-auto max-w-[1240px] px-4 py-8 sm:px-6 lg:py-12">
-        {/* Pricing Info Note */}
-        <div className="mx-auto mb-6 flex max-w-4xl flex-wrap items-center justify-between gap-3 px-2">
-          <div className="flex items-center gap-2 text-xs text-muted">
-            <span className="inline-block h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span>All pricing in USD ($) via secure checkout on Dodo Payments</span>
-          </div>
-        </div>
+        {/* Main Placement Card matching macapp.supply */}
+        <section className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-8">
+          <div className="flex flex-col gap-8 md:flex-row md:items-stretch md:justify-between">
+            <div className="flex-1">
+              <h3 className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
+                7-day featured placement
+              </h3>
 
-        <div className="max-w-xl mx-auto">
-          {/* Card: Gold Spotlight (Vibrant Gradient Card) */}
-          <div className="relative flex flex-col justify-between rounded-3xl border-2 border-fuchsia-500/70 bg-gradient-to-b from-[#181228] to-[#110e1c] p-7 sm:p-9 text-white shadow-2xl transition hover:shadow-fuchsia-500/20">
-            {/* Glowing Accent Ribbon */}
-            <div className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-400 px-4 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md">
-              Best Exposure 🔥
-            </div>
-
-            <div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-white">Gold Spotlight + Medium Article</h3>
-                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Top #1 Hero spot for 7 days & organic SEO backlinks</p>
-                </div>
+              <div className="mt-4 flex items-baseline gap-2">
+                <span className="font-display text-[48px] font-bold leading-none tracking-tight text-ink md:text-[60px]">
+                  {salePrice}
+                </span>
+                <span className="text-[18px] text-muted line-through font-medium">{originalPrice}</span>
+                <span className="text-[16px] text-muted">/ 7 days</span>
               </div>
 
-              <div className="mt-6 flex items-baseline gap-2 flex-wrap">
-                <span className="text-5xl font-extrabold tracking-tight text-white">{articleConv.formatted}</span>
-                <span className="text-sm font-medium text-fuchsia-200/70">one-time payment</span>
-              </div>
+              <p className="mt-2 text-[14px] text-muted">One-time payment. No subscription, no hidden fees.</p>
 
-              <p className="mt-2 text-xs text-fuchsia-200/60">Complete package with full editorial story.</p>
-
-              <hr className="my-6 border-white/10" />
-
-              <ul className="space-y-3.5 text-sm">
-                {story.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-white/90">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-fuchsia-500 to-amber-400 text-white text-xs font-bold shadow-xs">
-                      ✓
-                    </span>
-                    <span className={item.includes("Medium") || item.includes("2 hours") ? "font-semibold text-amber-300" : ""}>{item}</span>
-                  </li>
-                ))}
+              <ul className="mt-5 space-y-2">
+                <li className="flex items-center gap-2 text-[14px]">
+                  <span className="inline-flex">
+                    <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                  </span>
+                  <span className="text-ink">Premium Gold featured badge</span>
+                </li>
+                <li className="flex items-center gap-2 text-[14px]">
+                  <span className="inline-flex">
+                    <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                  </span>
+                  <span className="text-ink">Approved within 2 hours</span>
+                </li>
+                <li className="flex items-center gap-2 text-[14px]">
+                  <span className="inline-flex">
+                    <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                  </span>
+                  <span className="text-ink">Hero spot on the homepage</span>
+                </li>
+                <li className="flex items-center gap-2 text-[14px]">
+                  <span className="inline-flex">
+                    <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                  </span>
+                  <span className="text-ink">Dedicated Medium review article & SEO backlink</span>
+                </li>
+                <li className="flex items-center gap-2 text-[14px]">
+                  <span className="inline-flex">
+                    <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                  </span>
+                  <span className="text-ink">Newsletter & social mention on X</span>
+                </li>
               </ul>
             </div>
 
-            <Link
-              to="/submit"
-              search={{ tier: "article", coupon: "BFCM50" }}
-              data-ml-goal="pricing_cta"
-              data-ml-goal-plan="article"
-              className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
-            >
-              Claim Gold Spotlight (7 Days) — {articleConv.formatted} 🚀
-            </Link>
+            <div className="flex flex-col justify-center md:w-[280px]">
+              <Link
+                to="/submit"
+                search={{ tier: "article", coupon: "BFCM50" }}
+                className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-amber-500 px-6 py-3.5 text-[15px] font-semibold text-stone-950 transition hover:bg-amber-400 shadow-sm cursor-pointer"
+              >
+                Pay now — {salePrice}
+                <span aria-hidden="true">↗</span>
+              </Link>
+              <p className="mt-3 text-center text-[12px] leading-relaxed text-muted">
+                Secure checkout via Dodo Payments — USD, international cards & Apple Pay.
+              </p>
+            </div>
           </div>
-        </div>
-      </section>
 
-      {/* Feature Breakdown Grid */}
-      <section className="mx-auto max-w-[1240px] px-4 py-12 sm:px-6">
-        <div className="text-center">
-          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-ink">What is included with sponsorship</h2>
-          <p className="mt-2 text-sm text-muted">Everything designed to drive qualified Mac users to your product</p>
-        </div>
-
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto">
-          <FeatureCard
-            icon="🏆"
-            title="Editor's Choice Badge"
-            description="Your card receives the verified Editor's Choice badge, establishing instant trust with high-intent buyers."
-          />
-          <FeatureCard
-            icon="⚡"
-            title="Fast Review (2h - 24h)"
-            description="Skip the general queue. Featured listings are evaluated in 24 hours, and the Featured + Medium package is approved within 2 hours."
-          />
-          <FeatureCard
-            icon="🌟"
-            title="Homepage Hero Carousel"
-            description="Your app icon appears in the curved hero arc at the very top of the homepage, seen by every visitor."
-          />
-          <FeatureCard
-            icon="📣"
-            title="Social Media Broadcast"
-            description="Shoutout from @hiii_firoj on X (Twitter) directly reaching an audience of founders, builders, and developers."
-          />
-          <FeatureCard
-            icon="✍️"
-            title="Medium Profile Deep-Dive"
-            description={`With the $${articlePrice} Featured + Article tier, receive a comprehensive dedicated review article published on Firoj's Medium profile.`}
-          />
-          <FeatureCard
-            icon="🔗"
-            title="Permanent Listing & SEO"
-            description="Even after the hero spotlight rotation, your dedicated app review page stays live permanently with dofollow link."
-          />
-        </div>
-      </section>
-
-      {/* FAQ Accordion Section */}
-      <section className="border-t border-line/60 bg-surface/40 py-16">
-        <div className="mx-auto max-w-3xl px-4 sm:px-6">
-          <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
-          <div className="mt-8 space-y-3">
-            <Faq q="What does the Gold Spotlight package include?">
-              The Gold Spotlight (${articlePrice}) gives you the Golden Editor's Choice badge, express approval within 2 hours, the top priority #1 hero spot for 7 days across the entire directory, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks — all for a one-time payment.
-            </Faq>
-            <Faq q="What if my app isn't accepted?">
-              All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
-            </Faq>
-            <Faq q="Do I need to submit the app first or pay first?">
-              You can start right from the packages above. You will be guided through entering your app name, URL, screenshot, and details before checkout.
-            </Faq>
-            <Faq q="What payment methods are supported?">
-              Through Dodo Payments secure checkout, you can pay with international credit cards, debit cards, Apple Pay, Google Pay, and localized bank methods worldwide billed in USD ($).
-            </Faq>
-            <Faq q="How long does the hero spotlight last?">
-              Gold Spotlight apps hold the top hero spot and featured placement across the directory for a full 7 days, capped at 6 active Gold spots to ensure each sponsor receives prime visibility. After 7 days, your app stays listed permanently in the directory.
-            </Faq>
+          <div className="mt-8 rounded-xl border border-line bg-surface/70 px-4 py-3 text-[13px] leading-relaxed text-ink">
+            <span className="font-semibold text-amber-500">Black Friday 50% OFF applied.</span> {salePrice} is our special rate with code{" "}
+            <strong className="font-mono text-amber-400">BFCM50</strong> (regular {originalPrice}). As directory traffic keeps climbing, the price goes up — lock in the current rate today and it applies to your full 7-day placement.
           </div>
-        </div>
-      </section>
-    </main>
-  );
-}
+        </section>
 
-function FeatureCard({ icon, title, description }: { icon: string; title: string; description: string }) {
-  return (
-    <div className="rounded-2xl border border-line bg-surface p-6 shadow-xs transition hover:border-line-2 hover:shadow-md">
-      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/10 text-xl">
-        {icon}
-      </div>
-      <h3 className="mt-4 text-base font-semibold text-ink">{title}</h3>
-      <p className="mt-2 text-sm leading-relaxed text-body">{description}</p>
+        {/* What's Included 2x2 Grid matching macapp.supply */}
+        <section className="mt-14">
+          <h2 className="font-display text-[22px] font-bold tracking-tight text-ink md:text-[26px]">
+            What's included
+          </h2>
+
+          <div className="mt-6 grid gap-x-8 gap-y-6 sm:grid-cols-2">
+            <div className="flex gap-3">
+              <span className="inline-flex">
+                <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+              </span>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Premium featured badge</h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                  Your listing carries the Gold verified badge everywhere it appears — homepage, category pages, search and the footer.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="inline-flex">
+                <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+              </span>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Approved within 2 hours</h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                  Skip the review queue entirely. We check your submission and put it live within 2 hours, usually much sooner.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="inline-flex">
+                <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+              </span>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Hero spot & top placement</h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                  Your app sits in the priority card at the top of the homepage and at the front of every list for the full 7 days.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <span className="inline-flex">
+                <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+              </span>
+              <div>
+                <h3 className="text-[15px] font-semibold text-ink">Newsletter & social mention</h3>
+                <p className="mt-1 text-[14px] leading-relaxed text-muted">
+                  Featured apps are included in our subscriber update, reviewed in a dedicated Medium article, and shared on X when they go live.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* How it works Section matching macapp.supply */}
+        <section className="mt-14">
+          <h2 className="font-display text-[22px] font-bold tracking-tight text-ink md:text-[26px]">
+            How it works
+          </h2>
+
+          <ol className="mt-5 space-y-4 text-[15px] leading-relaxed text-muted">
+            <li className="flex gap-3.5">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-canvas">
+                1
+              </span>
+              <span>Pay the {salePrice} sponsorship through secure checkout or submit your app directly.</span>
+            </li>
+            <li className="flex gap-3.5">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-canvas">
+                2
+              </span>
+              <span>
+                Send us your app details — or{" "}
+                <Link className="text-ink underline underline-offset-4" to="/submit" search={{ tier: "article", coupon: "BFCM50" }}>
+                  submit the app
+                </Link>{" "}
+                with the same email address you paid with.
+              </span>
+            </li>
+            <li className="flex gap-3.5">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-canvas">
+                3
+              </span>
+              <span>We review it by hand and publish it as featured within 2 hours.</span>
+            </li>
+            <li className="flex gap-3.5">
+              <span className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[12px] font-semibold text-canvas">
+                4
+              </span>
+              <span>Your app keeps the hero spot and badge for 7 days, then stays listed permanently.</span>
+            </li>
+          </ol>
+        </section>
+
+        {/* Questions Section matching macapp.supply */}
+        <section className="mt-14">
+          <h2 className="font-display text-[22px] font-bold tracking-tight text-ink md:text-[26px]">
+            Questions
+          </h2>
+
+          <div className="mt-6 divide-y divide-line border-y border-line">
+            <div className="py-5">
+              <h3 className="text-[15px] font-semibold text-ink">What exactly do I get for {salePrice}?</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
+                A 7-day featured placement: the premium Gold badge, #1 priority hero spot on the homepage, top-of-list placement, a dedicated in-depth Medium review article, and social mentions on X. One-time payment, no subscription.
+              </p>
+            </div>
+
+            <div className="py-5">
+              <h3 className="text-[15px] font-semibold text-ink">What if my app isn't a good fit?</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
+                We review every app by hand. If it doesn't meet our guidelines, you get a full refund — no questions asked.
+              </p>
+            </div>
+
+            <div className="py-5">
+              <h3 className="text-[15px] font-semibold text-ink">Do I need to submit the app first?</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
+                Either order works. You can{" "}
+                <Link className="text-ink underline underline-offset-4" to="/submit" search={{ tier: "article", coupon: "BFCM50" }}>
+                  submit your app
+                </Link>{" "}
+                and complete checkout directly, or pay now and send details — we'll match them by email.
+              </p>
+            </div>
+
+            <div className="py-5">
+              <h3 className="text-[15px] font-semibold text-ink">What happens after 7 days?</h3>
+              <p className="mt-1.5 text-[14px] leading-relaxed text-muted">
+                Your app stays listed in the directory forever. Only the featured placement and badge expire — you can renew any time at the then-current rate.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Ready to get featured CTA matching macapp.supply */}
+        <section className="mt-14 rounded-2xl border border-line bg-surface-2/40 p-6 text-center md:p-8">
+          <h2 className="font-display text-[22px] font-bold tracking-tight text-ink md:text-[26px]">
+            Ready to get featured?
+          </h2>
+          <p className="mx-auto mt-2 max-w-[520px] text-[14px] leading-relaxed text-muted">
+            7 days in the hero spot, premium badge and 2-hour approval — for {salePrice} while the Black Friday rate lasts.
+          </p>
+          <Link
+            to="/submit"
+            search={{ tier: "article", coupon: "BFCM50" }}
+            className="mt-6 inline-flex items-center justify-center gap-1.5 rounded-full bg-[#0071e3] px-6 py-3 text-sm font-semibold text-white transition hover:opacity-90 shadow-sm cursor-pointer"
+          >
+            Pay now — {salePrice} for 7 days
+            <span aria-hidden="true">↗</span>
+          </Link>
+          <p className="mt-3 text-[11px] text-muted">
+            Questions first?{" "}
+            <a className="text-ink underline underline-offset-4" href="https://x.com/hiii_firoj" target="_blank" rel="noopener noreferrer">
+              Get in touch on X
+            </a>
+            .
+          </p>
+        </section>
+      </main>
     </div>
-  );
-}
-
-function Faq({ q, children }: { q: string; children: ReactNode }) {
-  return (
-    <details className="group rounded-2xl border border-line bg-surface p-5 transition open:bg-surface-2">
-      <summary className="flex cursor-pointer items-center justify-between font-medium text-ink list-none">
-        <span className="text-[15px]">{q}</span>
-        <span className="ml-4 shrink-0 text-muted transition-transform group-open:rotate-180">
-          ↓
-        </span>
-      </summary>
-      <p className="mt-3 text-sm leading-relaxed text-body">{children}</p>
-    </details>
   );
 }
