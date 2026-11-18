@@ -497,6 +497,13 @@ export function getNextCycleLabel(now = new Date()): string {
   return `${dayNum} ${months[d.getMonth()]}`;
 }
 
+export function formatCycleDate(d: Date): string {
+  if (isNaN(d.getTime())) return getNextCycleLabel();
+  const dayNum = d.getDate();
+  const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  return `${dayNum} ${months[d.getMonth()]}`;
+}
+
 export async function countActiveTierApps(tier: "featured" | "article", excludeId?: string): Promise<number> {
   const sql = await directorySql();
   if (excludeId) {
@@ -545,17 +552,41 @@ export async function countActiveHotApps(excludeId?: string): Promise<number> {
 
 export async function getPaidSlotDates(tier: "featured" | "article"): Promise<string[]> {
   const sql = await directorySql();
+  if (tier === "featured") {
+    const rows = await sql.query<{ hot_expires_at: string | Date | null }>(
+      `select coalesce(hot_marked_at, created_at) + interval '7 days' as hot_expires_at
+       from apps
+       where is_hot = true
+         and status = 'published'
+         and coalesce(hot_marked_at, created_at) + interval '7 days' > now()
+       order by coalesce(hot_marked_at, created_at) + interval '7 days' asc`,
+    );
+    return rows.map((r) => (r.hot_expires_at instanceof Date ? r.hot_expires_at.toISOString() : String(r.hot_expires_at)));
+  }
   const rows = await sql.query<{ featured_until: string | Date | null }>(
     `select featured_until from apps
      where editor_choice = true
        and status = 'published'
-       and coalesce(featured_tier, 'featured') = $1
+       and coalesce(featured_tier, 'featured') = 'article'
        and featured_until is not null
        and featured_until > now()
      order by featured_until asc`,
-    [tier],
   );
   return rows.map((r) => (r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until)));
+}
+
+export async function countQueuedPaidSubmissions(tier: "featured" | "article"): Promise<number> {
+  const sql = await directorySql();
+  const rows = await sql.query<{ count: string }>(
+    `select count(*)::text as count
+     from submissions
+     where plan = 'choice'
+       and tier = $1
+       and status in ('paid', 'awaiting_payment')
+       and created_at > now() - interval '7 days'`,
+    [tier],
+  );
+  return Number(rows[0]?.count ?? 0);
 }
 
 export type EditorChoiceSlotsInfo = {
@@ -613,14 +644,25 @@ export async function publicOffer(): Promise<PublicOffer> {
           count(*) filter (where is_hot = true and status = 'published')::text as active_hot
         from apps
       `),
-      sql.query<{ tier: string; featured_until: string | Date | null }>(`
-        select coalesce(featured_tier, 'featured') as tier, featured_until
+      sql.query<{
+        tier: string;
+        featured_until: string | Date | null;
+        is_hot: boolean;
+        hot_expires_at: string | Date | null;
+      }>(`
+        select
+          coalesce(featured_tier, 'featured') as tier,
+          featured_until,
+          is_hot,
+          coalesce(hot_marked_at, created_at) + interval '7 days' as hot_expires_at
         from apps
-        where editor_choice = true
-          and status = 'published'
-          and featured_until is not null
-          and featured_until > now()
-        order by featured_until asc
+        where status = 'published'
+          and (
+            (editor_choice = true and featured_until is not null and featured_until > now())
+            or
+            (is_hot = true and coalesce(hot_marked_at, created_at) + interval '7 days' > now())
+          )
+        order by coalesce(featured_until, coalesce(hot_marked_at, created_at) + interval '7 days') asc
       `),
       Promise.all([readDodoPrice("featured"), readDodoPrice("article")]),
     ]);
@@ -662,16 +704,31 @@ export async function publicOffer(): Promise<PublicOffer> {
 
     const featuredOpenDates: string[] = [];
     const articleOpenDates: string[] = [];
+    const hotOpenDates: string[] = [];
     for (const r of datesRows) {
-      const iso = r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until);
-      if (r.tier === "article") {
+      if (r.tier === "article" && r.featured_until) {
+        const iso = r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until);
         articleOpenDates.push(iso);
-      } else {
+      } else if (r.featured_until) {
+        const iso = r.featured_until instanceof Date ? r.featured_until.toISOString() : String(r.featured_until);
         featuredOpenDates.push(iso);
+      }
+      if (r.is_hot && r.hot_expires_at) {
+        const iso = r.hot_expires_at instanceof Date ? r.hot_expires_at.toISOString() : String(r.hot_expires_at);
+        hotOpenDates.push(iso);
       }
     }
 
-    const nextDate = getNextCycleLabel();
+    const defaultNextDate = getNextCycleLabel();
+    const articleNextDate =
+      articleOpenDates.length > 0 && activeArticle >= MAX_EDITOR_CHOICE_SLOTS
+        ? formatCycleDate(new Date(articleOpenDates[0]))
+        : defaultNextDate;
+    const hotNextDate =
+      hotOpenDates.length > 0 && activeHot >= MAX_HOT_SLOTS
+        ? formatCycleDate(new Date(hotOpenDates[0]))
+        : defaultNextDate;
+
     const featuredRemaining = 0; // Blue (featured) tier discontinued — no new slots offered
     const articleRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeArticle);
     const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
@@ -682,7 +739,7 @@ export async function publicOffer(): Promise<PublicOffer> {
       active: activeFeatured,
       remaining: 0,
       isFull: true, // Blue tier discontinued — always full/closed
-      nextDate,
+      nextDate: defaultNextDate,
       openDates: [],
     };
 
@@ -691,7 +748,7 @@ export async function publicOffer(): Promise<PublicOffer> {
       active: activeArticle,
       remaining: articleRemaining,
       isFull: articleRemaining === 0,
-      nextDate,
+      nextDate: articleNextDate,
       openDates: articleOpenDates,
     };
 
@@ -700,8 +757,8 @@ export async function publicOffer(): Promise<PublicOffer> {
       active: activeHot,
       remaining: hotRemaining,
       isFull: hotRemaining === 0,
-      nextDate,
-      openDates: [],
+      nextDate: hotNextDate,
+      openDates: hotOpenDates,
     };
 
     const result: PublicOffer = {
@@ -747,13 +804,24 @@ export async function publicOffer(): Promise<PublicOffer> {
       nextDate,
       openDates: [],
     };
+    const fallbackHotSlots: EditorChoiceSlotsInfo = {
+      total: MAX_HOT_SLOTS,
+      active: 0,
+      remaining: MAX_HOT_SLOTS,
+      isFull: false,
+      nextDate,
+      openDates: [],
+    };
     return {
       featuredPriceCents: 9900,
       featuredCompareCents: 19900,
       articlePriceCents: 12000,
       articleCompareCents: 24900,
+      hotPriceCents: 9900,
+      hotCompareCents: 19900,
       featuredSlots: fallbackFeaturedSlots,
       articleSlots: fallbackArticleSlots,
+      hotSlots: fallbackHotSlots,
       priceCents: 9900,
       compareCents: 19900,
       slots: {
@@ -1625,18 +1693,22 @@ export async function submitListing(
     const isHotTier = tier === "featured";
     if (isHotTier) {
       const activeHotSlots = await countActiveHotApps();
-      if (activeHotSlots >= MAX_HOT_SLOTS) {
+      const queuedHot = await countQueuedPaidSubmissions("featured");
+      // Allow booking for next cycle: up to MAX_HOT_SLOTS * 2 (current active + next week queue)
+      if (activeHotSlots + queuedHot >= MAX_HOT_SLOTS * 2) {
         return {
           ok: false as const,
-          message: `All ${MAX_HOT_SLOTS} spots for Hot Boost are currently full. Please submit using the Free plan or Gold Spotlight.`,
+          message: `All spots for Hot Boost are currently booked for this and the upcoming cycle. Please check back soon or submit using Free plan.`,
         };
       }
     } else {
       const activeTierSlots = await countActiveTierApps("article");
-      if (activeTierSlots >= MAX_TIER_SLOTS) {
+      const queuedTier = await countQueuedPaidSubmissions("article");
+      // Allow booking for next cycle: up to MAX_TIER_SLOTS * 2 (current active + next week queue)
+      if (activeTierSlots + queuedTier >= MAX_TIER_SLOTS * 2) {
         return {
           ok: false as const,
-          message: `All ${MAX_TIER_SLOTS} spots for Gold Spotlight are currently full. Please submit using the Free plan or Hot Boost.`,
+          message: `All spots for Gold Spotlight are currently booked for this and the upcoming cycle. Please check back soon or submit using Free plan.`,
         };
       }
     }

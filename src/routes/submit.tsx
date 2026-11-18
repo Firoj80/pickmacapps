@@ -202,19 +202,17 @@ function SubmitPage() {
 
   // Plan Selection: Free listing is DEFAULT
   const [selectedPlan, setSelectedPlan] = useState<"free" | "featured" | "article">(() => {
-    if (tier === "article" && !articleSlots.isFull) return "article";
-    if (tier === "featured" && !hotSlots.isFull) return "featured";
+    if (tier === "article") return "article";
+    if (tier === "featured") return "featured";
     return "free"; // Free listing by default
   });
 
   // Toggle handlers for the 2 upgrade options (Golden and Hot)
   const toggleGold = () => {
-    if (articleSlots.isFull) return;
     setSelectedPlan((prev) => (prev === "article" ? "free" : "article"));
   };
 
   const toggleHot = () => {
-    if (hotSlots.isFull) return;
     setSelectedPlan((prev) => (prev === "featured" ? "free" : "featured"));
   };
 
@@ -359,9 +357,6 @@ function SubmitPage() {
   const hasEmail = Boolean(email.trim() && email.includes("@"));
   const hasXHandle = Boolean(xHandle.trim());
   const badgeOk = isPaid || badge === "ok";
-  const isSelectedTierFull =
-    (selectedPlan === "featured" && hotSlots.isFull) ||
-    (selectedPlan === "article" && articleSlots.isFull);
 
   async function handleFinalSubmit(event: React.FormEvent) {
     event.preventDefault();
@@ -386,10 +381,6 @@ function SubmitPage() {
     }
     if (!isPaid && badge !== "ok") {
       setSubmissionError("Please verify the PickMacApps badge on your website before submitting free listing.");
-      return;
-    }
-    if (isSelectedTierFull) {
-      setSubmissionError("The selected placement tier is currently sold out for this cycle. Please choose another tier.");
       return;
     }
 
@@ -869,6 +860,20 @@ function SubmitPage() {
                                 </span>
                               )}
                             </div>
+                            {articleSlots.isFull ? (
+                              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-amber-400">
+                                <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-300 ring-1 ring-amber-400/40">
+                                  <span>📅</span>
+                                  <span>This week full</span>
+                                </span>
+                                <span>Book for next week · Starts {articleSlots.nextDate}</span>
+                              </div>
+                            ) : (
+                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>⚡ Only {articleSlots.remaining} of 6 spots left for this week</span>
+                              </div>
+                            )}
                             <p className="text-xs text-muted leading-relaxed">
                               Hero spot on the homepage, premium golden choice badge and approval within 24 hours — more visibility for a full week.
                             </p>
@@ -880,9 +885,8 @@ function SubmitPage() {
                           type="button"
                           role="switch"
                           aria-checked={selectedPlan === "article"}
-                          disabled={articleSlots.isFull}
                           onClick={toggleGold}
-                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "article"
                               ? "bg-amber-500"
                               : "bg-surface-2 border border-line hover:bg-surface"
@@ -899,17 +903,29 @@ function SubmitPage() {
                       {/* Expanded Details when selected */}
                       {selectedPlan === "article" && (
                         <div className="border-t border-amber-500/20 pt-4 space-y-3 animate-fade-in">
-                          <div className="flex items-center justify-between text-xs font-semibold text-amber-400">
-                            <span className="flex items-center gap-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                              <span>
-                                {articleSlots.isFull
-                                  ? "🔴 Sold out for this week"
-                                  : `⚡ Only ${articleSlots.remaining} of 6 spots left`}
+                          {articleSlots.isFull ? (
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-amber-400">
+                                <span className="flex items-center gap-1.5">
+                                  <span>📅 All 6 spots active for this week</span>
+                                </span>
+                                <span className="rounded-md bg-amber-500/20 px-2.5 py-0.5 text-[11px] text-amber-300 font-bold ring-1 ring-amber-400/30">
+                                  Next cycle opens {articleSlots.nextDate} · Reserve now
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted leading-relaxed">
+                                Your #1 Hero Spot and Golden Badge placement will be reserved for the upcoming 7-day cycle starting <strong>{articleSlots.nextDate}</strong>.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between text-xs font-semibold text-amber-400">
+                              <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                                <span>⚡ Only {articleSlots.remaining} of 6 spots left for this week</span>
                               </span>
-                            </span>
-                            <span className="text-[11px] text-muted">1-time payment · no subscription</span>
-                          </div>
+                              <span className="text-[11px] text-muted">1-time payment · no subscription</span>
+                            </div>
+                          )}
 
                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
                             <li className="flex items-start gap-2">
@@ -982,6 +998,20 @@ function SubmitPage() {
                                 </span>
                               )}
                             </div>
+                            {hotSlots.isFull ? (
+                              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-orange-400">
+                                <span className="inline-flex items-center gap-1 rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-bold text-orange-300 ring-1 ring-orange-400/40">
+                                  <span>📅</span>
+                                  <span>This week full</span>
+                                </span>
+                                <span>Book for next week · Starts {hotSlots.nextDate}</span>
+                              </div>
+                            ) : (
+                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <span>⚡ Only {hotSlots.remaining} of 6 spots left for this week</span>
+                              </div>
+                            )}
                             <p className="text-xs text-muted leading-relaxed">
                               Positioned at the top of all free listing apps, right after Golden badge apps, hero section icon and Fire badge.
                             </p>
@@ -993,9 +1023,8 @@ function SubmitPage() {
                           type="button"
                           role="switch"
                           aria-checked={selectedPlan === "featured"}
-                          disabled={hotSlots.isFull}
                           onClick={toggleHot}
-                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "featured"
                               ? "bg-orange-500"
                               : "bg-surface-2 border border-line hover:bg-surface"
@@ -1012,17 +1041,29 @@ function SubmitPage() {
                       {/* Expanded Details when selected */}
                       {selectedPlan === "featured" && (
                         <div className="border-t border-orange-500/20 pt-4 space-y-3 animate-fade-in">
-                          <div className="flex items-center justify-between text-xs font-semibold text-orange-400">
-                            <span className="flex items-center gap-1.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-                              <span>
-                                {hotSlots.isFull
-                                  ? "🔴 Sold out for this week"
-                                  : `⚡ Only ${hotSlots.remaining} of 6 spots left`}
+                          {hotSlots.isFull ? (
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-orange-400">
+                                <span className="flex items-center gap-1.5">
+                                  <span>📅 All 6 spots active for this week</span>
+                                </span>
+                                <span className="rounded-md bg-orange-500/20 px-2.5 py-0.5 text-[11px] text-orange-300 font-bold ring-1 ring-orange-400/30">
+                                  Next cycle opens {hotSlots.nextDate} · Reserve now
+                                </span>
+                              </div>
+                              <p className="text-[11px] text-muted leading-relaxed">
+                                Your Hot Boost placement will be reserved for the upcoming 7-day cycle starting <strong>{hotSlots.nextDate}</strong>. Your app will be boosted right after Golden apps as soon as the cycle opens.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="flex items-center justify-between text-xs font-semibold text-orange-400">
+                              <span className="flex items-center gap-1.5">
+                                <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
+                                <span>⚡ Only {hotSlots.remaining} of 6 spots left for this week</span>
                               </span>
-                            </span>
-                            <span className="text-[11px] text-muted">1-time payment · no subscription</span>
-                          </div>
+                              <span className="text-[11px] text-muted">1-time payment · no subscription</span>
+                            </div>
+                          )}
 
                           <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
                             <li className="flex items-start gap-2">
@@ -1211,7 +1252,6 @@ function SubmitPage() {
                       type="submit"
                       disabled={
                         sending ||
-                        isSelectedTierFull ||
                         (!isPaid && badge !== "ok") ||
                         !hasEmail ||
                         !hasXHandle ||
@@ -1234,9 +1274,13 @@ function SubmitPage() {
                       ) : selectedPlan === "free" ? (
                         badge === "ok" ? "Submit for review (Free)" : "Verify badge above to submit free"
                       ) : selectedPlan === "featured" ? (
-                        `Proceed to checkout — $${hotBaseDollars} (🔥 Hot Boost)`
+                        hotSlots.isFull
+                          ? `Proceed to checkout — $${hotBaseDollars} (📅 Book for Next Week: ${hotSlots.nextDate})`
+                          : `Proceed to checkout — $${hotBaseDollars} (🔥 Hot Boost · 7 Days)`
                       ) : (
-                        `Proceed to checkout — $${goldBaseDollars} (🌟 Gold Spotlight)`
+                        articleSlots.isFull
+                          ? `Proceed to checkout — $${goldBaseDollars} (📅 Book for Next Week: ${articleSlots.nextDate})`
+                          : `Proceed to checkout — $${goldBaseDollars} (🌟 Gold Spotlight · 7 Days)`
                       )}
                     </button>
 
