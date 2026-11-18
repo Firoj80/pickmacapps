@@ -1,5 +1,5 @@
-import { useEffect, useState, useMemo } from "react";
-import { CheckIcon, ChevronIcon, QuoteIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { useEffect, useState } from "react";
+import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { verifyBadge } from "@/lib/badge";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
@@ -8,10 +8,9 @@ import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 
 export type SubmitSearch = {
-  tier?: "article" | "free";
+  tier?: "article" | "featured" | "free";
   submitted?: string;
   payment_id?: string;
   subscription_id?: string;
@@ -23,11 +22,9 @@ export type SubmitSearch = {
 export const Route = createFileRoute("/submit")({
   validateSearch: (search: Record<string, unknown>): SubmitSearch => ({
     tier:
-      search.tier === "article" || search.tier === "free"
-        ? (search.tier as "article" | "free")
-        : search.tier === "featured"
-          ? "article" // redirect legacy featured URLs to article
-          : undefined,
+      search.tier === "article" || search.tier === "featured" || search.tier === "free"
+        ? (search.tier as "article" | "featured" | "free")
+        : undefined,
     submitted: search.submitted ? String(search.submitted) : undefined,
     payment_id: search.payment_id ? String(search.payment_id) : undefined,
     subscription_id: search.subscription_id ? String(search.subscription_id) : undefined,
@@ -58,12 +55,6 @@ export const Route = createFileRoute("/submit")({
   },
 });
 
-const checks = [
-  { label: "Your app is functional" },
-  { label: "It delivers what it promises" },
-  { label: "Is not an infoproduct" },
-];
-
 const testimonials = [
   {
     quote: "I liked this idea of sharing Mac Apps made by indie hackers so I've submitted Photsy to be listed here 😊",
@@ -93,7 +84,7 @@ const testimonials = [
     avatarUrl: "https://unavatar.io/x/vishvavariya",
   },
   {
-    quote: "great to see Hoply in the list! thank you for including it",
+    quote: "Great to see Hoply in the list! Thank you for including it.",
     name: "Milos",
     xHandle: "milos5611",
     role: "Founder, Hoply",
@@ -103,29 +94,29 @@ const testimonials = [
   },
 ];
 
-const field =
-  "w-full rounded-xl border border-line bg-surface px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
+const inputFieldClass =
+  "w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none";
 
 function SubmitPage() {
   const offer = Route.useLoaderData();
   const search = Route.useSearch();
-  const { tier, payment_id, submitted, currency: searchCurrency, coupon: searchCoupon } = search;
+  const { tier, payment_id, submitted, coupon: searchCoupon } = search;
 
-  const [couponInput, setCouponInput] = useState(() => (searchCoupon ?? "").toUpperCase());
+  // Coupon state — auto-apply BFCM50 by default
+  const [couponInput, setCouponInput] = useState(() => (searchCoupon ?? "BFCM50").toUpperCase());
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(() => {
-    const raw = (searchCoupon ?? "").trim().toUpperCase();
+    const raw = (searchCoupon ?? "BFCM50").trim().toUpperCase();
     return raw === "BFCM50" ? "BFCM50" : null;
   });
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  // Auto-sync coupon from URL if changed dynamically via ClaimSpotCard / banner click
+  // Auto-sync coupon from search params if passed
   useEffect(() => {
     if (searchCoupon) {
       const raw = searchCoupon.trim().toUpperCase();
       if (raw === "BFCM50") {
         setAppliedCoupon("BFCM50");
         setCouponInput("BFCM50");
-        setCouponError(null);
       }
     }
   }, [searchCoupon]);
@@ -146,75 +137,53 @@ function SubmitPage() {
   const isBfcm = appliedCoupon === "BFCM50";
   const discountMultiplier = isBfcm ? 0.5 : 1.0;
 
-  const currency = "USD";
+  // Pricing calculations
+  // Hot Boost (tier === "featured")
+  const rawHotDollars = Math.round((offer.featuredPriceCents ?? 9900) / 100);
+  const hotBaseDollars = Math.round(rawHotDollars * discountMultiplier);
+  const hotCompareDollars = isBfcm ? rawHotDollars : Math.round((offer.featuredCompareCents ?? 19900) / 100);
 
-  const rawFeaturedDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
-  const rawFeaturedCompareDollars = Math.round((offer.featuredCompareCents ?? offer.compareCents) / 100);
-  const rawArticleDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
-  const rawArticleCompareDollars = Math.round((offer.articleCompareCents ?? 24900) / 100);
+  // Gold Spotlight (tier === "article")
+  const rawGoldDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
+  const goldBaseDollars = Math.round(rawGoldDollars * discountMultiplier);
+  const goldCompareDollars = isBfcm ? rawGoldDollars : Math.round((offer.articleCompareCents ?? 24900) / 100);
 
-  const featuredBaseDollars = Math.round(rawFeaturedDollars * discountMultiplier);
-  const featuredCompareDollars = isBfcm ? rawFeaturedDollars : rawFeaturedCompareDollars;
-  const articleBaseDollars = Math.round(rawArticleDollars * discountMultiplier);
-  const articleCompareDollars = isBfcm ? rawArticleDollars : rawArticleCompareDollars;
-
-  const featuredPrice = String(featuredBaseDollars);
-  const featuredCompare = String(featuredCompareDollars);
-  const articlePrice = String(articleBaseDollars);
-  const articleCompare = String(articleCompareDollars);
-
-  const featuredConv = { formatted: `$${featuredBaseDollars}`, amount: featuredBaseDollars };
-  const featuredCompareConv = { formatted: `$${featuredCompareDollars}`, amount: featuredCompareDollars };
-  const articleConv = { formatted: `$${articleBaseDollars}`, amount: articleBaseDollars };
-  const articleCompareConv = { formatted: `$${articleCompareDollars}`, amount: articleCompareDollars };
-
-  const featuredSlots = offer.featuredSlots ?? {
-    total: 3,
+  // Slot calculations
+  const hotSlots = offer.hotSlots ?? {
+    total: 6,
     active: 0,
-    remaining: 3,
+    remaining: 6,
     isFull: false,
-    nextDate: offer.slots?.nextDate ?? "7 days",
+    nextDate: "7 days",
   };
   const articleSlots = offer.articleSlots ?? {
-    total: 3,
+    total: 6,
     active: 0,
-    remaining: 3,
+    remaining: 6,
     isFull: false,
-    nextDate: offer.slots?.nextDate ?? "7 days",
+    nextDate: "7 days",
   };
 
-  // Default to Free listing (first pill) unless specific tier specified
-  const [selectedPlan, setSelectedPlan] = useState<"free" | "article">(() => {
+  // Plan Selection: "free" | "featured" (Hot Boost) | "article" (Gold Spotlight)
+  const [selectedPlan, setSelectedPlan] = useState<"free" | "featured" | "article">(() => {
     if (tier === "article" && !articleSlots.isFull) return "article";
-    return "free";
+    if (tier === "featured" && !hotSlots.isFull) return "featured";
+    if (tier === "free") return "free";
+    return "featured"; // Default to Hot Boost
   });
 
-  // Auto-sync plan when tier changes from URL search params
+  // Auto-sync plan when tier in search changes
   useEffect(() => {
     if (tier === "article" && !articleSlots.isFull) {
       setSelectedPlan("article");
+    } else if (tier === "featured" && !hotSlots.isFull) {
+      setSelectedPlan("featured");
+    } else if (tier === "free") {
+      setSelectedPlan("free");
     }
-  }, [tier, articleSlots.isFull]);
+  }, [tier, articleSlots.isFull, hotSlots.isFull]);
 
-  const isPaid = selectedPlan === "article";
-  const [showModal, setShowModal] = useState(false);
-  const [showAdvanced, setShowAdvanced] = useState(false);
-
-  const [copied, setCopied] = useState(false);
-  const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
-  const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
-  const [badgeMessage, setBadgeMessage] = useState("");
-  const [sent, setSent] = useState(() => Boolean(submitted || payment_id));
-  const [sending, setSending] = useState(false);
-
-  useEffect(() => {
-    if (payment_id) {
-      trackGoal("payment_completed", { payment_id, status: search.status ?? "success" });
-      setSent(true);
-    }
-  }, [payment_id, search.status]);
-
-  // App details form state (editable & populated by auto-fetch)
+  // App details form state
   const [website, setWebsite] = useState("");
   const [name, setName] = useState("");
   const [tagline, setTagline] = useState("");
@@ -226,7 +195,7 @@ function SubmitPage() {
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
 
-  // Auto-fetch status
+  // Auto-fetch state
   const [fetching, setFetching] = useState(false);
   const [fetchStatus, setFetchStatus] = useState<"idle" | "success" | "error">("idle");
   const [fetchMessage, setFetchMessage] = useState("");
@@ -238,15 +207,25 @@ function SubmitPage() {
     tier?: string | null;
   } | null>(null);
 
-  const currentPrice = selectedPlan === "free" ? "0" : articlePrice;
-  const currentCompare = articleCompare;
-  const activeConv = articleConv;
-  const activeCompareConv = articleCompareConv;
-  const isSelectedTierFull = selectedPlan === "article" && articleSlots.isFull;
+  // Badge state for Free tier
+  const [copied, setCopied] = useState(false);
+  const [badgeVariant, setBadgeVariant] = useState<"logo" | "classic" | "dark">("logo");
+  const [badge, setBadge] = useState<"idle" | "checking" | "ok" | "fail">("idle");
+  const [badgeMessage, setBadgeMessage] = useState("");
 
-  // Canonical website URL for badge embeds
+  // Submission process state
+  const [sent, setSent] = useState(() => Boolean(submitted || payment_id));
+  const [sending, setSending] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (payment_id) {
+      trackGoal("payment_completed", { payment_id, status: search.status ?? "success" });
+      setSent(true);
+    }
+  }, [payment_id, search.status]);
+
   const siteOrigin = "https://pickmacapps.store";
-
   const badgeFile =
     badgeVariant === "classic"
       ? "badge-classic.svg"
@@ -263,11 +242,6 @@ function SubmitPage() {
     height="54"
   />
 </a>`;
-
-  const hasEmail = Boolean(email.trim() && email.includes("@"));
-  const hasXHandle = Boolean(xHandle.trim());
-  const badgeOk = isPaid || badge === "ok";
-  const canSubmit = Boolean(hasEmail && hasXHandle && (!isPaid || !isSelectedTierFull) && badgeOk && !sending);
 
   async function copyBadge() {
     try {
@@ -313,7 +287,7 @@ function SubmitPage() {
         setFetchMessage(
           result.alreadyListed
             ? `Found existing listing for ${result.alreadyListed.name}! Details auto-filled. Submitting will update your listing.`
-            : "Details extracted from your website! You can review or tweak anything below.",
+            : "Metadata extracted successfully! You can review and tweak the details below.",
         );
       } else {
         setFetchStatus("error");
@@ -346,19 +320,44 @@ function SubmitPage() {
     }
   }
 
+  const isPaid = selectedPlan !== "free";
+  const hasEmail = Boolean(email.trim() && email.includes("@"));
+  const hasXHandle = Boolean(xHandle.trim());
+  const badgeOk = isPaid || badge === "ok";
+  const isSelectedTierFull =
+    (selectedPlan === "featured" && hotSlots.isFull) ||
+    (selectedPlan === "article" && articleSlots.isFull);
+
   async function handleFinalSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (sending) return;
-    if (!hasEmail || !hasXHandle) {
-      setBadge("fail");
-      setBadgeMessage("Both email and X handle are mandatory to submit.");
+    setSubmissionError(null);
+
+    if (!website.trim()) {
+      setSubmissionError("Website URL is required.");
+      return;
+    }
+    if (!name.trim()) {
+      setSubmissionError("App name is required.");
+      return;
+    }
+    if (!hasEmail) {
+      setSubmissionError("A valid developer email is required so we can notify you.");
+      return;
+    }
+    if (!hasXHandle) {
+      setSubmissionError("Your X (Twitter) handle is required.");
       return;
     }
     if (!isPaid && badge !== "ok") {
-      setBadge("fail");
-      setBadgeMessage("Please verify the PickMacApps badge on your website first.");
+      setSubmissionError("Please verify the PickMacApps badge on your website before submitting free listing.");
       return;
     }
+    if (isSelectedTierFull) {
+      setSubmissionError("The selected placement tier is currently sold out for this cycle. Please pick another tier.");
+      return;
+    }
+
     setSending(true);
     const attr = getAttribution();
     identifyUser({
@@ -367,9 +366,17 @@ function SubmitPage() {
       name: name.trim(),
       xHandle: xHandle.trim(),
     });
+
+    const activePrice =
+      selectedPlan === "free"
+        ? "0"
+        : selectedPlan === "featured"
+          ? String(hotBaseDollars)
+          : String(goldBaseDollars);
+
     trackGoal(isPaid ? "checkout_click" : "signup_click", {
       plan: selectedPlan,
-      price: currentPrice,
+      price: activePrice,
       paid: isPaid,
       appName: name.trim(),
     });
@@ -388,26 +395,28 @@ function SubmitPage() {
           email: email.trim(),
           xHandle: xHandle.trim(),
           plan: isPaid ? "choice" : "free",
-          tier: "article",
-          currency,
+          tier: selectedPlan === "free" ? "free" : selectedPlan === "featured" ? "featured" : "article",
+          currency: "USD",
           coupon: appliedCoupon ?? undefined,
           mlVisitorId: attr.ml_visitor_id,
           mlSessionId: attr.ml_session_id,
         },
       });
+
       if (result.checkoutUrl) {
         trackGoal("checkout_redirect", {
           plan: selectedPlan,
-          price: currentPrice,
+          price: activePrice,
           appName: name.trim(),
         });
         window.location.href = appendAttributionToUrl(result.checkoutUrl);
         return;
       }
+
       if (result.ok) {
         trackGoal("signup_completed", {
           plan: selectedPlan,
-          price: currentPrice,
+          price: activePrice,
           appName: name.trim(),
         });
         if (result.dashboardToken) {
@@ -416,439 +425,840 @@ function SubmitPage() {
         }
         setSent(true);
       } else {
-        setBadge("fail");
-        setBadgeMessage(result.message);
+        setSubmissionError(result.message);
       }
     } catch {
-      setBadge("fail");
-      setBadgeMessage("The submission could not be saved.");
+      setSubmissionError("The submission could not be processed. Please check your network and try again.");
     } finally {
       setSending(false);
     }
   }
 
   return (
-    <main className="min-h-screen bg-canvas">
-      <div className="w-full px-5 md:px-8 xl:px-12 py-8 sm:py-12 lg:py-14 max-w-6xl mx-auto">
+    <div className="min-h-screen bg-canvas font-sans text-ink antialiased selection:bg-accent/20">
+      <div className="mx-auto w-full max-w-[880px] px-6 md:px-10 pt-12 pb-24 md:pt-16">
+        {/* Top Back Link matching macapp.supply */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink mb-8 transition cursor-pointer"
+        >
+          <span aria-hidden="true">←</span>
+          <span>Back to apps</span>
+        </Link>
+
         {sent ? (
-          <div className="mx-auto max-w-xl rounded-2xl border border-line bg-surface p-8 text-center shadow-xs">
-            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600">
-              <CheckIcon className="h-8 w-8" />
+          /* Submission Confirmation View matching macapp.supply */
+          <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
+            <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
+              <CheckIcon className="h-9 w-9 stroke-[2.5]" />
             </div>
-            <h2 className="font-display text-2xl font-bold tracking-tight text-ink">
-              {alreadyListed ? "Update received!" : "Submission received!"}
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-body">
+
+            <h1 className="font-display text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[56px]">
+              Thank you!
+            </h1>
+
+            <p className="mt-4 max-w-md text-[15px] leading-relaxed text-muted">
               {alreadyListed ? (
                 <>
-                  Thank you for submitting an update for <strong>{name || alreadyListed.name}</strong>. We’ll review and apply your updates to your live listing (<a href={`/app/${alreadyListed.slug}`} target="_blank" rel="noreferrer" className="underline font-medium hover:text-ink">/app/{alreadyListed.slug}</a>).
+                  Update received for <strong className="text-ink">{name || alreadyListed.name}</strong>. We’ll review your changes and apply them to your live listing (<a href={`/app/${alreadyListed.slug}`} target="_blank" rel="noreferrer" className="underline font-medium hover:text-ink">/app/{alreadyListed.slug}</a>).
                 </>
               ) : (
                 <>
-                  Thank you for submitting your app. We’ll review your listing details and send confirmation to{" "}
-                  <strong>{email}</strong>.
+                  Your app is in our review queue. We’ll email you at{" "}
+                  <span className="text-ink font-semibold">{email}</span> once it’s approved and live.
                 </>
               )}
             </p>
-            <button
-              type="button"
-              className="mt-6 inline-flex items-center justify-center rounded-xl bg-ink px-5 py-2.5 text-sm font-semibold text-canvas hover:opacity-90 cursor-pointer"
-              onClick={() => {
-                setSent(false);
-                setBadge("idle");
-                setBadgeMessage("");
-                setFetchStatus("idle");
-                setFetchMessage("");
-                setWebsite("");
-                setName("");
-                setTagline("");
-                setDescription("");
-                setIcon("");
-                setDemo("");
-                setEmail("");
-                setXHandle("");
-              }}
-            >
-              Submit another app
-            </button>
+
+            <div className="mt-8 flex flex-wrap justify-center gap-3">
+              <Link
+                to="/"
+                className="rounded-full bg-ink px-6 py-2.5 text-sm font-semibold text-canvas transition hover:opacity-90 cursor-pointer"
+              >
+                Browse directory
+              </Link>
+              <button
+                type="button"
+                onClick={() => {
+                  setSent(false);
+                  setBadge("idle");
+                  setBadgeMessage("");
+                  setFetchStatus("idle");
+                  setFetchMessage("");
+                  setWebsite("");
+                  setName("");
+                  setTagline("");
+                  setDescription("");
+                  setIcon("");
+                  setDemo("");
+                  setEmail("");
+                  setXHandle("");
+                }}
+                className="rounded-full border border-line bg-surface px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-2 cursor-pointer"
+              >
+                Submit another app
+              </button>
+            </div>
           </div>
         ) : (
           <div>
-            {/* Black Friday Sale Discount Banner at top of page */}
-            <div className="mb-6 sm:mb-8">
-              <BlackFridayCountdown
-                isSubmitPage
-                onApplyCoupon={() => applyCoupon("BFCM50")}
-              />
-            </div>
-
-            {/* Top Heading & Plan Switcher Pills placed directly below heading as in image */}
-            <div className="mb-6 sm:mb-8 space-y-3.5">
-              <h1 className="font-display text-2xl sm:text-3xl lg:text-[34px] font-bold tracking-tight text-ink">
-                Submit Your Mac App
+            {/* Header / Intro matching macapp.supply */}
+            <div className="space-y-3">
+              <h1 className="font-display text-[36px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[52px]">
+                Submit an app
               </h1>
-
-              {/* Discreet Plan Switcher Pills + Currency Selector */}
-              <div className="flex flex-wrap items-center justify-between gap-3">
-                <div className="inline-flex items-center rounded-xl border border-line bg-surface p-1 shadow-2xs">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("free")}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                      selectedPlan === "free"
-                        ? "bg-ink text-canvas shadow-xs"
-                        : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    Free Listing ($0)
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedPlan("article")}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                      selectedPlan === "article"
-                        ? "bg-ink text-canvas shadow-xs"
-                        : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    Gold Spotlight ({articleConv.formatted})
-                  </button>
-                </div>
-              </div>
+              <p className="max-w-lg text-[15px] leading-relaxed text-muted">
+                Share your Mac app with thousands of macOS power users, designers, and developers. Every submission is manually reviewed.
+              </p>
             </div>
 
-            {/* 2-Column Split Layout matching macapp.supply/submit screenshot */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-start">
-              {/* Left Column: Price Card, Checklist & Primary Action */}
-              <div className="space-y-6">
-                <div>
-                  <h2 className="text-xs font-semibold text-muted mb-2.5">
-                    {selectedPlan === "free" ? "Free Community Tier" : "Price"}
-                  </h2>
-
-                  {/* Main Price Card matching screenshot */}
-                  <div className="rounded-2xl border border-line bg-surface p-6 sm:p-7 shadow-xs relative transition-all">
-                    {/* Top Row with Badge & Circular Checkmark */}
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        {selectedPlan === "article" ? (
-                          <span className="inline-flex items-center rounded-md bg-gradient-to-r from-amber-500 to-fuchsia-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
-                            🌟 Gold Spotlight · 7 Days Featured · Top #1 Spot
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2.5 py-0.5 text-xs font-semibold text-stone-800 dark:bg-stone-800 dark:text-stone-200">
-                            Community Tier
-                          </span>
-                        )}
-
-                        <div className="mt-3 flex items-baseline gap-2 flex-wrap">
-                          <span className="font-display text-3xl sm:text-4xl font-extrabold text-ink">
-                            {selectedPlan === "free" ? "$0" : activeConv.formatted}
-                          </span>
-                          {selectedPlan !== "free" && (
-                            <>
-                              <span className="text-sm text-muted line-through">{activeCompareConv.formatted}</span>
-                              <span className="text-sm text-muted">one-time</span>
-                            </>
-                          )}
-                          {selectedPlan === "free" && (
-                            <span className="text-xs text-muted">free forever</span>
-                          )}
-                        </div>
-
-                        {selectedPlan !== "free" && isBfcm && (
-                          <div className="mt-2.5 inline-flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400">
-                            <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
-                            <span>🔥 Black Friday 50% OFF Applied (BFCM50)</span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAppliedCoupon(null);
-                                setCouponInput("");
-                              }}
-                              className="ml-1 text-[11px] text-muted hover:text-ink cursor-pointer"
-                              title="Remove coupon"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                        )}
-
-                        {selectedPlan === "free" ? (
-                          <p className="mt-2 text-xs font-medium text-amber-700 dark:text-amber-400">
-                            * Requires PickMacApps backlink badge on your website
-                          </p>
-                        ) : (
-                          <p className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                            <span>
-                              {articleSlots.isFull
-                                ? "🔴 Sold out for this week"
-                                : `* Only ${articleSlots.remaining} spot remaining for this week`}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-
-                      {/* Top Right Blue Check Circle matching reference */}
-                      <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#0071e3] text-white">
-                        <CheckIcon className="h-3.5 w-3.5 stroke-[2.5]" />
-                      </div>
-                    </div>
-
-                    {/* Value Prop Bullets matching screenshot */}
-                    <ul className="mt-6 space-y-3 border-t border-line/70 pt-5 text-xs text-body">
-                      {selectedPlan === "article" ? (
-                        <>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Featured as Gold Spotlight</strong> for 7 days
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">#1 Priority Top Placement & Gold Badge</strong> for 7 days
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              After 7 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Featured at the top</strong> of alternative pages
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Dedicated blog post</strong> for your app, including competitor comparisons
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">High-quality backlink</strong> to boost your SEO
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Hundreds of monthly visitors</strong> discovering your app
-                            </span>
-                          </li>
-                        </>
-                      ) : (
-                        <>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-stone-500 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Permanent directory catalog listing</strong> in category & search
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-stone-500 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Standard dofollow backlink</strong> to your website
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-amber-600 font-bold shrink-0">⚠️</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Reciprocal badge required</strong> on your landing page before approval
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-stone-500 font-bold shrink-0">✓</span>
-                            <span>Standard manual editorial review (3–5 business days)</span>
-                          </li>
-                        </>
-                      )}
-                    </ul>
-                  </div>
+            {/* Black Friday Discount Pill Banner */}
+            {isBfcm && (
+              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-semibold text-amber-400">
+                <div className="flex items-center gap-2">
+                  <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
+                  <span>🔥 Black Friday 50% OFF active! Promo code <span className="font-mono underline">BFCM50</span> applied across all paid tiers.</span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppliedCoupon(null);
+                    setCouponInput("");
+                  }}
+                  className="text-[11px] text-amber-400/80 hover:text-amber-300 cursor-pointer"
+                  title="Remove coupon"
+                >
+                  ✕ Remove
+                </button>
+              </div>
+            )}
 
-                {/* Quality Checklist section matching screenshot */}
-                <div>
-                  <h2 className="text-sm font-semibold text-ink mb-3">Checklist</h2>
-                  <div className="space-y-3">
-                    {checks.map((item) => (
-                      <div key={item.label} className="flex items-center gap-3">
-                        <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-[#10b981] text-white shadow-2xs">
-                          <CheckIcon className="h-3 w-3 stroke-[3]" />
-                        </div>
-                        <span className="text-xs sm:text-sm font-medium text-ink">{item.label}</span>
-                      </div>
-                    ))}
-                    {selectedPlan === "free" && (
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md ${badge === "ok" ? "bg-[#10b981]" : "bg-amber-500"} text-white shadow-2xs`}>
-                          <CheckIcon className="h-3 w-3 stroke-[3]" />
-                        </div>
-                        <span className="text-xs sm:text-sm font-medium text-ink">PickMacApps reciprocal badge on your site</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
+            {/* Main Form */}
+            <form onSubmit={handleFinalSubmit} className="mt-10 space-y-8">
+              {/* SECTION 1: The App Card matching macapp.supply */}
+              <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-6">
+                <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
+                  The app
+                </h2>
 
-                {/* Free Plan Badge & Form Block (Only in free mode) */}
-                {selectedPlan === "free" ? (
-                  <form onSubmit={handleFinalSubmit} className="space-y-4 pt-2">
-                    <div className="rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs space-y-4">
-                      <h3 className="text-sm font-semibold text-ink">App details for free submission</h3>
-
-                      <div className="space-y-1.5">
-                        <label htmlFor="free_website" className="text-xs font-medium text-body">
-                          Website URL <span className="text-accent">*</span>
-                        </label>
-                        <div className="flex gap-2">
-                          <input
-                            id="free_website"
-                            required
-                            type="url"
-                            placeholder="https://yourmacapp.com"
-                            value={website}
-                            onChange={(e) => setWebsite(e.target.value)}
-                            className={field}
-                          />
-                          <button
-                            type="button"
-                            disabled={fetching || !website.trim()}
-                            onClick={() => void handleAutoFetch()}
-                            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink transition hover:border-accent hover:bg-accent/5 disabled:opacity-50 cursor-pointer"
-                          >
-                            {fetching ? (
-                              <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-                            ) : (
-                              <SparklesIcon className="h-3.5 w-3.5 text-accent" />
-                            )}
-                            <span>Auto-fetch</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {fetchStatus === "success" && (
-                        <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2.5 text-xs text-emerald-800 dark:text-emerald-300">
-                          {fetchMessage}
-                        </div>
-                      )}
-                      {fetchStatus === "error" && (
-                        <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-2.5 text-xs text-amber-800 dark:text-amber-300">
-                          {fetchMessage}
-                        </div>
-                      )}
-
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label htmlFor="free_email" className="mb-1 block text-xs font-medium text-body">
-                            Email <span className="text-accent">*</span>
-                          </label>
-                          <input
-                            id="free_email"
-                            required
-                            type="email"
-                            placeholder="developer@yourdomain.com"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className={field}
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="free_x" className="mb-1 block text-xs font-medium text-body">
-                            X (Twitter) handle <span className="text-accent">*</span>
-                          </label>
-                          <input
-                            id="free_x"
-                            required
-                            type="text"
-                            placeholder="@username"
-                            value={xHandle}
-                            onChange={(e) => setXHandle(e.target.value)}
-                            className={field}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Reciprocal Badge embed block */}
-                      <div className="rounded-xl border border-line bg-surface-2 p-3.5 space-y-3">
-                        <div className="flex items-center justify-between text-xs font-semibold text-ink">
-                          <span>Reciprocal badge code</span>
-                          <button
-                            type="button"
-                            onClick={copyBadge}
-                            className="text-accent hover:underline cursor-pointer"
-                          >
-                            {copied ? "Copied!" : "Copy Code"}
-                          </button>
-                        </div>
-                        <pre className="overflow-x-auto rounded-lg border border-line bg-surface p-2.5 text-[11px] text-body">
-                          <code>{badgeHtml}</code>
-                        </pre>
-                        <button
-                          type="button"
-                          disabled={badge === "checking" || !website.trim()}
-                          onClick={() => void checkBadge()}
-                          className="w-full py-2 px-3 rounded-lg border border-line bg-surface text-xs font-semibold text-ink hover:bg-stone-50 dark:hover:bg-stone-800 transition cursor-pointer"
-                        >
-                          {badge === "checking" ? "Checking website for badge…" : "🔍 Check My Badge Now"}
-                        </button>
-                        {badgeMessage && (
-                          <p className={`text-xs ${badge === "ok" ? "text-emerald-600" : "text-amber-600"}`}>
-                            {badgeMessage}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={!canSubmit}
-                      className="w-full rounded-xl bg-ink py-3.5 px-6 text-sm font-semibold text-canvas transition hover:opacity-90 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {sending ? "Submitting…" : badge === "ok" ? "Submit Free Listing" : "Verify Badge to Submit Free"}
-                    </button>
-                  </form>
-                ) : (
-                  /* Paid Listing CTA matching screenshot */
-                  <div>
+                {/* Website URL + Analyze Button */}
+                <div className="space-y-2">
+                  <label htmlFor="website" className="text-xs font-medium text-ink">
+                    Website URL <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      id="website"
+                      type="url"
+                      required
+                      value={website}
+                      onChange={(e) => setWebsite(e.target.value)}
+                      placeholder="https://yourmacapp.com"
+                      className={inputFieldClass}
+                    />
                     <button
                       type="button"
-                      disabled={isSelectedTierFull}
-                      onClick={() => setShowModal(true)}
-                      className="w-full rounded-xl bg-ink py-3.5 px-6 text-sm sm:text-base font-semibold text-canvas transition hover:opacity-90 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => void handleAutoFetch()}
+                      disabled={fetching || !website.trim()}
+                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-accent hover:bg-accent/10 disabled:opacity-50 cursor-pointer"
                     >
-                      {isSelectedTierFull
-                        ? "Sold Out for this week"
-                        : `Get listed for ${activeConv.formatted}`}
+                      {fetching ? (
+                        <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <SparklesIcon className="h-3.5 w-3.5 text-accent" />
+                      )}
+                      <span>Analyze</span>
                     </button>
-                    <p className="mt-3 text-center text-xs text-muted">
-                      {selectedPlan === "article"
-                        ? "Featured as Gold Spotlight for 7 days, then listed permanently. You'll get a form link to submit app details after payment."
-                        : "Featured as Editor's Choice for 7 days, then listed permanently. You'll get a form link to submit app details after payment."}
-                    </p>
                   </div>
-                )}
+                  <p className="text-xs text-muted">
+                    Tap Analyze to auto-fill the name, tagline, description, icon and details.
+                  </p>
+
+                  {fetchStatus === "success" && (
+                    <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+                      {fetchMessage}
+                    </div>
+                  )}
+                  {fetchStatus === "error" && (
+                    <div className="mt-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+                      {fetchMessage}
+                    </div>
+                  )}
+                </div>
+
+                {/* App Name */}
+                <div className="space-y-2">
+                  <label htmlFor="name" className="text-xs font-medium text-ink">
+                    App name <span className="text-rose-500">*</span>
+                  </label>
+                  <input
+                    id="name"
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Raycast"
+                    className={inputFieldClass}
+                  />
+                </div>
+
+                {/* Short Description (Tagline) with 60-char counter */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="tagline" className="text-xs font-medium text-ink">
+                      Short description <span className="text-rose-500">*</span>
+                    </label>
+                    <span
+                      className={`text-[11px] tabular-nums ${
+                        tagline.length > 60 ? "text-amber-400 font-semibold" : "text-muted"
+                      }`}
+                    >
+                      {tagline.length}/60
+                    </span>
+                  </div>
+                  <input
+                    id="tagline"
+                    type="text"
+                    required
+                    value={tagline}
+                    onChange={(e) => setTagline(e.target.value)}
+                    placeholder="One sharp line that sums up what the app does."
+                    className={inputFieldClass}
+                  />
+                </div>
+
+                {/* Long Description with Markdown guide chips */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label htmlFor="description" className="text-xs font-medium text-ink">
+                      Long description
+                    </label>
+                    <span className="text-[11px] tabular-nums text-muted">
+                      {description.length}/6000 · optional
+                    </span>
+                  </div>
+                  <textarea
+                    id="description"
+                    rows={5}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Detailed description of what your app does, core features, keyboard shortcuts, and who it's for."
+                    className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none resize-y"
+                  />
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-muted">
+                    <span className="font-medium text-ink">Markdown supported:</span>
+                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">## Heading</span>
+                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">**bold**</span>
+                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">*italic*</span>
+                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">[text](url)</span>
+                  </div>
+                </div>
+
+                {/* Category & Pricing Model (2-column grid) */}
+                <div className="grid gap-5 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label htmlFor="category" className="text-xs font-medium text-ink">
+                      Category <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      id="category"
+                      value={category}
+                      onChange={(e) => setCategory(e.target.value)}
+                      className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                    >
+                      {shelfCategories.map((c) => (
+                        <option key={c.slug} value={c.slug}>
+                          {c.emoji} {c.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="pricing" className="text-xs font-medium text-ink">
+                      Pricing <span className="text-rose-500">*</span>
+                    </label>
+                    <select
+                      id="pricing"
+                      value={pricing}
+                      onChange={(e) => setPricing(e.target.value as "free" | "freemium" | "paid")}
+                      className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                    >
+                      <option value="free">Free</option>
+                      <option value="freemium">Freemium</option>
+                      <option value="paid">Paid (one-time or subscription)</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* App Icon URL & Live Preview */}
+                <div className="space-y-2">
+                  <label htmlFor="icon" className="text-xs font-medium text-ink">
+                    App icon URL <span className="text-rose-500">*</span>
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 overflow-hidden shadow-xs">
+                      {icon.trim() ? (
+                        <img
+                          src={icon.trim()}
+                          alt={name || "App icon"}
+                          className="h-14 w-14 rounded-2xl object-cover"
+                          onError={(e) => {
+                            (e.currentTarget as HTMLElement).style.display = "none";
+                          }}
+                        />
+                      ) : (
+                        <span className="text-[10px] text-muted text-center px-1">No icon</span>
+                      )}
+                    </div>
+                    <div className="flex-1">
+                      <input
+                        id="icon"
+                        type="url"
+                        value={icon}
+                        onChange={(e) => setIcon(e.target.value)}
+                        placeholder="https://yourmacapp.com/icon.png"
+                        className={inputFieldClass}
+                      />
+                      <p className="mt-1 text-[11px] text-muted">
+                        Auto-detected by Analyze, or paste an image URL (PNG, JPG or WebP).
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Cover Image or Demo Preview (1200x630) */}
+                <div className="space-y-2">
+                  <label htmlFor="demo" className="text-xs font-medium text-ink">
+                    Cover image or Demo URL (1200×630) · optional
+                  </label>
+                  <input
+                    id="demo"
+                    type="url"
+                    value={demo}
+                    onChange={(e) => setDemo(e.target.value)}
+                    placeholder="https://yourmacapp.com/og-image.png"
+                    className={inputFieldClass}
+                  />
+                  {demo.trim() && (
+                    <div className="mt-2 overflow-hidden rounded-xl border border-line bg-surface-2 aspect-[1200/630] max-h-48 flex items-center justify-center">
+                      <img
+                        src={demo.trim()}
+                        alt="Preview cover"
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          (e.currentTarget as HTMLElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
+                {/* Developer Contact (2-column grid) */}
+                <div className="grid gap-5 sm:grid-cols-2 pt-2 border-t border-line/60">
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-xs font-medium text-ink">
+                      Developer email <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="email"
+                      type="email"
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="developer@yourdomain.com"
+                      className={inputFieldClass}
+                    />
+                    <p className="text-[11px] text-muted">We’ll send review and approval status updates here.</p>
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="xHandle" className="text-xs font-medium text-ink">
+                      X (Twitter) handle <span className="text-rose-500">*</span>
+                    </label>
+                    <input
+                      id="xHandle"
+                      type="text"
+                      required
+                      value={xHandle}
+                      onChange={(e) => setXHandle(e.target.value)}
+                      placeholder="@username"
+                      className={inputFieldClass}
+                    />
+                    <p className="text-[11px] text-muted">Used to tag you in launch announcements on X.</p>
+                  </div>
+                </div>
               </div>
 
-              {/* Right Column: 4 Testimonials matching macapp.supply/submit screenshot */}
-              <div className="space-y-4">
+              {/* SECTION 2: Placement Plan Selector */}
+              <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-6">
+                <div>
+                  <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
+                    Choose your placement plan
+                  </h2>
+                  <p className="mt-1 text-xs text-muted">
+                    Select how you would like your app to be listed and prioritized in the directory.
+                  </p>
+                </div>
+
+                {/* 3-Tier Placement Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                  {/* Card 1: Free Community Tier */}
+                  <div
+                    onClick={() => setSelectedPlan("free")}
+                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
+                      selectedPlan === "free"
+                        ? "border-line-2 bg-surface-2 ring-2 ring-line-2 shadow-xs"
+                        : "border-line bg-surface/60 hover:border-line-2 hover:bg-surface-2/50"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center rounded-md bg-stone-800 px-2 py-0.5 text-[11px] font-semibold text-stone-200">
+                          Community
+                        </span>
+                        <div
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                            selectedPlan === "free"
+                              ? "border-ink bg-ink text-canvas"
+                              : "border-line bg-surface-2 text-transparent"
+                          }`}
+                        >
+                          <CheckIcon className="h-3 w-3 stroke-[3]" />
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="font-display text-2xl font-bold text-ink">$0</div>
+                        <div className="text-[11px] text-muted">Free forever with badge</div>
+                      </div>
+
+                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-line/60 pt-3">
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Permanent directory listing</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Standard dofollow backlink</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">⚠️</span>
+                          <span className="font-medium text-amber-300">Requires reciprocal badge</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-stone-400 font-bold">•</span>
+                          <span>Standard review (1–2 weeks)</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-line/60 text-[11px] text-muted">
+                      Best for hobbyists and side projects.
+                    </div>
+                  </div>
+
+                  {/* Card 2: 🔥 Hot Boost (Highlighted Tier) */}
+                  <div
+                    onClick={() => !hotSlots.isFull && setSelectedPlan("featured")}
+                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
+                      hotSlots.isFull
+                        ? "opacity-60 cursor-not-allowed border-line bg-surface/40"
+                        : selectedPlan === "featured"
+                          ? "border-orange-500/80 bg-orange-500/10 ring-2 ring-orange-500/50 shadow-md"
+                          : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500/60"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs">
+                          <span>🔥</span>
+                          <span>Hot Boost</span>
+                        </span>
+                        <div
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                            selectedPlan === "featured"
+                              ? "border-orange-500 bg-orange-500 text-white"
+                              : "border-line bg-surface-2 text-transparent"
+                          }`}
+                        >
+                          <CheckIcon className="h-3 w-3 stroke-[3]" />
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-display text-2xl font-bold text-ink">
+                            ${hotBaseDollars}
+                          </span>
+                          <span className="text-xs text-muted line-through font-medium">
+                            ${hotCompareDollars}
+                          </span>
+                          <span className="text-[11px] text-muted">one-time</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-orange-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
+                          <span>
+                            {hotSlots.isFull
+                              ? "Sold out for this week"
+                              : `⚡ ${hotSlots.remaining} of 6 spots left`}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* User's exact requirements for Hot Boost */}
+                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-orange-500/20 pt-3">
+                        <li className="flex items-start gap-2">
+                          <span className="text-orange-400 font-bold">🔥</span>
+                          <span>
+                            <strong className="text-ink">Top of all free listing apps</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-orange-400 font-bold">⏱️</span>
+                          <span>
+                            <strong className="text-ink">7 days duration</strong> boost
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-orange-400 font-bold">🥈</span>
+                          <span>
+                            <strong className="text-ink">Just right after Golden badge apps</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-orange-400 font-bold">✨</span>
+                          <span>
+                            <strong className="text-ink">In hero section app icon</strong> carousel
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-orange-400 font-bold">🏷️</span>
+                          <span>
+                            Distinct <strong className="text-ink">Fire badge (🔥 Hot)</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>
+                            <strong className="text-ink">No backlinks or badges required</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Fast-track 24h editorial review</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Permanent directory listing after 7 days</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-orange-500/20 text-[11px] text-orange-400/90 font-medium">
+                      Maximum 6 spots active simultaneously.
+                    </div>
+                  </div>
+
+                  {/* Card 3: 🌟 Gold Spotlight Tier */}
+                  <div
+                    onClick={() => !articleSlots.isFull && setSelectedPlan("article")}
+                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
+                      articleSlots.isFull
+                        ? "opacity-60 cursor-not-allowed border-line bg-surface/40"
+                        : selectedPlan === "article"
+                          ? "border-amber-500/80 bg-amber-500/10 ring-2 ring-amber-500/50 shadow-md"
+                          : "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60"
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 px-2 py-0.5 text-[11px] font-bold text-stone-950 shadow-2xs">
+                          <span>🌟</span>
+                          <span>Gold Spotlight</span>
+                        </span>
+                        <div
+                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
+                            selectedPlan === "article"
+                              ? "border-amber-500 bg-amber-500 text-stone-950"
+                              : "border-line bg-surface-2 text-transparent"
+                          }`}
+                        >
+                          <CheckIcon className="h-3 w-3 stroke-[3]" />
+                        </div>
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="flex items-baseline gap-2">
+                          <span className="font-display text-2xl font-bold text-ink">
+                            ${goldBaseDollars}
+                          </span>
+                          <span className="text-xs text-muted line-through font-medium">
+                            ${goldCompareDollars}
+                          </span>
+                          <span className="text-[11px] text-muted">one-time</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-amber-400">
+                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                          <span>
+                            {articleSlots.isFull
+                              ? "Sold out for this week"
+                              : `⚡ ${articleSlots.remaining} of 6 spots left`}
+                          </span>
+                        </div>
+                      </div>
+
+                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-amber-500/20 pt-3">
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">👑</span>
+                          <span>
+                            <strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">🌟</span>
+                          <span>
+                            Exclusive <strong className="text-ink">Golden Choice Badge</strong>
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">📝</span>
+                          <span>
+                            <strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)
+                          </span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">🔝</span>
+                          <span>Top spot on competitor comparison pages</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-amber-400 font-bold">✨</span>
+                          <span>Hero animated app icon in top carousel</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>High-authority SEO dofollow backlink</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Guaranteed 24-hour publishing</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                          <span className="text-emerald-400 font-bold">✓</span>
+                          <span>Permanent directory listing after 7 days</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="mt-5 pt-3 border-t border-amber-500/20 text-[11px] text-amber-400/90 font-medium">
+                      Maximum 6 spots active simultaneously.
+                    </div>
+                  </div>
+                </div>
+
+                {/* Coupon Code Section */}
+                <div className="pt-2 border-t border-line">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label htmlFor="coupon" className="text-xs font-medium text-ink">
+                      Discount coupon code
+                    </label>
+                    {isBfcm && (
+                      <span className="text-[11px] font-semibold text-emerald-400">
+                        ✓ BFCM50 applied (50% off)
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-2 max-w-sm">
+                    <input
+                      id="coupon"
+                      type="text"
+                      placeholder="e.g. BFCM50"
+                      value={couponInput}
+                      onChange={(e) => {
+                        setCouponInput(e.target.value.toUpperCase());
+                        setCouponError(null);
+                      }}
+                      className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs font-mono font-bold text-ink uppercase placeholder:normal-case placeholder:font-normal focus:border-accent focus:outline-none"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => applyCoupon(couponInput)}
+                      className="shrink-0 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink hover:bg-surface transition cursor-pointer"
+                    >
+                      Apply
+                    </button>
+                  </div>
+                  {couponError && <p className="mt-1 text-xs text-rose-400">{couponError}</p>}
+                </div>
+              </div>
+
+              {/* SECTION 3: Reciprocal Badge Block (Visible only when Free plan selected) */}
+              {selectedPlan === "free" && (
+                <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-4">
+                  <div>
+                    <h3 className="font-display text-base font-semibold text-ink">
+                      Reciprocal badge on your website
+                    </h3>
+                    <p className="mt-1 text-xs text-muted">
+                      Free community listings require adding our backlink badge to your app website. Once added, click “Check My Badge Now” below to verify.
+                    </p>
+                  </div>
+
+                  {/* Badge Style Selector */}
+                  <div className="flex items-center gap-2 pt-1">
+                    <button
+                      type="button"
+                      onClick={() => setBadgeVariant("logo")}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                        badgeVariant === "logo"
+                          ? "bg-ink text-canvas"
+                          : "border border-line bg-surface-2 text-muted hover:text-ink"
+                      }`}
+                    >
+                      Logo badge
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBadgeVariant("classic")}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                        badgeVariant === "classic"
+                          ? "bg-ink text-canvas"
+                          : "border border-line bg-surface-2 text-muted hover:text-ink"
+                      }`}
+                    >
+                      Classic badge
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBadgeVariant("dark")}
+                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                        badgeVariant === "dark"
+                          ? "bg-ink text-canvas"
+                          : "border border-line bg-surface-2 text-muted hover:text-ink"
+                      }`}
+                    >
+                      Dark badge
+                    </button>
+                  </div>
+
+                  {/* Badge Preview */}
+                  <div className="p-4 rounded-xl border border-line bg-surface-2 flex items-center justify-center">
+                    <img
+                      src={badgeSrc}
+                      alt="Featured on PickMacApps"
+                      width={200}
+                      height={54}
+                      className="h-10 w-auto"
+                    />
+                  </div>
+
+                  {/* HTML snippet with 1-click copy */}
+                  <div className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
+                    <div className="flex items-center justify-between text-xs font-semibold text-ink">
+                      <span>HTML Embed Code</span>
+                      <button
+                        type="button"
+                        onClick={copyBadge}
+                        className="text-accent hover:underline cursor-pointer"
+                      >
+                        {copied ? "Copied!" : "Copy Code"}
+                      </button>
+                    </div>
+                    <pre className="overflow-x-auto rounded-lg border border-line bg-surface p-2.5 text-[11px] text-body">
+                      <code>{badgeHtml}</code>
+                    </pre>
+                  </div>
+
+                  <button
+                    type="button"
+                    disabled={badge === "checking" || !website.trim()}
+                    onClick={() => void checkBadge()}
+                    className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface-2 text-xs font-semibold text-ink hover:border-accent hover:bg-accent/10 transition cursor-pointer disabled:opacity-50"
+                  >
+                    {badge === "checking" ? "Checking website for badge…" : "🔍 Check My Badge Now"}
+                  </button>
+
+                  {badgeMessage && (
+                    <p
+                      className={`text-xs ${
+                        badge === "ok" ? "text-emerald-400 font-medium" : "text-amber-400"
+                      }`}
+                    >
+                      {badgeMessage}
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Submission Error Banner */}
+              {submissionError && (
+                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-300">
+                  {submissionError}
+                </div>
+              )}
+
+              {/* Submit CTA button matching macapp.supply */}
+              <div className="space-y-3 pt-2">
+                <button
+                  type="submit"
+                  disabled={
+                    sending ||
+                    isSelectedTierFull ||
+                    (!isPaid && badge !== "ok") ||
+                    !hasEmail ||
+                    !hasXHandle ||
+                    !website.trim() ||
+                    !name.trim()
+                  }
+                  className={`w-full rounded-full py-3.5 px-6 text-sm md:text-base font-bold transition shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                    selectedPlan === "featured"
+                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:opacity-95"
+                      : selectedPlan === "article"
+                        ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 hover:opacity-95"
+                        : "bg-ink text-canvas hover:opacity-90"
+                  }`}
+                >
+                  {sending ? (
+                    <span className="inline-flex items-center gap-2">
+                      <SpinnerIcon className="h-4 w-4 animate-spin" />
+                      <span>{isPaid ? "Proceeding to checkout…" : "Submitting…"}</span>
+                    </span>
+                  ) : selectedPlan === "free" ? (
+                    badge === "ok" ? "Submit for review (Free)" : "Verify badge above to submit free"
+                  ) : selectedPlan === "featured" ? (
+                    `Proceed to checkout — $${hotBaseDollars} (🔥 Hot Boost)`
+                  ) : (
+                    `Proceed to checkout — $${goldBaseDollars} (🌟 Gold Spotlight)`
+                  )}
+                </button>
+
+                <p className="text-center text-[12px] leading-relaxed text-muted">
+                  {isPaid
+                    ? "Secure checkout by Dodo Payments, powered by Stripe — USD, excl. VAT. Full refund if it doesn't meet our listing guidelines."
+                    : "Submissions are reviewed manually by a human editor. Most take 1–2 weeks."}
+                </p>
+              </div>
+            </form>
+
+            {/* Testimonials Section matching macapp.supply */}
+            <div className="mt-16 pt-12 border-t border-line space-y-6">
+              <div className="text-center space-y-1">
+                <h3 className="font-display text-lg font-bold text-ink">
+                  Trusted by indie Mac developers
+                </h3>
+                <p className="text-xs text-muted">
+                  Here is what founders say about being listed on PickMacApps.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {testimonials.map((t) => (
                   <div
                     key={t.name}
-                    className="rounded-2xl border border-line bg-surface p-5 sm:p-6 shadow-xs transition hover:border-line-2"
+                    className="rounded-2xl border border-line bg-surface p-5 shadow-xs transition hover:border-line-2"
                   >
-                    {/* Large subtle quote glyph */}
-                    <div className="text-3xl font-serif text-muted/40 leading-none select-none mb-3">
+                    <div className="text-2xl font-serif text-muted/40 leading-none select-none mb-2">
                       “
                     </div>
-                    <p className="text-xs sm:text-sm text-body leading-relaxed">
-                      {t.quote}
-                    </p>
+                    <p className="text-xs text-body leading-relaxed">{t.quote}</p>
                     <div className="mt-4 flex items-center gap-3">
                       <div className="relative h-9 w-9 shrink-0">
                         <div
@@ -873,7 +1283,7 @@ function SubmitPage() {
                       </div>
                       <div className="min-w-0">
                         <div className="flex items-center gap-1.5 flex-wrap">
-                          <span className="text-xs sm:text-sm font-semibold text-ink leading-tight">
+                          <span className="text-xs font-semibold text-ink leading-tight">
                             {t.name}
                           </span>
                           {t.xHandle && (
@@ -884,14 +1294,10 @@ function SubmitPage() {
                               className="text-[11px] font-medium text-accent hover:underline inline-flex items-center gap-0.5"
                             >
                               <span>@{t.xHandle}</span>
-                              <svg className="h-2.5 w-2.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                                <path d="M7 17L17 7" />
-                                <path d="M8 7h9v9" />
-                              </svg>
                             </a>
                           )}
                         </div>
-                        <div className="text-[11px] text-muted mt-0.5">{t.role}</div>
+                        <div className="text-[11px] text-muted">{t.role}</div>
                       </div>
                     </div>
                   </div>
@@ -900,205 +1306,7 @@ function SubmitPage() {
             </div>
           </div>
         )}
-
-        {/* Paid Checkout Modal (Opened on "Get listed for $XX") */}
-        {showModal && (
-          <div
-            role="dialog"
-            aria-modal="true"
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
-            onClick={(e) => {
-              if (e.target === e.currentTarget) setShowModal(false);
-            }}
-          >
-            <div className="w-full max-w-lg rounded-2xl border border-line bg-surface p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-150">
-              <div className="flex items-center justify-between border-b border-line pb-3">
-                <div>
-                  <h3 className="text-base font-bold text-ink">
-                    Get listed for {activeConv.formatted}
-                  </h3>
-                  <p className="text-xs text-muted mt-0.5">
-                    {selectedPlan === "article"
-                      ? "Gold Spotlight Tier · Featured for 7 days"
-                      : "Featured as Editor's Choice for 7 days"}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setShowModal(false)}
-                  className="rounded-lg p-1.5 text-muted hover:bg-surface-2 hover:text-ink cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleFinalSubmit} className="space-y-3.5">
-                {/* Website URL + Auto-fetch */}
-                <div className="space-y-1">
-                  <label htmlFor="modal_website" className="text-xs font-medium text-body">
-                    Website URL <span className="text-accent">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="modal_website"
-                      required
-                      type="url"
-                      placeholder="https://yourmacapp.com"
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      className={field}
-                    />
-                    <button
-                      type="button"
-                      disabled={fetching || !website.trim()}
-                      onClick={() => void handleAutoFetch()}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-ink transition hover:border-accent hover:bg-accent/5 disabled:opacity-50 cursor-pointer"
-                    >
-                      {fetching ? (
-                        <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <SparklesIcon className="h-3.5 w-3.5 text-accent" />
-                      )}
-                      <span>Auto-fetch</span>
-                    </button>
-                  </div>
-                </div>
-
-                {fetchStatus === "success" && (
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-2 text-xs text-emerald-800 dark:text-emerald-300">
-                    {fetchMessage}
-                  </div>
-                )}
-
-                {/* Email + X Handle */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label htmlFor="modal_email" className="mb-1 block text-xs font-medium text-body">
-                      Your Email <span className="text-accent">*</span>
-                    </label>
-                    <input
-                      id="modal_email"
-                      required
-                      type="email"
-                      placeholder="developer@yourdomain.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className={field}
-                    />
-                  </div>
-                  <div>
-                    <label htmlFor="modal_x" className="mb-1 block text-xs font-medium text-body">
-                      X (Twitter) handle <span className="text-accent">*</span>
-                    </label>
-                    <input
-                      id="modal_x"
-                      required
-                      type="text"
-                      placeholder="@username"
-                      value={xHandle}
-                      onChange={(e) => setXHandle(e.target.value)}
-                      className={field}
-                    />
-                  </div>
-                </div>
-
-                {/* Accordion for optional fields */}
-                <div className="pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowAdvanced(!showAdvanced)}
-                    className="flex items-center gap-1 text-xs font-semibold text-accent hover:underline cursor-pointer"
-                  >
-                    <ChevronIcon className={`h-3 w-3 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
-                    <span>{showAdvanced ? "Hide optional fields" : "Customize name, category & tagline ▾"}</span>
-                  </button>
-
-                  {showAdvanced && (
-                    <div className="mt-3 space-y-2.5 border-t border-line pt-3">
-                      <div>
-                        <label htmlFor="modal_name" className="mb-1 block text-xs font-medium text-body">App name</label>
-                        <input id="modal_name" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Raycast" className={field} />
-                      </div>
-                      <div>
-                        <label htmlFor="modal_tagline" className="mb-1 block text-xs font-medium text-body">Tagline</label>
-                        <input id="modal_tagline" value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="Short one-line description" className={field} />
-                      </div>
-                      <div className="grid grid-cols-2 gap-2.5">
-                        <div>
-                          <label htmlFor="modal_category" className="mb-1 block text-xs font-medium text-body">Category</label>
-                          <select id="modal_category" value={category} onChange={(e) => setCategory(e.target.value)} className={field}>
-                            {shelfCategories.map((c) => (
-                              <option key={c.slug} value={c.slug}>{c.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label htmlFor="modal_pricing" className="mb-1 block text-xs font-medium text-body">Pricing Model</label>
-                          <select id="modal_pricing" value={pricing} onChange={(e) => setPricing(e.target.value as "free" | "freemium" | "paid")} className={field}>
-                            <option value="free">Free</option>
-                            <option value="freemium">Freemium</option>
-                            <option value="paid">Paid</option>
-                          </select>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Coupon Code Input */}
-                <div className="pt-2 border-t border-line">
-                  <div className="flex items-center justify-between mb-1">
-                    <label htmlFor="modal_coupon" className="text-xs font-medium text-body">
-                      Coupon Code
-                    </label>
-                    {isBfcm && (
-                      <span className="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">
-                        ✓ BFCM50 applied (50% OFF)
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-2">
-                    <input
-                      id="modal_coupon"
-                      type="text"
-                      placeholder="e.g. BFCM50"
-                      value={couponInput}
-                      onChange={(e) => {
-                        setCouponInput(e.target.value.toUpperCase());
-                        setCouponError(null);
-                      }}
-                      className="w-full rounded-xl border border-line bg-surface px-3 py-2 text-xs font-mono font-bold text-ink uppercase placeholder:normal-case placeholder:font-normal focus:border-accent focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => applyCoupon(couponInput)}
-                      className="shrink-0 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink hover:bg-surface transition cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {couponError && <p className="mt-1 text-xs text-rose-500">{couponError}</p>}
-                </div>
-
-                <div className="pt-2">
-                  <button
-                    type="submit"
-                    disabled={sending || !hasEmail || !hasXHandle || !website.trim()}
-                    className="w-full rounded-xl bg-ink py-3 px-5 text-sm font-bold text-canvas transition hover:opacity-90 shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {sending
-                      ? "Redirecting to checkout…"
-                      : `Proceed to Secure Checkout (${activeConv.formatted}) →`}
-                  </button>
-                  <p className="mt-2 text-center text-[11px] text-muted">
-                    Instant access to private submitter dashboard after payment.
-                  </p>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
       </div>
-    </main>
+    </div>
   );
 }

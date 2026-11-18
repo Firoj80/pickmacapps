@@ -1622,13 +1622,23 @@ export async function submitListing(
     return { ok: false as const, message: "Name, website, tagline, description, icon, category, email, and X handle are required." };
   }
   if (plan === "choice") {
-    const activeTierSlots = await countActiveTierApps(tier);
-    if (activeTierSlots >= MAX_TIER_SLOTS) {
-      const tierLabel = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
-      return {
-        ok: false as const,
-        message: `All ${MAX_TIER_SLOTS} spots for ${tierLabel} are currently full for this 30-day cycle. Please choose the other tier or submit using the Free plan.`,
-      };
+    const isHotTier = tier === "featured";
+    if (isHotTier) {
+      const activeHotSlots = await countActiveHotApps();
+      if (activeHotSlots >= MAX_HOT_SLOTS) {
+        return {
+          ok: false as const,
+          message: `All ${MAX_HOT_SLOTS} spots for Hot Boost are currently full. Please submit using the Free plan or Gold Spotlight.`,
+        };
+      }
+    } else {
+      const activeTierSlots = await countActiveTierApps("article");
+      if (activeTierSlots >= MAX_TIER_SLOTS) {
+        return {
+          ok: false as const,
+          message: `All ${MAX_TIER_SLOTS} spots for Gold Spotlight are currently full. Please submit using the Free plan or Hot Boost.`,
+        };
+      }
     }
   }
   if (plan === "free") {
@@ -1793,13 +1803,21 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     if (submission.status !== "paid") {
       throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
     }
-    const targetTier = submission.tier === "article" ? "article" : "featured";
-    const activeTier = await countActiveTierApps(targetTier);
-    if (activeTier >= MAX_TIER_SLOTS) {
-      const tierLabel = targetTier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
-      throw new Error(
-        `Cannot approve as ${tierLabel}: All ${MAX_TIER_SLOTS} slots for this tier are currently full (${activeTier}/${MAX_TIER_SLOTS} active). Please unpublish or remove another app from this tier before approving.`
-      );
+    const isHotTier = submission.tier === "featured";
+    if (isHotTier) {
+      const activeHot = await countActiveHotApps(submission.app_id ?? undefined);
+      if (activeHot >= MAX_HOT_SLOTS) {
+        throw new Error(
+          `Cannot approve as Hot Boost: All ${MAX_HOT_SLOTS} slots for Hot Boost are currently full (${activeHot}/${MAX_HOT_SLOTS} active). Please unmark another hot app before approving.`
+        );
+      }
+    } else {
+      const activeTier = await countActiveTierApps("article", submission.app_id ?? undefined);
+      if (activeTier >= MAX_TIER_SLOTS) {
+        throw new Error(
+          `Cannot approve as Gold Spotlight: All ${MAX_TIER_SLOTS} slots for Gold Spotlight are currently full (${activeTier}/${MAX_TIER_SLOTS} active). Please unpublish or remove another app from this tier before approving.`
+        );
+      }
     }
   } else {
     // Free listing: Must verify PickMacApps badge live on website before approving
@@ -1821,7 +1839,8 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     tips: [],
   };
   const isChoice = submission.plan === "choice";
-  const tier = isChoice ? (submission.tier === "article" ? "article" : "featured") : null;
+  const isChoiceHot = isChoice && submission.tier === "featured";
+  const isChoiceGold = isChoice && submission.tier === "article";
   const makeHot = Boolean(options?.makeHot);
 
   // Check if an existing published app matches this submission (Option B & C)
@@ -1857,8 +1876,9 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   if (existingApp) {
     // Option B: Update existing listing details without creating a duplicate
     // Option C: If choice plan was paid/selected, upgrade app to Editor's Choice Gold or Blue
-    const updatedEditorChoice = isChoice ? true : existingApp.editor_choice;
-    const updatedTier = isChoice ? tier : existingApp.featured_tier;
+    const updatedEditorChoice = isChoiceGold ? true : (isChoiceHot ? false : existingApp.editor_choice);
+    const updatedTier = isChoiceGold ? "article" : (isChoiceHot ? null : existingApp.featured_tier);
+    const updatedIsHot = isChoiceHot ? true : (isChoiceGold ? false : (makeHot || existingApp.is_hot));
 
     // Use submission's dashboard token, or existing app's token, or generate new
     const dashTokenRows = await sql.query<{ dashboard_token: string | null }>(
@@ -1884,10 +1904,15 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         featured_until = case
           when $11 and not editor_choice then now() + interval '7 days'
           when $11 and editor_choice and (featured_until is null or featured_until < now()) then now() + interval '7 days'
+          when not $11 then null
           else featured_until
         end,
-        is_hot = case when $13 then true else is_hot end,
-        hot_marked_at = case when $13 and not is_hot then now() else hot_marked_at end,
+        is_hot = $13,
+        hot_marked_at = case
+          when $13 and not is_hot then now()
+          when not $13 then null
+          else hot_marked_at
+        end,
         submitter_email = coalesce(nullif($14, ''), submitter_email),
         submitter_x = coalesce(nullif($15, ''), submitter_x),
         dashboard_token = coalesce(dashboard_token, $16),
@@ -1908,7 +1933,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         submission.demo || "",
         updatedEditorChoice,
         updatedTier,
-        makeHot,
+        updatedIsHot,
         submission.email,
         submission.x_handle || "",
         dashboardToken,
@@ -1943,6 +1968,11 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       .slice(0, 80) || appId.slice(0, 8);
   const taken = await sql.query("select id from apps where slug = $1", [slug]);
   if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
+
+  const shouldBeEditorChoice = isChoiceGold;
+  const shouldBeTier = isChoiceGold ? "article" : null;
+  const shouldBeHot = isChoiceHot || makeHot;
+
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
@@ -1960,21 +1990,16 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       category.slug,
       category.name,
       category.emoji,
-      isChoice,
-      tier,
-      makeHot,
+      shouldBeEditorChoice,
+      shouldBeTier,
+      shouldBeHot,
       submission.demo || "",
       submission.email,
       submission.x_handle || "",
       dashboardToken,
     ],
   );
-  await sql.query("delete from app_tombstones where slug = $1", [slug]);
-  await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
-  invalidatePublicOfferCache();
-  invalidatePublishedDirectoryCache();
-  await audit(sql, "approve", slug, submission.plan);
-  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier, dashboardToken };
+  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier: shouldBeTier, dashboardToken };
 }
 
 export async function runBadgeChecks() {
