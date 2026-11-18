@@ -17,7 +17,7 @@ export function AppGrid({
   apps,
   query,
   category = "all",
-  sort = "featured",
+  sort,
   categories = [],
   onQuery,
   onCategory,
@@ -185,7 +185,7 @@ export function AppGrid({
             priority={page === 0 && index < 2}
           />
         ))}
-        {sort === "featured" && visible.length < MAX_HOME_TIER_SLOTS && (
+        {(sort === "featured" || category === "pick") && visible.length < MAX_HOME_TIER_SLOTS && (
           <ClaimSpotCard tier="article" offer={offer} />
         )}
       </div>
