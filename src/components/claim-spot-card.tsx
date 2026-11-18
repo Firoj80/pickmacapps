@@ -78,9 +78,7 @@ export function ClaimSpotCard({
               <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-400/80 bg-amber-400/10 text-amber-300 text-xl font-bold shadow-md">
                 <span>+</span>
               </div>
-              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-stone-950">
-                ★
-              </span>
+              <BadgeCheckIcon className="absolute -bottom-1 -right-1 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
             </div>
 
             {/* Center Content Column */}
@@ -174,9 +172,7 @@ export function ClaimSpotCard({
                 <div className="flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-300/70 bg-amber-400/10 text-xl font-bold shadow-md">
                   <span className="text-amber-300">+</span>
                 </div>
-                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-stone-950">
-                  ★
-                </span>
+                <BadgeCheckIcon className="absolute -bottom-1 -right-1 h-4.5 w-4.5 shrink-0 fill-amber-400 text-stone-950" />
               </div>
 
               <p className="mt-2 text-[15px] sm:text-base font-bold tracking-tight text-white drop-shadow-sm">

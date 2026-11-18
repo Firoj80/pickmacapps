@@ -313,9 +313,7 @@ function Home() {
               {cat === "pick" || sort === "featured" ? (
                 <>
                   <span>Featured Mac apps</span>
-                  <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/15 text-accent text-sm">
-                    ★
-                  </span>
+                  <BadgeCheckIcon className="h-6 w-6 sm:h-7 sm:w-7 shrink-0 fill-amber-500 text-stone-950 drop-shadow-xs" />
                 </>
               ) : sort === "new" ? (
                 <span>Latest Mac apps</span>
@@ -403,7 +401,7 @@ function Home() {
                   : "text-muted hover:bg-surface-2 hover:text-ink"
               }`}
             >
-              <span className="text-amber-500">★</span>
+              <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
               <span>Featured</span>
             </Link>
 
