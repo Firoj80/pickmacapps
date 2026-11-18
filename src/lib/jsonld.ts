@@ -58,7 +58,7 @@ function websiteNode(origin: string, withSearch: boolean, description?: string) 
       {
         "@type": "SiteNavigationElement",
         name: "Sponsor",
-        description: "Feature your macOS app on PickMacApps for 30 days",
+        description: "Feature your macOS app on PickMacApps for 7 days",
         url: absoluteUrl(origin, "/sponsor"),
       },
       {

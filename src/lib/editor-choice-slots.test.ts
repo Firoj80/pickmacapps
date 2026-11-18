@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
+import { FEATURED_APP_DURATION_DAYS, getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
 import {
   appPriorityWeight,
   featuredTierWeight,
@@ -10,16 +10,18 @@ import {
   type AppItem,
 } from "./catalog.ts";
 
-test("getNextCycleLabel returns the 30-day rollover date", () => {
-  // 2026-10-31 + 30 days is Nov 30
+test("FEATURED_APP_DURATION_DAYS is strictly 7 days and getNextCycleLabel returns the 7-day rollover date", () => {
+  assert.equal(FEATURED_APP_DURATION_DAYS, 7);
+
+  // 2026-10-31 + 7 days is Nov 7
   const oct31 = new Date(Date.UTC(2026, 9, 31, 12, 0, 0));
   const labelOct = getNextCycleLabel(oct31);
-  assert.equal(labelOct, "30 Nov");
+  assert.equal(labelOct, "7 Nov");
 
-  // 2026-11-01 + 30 days is Dec 1
+  // 2026-11-01 + 7 days is Nov 8
   const nov1 = new Date(Date.UTC(2026, 10, 1, 12, 0, 0));
   const labelNov = getNextCycleLabel(nov1);
-  assert.equal(labelNov, "1 Dec");
+  assert.equal(labelNov, "8 Nov");
 });
 
 test("MAX_EDITOR_CHOICE_SLOTS is strictly 12 and MAX_TIER_SLOTS is strictly 6 per tier", () => {

@@ -190,14 +190,14 @@ function SubmitPage() {
     active: 0,
     remaining: 6,
     isFull: false,
-    nextDate: offer.slots?.nextDate ?? "30 days",
+    nextDate: offer.slots?.nextDate ?? "7 days",
   };
   const articleSlots = offer.articleSlots ?? {
     total: 6,
     active: 0,
     remaining: 6,
     isFull: false,
-    nextDate: offer.slots?.nextDate ?? "30 days",
+    nextDate: offer.slots?.nextDate ?? "7 days",
   };
 
   // Default to Free listing (first pill) unless specific tier specified
@@ -564,7 +564,7 @@ function SubmitPage() {
                       <div>
                         {selectedPlan === "article" ? (
                           <span className="inline-flex items-center rounded-md bg-gradient-to-r from-amber-500 to-fuchsia-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
-                            🌟 Gold Spotlight · 30 Days Featured · Top #1 Spot
+                            🌟 Gold Spotlight · 7 Days Featured · Top #1 Spot
                           </span>
                         ) : selectedPlan === "free" ? (
                           <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2.5 py-0.5 text-xs font-semibold text-stone-800 dark:bg-stone-800 dark:text-stone-200">
@@ -572,7 +572,7 @@ function SubmitPage() {
                           </span>
                         ) : (
                           <span className="inline-flex items-center rounded-md border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-ink">
-                            Editor's Choice · 30 Days Featured
+                            Editor's Choice · 7 Days Featured
                           </span>
                         )}
 
@@ -654,19 +654,19 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              <strong className="text-ink font-semibold">Featured as Gold Spotlight</strong> for 30 days
+                              <strong className="text-ink font-semibold">Featured as Gold Spotlight</strong> for 7 days
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              <strong className="text-ink font-semibold">#1 Priority Top Placement & Gold Badge</strong> for 30 days
+                              <strong className="text-ink font-semibold">#1 Priority Top Placement & Gold Badge</strong> for 7 days
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              After 30 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
+                              After 7 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
@@ -724,7 +724,7 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              <strong className="text-ink font-semibold">Featured as Editor's Choice</strong> on our directory for 30 days
+                              <strong className="text-ink font-semibold">Featured as Editor's Choice</strong> on our directory for 7 days
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
@@ -736,7 +736,7 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-emerald-600 font-bold shrink-0">✓</span>
                             <span>
-                              After 30 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
+                              After 7 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
                             </span>
                           </li>
                           <li className="flex items-start gap-2.5">
@@ -924,8 +924,8 @@ function SubmitPage() {
                     </button>
                     <p className="mt-3 text-center text-xs text-muted">
                       {selectedPlan === "article"
-                        ? "Featured as Gold Spotlight for 30 days, then listed permanently. You'll get a form link to submit app details after payment."
-                        : "Featured as Editor's Choice for 30 days, then listed permanently. You'll get a form link to submit app details after payment."}
+                        ? "Featured as Gold Spotlight for 7 days, then listed permanently. You'll get a form link to submit app details after payment."
+                        : "Featured as Editor's Choice for 7 days, then listed permanently. You'll get a form link to submit app details after payment."}
                     </p>
                   </div>
                 )}
@@ -1018,8 +1018,8 @@ function SubmitPage() {
                   </h3>
                   <p className="text-xs text-muted mt-0.5">
                     {selectedPlan === "article"
-                      ? "Gold Spotlight Tier · Featured for 30 days"
-                      : "Featured as Editor's Choice for 30 days"}
+                      ? "Gold Spotlight Tier · Featured for 7 days"
+                      : "Featured as Editor's Choice for 7 days"}
                   </p>
                 </div>
                 <button

@@ -43,7 +43,7 @@ export const pageCopy = {
   sponsor: {
     title: "Sponsor — PickMacApps",
     description:
-      "Feature your macOS app on PickMacApps for 30 days. Reach thousands of active Mac power users, developers, and creators.",
+      "Feature your macOS app on PickMacApps for 7 days. Reach thousands of active Mac power users, developers, and creators.",
   },
   categories: {
     title: "Browse by category — PickMacApps",

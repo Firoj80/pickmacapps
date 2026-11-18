@@ -12,22 +12,22 @@ import {
 } from "@/lib/currency";
 
 const featured = [
-  "Featured as Editor's Choice for 30 days",
+  "Featured as Editor's Choice for 7 days",
   "Blue verified featured badge 🔹",
   "Approved within 24 hours",
-  "Top hero spot for 30 days",
+  "Top hero spot for 7 days",
   "Permanent listing in directory",
   "Social shoutout to Mac enthusiasts",
 ];
 
 const story = [
-  "Featured as Gold Spotlight for 30 days",
-  "Golden verified choice badge 🌟 for 30 days",
+  "Featured as Gold Spotlight for 7 days",
+  "Golden verified choice badge 🌟 for 7 days",
   "⚡ Approved within 2 hours (Express)",
-  "#1 priority hero spot for 30 days",
+  "#1 priority hero spot for 7 days",
   "Dedicated in-depth Medium review article",
   "High-authority SEO backlink to your app",
-  "Permanent listing in directory after 30 days",
+  "Permanent listing in directory after 7 days",
   "Social shoutout to Mac enthusiasts",
   "Priority placement across alternative tables",
 ];
@@ -40,9 +40,9 @@ export const Route = createFileRoute("/sponsor")({
     const seo = buildMetadata({
       title: pageCopy.sponsor.title,
       description: pageCopy.sponsor.description,
-      ogTitle: "Feature Your Mac App on PickMacApps (30 Days)",
+      ogTitle: "Feature Your Mac App on PickMacApps (7 Days)",
       ogDescription: pageCopy.sponsor.description,
-      twitterTitle: "Feature Your Mac App on PickMacApps (30 Days)",
+      twitterTitle: "Feature Your Mac App on PickMacApps (7 Days)",
       twitterDescription: pageCopy.sponsor.description,
       path: "/sponsor",
       origin,
@@ -217,7 +217,7 @@ function SponsorPage() {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-white">Gold Spotlight + Medium Article</h3>
-                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Top #1 Hero spot for 30 days & organic SEO backlinks</p>
+                  <p className="text-sm text-fuchsia-200/80 mt-0.5">Top #1 Hero spot for 7 days & organic SEO backlinks</p>
                 </div>
               </div>
 
@@ -254,7 +254,7 @@ function SponsorPage() {
               data-ml-goal-plan="article"
               className="mt-8 flex w-full items-center justify-center rounded-2xl bg-gradient-to-r from-fuchsia-600 via-pink-600 to-amber-500 py-3.5 text-sm font-bold text-white shadow-lg transition-all hover:opacity-95 hover:scale-[1.01]"
             >
-              Claim Gold Spotlight (30 Days) — {articleConv.formatted} {currency !== "USD" ? `(~$${articleBaseDollars})` : ""} 🚀
+              Claim Gold Spotlight (7 Days) — {articleConv.formatted} {currency !== "USD" ? `(~$${articleBaseDollars})` : ""} 🚀
             </Link>
           </div>
         </div>
@@ -307,7 +307,7 @@ function SponsorPage() {
           <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
           <div className="mt-8 space-y-3">
             <Faq q="What is the difference between the packages?">
-              The ${featuredPrice} tier gives you the Blue featured badge, 24h review, top hero placement for 30 days, and a social shoutout. The ${articlePrice} tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 30 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
+              The ${featuredPrice} tier gives you the Blue featured badge, 24h review, top hero placement for 7 days, and a social shoutout. The ${articlePrice} tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 7 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
             </Faq>
             <Faq q="What if my app isn't accepted?">
               All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
@@ -319,7 +319,7 @@ function SponsorPage() {
               Yes! Through Dodo Payments Adaptive Currency checkout, your payment is processed directly in your local currency. You can select your preferred currency above or pay in your native currency with localized payment methods supported worldwide (UPI/Cards in India, iDEAL/SEPA in Europe, Apple Pay, Google Pay, and international credit cards).
             </Faq>
             <Faq q="How long does the hero spotlight last?">
-              Featured apps hold the top hero spot and featured placement across the directory for a full 30 days, capped at 12 active apps to ensure each sponsor receives prime visibility. After 30 days, your app stays listed permanently in the directory.
+              Featured apps hold the top hero spot and featured placement across the directory for a full 7 days, capped at 12 active apps to ensure each sponsor receives prime visibility. After 7 days, your app stays listed permanently in the directory.
             </Faq>
           </div>
         </div>

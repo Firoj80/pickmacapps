@@ -486,10 +486,11 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
 
 export const MAX_EDITOR_CHOICE_SLOTS = 12;
 export const MAX_TIER_SLOTS = 6; // 6 Blue (Featured) + 6 Gold (Article) = 12 total
+export const FEATURED_APP_DURATION_DAYS = 7;
 
 export function getNextCycleLabel(now = new Date()): string {
   const d = new Date(now);
-  d.setDate(d.getDate() + 30);
+  d.setDate(d.getDate() + FEATURED_APP_DURATION_DAYS);
   const dayNum = d.getDate();
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   return `${dayNum} ${months[d.getMonth()]}`;
@@ -959,7 +960,7 @@ export async function createAdminApp(input: {
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
       editor_choice, featured_tier, featured_until, is_hot, status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '30 days' else null end, $14, $15, $16, false, $17, $18, $19, $20, now(), now())`,
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, $15, $16, false, $17, $18, $19, $20, now(), now())`,
     [
       id,
       input.name.trim(),
@@ -1110,7 +1111,7 @@ export async function saveApp(input: {
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
       featured_tier = $12,
-      featured_until = case when $11 then coalesce(featured_until, now() + interval '30 days') else null end,
+      featured_until = case when $11 then coalesce(featured_until, now() + interval '7 days') else null end,
       status = $13, icon = $14, demo = $15, is_hot = $16,
       check_badge = $17, x_handle = $18, submitter_x = coalesce(nullif($18, ''), submitter_x),
       updated_at = now()
@@ -1809,8 +1810,8 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         editor_choice = $11,
         featured_tier = $12,
         featured_until = case
-          when $11 and not editor_choice then now() + interval '30 days'
-          when $11 and editor_choice and (featured_until is null or featured_until < now()) then now() + interval '30 days'
+          when $11 and not editor_choice then now() + interval '7 days'
+          when $11 and editor_choice and (featured_until is null or featured_until < now()) then now() + interval '7 days'
           else featured_until
         end,
         is_hot = case when $13 then true else is_hot end,
@@ -1874,7 +1875,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
       editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, demo, status, submitter_email, submitter_x, is_user_submitted, dashboard_token
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '30 days' else null end,$14,case when $14 then now() else null end,$15,'published',$16,$17,true,$18)`,
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '7 days' else null end,$14,case when $14 then now() else null end,$15,'published',$16,$17,true,$18)`,
     [
       appId,
       submission.app_name,
