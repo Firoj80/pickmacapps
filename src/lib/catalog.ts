@@ -23,6 +23,8 @@ export type AppItem = {
   featuredUntil?: string | null;
   isHot?: boolean;
   hotMarkedAt?: string | null;
+  hotScheduledFor?: string | null;
+  featuredScheduledFor?: string | null;
   isUserSubmitted?: boolean;
   views7d?: number;
   clickCount?: number;

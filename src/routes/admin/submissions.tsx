@@ -140,10 +140,19 @@ function SubmissionsPage() {
                               {item.tier === "article" ? (
                                 <span className="inline-flex items-center gap-1">
                                   <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
-                                  <span>Gold (Article)</span>
+                                  <span>Gold Spotlight</span>
                                 </span>
-                              ) : "🔹 Blue (Featured)"}
+                              ) : (
+                                <span className="inline-flex items-center gap-1 text-rose-700">
+                                  🔥 Hot Boost
+                                </span>
+                              )}
                             </Pill>
+                            {item.status === "paid" ? (
+                              <span className="inline-block rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-500/20">
+                                📅 Booked for {item.tier === "article" ? (data.offer?.articleSlots?.nextDate || "Next Week") : (data.offer?.hotSlots?.nextDate || "Next Week")}
+                              </span>
+                            ) : null}
                           </div>
                         ) : (
                           <div className="flex flex-col items-start gap-1">

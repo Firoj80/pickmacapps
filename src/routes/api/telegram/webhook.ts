@@ -179,7 +179,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
           return Response.json({ ok: true });
         }
 
-        if (parsed.action === "approve" || parsed.action === "apphot") {
+        if (parsed.action === "approve" || parsed.action === "apphot" || parsed.action === "apphotsched") {
           // Live check badge before approving if free plan
           if (submission.plan !== "choice") {
             const liveCheck = await checkBadgeOnPage(submission.website);
@@ -211,7 +211,12 @@ export const Route = createFileRoute("/api/telegram/webhook")({
 
           try {
             const makeHot = parsed.action === "apphot";
-            const created = await approveSubmission(submission.id, { makeHot });
+            const scheduleHot = parsed.action === "apphotsched";
+            const created = await approveSubmission(submission.id, {
+              approvedBy: `Telegram admin (${fromUsername})`,
+              makeHot,
+              scheduleHot,
+            });
             submitToIndexNow(PRIMARY_ORIGIN, urlsForAppChange(PRIMARY_ORIGIN, created.slug));
 
             const updated = (await getSubmissionById(submission.id)) ?? {
@@ -220,12 +225,26 @@ export const Route = createFileRoute("/api/telegram/webhook")({
               approvedSlug: created.slug,
             };
 
-            await answerTelegramCallback(
-              callback.id,
-              created.isUpdate
-                ? (makeHot ? `🔥 Updated & marked Hot: ${created.name}` : `✅ Updated & applied: ${created.name}`)
-                : (makeHot ? `🔥 Approved & marked Hot: ${created.name}` : `✅ Approved & published: ${created.name}`),
-            );
+            let note: string | undefined = undefined;
+            let answerMsg = "";
+            if (created.isHotScheduled) {
+              const dateLabel = created.scheduledDate || "next cycle";
+              note = `Published + 📅 Hot Scheduled (${dateLabel})`;
+              answerMsg = created.isUpdate
+                ? `📅 Updated & Hot scheduled for ${dateLabel}: ${created.name}`
+                : `📅 Approved & Hot scheduled for ${dateLabel}: ${created.name}`;
+            } else if (created.isHot) {
+              note = "Published + 🔥 Hot";
+              answerMsg = created.isUpdate
+                ? `🔥 Updated & marked Hot: ${created.name}`
+                : `🔥 Approved & marked Hot: ${created.name}`;
+            } else {
+              answerMsg = created.isUpdate
+                ? `✅ Updated & applied: ${created.name}`
+                : `✅ Approved & published: ${created.name}`;
+            }
+
+            await answerTelegramCallback(callback.id, answerMsg);
 
             if (chatId !== undefined && messageId !== undefined) {
               await editTelegramMessage(
@@ -233,7 +252,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
                 messageId,
                 formatSubmissionNotification(updated, {
                   approvedSlug: created.slug,
-                  badgeNote: makeHot ? "Published + 🔥 Hot" : undefined,
+                  badgeNote: note,
                 }),
                 buildSubmissionInlineKeyboard(updated, created.slug),
               );

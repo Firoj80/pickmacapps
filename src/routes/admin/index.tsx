@@ -100,6 +100,10 @@ function AdminHome() {
   const blueOccupants = data.stats.blueOccupants ?? [];
   const goldOccupants = data.stats.goldOccupants ?? [];
   const hotApps = data.stats.hotApps ?? [];
+  const scheduledHotApps = (data.stats as any).scheduledHotApps ?? [];
+  const scheduledGoldApps = (data.stats as any).scheduledGoldApps ?? [];
+  const queuedPaidBookings = (data.stats as any).queuedPaidBookings ?? [];
+  const totalScheduled = scheduledHotApps.length + scheduledGoldApps.length + queuedPaidBookings.length;
   const topPerforming = data.stats.topPerforming ?? [];
   const recentAudit = data.stats.recentAudit ?? [];
   const totalCatalog = data.stats.free + data.stats.paid + data.stats.freemium;
@@ -260,6 +264,179 @@ function AdminHome() {
             {hotApps.length}/6 hot · {goldOccupants.length}/6 gold slots filled
           </p>
         </Link>
+      </section>
+
+      {/* Upcoming Cycle Reservations (Booked for Next Week) */}
+      <section className="mt-5 overflow-hidden rounded-2xl border border-line bg-white shadow-xs">
+        <div className="flex flex-col gap-2 border-b border-line px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between bg-stone-50/50">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold text-ink">📅 Upcoming Cycle Reservations (Booked for Next Week)</span>
+            <span
+              className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                totalScheduled > 0 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+              }`}
+            >
+              {totalScheduled > 0 ? `${totalScheduled} Booked for ${data.offer?.hotSlots?.nextDate || "Next Week"}` : "0 Booked · Slots Open"}
+            </span>
+          </div>
+          <div className="text-xs text-muted">
+            Next Hot Rollover: <span className="font-semibold text-ink">{data.offer?.hotSlots?.nextDate || "7 days"}</span>
+            {" · "}
+            Next Gold Rollover: <span className="font-semibold text-ink">{data.offer?.articleSlots?.nextDate || "7 days"}</span>
+          </div>
+        </div>
+
+        <div className="p-4">
+          {totalScheduled === 0 ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center text-xs text-muted">
+              <span className="text-2xl mb-1.5">📅</span>
+              <p className="font-semibold text-ink">No upcoming cycle reservations currently queued</p>
+              <p className="text-[11px] text-muted mt-0.5">
+                When current 6 Hot or 6 Gold slots are full, any new bookings or Telegram approvals scheduled for next week ({data.offer?.hotSlots?.nextDate || "next cycle"}) will appear here.
+              </p>
+            </div>
+          ) : (
+            <div className="divide-y divide-stone-100">
+              {scheduledHotApps.map((app: any) => {
+                const dt = app.hotScheduledFor ? new Date(app.hotScheduledFor) : null;
+                const formatted = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : (data.offer?.hotSlots?.nextDate || "Next Week");
+                const daysLeft = dt && !isNaN(dt.getTime()) ? Math.max(0, Math.ceil((dt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : null;
+
+                return (
+                  <div key={`sched-hot-${app.id}`} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {app.icon ? (
+                        <img alt="" src={app.icon} className="h-8 w-8 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-xs shrink-0 text-muted">
+                          📱
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Link to="/admin/apps/$id" params={{ id: app.id }} className="truncate font-semibold text-xs text-ink hover:underline">
+                            {app.name}
+                          </Link>
+                          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50 px-1.5 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-500/20">
+                            🔥 Hot Boost (Scheduled)
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted truncate mt-0.5">
+                          Scheduled for: <span className="font-medium text-ink">{formatted}</span>
+                          {daysLeft !== null ? ` (in ${daysLeft} days)` : ""}
+                          {app.submitter ? ` · Submitter: ${app.submitter}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link
+                        to="/admin/apps/$id"
+                        params={{ id: app.id }}
+                        className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-stone-50 shadow-2xs"
+                      >
+                        Manage App →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {scheduledGoldApps.map((app: any) => {
+                const dt = app.featuredScheduledFor ? new Date(app.featuredScheduledFor) : null;
+                const formatted = dt && !isNaN(dt.getTime()) ? dt.toLocaleDateString("en-US", { month: "short", day: "numeric" }) : (data.offer?.articleSlots?.nextDate || "Next Week");
+                const daysLeft = dt && !isNaN(dt.getTime()) ? Math.max(0, Math.ceil((dt.getTime() - Date.now()) / (24 * 60 * 60 * 1000))) : null;
+
+                return (
+                  <div key={`sched-gold-${app.id}`} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {app.icon ? (
+                        <img alt="" src={app.icon} className="h-8 w-8 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-xs shrink-0 text-muted">
+                          📱
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <Link to="/admin/apps/$id" params={{ id: app.id }} className="truncate font-semibold text-xs text-ink hover:underline">
+                            {app.name}
+                          </Link>
+                          <span className="inline-flex items-center gap-1 rounded-md bg-amber-50 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 ring-1 ring-amber-500/20">
+                            <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                            <span>Gold Spotlight (Scheduled)</span>
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted truncate mt-0.5">
+                          Scheduled for: <span className="font-medium text-ink">{formatted}</span>
+                          {daysLeft !== null ? ` (in ${daysLeft} days)` : ""}
+                          {app.submitter ? ` · Submitter: ${app.submitter}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link
+                        to="/admin/apps/$id"
+                        params={{ id: app.id }}
+                        className="rounded-lg border border-line bg-white px-2.5 py-1 text-[11px] font-medium text-ink hover:bg-stone-50 shadow-2xs"
+                      >
+                        Manage App →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {queuedPaidBookings.map((sub: any) => {
+                const isGold = sub.tier === "article";
+                const dateLabel = isGold ? (data.offer?.articleSlots?.nextDate || "Next Week") : (data.offer?.hotSlots?.nextDate || "Next Week");
+
+                return (
+                  <div key={`queued-sub-${sub.id}`} className="py-2.5 first:pt-0 last:pb-0 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 min-w-0">
+                      {sub.icon ? (
+                        <img alt="" src={sub.icon} className="h-8 w-8 rounded-lg object-cover shrink-0" />
+                      ) : (
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-surface-2 text-xs shrink-0 text-muted">
+                          📱
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="truncate font-semibold text-xs text-ink">{sub.appName}</span>
+                          {isGold ? (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                              <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                              <span>Gold Spotlight (Paid Booking)</span>
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-rose-100 px-1.5 py-0.5 text-[10px] font-semibold text-rose-800">
+                              🔥 Hot Boost (Paid Booking)
+                            </span>
+                          )}
+                          <span className="rounded-md bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700 ring-1 ring-emerald-500/20">
+                            Paid Confirmed
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-muted truncate mt-0.5">
+                          Queued for Next Cycle: <span className="font-medium text-ink">{dateLabel}</span>
+                          {sub.submitter ? ` · Submitter: ${sub.submitter}` : ""}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <Link
+                        to="/admin/submissions"
+                        className="rounded-lg bg-emerald-600 px-2.5 py-1 text-[11px] font-semibold text-white hover:bg-emerald-700 shadow-2xs"
+                      >
+                        Approve & Schedule →
+                      </Link>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* Two-Column Modern Command Layout */}

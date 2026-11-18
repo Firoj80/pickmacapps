@@ -37,6 +37,8 @@ type AppRow = {
   featured_until?: string | Date | null;
   is_hot?: boolean;
   hot_marked_at?: string | Date | null;
+  hot_scheduled_for?: string | Date | null;
+  featured_scheduled_for?: string | Date | null;
   is_user_submitted?: boolean;
   views_7d?: number | string;
   created_at: string | Date;
@@ -113,6 +115,8 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
       : asBool(row.is_hot)
       ? (row.created_at ? iso(row.created_at) : new Date().toISOString())
       : null,
+    hotScheduledFor: row.hot_scheduled_for ? iso(row.hot_scheduled_for) : null,
+    featuredScheduledFor: row.featured_scheduled_for ? iso(row.featured_scheduled_for) : null,
     isUserSubmitted: asBool(row.is_user_submitted),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
@@ -299,6 +303,9 @@ async function ensureSeed(sql: Sql) {
     await sql.query("alter table apps add column if not exists check_badge boolean not null default false");
     await sql.query("alter table apps add column if not exists x_handle text not null default ''");
     await sql.query("alter table apps add column if not exists dashboard_token text unique");
+    await sql.query("alter table apps add column if not exists hot_scheduled_for timestamptz");
+    await sql.query("alter table apps add column if not exists featured_scheduled_for timestamptz");
+    await sql.query("alter table submissions add column if not exists scheduled_for timestamptz");
   } catch (err) {
     console.error("ensureSeed is_hot & flags failed:", err);
   }
@@ -367,6 +374,9 @@ async function ensureSeed(sql: Sql) {
     await sql.query("alter table apps add column if not exists check_badge boolean not null default false");
     await sql.query("alter table apps add column if not exists x_handle text not null default ''");
     await sql.query("alter table apps add column if not exists dashboard_token text unique");
+    await sql.query("alter table apps add column if not exists hot_scheduled_for timestamptz");
+    await sql.query("alter table apps add column if not exists featured_scheduled_for timestamptz");
+    await sql.query("alter table submissions add column if not exists scheduled_for timestamptz");
   } catch (err) {
     console.error("ensureSeed is_hot & flags failed:", err);
   }
@@ -871,12 +881,38 @@ export async function adminStats() {
   const trafficSources7d: { source: string; views: number }[] = [];
 
   let hotApps: { id: string; name: string; slug: string; icon: string; hotMarkedAt: string | null }[] = [];
+  let scheduledHotApps: {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string;
+    hotScheduledFor: string | null;
+    submitter: string | null;
+  }[] = [];
+  let scheduledGoldApps: {
+    id: string;
+    name: string;
+    slug: string;
+    icon: string;
+    featuredScheduledFor: string | null;
+    submitter: string | null;
+  }[] = [];
+  let queuedPaidBookings: {
+    id: string;
+    appName: string;
+    website: string;
+    icon: string;
+    tier: string;
+    submitter: string;
+    createdAt: string;
+  }[] = [];
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   try {
+    await expireOldHotApps().catch(() => {});
     await sql.query("update apps set hot_marked_at = now() where is_hot = true and hot_marked_at is null");
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
-      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 6",
+      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc",
     );
     hotApps = hotRows.map((r) => ({
       id: r.id,
@@ -886,6 +922,86 @@ export async function adminStats() {
       hotMarkedAt: r.hot_marked_at
         ? (r.hot_marked_at instanceof Date ? r.hot_marked_at.toISOString() : String(r.hot_marked_at))
         : new Date().toISOString(),
+    }));
+
+    const schedHotRows = await sql.query<{
+      id: string;
+      name: string;
+      slug: string;
+      icon: string;
+      hot_scheduled_for: string | Date | null;
+      submitter_email: string | null;
+      submitter_x: string | null;
+    }>(
+      `select id, name, slug, icon, hot_scheduled_for, submitter_email, submitter_x
+       from apps
+       where status = 'published'
+         and is_hot = false
+         and hot_scheduled_for is not null
+       order by hot_scheduled_for asc`,
+    );
+    scheduledHotApps = schedHotRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      hotScheduledFor: r.hot_scheduled_for
+        ? (r.hot_scheduled_for instanceof Date ? r.hot_scheduled_for.toISOString() : String(r.hot_scheduled_for))
+        : null,
+      submitter: r.submitter_x || r.submitter_email || null,
+    }));
+
+    const schedGoldRows = await sql.query<{
+      id: string;
+      name: string;
+      slug: string;
+      icon: string;
+      featured_scheduled_for: string | Date | null;
+      submitter_email: string | null;
+      submitter_x: string | null;
+    }>(
+      `select id, name, slug, icon, featured_scheduled_for, submitter_email, submitter_x
+       from apps
+       where status = 'published'
+         and editor_choice = false
+         and featured_scheduled_for is not null
+       order by featured_scheduled_for asc`,
+    );
+    scheduledGoldApps = schedGoldRows.map((r) => ({
+      id: r.id,
+      name: r.name,
+      slug: r.slug,
+      icon: r.icon,
+      featuredScheduledFor: r.featured_scheduled_for
+        ? (r.featured_scheduled_for instanceof Date ? r.featured_scheduled_for.toISOString() : String(r.featured_scheduled_for))
+        : null,
+      submitter: r.submitter_x || r.submitter_email || null,
+    }));
+
+    const queuedRows = await sql.query<{
+      id: string;
+      app_name: string;
+      website: string;
+      icon: string;
+      tier: string;
+      email: string;
+      x_handle: string;
+      created_at: string | Date;
+    }>(
+      `select id, app_name, website, icon, tier, email, x_handle, created_at
+       from submissions
+       where plan = 'choice'
+         and status = 'paid'
+       order by created_at asc`,
+    );
+    queuedPaidBookings = queuedRows.map((r) => ({
+      id: r.id,
+      appName: r.app_name,
+      website: r.website,
+      icon: r.icon,
+      tier: r.tier,
+      submitter: r.x_handle || r.email || "",
+      createdAt: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
     }));
 
     const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
@@ -975,6 +1091,9 @@ export async function adminStats() {
     views30d,
     topApps7d,
     hotApps,
+    scheduledHotApps,
+    scheduledGoldApps,
+    queuedPaidBookings,
     blueOccupants,
     goldOccupants,
     trafficSources7d,
@@ -1748,6 +1867,7 @@ export async function submitListing(
       submissionToken,
     ],
   );
+  const currentOffer = await publicOffer();
   const telegramInfo: TelegramSubmissionInfo = {
     id,
     appName: name,
@@ -1764,6 +1884,7 @@ export async function submitListing(
     existingSlug: existingApp?.slug,
     isUpdate: Boolean(existingApp),
     dashboardToken: submissionToken,
+    hotSlots: currentOffer.hotSlots,
   };
   if (plan === "free") {
     await notifyTelegramSubmission(telegramInfo, "submitted").catch((err) => {
@@ -1844,13 +1965,26 @@ export async function markPaymentPaid(input: { eventId: string; submissionId: st
   await sql.query("insert into webhook_events (id) values ($1)", [input.eventId]);
   const paidSubmission = await getSubmissionById(input.submissionId);
   if (paidSubmission) {
-    await notifyTelegramSubmission(paidSubmission, "payment_succeeded").catch((err) => {
+    const currentOffer = await publicOffer();
+    const paidTelegramInfo: TelegramSubmissionInfo = {
+      ...paidSubmission,
+      hotSlots: currentOffer.hotSlots,
+    };
+    await notifyTelegramSubmission(paidTelegramInfo, "payment_succeeded").catch((err) => {
       console.error("[telegram] notify paid confirmation failed:", err);
     });
   }
 }
 
-export async function approveSubmission(id: string, options?: { makeHot?: boolean }) {
+export async function approveSubmission(
+  id: string,
+  options?: {
+    approvedBy?: string;
+    makeHot?: boolean;
+    scheduleHot?: boolean;
+    scheduleGold?: boolean;
+  },
+) {
   const sql = await directorySql();
   const rows = await sql.query<{
     id: string;
@@ -1873,27 +2007,16 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   const submission = rows[0];
   if (!submission) throw new Error("Submission not found");
   if (submission.status === "approved") throw new Error("That submission is already approved.");
-  if (submission.plan === "choice") {
-    if (submission.status !== "paid") {
-      throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
-    }
-    const isHotTier = submission.tier === "featured";
-    if (isHotTier) {
-      const activeHot = await countActiveHotApps(submission.app_id ?? undefined);
-      if (activeHot >= MAX_HOT_SLOTS) {
-        throw new Error(
-          `Cannot approve as Hot Boost: All ${MAX_HOT_SLOTS} slots for Hot Boost are currently full (${activeHot}/${MAX_HOT_SLOTS} active). Please unmark another hot app before approving.`
-        );
-      }
-    } else {
-      const activeTier = await countActiveTierApps("article", submission.app_id ?? undefined);
-      if (activeTier >= MAX_TIER_SLOTS) {
-        throw new Error(
-          `Cannot approve as Gold Spotlight: All ${MAX_TIER_SLOTS} slots for Gold Spotlight are currently full (${activeTier}/${MAX_TIER_SLOTS} active). Please unpublish or remove another app from this tier before approving.`
-        );
-      }
-    }
-  } else {
+
+  const isChoice = submission.plan === "choice";
+  const isChoiceHot = isChoice && submission.tier === "featured";
+  const isChoiceGold = isChoice && submission.tier === "article";
+
+  if (isChoice && submission.status !== "paid") {
+    throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
+  }
+
+  if (!isChoice) {
     // Free listing: Must verify PickMacApps badge live on website before approving
     const badgeCheck = await checkBadgeOnPage(submission.website);
     if (!badgeCheck.ok) {
@@ -1912,10 +2035,52 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
     paragraphs: [],
     tips: [],
   };
-  const isChoice = submission.plan === "choice";
-  const isChoiceHot = isChoice && submission.tier === "featured";
-  const isChoiceGold = isChoice && submission.tier === "article";
-  const makeHot = Boolean(options?.makeHot);
+
+  const activeHot = await countActiveHotApps(submission.app_id ?? undefined);
+  const hotSlotsFull = activeHot >= MAX_HOT_SLOTS;
+
+  const activeGold = await countActiveTierApps("article", submission.app_id ?? undefined);
+  const goldSlotsFull = activeGold >= MAX_TIER_SLOTS;
+
+  const offer = await publicOffer();
+  const nextHotDate = offer.hotSlots.nextDate;
+  const nextGoldDate = offer.articleSlots.nextDate;
+  const nextHotIso = offer.hotSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
+  const nextGoldIso = offer.articleSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
+
+  const wantsHot = isChoiceHot || Boolean(options?.makeHot) || Boolean(options?.scheduleHot);
+
+  let shouldBeHot = false;
+  let hotScheduledFor: string | null = null;
+  let isHotScheduled = false;
+
+  if (options?.scheduleHot || (wantsHot && hotSlotsFull)) {
+    // Either explicitly scheduled for next cycle or hot slots are full: schedule it!
+    shouldBeHot = false;
+    hotScheduledFor = nextHotIso;
+    isHotScheduled = true;
+  } else if (wantsHot) {
+    shouldBeHot = true;
+    hotScheduledFor = null;
+  }
+
+  let shouldBeEditorChoice = false;
+  let shouldBeTier: string | null = null;
+  let featuredScheduledFor: string | null = null;
+  let isGoldScheduled = false;
+
+  if (isChoiceGold) {
+    if (options?.scheduleGold || goldSlotsFull) {
+      shouldBeEditorChoice = false;
+      shouldBeTier = "article";
+      featuredScheduledFor = nextGoldIso;
+      isGoldScheduled = true;
+    } else {
+      shouldBeEditorChoice = true;
+      shouldBeTier = "article";
+      featuredScheduledFor = null;
+    }
+  }
 
   // Check if an existing published app matches this submission (Option B & C)
   let existingApp: {
@@ -1948,13 +2113,10 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   }
 
   if (existingApp) {
-    // Option B: Update existing listing details without creating a duplicate
-    // Option C: If choice plan was paid/selected, upgrade app to Editor's Choice Gold or Blue
-    const updatedEditorChoice = isChoiceGold ? true : (isChoiceHot ? false : existingApp.editor_choice);
+    const updatedEditorChoice = isChoiceGold ? shouldBeEditorChoice : existingApp.editor_choice;
     const updatedTier = isChoiceGold ? "article" : (isChoiceHot ? null : existingApp.featured_tier);
-    const updatedIsHot = isChoiceHot ? true : (isChoiceGold ? false : (makeHot || existingApp.is_hot));
+    const updatedIsHot = wantsHot ? shouldBeHot : existingApp.is_hot;
 
-    // Use submission's dashboard token, or existing app's token, or generate new
     const dashTokenRows = await sql.query<{ dashboard_token: string | null }>(
       "select dashboard_token from apps where id = $1 limit 1",
       [existingApp.id],
@@ -1987,13 +2149,15 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
           when not $13 then null
           else hot_marked_at
         end,
-        submitter_email = coalesce(nullif($14, ''), submitter_email),
-        submitter_x = coalesce(nullif($15, ''), submitter_x),
-        dashboard_token = coalesce(dashboard_token, $16),
+        hot_scheduled_for = $14,
+        featured_scheduled_for = $15,
+        submitter_email = coalesce(nullif($16, ''), submitter_email),
+        submitter_x = coalesce(nullif($17, ''), submitter_x),
+        dashboard_token = coalesce(dashboard_token, $18),
         status = 'published',
         badge_misses = 0,
         updated_at = now()
-      where id = $17`,
+      where id = $19`,
       [
         submission.app_name,
         submission.tagline,
@@ -2008,6 +2172,8 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
         updatedEditorChoice,
         updatedTier,
         updatedIsHot,
+        hotScheduledFor,
+        featuredScheduledFor,
         submission.email,
         submission.x_handle || "",
         dashboardToken,
@@ -2029,6 +2195,10 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       isChoice,
       tier: updatedTier,
       dashboardToken,
+      isHot: updatedIsHot,
+      isHotScheduled,
+      isGoldScheduled,
+      scheduledDate: isHotScheduled ? nextHotDate : isGoldScheduled ? nextGoldDate : undefined,
     };
   }
 
@@ -2043,15 +2213,11 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
   const taken = await sql.query("select id from apps where slug = $1", [slug]);
   if (taken.length) slug = `${slug}-${appId.slice(0, 4)}`;
 
-  const shouldBeEditorChoice = isChoiceGold;
-  const shouldBeTier = isChoiceGold ? "article" : null;
-  const shouldBeHot = isChoiceHot || makeHot;
-
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, demo, status, submitter_email, submitter_x, is_user_submitted, dashboard_token
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '7 days' else null end,$14,case when $14 then now() else null end,$15,'published',$16,$17,true,$18)`,
+      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, hot_scheduled_for, featured_scheduled_for, demo, status, submitter_email, submitter_x, is_user_submitted, dashboard_token
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '7 days' else null end,$14,case when $14 then now() else null end,$15,$16,$17,'published',$18,$19,true,$20)`,
     [
       appId,
       submission.app_name,
@@ -2067,13 +2233,34 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
       shouldBeEditorChoice,
       shouldBeTier,
       shouldBeHot,
+      hotScheduledFor,
+      featuredScheduledFor,
       submission.demo || "",
       submission.email,
       submission.x_handle || "",
       dashboardToken,
     ],
   );
-  return { id: appId, slug, name: submission.app_name, categorySlug: category.slug, isUpdate: false, isChoice, tier: shouldBeTier, dashboardToken };
+
+  await sql.query("delete from app_tombstones where slug = $1", [slug]);
+  await sql.query("update submissions set status = 'approved', app_id = $2 where id = $1", [id, appId]);
+  invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
+  await audit(sql, "approve_submission", slug, submission.plan);
+  return {
+    id: appId,
+    slug,
+    name: submission.app_name,
+    categorySlug: category.slug,
+    isUpdate: false,
+    isChoice,
+    tier: shouldBeTier,
+    dashboardToken,
+    isHot: shouldBeHot,
+    isHotScheduled,
+    isGoldScheduled,
+    scheduledDate: isHotScheduled ? nextHotDate : isGoldScheduled ? nextGoldDate : undefined,
+  };
 }
 
 export async function runBadgeChecks() {
@@ -2160,6 +2347,71 @@ export async function expireOldHotApps(): Promise<number> {
     invalidatePublishedDirectoryCache();
     await audit(sql, "expire_hot", `${rows.length} apps`, `Expired hot tags older than ${HOT_APP_DURATION_DAYS} days`);
   }
+
+  // Activate any scheduled Hot apps whose scheduled time has arrived and slot is open
+  try {
+    const activeHotCount = await countActiveHotApps();
+    const availableSlots = Math.max(0, MAX_HOT_SLOTS - activeHotCount);
+    if (availableSlots > 0) {
+      const readyApps = await sql.query<{ id: string; name: string }>(
+        `select id, name from apps
+         where status = 'published'
+           and is_hot = false
+           and hot_scheduled_for is not null
+           and hot_scheduled_for <= now()
+         order by hot_scheduled_for asc
+         limit $1`,
+        [availableSlots],
+      );
+      for (const app of readyApps) {
+        await sql.query(
+          `update apps
+           set is_hot = true, hot_marked_at = now(), hot_scheduled_for = null, updated_at = now()
+           where id = $1`,
+          [app.id],
+        );
+        await audit(sql, "activate_scheduled_hot", app.name, "Promoted scheduled Hot app to active");
+      }
+      if (readyApps.length > 0) {
+        invalidatePublishedDirectoryCache();
+      }
+    }
+  } catch (err) {
+    console.error("Auto-activating scheduled hot apps failed:", err);
+  }
+
+  // Activate any scheduled Gold apps whose scheduled time has arrived and slot is open
+  try {
+    const activeGoldCount = await countActiveTierApps("article");
+    const availableGold = Math.max(0, MAX_TIER_SLOTS - activeGoldCount);
+    if (availableGold > 0) {
+      const readyGold = await sql.query<{ id: string; name: string }>(
+        `select id, name from apps
+         where status = 'published'
+           and editor_choice = false
+           and featured_scheduled_for is not null
+           and featured_scheduled_for <= now()
+         order by featured_scheduled_for asc
+         limit $1`,
+        [availableGold],
+      );
+      for (const app of readyGold) {
+        await sql.query(
+          `update apps
+           set editor_choice = true, featured_tier = 'article', featured_until = now() + interval '7 days', featured_scheduled_for = null, updated_at = now()
+           where id = $1`,
+          [app.id],
+        );
+        await audit(sql, "activate_scheduled_gold", app.name, "Promoted scheduled Gold app to active");
+      }
+      if (readyGold.length > 0) {
+        invalidatePublishedDirectoryCache();
+      }
+    }
+  } catch (err) {
+    console.error("Auto-activating scheduled gold apps failed:", err);
+  }
+
   return rows.length;
 }
 

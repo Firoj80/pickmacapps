@@ -31,6 +31,7 @@ export const Route = createFileRoute("/admin/apps/")({
 const filters = [
   { id: "all", label: "All Apps" },
   { id: "hot", label: "🔥 Hot" },
+  { id: "scheduled", label: "📅 Scheduled Next Week" },
   { id: "blue", label: "🔹 Blue Tier" },
   { id: "gold", label: "🌟 Gold Tier" },
   { id: "published", label: "Published" },
@@ -51,6 +52,10 @@ function AppsPage() {
   }
 
   const hotCount = useMemo(() => apps.filter((a) => a.isHot).length, [apps]);
+  const scheduledCount = useMemo(
+    () => apps.filter((a) => Boolean(a.hotScheduledFor || a.featuredScheduledFor)).length,
+    [apps],
+  );
   const blueCount = useMemo(() => apps.filter((a) => a.editorChoice && a.featuredTier !== "article").length, [apps]);
   const goldCount = useMemo(() => apps.filter((a) => a.editorChoice && a.featuredTier === "article").length, [apps]);
   const publishedCount = useMemo(() => apps.filter((a) => a.status === "published").length, [apps]);
@@ -60,6 +65,7 @@ function AppsPage() {
     const needle = query.trim().toLowerCase();
     return apps.filter((app) => {
       if (filter === "hot" && !app.isHot) return false;
+      if (filter === "scheduled" && !app.hotScheduledFor && !app.featuredScheduledFor) return false;
       if (filter === "blue" && (!app.editorChoice || app.featuredTier === "article")) return false;
       if (filter === "gold" && (!app.editorChoice || app.featuredTier !== "article")) return false;
       if (filter === "published" && app.status !== "published") return false;
@@ -183,6 +189,8 @@ function AppsPage() {
                 ? ` (${apps.length})`
                 : item.id === "hot"
                 ? ` (${hotCount})`
+                : item.id === "scheduled"
+                ? ` (${scheduledCount})`
                 : item.id === "blue"
                 ? ` (${blueCount})`
                 : item.id === "gold"
@@ -334,6 +342,17 @@ function AppsPage() {
                         </span>
                       </div>
                     ) : null}
+                    {app.featuredScheduledFor ? (
+                      <div className="mt-1">
+                        <span className="inline-block rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10.5px] font-bold text-amber-300">
+                          {(() => {
+                            const dt = new Date(app.featuredScheduledFor);
+                            const formatted = isNaN(dt.getTime()) ? app.featuredScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                            return `📅 Gold Opens: ${formatted}`;
+                          })()}
+                        </span>
+                      </div>
+                    ) : null}
                   </td>
 
                   {/* Reciprocal Badge Status */}
@@ -395,6 +414,17 @@ function AppsPage() {
                           {(() => {
                             const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                             return `Expires: ${formatted} (${daysLeft} days left)`;
+                          })()}
+                        </span>
+                      </div>
+                    ) : null}
+                    {app.hotScheduledFor ? (
+                      <div className="mt-1">
+                        <span className="inline-block rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10.5px] font-bold text-amber-300">
+                          {(() => {
+                            const dt = new Date(app.hotScheduledFor);
+                            const formatted = isNaN(dt.getTime()) ? app.hotScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                            return `📅 Hot Opens: ${formatted}`;
                           })()}
                         </span>
                       </div>
@@ -568,6 +598,24 @@ function AppsPage() {
                 {(() => {
                   const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                   return `🔥 Hot expires: ${formatted} (${daysLeft}d left)`;
+                })()}
+              </div>
+            ) : null}
+            {app.hotScheduledFor ? (
+              <div className="text-[10.5px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 rounded-lg px-2.5 py-1">
+                {(() => {
+                  const dt = new Date(app.hotScheduledFor);
+                  const formatted = isNaN(dt.getTime()) ? app.hotScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return `📅 Hot opens: ${formatted}`;
+                })()}
+              </div>
+            ) : null}
+            {app.featuredScheduledFor ? (
+              <div className="text-[10.5px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 rounded-lg px-2.5 py-1">
+                {(() => {
+                  const dt = new Date(app.featuredScheduledFor);
+                  const formatted = isNaN(dt.getTime()) ? app.featuredScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                  return `📅 Gold opens: ${formatted}`;
                 })()}
               </div>
             ) : null}

@@ -21,9 +21,10 @@ export interface TelegramSubmissionInfo {
   existingSlug?: string;
   isUpdate?: boolean;
   dashboardToken?: string;
+  hotSlots?: { isFull: boolean; nextDate: string; remaining: number };
 }
 
-export type TelegramSubmissionAction = "approve" | "apphot" | "reject" | "badge" | "nobadge" | "xpost" | "conf";
+export type TelegramSubmissionAction = "approve" | "apphot" | "apphotsched" | "reject" | "badge" | "nobadge" | "xpost" | "conf";
 
 export interface ParsedTelegramCallback {
   action: TelegramSubmissionAction;
@@ -82,7 +83,7 @@ export function parseSubmissionCallbackData(data: string): ParsedTelegramCallbac
       submissionId: xpostMatch[2],
     };
   }
-  const match = /^sub:(approve|apphot|reject|badge|nobadge|conf):([a-zA-Z0-9-]+)$/.exec(trimmed);
+  const match = /^sub:(approve|apphot|apphotsched|reject|badge|nobadge|conf):([a-zA-Z0-9-]+)$/.exec(trimmed);
   if (!match) return null;
   return {
     action: match[1] as TelegramSubmissionAction,
@@ -278,6 +279,7 @@ export function formatSubmissionNotification(
     kind?: "submitted" | "payment_succeeded";
     badgeNote?: string;
     approvedSlug?: string;
+    hotSlots?: { isFull: boolean; nextDate: string; remaining: number };
   },
 ): string {
   const header = defaultHeader(submission, options?.kind);
@@ -307,6 +309,15 @@ export function formatSubmissionNotification(
     `🛡 <b>Badge Check:</b> ${escapeTelegramHtml(badgeText)}${options?.badgeNote ? ` <i>(${escapeTelegramHtml(options.badgeNote)})</i>` : ""}`,
   );
 
+  const slots = options?.hotSlots || submission.hotSlots;
+  if (slots) {
+    if (slots.isFull) {
+      lines.push(`🔥 <b>Hot Slots:</b> 6/6 Full · Next slot opens ${escapeTelegramHtml(slots.nextDate)}`);
+    } else {
+      lines.push(`🔥 <b>Hot Slots:</b> ${6 - slots.remaining}/6 Active (${slots.remaining} available)`);
+    }
+  }
+
   if (submission.existingSlug && submission.status !== "approved") {
     lines.push(`🔗 <b>Current Live Page:</b> ${PRIMARY_ORIGIN}/app/${escapeTelegramHtml(submission.existingSlug)}`);
   }
@@ -332,6 +343,7 @@ function safeHttpUrl(url: string): string | null {
 export function buildSubmissionInlineKeyboard(
   submission: TelegramSubmissionInfo,
   approvedSlug?: string,
+  options?: { hotSlots?: { isFull: boolean; nextDate: string; remaining: number } },
 ): { inline_keyboard: TelegramInlineButton[][] } {
   const websiteUrl = safeHttpUrl(submission.website);
   const slug = approvedSlug || submission.approvedSlug;
@@ -353,6 +365,23 @@ export function buildSubmissionInlineKeyboard(
   const isFree = submission.plan !== "choice";
   const badgeMissing = isFree && !submission.badgeOk;
 
+  const hotSlots = options?.hotSlots || submission.hotSlots;
+  const isHotFull = Boolean(hotSlots?.isFull);
+  const nextHotDate = hotSlots?.nextDate || "Next Cycle";
+
+  const hotButton: TelegramInlineButton = isHotFull
+    ? {
+        text: `📅 Approve + Hot (${nextHotDate})`,
+        callback_data: `sub:apphotsched:${submission.id}`,
+      }
+    : {
+        text:
+          hotSlots?.remaining !== undefined && hotSlots.remaining < 6
+            ? `🔥 Approve + Hot (${hotSlots.remaining} left)`
+            : "🔥 Approve + Hot",
+        callback_data: `sub:apphot:${submission.id}`,
+      };
+
   const row1: TelegramInlineButton[] = badgeMissing
     ? [
         {
@@ -362,7 +391,7 @@ export function buildSubmissionInlineKeyboard(
       ]
     : [
         { text: "✅ Approve & Publish", callback_data: `sub:approve:${submission.id}` },
-        { text: "🔥 Approve + Hot", callback_data: `sub:apphot:${submission.id}` },
+        hotButton,
       ];
 
   const creator = normalizeCreatorMention(submission.xHandle);
@@ -617,12 +646,16 @@ export async function answerTelegramCallback(callbackQueryId: string, text: stri
 export async function notifyTelegramSubmission(
   submission: TelegramSubmissionInfo,
   kind: "submitted" | "payment_succeeded" = "submitted",
+  options?: {
+    hotSlots?: { isFull: boolean; nextDate: string; remaining: number };
+  },
 ) {
   const adminChatId = env("TELEGRAM_ADMIN_CHAT_ID");
   if (!adminChatId || !env("TELEGRAM_BOT_TOKEN")) return;
 
-  const text = formatSubmissionNotification(submission, { kind });
-  const keyboard = buildSubmissionInlineKeyboard(submission);
+  const slots = options?.hotSlots || submission.hotSlots;
+  const text = formatSubmissionNotification(submission, { kind, hotSlots: slots });
+  const keyboard = buildSubmissionInlineKeyboard(submission, undefined, { hotSlots: slots });
   await sendTelegramMessage(adminChatId, text, keyboard);
 }
 
