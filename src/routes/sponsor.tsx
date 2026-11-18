@@ -5,15 +5,6 @@ import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
 
-const featured = [
-  "Featured as Editor's Choice for 7 days",
-  "Blue verified featured badge 🔹",
-  "Approved within 24 hours",
-  "Top hero spot for 7 days",
-  "Permanent listing in directory",
-  "Social shoutout to Mac enthusiasts",
-];
-
 const story = [
   "Featured as Gold Spotlight for 7 days",
   "Golden verified choice badge 🌟 for 7 days",
@@ -53,13 +44,10 @@ export const Route = createFileRoute("/sponsor")({
 function SponsorPage() {
   const offer = Route.useLoaderData();
 
-  const featuredBaseDollars = Math.round((offer.featuredPriceCents ?? offer.priceCents) / 100);
   const articleBaseDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
 
-  const featuredConv = { formatted: `$${featuredBaseDollars}` };
   const articleConv = { formatted: `$${articleBaseDollars}` };
 
-  const featuredPrice = String(featuredBaseDollars);
   const articlePrice = String(articleBaseDollars);
 
   return (
@@ -84,7 +72,7 @@ function SponsorPage() {
 
         <p className="mx-auto mt-4 max-w-2xl text-[16px] leading-relaxed text-body sm:text-[18px]">
           Get immediate visibility, high-intent traffic, and trusted editorial placement on PickMacApps. 
-          Limited to only 6 featured spots at a time (3 Gold + 3 Blue).
+          Limited to only 6 Gold Spotlight spots at a time.
         </p>
 
         {/* Live Metrics Bar */}
@@ -132,53 +120,8 @@ function SponsorPage() {
           </div>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-2 lg:gap-8 max-w-4xl mx-auto">
-          {/* Card 1: Featured */}
-          <div className="relative flex flex-col justify-between rounded-3xl border border-line bg-surface/90 p-7 sm:p-9 shadow-lg backdrop-blur-xl transition hover:border-violet-500/40 hover:shadow-xl">
-            <div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-ink">Featured Placement</h3>
-                  <p className="text-sm text-muted mt-0.5">Homepage hero and featured badge</p>
-                </div>
-                <span className="rounded-full bg-violet-500/10 px-3 py-1 text-xs font-semibold text-violet-600 dark:text-violet-400">
-                  Popular
-                </span>
-              </div>
-
-              <div className="mt-6 flex items-baseline gap-2 flex-wrap">
-                <span className="text-5xl font-extrabold tracking-tight text-ink">{featuredConv.formatted}</span>
-                <span className="text-sm font-medium text-muted">one-time payment</span>
-              </div>
-
-              <p className="mt-2 text-xs text-muted">No recurring fees. App stays listed permanently.</p>
-
-              <hr className="my-6 border-line" />
-
-              <ul className="space-y-3.5 text-sm">
-                {featured.map((item) => (
-                  <li key={item} className="flex items-start gap-3 text-body">
-                    <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-500/15 text-violet-600 dark:text-violet-400 text-xs font-bold">
-                      ✓
-                    </span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <Link
-              to="/submit"
-              search={{ tier: "featured", coupon: "BFCM50" }}
-              data-ml-goal="pricing_cta"
-              data-ml-goal-plan="featured"
-              className="mt-8 flex w-full items-center justify-center rounded-2xl border border-line-2 bg-surface hover:bg-surface-2 py-3.5 text-sm font-semibold text-ink shadow-sm transition-all hover:scale-[1.01]"
-            >
-              Get Featured — {featuredConv.formatted}
-            </Link>
-          </div>
-
-          {/* Card 2: Featured + Article (Vibrant Gradient Card) */}
+        <div className="max-w-xl mx-auto">
+          {/* Card: Gold Spotlight (Vibrant Gradient Card) */}
           <div className="relative flex flex-col justify-between rounded-3xl border-2 border-fuchsia-500/70 bg-gradient-to-b from-[#181228] to-[#110e1c] p-7 sm:p-9 text-white shadow-2xl transition hover:shadow-fuchsia-500/20">
             {/* Glowing Accent Ribbon */}
             <div className="absolute -top-3.5 right-6 rounded-full bg-gradient-to-r from-fuchsia-500 via-pink-500 to-amber-400 px-4 py-1 text-xs font-bold text-white uppercase tracking-wider shadow-md">
@@ -273,8 +216,8 @@ function SponsorPage() {
         <div className="mx-auto max-w-3xl px-4 sm:px-6">
           <h2 className="text-2xl font-bold tracking-tight text-ink text-center">Frequently Asked Questions</h2>
           <div className="mt-8 space-y-3">
-            <Faq q="What is the difference between the packages?">
-              The ${featuredPrice} tier gives you the Blue featured badge, 24h review, top hero placement for 7 days, and a social shoutout. The ${articlePrice} tier gives you the Golden Editor's Choice badge, express approval within 2 hours, top priority #1 hero spot for 7 days, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks.
+            <Faq q="What does the Gold Spotlight package include?">
+              The Gold Spotlight (${articlePrice}) gives you the Golden Editor's Choice badge, express approval within 2 hours, the top priority #1 hero spot for 7 days across the entire directory, plus a dedicated in-depth editorial article on Firoj’s Medium profile, generating enduring search traffic and high-authority backlinks — all for a one-time payment.
             </Faq>
             <Faq q="What if my app isn't accepted?">
               All apps are inspected manually to ensure quality standards. If for any reason an app is not a fit for our directory, you will not be charged or will be refunded promptly.
@@ -286,7 +229,7 @@ function SponsorPage() {
               Through Dodo Payments secure checkout, you can pay with international credit cards, debit cards, Apple Pay, Google Pay, and localized bank methods worldwide billed in USD ($).
             </Faq>
             <Faq q="How long does the hero spotlight last?">
-              Featured apps hold the top hero spot and featured placement across the directory for a full 7 days, capped at 6 active apps (3 Gold + 3 Blue) to ensure each sponsor receives prime visibility. After 7 days, your app stays listed permanently in the directory.
+              Gold Spotlight apps hold the top hero spot and featured placement across the directory for a full 7 days, capped at 6 active Gold spots to ensure each sponsor receives prime visibility. After 7 days, your app stays listed permanently in the directory.
             </Faq>
           </div>
         </div>

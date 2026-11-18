@@ -11,7 +11,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 
 export type SubmitSearch = {
-  tier?: "featured" | "article" | "free";
+  tier?: "article" | "free";
   submitted?: string;
   payment_id?: string;
   subscription_id?: string;
@@ -23,9 +23,11 @@ export type SubmitSearch = {
 export const Route = createFileRoute("/submit")({
   validateSearch: (search: Record<string, unknown>): SubmitSearch => ({
     tier:
-      search.tier === "featured" || search.tier === "article" || search.tier === "free"
-        ? (search.tier as "featured" | "article" | "free")
-        : undefined,
+      search.tier === "article" || search.tier === "free"
+        ? (search.tier as "article" | "free")
+        : search.tier === "featured"
+          ? "article" // redirect legacy featured URLs to article
+          : undefined,
     submitted: search.submitted ? String(search.submitted) : undefined,
     payment_id: search.payment_id ? String(search.payment_id) : undefined,
     subscription_id: search.subscription_id ? String(search.subscription_id) : undefined,
@@ -182,9 +184,8 @@ function SubmitPage() {
   };
 
   // Default to Free listing (first pill) unless specific tier specified
-  const [selectedPlan, setSelectedPlan] = useState<"featured" | "free" | "article">(() => {
+  const [selectedPlan, setSelectedPlan] = useState<"free" | "article">(() => {
     if (tier === "article" && !articleSlots.isFull) return "article";
-    if (tier === "featured") return "featured";
     return "free";
   });
 
@@ -192,12 +193,10 @@ function SubmitPage() {
   useEffect(() => {
     if (tier === "article" && !articleSlots.isFull) {
       setSelectedPlan("article");
-    } else if (tier === "featured") {
-      setSelectedPlan("featured");
     }
   }, [tier, articleSlots.isFull]);
 
-  const isPaid = selectedPlan === "featured" || selectedPlan === "article";
+  const isPaid = selectedPlan === "article";
   const [showModal, setShowModal] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
 
@@ -239,18 +238,11 @@ function SubmitPage() {
     tier?: string | null;
   } | null>(null);
 
-  const currentPrice =
-    selectedPlan === "free"
-      ? "0"
-      : selectedPlan === "article"
-      ? articlePrice
-      : featuredPrice;
-  const currentCompare = selectedPlan === "article" ? articleCompare : featuredCompare;
-  const activeConv = selectedPlan === "article" ? articleConv : featuredConv;
-  const activeCompareConv = selectedPlan === "article" ? articleCompareConv : featuredCompareConv;
-  const isSelectedTierFull =
-    (selectedPlan === "featured" && featuredSlots.isFull) ||
-    (selectedPlan === "article" && articleSlots.isFull);
+  const currentPrice = selectedPlan === "free" ? "0" : articlePrice;
+  const currentCompare = articleCompare;
+  const activeConv = articleConv;
+  const activeCompareConv = articleCompareConv;
+  const isSelectedTierFull = selectedPlan === "article" && articleSlots.isFull;
 
   // Canonical website URL for badge embeds
   const siteOrigin = "https://pickmacapps.store";
@@ -396,7 +388,7 @@ function SubmitPage() {
           email: email.trim(),
           xHandle: xHandle.trim(),
           plan: isPaid ? "choice" : "free",
-          tier: selectedPlan === "article" ? "article" : "featured",
+          tier: "article",
           currency,
           coupon: appliedCoupon ?? undefined,
           mlVisitorId: attr.ml_visitor_id,
@@ -512,17 +504,6 @@ function SubmitPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => setSelectedPlan("featured")}
-                    className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
-                      selectedPlan === "featured"
-                        ? "bg-ink text-canvas shadow-xs"
-                        : "text-muted hover:text-ink"
-                    }`}
-                  >
-                    Editor's Choice ({featuredConv.formatted})
-                  </button>
-                  <button
-                    type="button"
                     onClick={() => setSelectedPlan("article")}
                     className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-all cursor-pointer ${
                       selectedPlan === "article"
@@ -554,13 +535,9 @@ function SubmitPage() {
                           <span className="inline-flex items-center rounded-md bg-gradient-to-r from-amber-500 to-fuchsia-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
                             🌟 Gold Spotlight · 7 Days Featured · Top #1 Spot
                           </span>
-                        ) : selectedPlan === "free" ? (
+                        ) : (
                           <span className="inline-flex items-center rounded-md bg-stone-200/80 px-2.5 py-0.5 text-xs font-semibold text-stone-800 dark:bg-stone-800 dark:text-stone-200">
                             Community Tier
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center rounded-md border border-line bg-surface-2 px-2.5 py-0.5 text-xs font-semibold text-ink">
-                            Editor's Choice · 7 Days Featured
                           </span>
                         )}
 
@@ -605,13 +582,9 @@ function SubmitPage() {
                           <p className="mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             <span>
-                              {selectedPlan === "article"
-                                ? articleSlots.isFull
-                                  ? "🔴 Sold out for this week"
-                                  : `* Only ${articleSlots.remaining} spot remaining for this week`
-                                : featuredSlots.isFull
-                                  ? "🔴 Sold out for this week"
-                                  : `* Only ${featuredSlots.remaining} spot remaining for this week`}
+                              {articleSlots.isFull
+                                ? "🔴 Sold out for this week"
+                                : `* Only ${articleSlots.remaining} spot remaining for this week`}
                             </span>
                           </p>
                         )}
@@ -623,7 +596,7 @@ function SubmitPage() {
                       </div>
                     </div>
 
-                    {/* 6 Value Prop Bullets matching screenshot */}
+                    {/* Value Prop Bullets matching screenshot */}
                     <ul className="mt-6 space-y-3 border-t border-line/70 pt-5 text-xs text-body">
                       {selectedPlan === "article" ? (
                         <>
@@ -670,7 +643,7 @@ function SubmitPage() {
                             </span>
                           </li>
                         </>
-                      ) : selectedPlan === "free" ? (
+                      ) : (
                         <>
                           <li className="flex items-start gap-2.5">
                             <span className="text-stone-500 font-bold shrink-0">✓</span>
@@ -693,51 +666,6 @@ function SubmitPage() {
                           <li className="flex items-start gap-2.5">
                             <span className="text-stone-500 font-bold shrink-0">✓</span>
                             <span>Standard manual editorial review (3–5 business days)</span>
-                          </li>
-                        </>
-                      ) : (
-                        <>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Featured as Editor's Choice</strong> on our directory for 7 days
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Top placement & Blue badge</strong> across the directory
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              After 7 days, you get <strong className="text-ink font-semibold">listed permanently</strong> on the directory
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Featured at the top</strong> of alternative pages
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Dedicated blog post</strong> for your app, including competitor comparisons
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">High-quality backlink</strong> to boost your SEO
-                            </span>
-                          </li>
-                          <li className="flex items-start gap-2.5">
-                            <span className="text-emerald-600 font-bold shrink-0">✓</span>
-                            <span>
-                              <strong className="text-ink font-semibold">Hundreds of monthly visitors</strong> discovering your app
-                            </span>
                           </li>
                         </>
                       )}

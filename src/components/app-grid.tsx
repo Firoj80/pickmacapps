@@ -5,13 +5,13 @@ import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
-const MAX_HOME_TIER_SLOTS = 3; // 3 Gold + 3 Blue = 6 total sponsored home slots
+const MAX_HOME_TIER_SLOTS = 6; // All 6 slots are Gold (article) tier
 
 export type HeroSort = "featured" | "hot" | "new" | "trending" | "free";
 
 type GridItem =
   | { kind: "app"; app: AppItem; priority: boolean }
-  | { kind: "claim"; tier: "article" | "featured" };
+  | { kind: "claim"; tier: "article" };
 
 export function AppGrid({
   apps,
@@ -70,17 +70,16 @@ export function AppGrid({
       return tA - tB || a.name.localeCompare(b.name);
     };
 
-    // Priority 1: Gold badge apps (editorChoice + featuredTier="article"), oldest first, max 3
+    // Priority 1: Gold badge apps (editorChoice + featuredTier="article"), oldest first, max 6
     const goldApps = apps
       .filter((a) => isEditorChoice(a) && a.featuredTier === "article")
       .sort(byOldest)
       .slice(0, MAX_HOME_TIER_SLOTS);
 
-    // Priority 2: Blue badge apps (editorChoice + featuredTier="featured"), oldest first, max 3
+    // Priority 2 (legacy): Blue badge apps still displayed if in DB, but no new claim cards offered
     const blueApps = apps
       .filter((a) => isEditorChoice(a) && a.featuredTier !== "article")
-      .sort(byOldest)
-      .slice(0, MAX_HOME_TIER_SLOTS);
+      .sort(byOldest);
 
     // Priority 3: Hot apps (isHot, non-editor-choice), oldest first
     const hotApps = apps
@@ -93,16 +92,14 @@ export function AppGrid({
       .sort(byOldest);
 
     const goldFull = goldApps.length >= MAX_HOME_TIER_SLOTS;
-    const blueFull = blueApps.length >= MAX_HOME_TIER_SLOTS;
 
     return [
-      // Gold badge apps first
+      // Gold badge apps first (up to 6)
       ...goldApps.map((app, i) => ({ kind: "app" as const, app, priority: i < 2 })),
-      // Blue badge apps next
+      // Legacy Blue badge apps (existing DB records, no new slots offered)
       ...blueApps.map((app) => ({ kind: "app" as const, app, priority: false })),
-      // Claim cards appear together right after all badge apps
+      // Single Gold claim card when Gold slots < 6
       ...(!goldFull ? [{ kind: "claim" as const, tier: "article" as const }] : []),
-      ...(!blueFull ? [{ kind: "claim" as const, tier: "featured" as const }] : []),
       // Hot apps
       ...hotApps.map((app) => ({ kind: "app" as const, app, priority: false })),
       // All remaining apps, oldest first

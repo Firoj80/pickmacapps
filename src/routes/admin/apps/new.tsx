@@ -42,7 +42,7 @@ function NewAppPage() {
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
   const [status, setStatus] = useState<"published" | "draft" | "unpublished">("published");
   const [editorChoice, setEditorChoice] = useState(false);
-  const [featuredTier, setFeaturedTier] = useState<"featured" | "article">("featured");
+  const [featuredTier, setFeaturedTier] = useState<"featured" | "article">("article");
   const [isHot, setIsHot] = useState(false);
   const [xHandle, setXHandle] = useState("");
   const [checkBadge, setCheckBadge] = useState(false);
@@ -427,15 +427,15 @@ function NewAppPage() {
                 onChange={(e) => setFeaturedTier(e.target.value as "featured" | "article")}
                 className={fieldClass}
               >
-                <option value="featured">
-                  🔹 Blue Badge — Featured Placement
-                </option>
                 <option value="article">
-                  🌟 Golden Badge — Featured + Medium Article
+                  🌟 Golden Badge — Featured + Medium Article (Gold Tier)
+                </option>
+                <option value="featured">
+                  🔹 Blue Badge — Featured Placement (Legacy)
                 </option>
               </select>
               <p className="text-[11px] text-muted">
-                Max 3 apps per badge tier. Gold badge apps receive highest placement priority.
+                All 6 paid slots are Gold badge. Blue badge is legacy.
               </p>
             </div>
           ) : null}

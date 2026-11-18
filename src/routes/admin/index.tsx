@@ -544,7 +544,7 @@ function AdminHome() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-ink">💎 7-Day Sponsorship Slots</h3>
-                <p className="text-[11px] text-muted">Fixed 3 Blue and 3 Gold premium homepage placements</p>
+                <p className="text-[11px] text-muted">All 6 Gold premium homepage placements (Blue tier discontinued)</p>
               </div>
               <button
                 type="button"
@@ -618,94 +618,21 @@ function AdminHome() {
               </div>
             ) : null}
 
-            {/* Blue Tier Slots */}
+            {/* Gold Tier Slots (Primary - 6 Slots) */}
             <div className="mt-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-sky-800">🔹 Blue Featured ({blueOccupants.length}/3)</span>
-                <span className="text-[11px] text-muted">{money(data.offer.featuredPriceCents ?? data.offer.priceCents)}/mo</span>
-              </div>
-              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
-                <div
-                  className="h-full bg-sky-500 transition-all duration-300"
-                  style={{ width: `${(blueOccupants.length / 3) * 100}%` }}
-                />
-              </div>
-
-              <div className="mt-2 space-y-1.5">
-                {[0, 1, 2].map((idx) => {
-                  const occupant = blueOccupants[idx];
-                  if (!occupant) {
-                    return (
-                      <div
-                        key={`blue-slot-${idx}`}
-                        className="flex items-center justify-between rounded-lg border border-dashed border-stone-200 bg-stone-50/40 px-2.5 py-1.5 text-[11px] text-muted"
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-stone-200 text-[9px] font-bold text-stone-600">
-                            {idx + 1}
-                          </span>
-                          Slot {idx + 1}: Open for assignment
-                        </span>
-                        <span className="font-medium text-emerald-600">Available</span>
-                      </div>
-                    );
-                  }
-                  const rem = getSlotDaysRemaining(occupant.featuredUntil);
-                  return (
-                    <div
-                      key={occupant.id}
-                      className="flex items-center justify-between rounded-lg border border-sky-100 bg-sky-50/20 px-2.5 py-1.5 text-xs"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <span className="flex h-4 w-4 items-center justify-center rounded-full bg-sky-100 text-[9px] font-bold text-sky-800 shrink-0">
-                          {idx + 1}
-                        </span>
-                        {occupant.icon ? (
-                          <img alt="" src={occupant.icon} className="h-5 w-5 rounded object-cover shrink-0" />
-                        ) : null}
-                        <Link
-                          to="/admin/apps/$id"
-                          params={{ id: occupant.id }}
-                          preload="intent"
-                          className="truncate font-semibold text-ink hover:underline"
-                        >
-                          {occupant.name}
-                        </Link>
-                        {rem ? (
-                          <span className="rounded bg-sky-100 px-1.5 py-0.2 text-[10px] font-bold text-sky-800 shrink-0">
-                            {rem.days}d left
-                          </span>
-                        ) : null}
-                      </div>
-                      <Link
-                        to="/admin/apps/$id"
-                        params={{ id: occupant.id }}
-                        preload="intent"
-                        className="text-[11px] font-medium text-stone-500 hover:text-ink shrink-0 ml-2"
-                      >
-                        Edit
-                      </Link>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Gold Tier Slots */}
-            <div className="mt-4 border-t border-stone-100 pt-3">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-amber-800">🌟 Gold Article Tier ({goldOccupants.length}/3)</span>
+                <span className="font-semibold text-amber-800">🌟 Gold Article Tier ({goldOccupants.length}/6)</span>
                 <span className="text-[11px] text-muted">{money(data.offer.articlePriceCents ?? 12000)}/mo</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-stone-100">
                 <div
                   className="h-full bg-gradient-to-r from-amber-400 to-fuchsia-500 transition-all duration-300"
-                  style={{ width: `${(goldOccupants.length / 3) * 100}%` }}
+                  style={{ width: `${(goldOccupants.length / 6) * 100}%` }}
                 />
               </div>
 
               <div className="mt-2 space-y-1.5">
-                {[0, 1, 2].map((idx) => {
+                {[0, 1, 2, 3, 4, 5].map((idx) => {
                   const occupant = goldOccupants[idx];
                   if (!occupant) {
                     return (
@@ -763,6 +690,57 @@ function AdminHome() {
                 })}
               </div>
             </div>
+
+            {/* Legacy Blue Tier Slots (if any occupant exists) */}
+            {blueOccupants.length > 0 ? (
+              <div className="mt-4 border-t border-stone-100 pt-3">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-sky-800">🔹 Legacy Blue Featured ({blueOccupants.length} active)</span>
+                  <span className="text-[11px] text-muted">Discontinued</span>
+                </div>
+                <div className="mt-2 space-y-1.5">
+                  {blueOccupants.map((occupant, idx) => {
+                    const rem = getSlotDaysRemaining(occupant.featuredUntil);
+                    return (
+                      <div
+                        key={occupant.id}
+                        className="flex items-center justify-between rounded-lg border border-sky-100 bg-sky-50/20 px-2.5 py-1.5 text-xs"
+                      >
+                        <div className="flex items-center gap-2 min-w-0">
+                          <span className="flex h-4 w-4 items-center justify-center rounded-full bg-sky-100 text-[9px] font-bold text-sky-800 shrink-0">
+                            {idx + 1}
+                          </span>
+                          {occupant.icon ? (
+                            <img alt="" src={occupant.icon} className="h-5 w-5 rounded object-cover shrink-0" />
+                          ) : null}
+                          <Link
+                            to="/admin/apps/$id"
+                            params={{ id: occupant.id }}
+                            preload="intent"
+                            className="truncate font-semibold text-ink hover:underline"
+                          >
+                            {occupant.name}
+                          </Link>
+                          {rem ? (
+                            <span className="rounded bg-sky-100 px-1.5 py-0.2 text-[10px] font-bold text-sky-800 shrink-0">
+                              {rem.days}d left
+                            </span>
+                          ) : null}
+                        </div>
+                        <Link
+                          to="/admin/apps/$id"
+                          params={{ id: occupant.id }}
+                          preload="intent"
+                          className="text-[11px] font-medium text-stone-500 hover:text-ink shrink-0 ml-2"
+                        >
+                          Edit
+                        </Link>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ) : null}
           </section>
 
           {/* Automation & Platform Health */}

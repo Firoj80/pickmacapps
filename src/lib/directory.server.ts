@@ -485,7 +485,7 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
 }
 
 export const MAX_EDITOR_CHOICE_SLOTS = 6;
-export const MAX_TIER_SLOTS = 3; // 3 Blue (Featured) + 3 Gold (Article) = 6 total
+export const MAX_TIER_SLOTS = 6; // All 6 slots are Gold (Article) tier
 export const FEATURED_APP_DURATION_DAYS = 7;
 
 export function getNextCycleLabel(now = new Date()): string {
@@ -650,21 +650,21 @@ export async function publicOffer(): Promise<PublicOffer> {
     }
 
     const nextDate = getNextCycleLabel();
-    const featuredRemaining = Math.max(0, MAX_TIER_SLOTS - activeFeatured);
-    const articleRemaining = Math.max(0, MAX_TIER_SLOTS - activeArticle);
+    const featuredRemaining = 0; // Blue (featured) tier discontinued — no new slots offered
+    const articleRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeArticle);
     const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
 
     const featuredSlots: EditorChoiceSlotsInfo = {
-      total: MAX_TIER_SLOTS,
+      total: 0,
       active: activeFeatured,
-      remaining: featuredRemaining,
-      isFull: featuredRemaining === 0,
+      remaining: 0,
+      isFull: true, // Blue tier discontinued — always full/closed
       nextDate,
-      openDates: featuredOpenDates,
+      openDates: [],
     };
 
     const articleSlots: EditorChoiceSlotsInfo = {
-      total: MAX_TIER_SLOTS,
+      total: MAX_EDITOR_CHOICE_SLOTS,
       active: activeArticle,
       remaining: articleRemaining,
       isFull: articleRemaining === 0,
@@ -696,11 +696,19 @@ export async function publicOffer(): Promise<PublicOffer> {
   } catch (err) {
     console.error("[directory] publicOffer DB query failed, using defaults:", err);
     const nextDate = getNextCycleLabel();
-    const fallbackSlots: EditorChoiceSlotsInfo = {
-      total: MAX_TIER_SLOTS,
+    const fallbackArticleSlots: EditorChoiceSlotsInfo = {
+      total: MAX_EDITOR_CHOICE_SLOTS,
       active: 0,
-      remaining: MAX_TIER_SLOTS,
+      remaining: MAX_EDITOR_CHOICE_SLOTS,
       isFull: false,
+      nextDate,
+      openDates: [],
+    };
+    const fallbackFeaturedSlots: EditorChoiceSlotsInfo = {
+      total: 0,
+      active: 0,
+      remaining: 0,
+      isFull: true,
       nextDate,
       openDates: [],
     };
@@ -709,8 +717,8 @@ export async function publicOffer(): Promise<PublicOffer> {
       featuredCompareCents: 19900,
       articlePriceCents: 12000,
       articleCompareCents: 24900,
-      featuredSlots: fallbackSlots,
-      articleSlots: fallbackSlots,
+      featuredSlots: fallbackFeaturedSlots,
+      articleSlots: fallbackArticleSlots,
       priceCents: 9900,
       compareCents: 19900,
       slots: {
@@ -1038,9 +1046,9 @@ export async function getAppRow(id: string) {
     otherEditorChoiceCount: otherTotal,
     editorChoiceSlotsFull: otherTotal >= MAX_EDITOR_CHOICE_SLOTS,
     otherFeaturedCount: otherFeatured,
-    featuredSlotsFull: otherFeatured >= MAX_TIER_SLOTS,
+    featuredSlotsFull: true, // Blue tier discontinued — always full
     otherArticleCount: otherArticle,
-    articleSlotsFull: otherArticle >= MAX_TIER_SLOTS,
+    articleSlotsFull: otherArticle >= MAX_EDITOR_CHOICE_SLOTS,
   };
 }
 

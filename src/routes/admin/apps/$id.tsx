@@ -488,15 +488,15 @@ function EditAppForm({ app }: { app: EditAppData }) {
                   onChange={(e) => setFeaturedTier(e.target.value as "featured" | "article")}
                   className={fieldClass}
                 >
-                  <option value="featured">
-                    🔹 Blue Badge — Featured Placement ({Math.max(0, 3 - blueActive)}/3 available)
-                  </option>
                   <option value="article">
-                    🌟 Golden Badge — Featured + Medium Article ({Math.max(0, 3 - goldActive)}/3 available)
+                    🌟 Golden Badge — Featured + Medium Article ({Math.max(0, 6 - goldActive)}/6 available)
+                  </option>
+                  <option value="featured">
+                    🔹 Blue Badge — Featured Placement (Legacy)
                   </option>
                 </select>
                 <p className="mt-1 text-[11px] text-muted">
-                  Gold badge apps appear with highest priority at the top, followed by Blue badge apps. Max 3 apps per tier.
+                  All 6 paid slots are Gold badge. Blue badge is legacy.
                 </p>
               </div>
 
@@ -504,26 +504,24 @@ function EditAppForm({ app }: { app: EditAppData }) {
               <div className="space-y-1.5 rounded-lg border border-line bg-white p-3 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="text-body flex items-center gap-1.5">
-                    <span>🔹 Blue spots:</span>
-                    <strong className="text-ink">{blueActive} / 3 active</strong>
-                  </span>
-                  {blueActive >= 3 ? (
-                    <span className="font-semibold text-rose-600">Blue Full (3/3)</span>
-                  ) : (
-                    <span className="font-medium text-emerald-600">{3 - blueActive} spots free</span>
-                  )}
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-body flex items-center gap-1.5">
                     <span>🌟 Gold spots:</span>
-                    <strong className="text-ink">{goldActive} / 3 active</strong>
+                    <strong className="text-ink">{goldActive} / 6 active</strong>
                   </span>
-                  {goldActive >= 3 ? (
-                    <span className="font-semibold text-rose-600">Gold Full (3/3)</span>
+                  {goldActive >= 6 ? (
+                    <span className="font-semibold text-rose-600">Gold Full (6/6)</span>
                   ) : (
-                    <span className="font-medium text-emerald-600">{3 - goldActive} spots free</span>
+                    <span className="font-medium text-emerald-600">{6 - goldActive} spots free</span>
                   )}
                 </div>
+                {blueActive > 0 ? (
+                  <div className="flex items-center justify-between">
+                    <span className="text-body flex items-center gap-1.5">
+                      <span>🔹 Legacy Blue:</span>
+                      <strong className="text-ink">{blueActive} active</strong>
+                    </span>
+                    <span className="text-muted">Discontinued</span>
+                  </div>
+                ) : null}
               </div>
             </div>
           ) : null}

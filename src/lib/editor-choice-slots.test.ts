@@ -24,10 +24,10 @@ test("FEATURED_APP_DURATION_DAYS is strictly 7 days and getNextCycleLabel return
   assert.equal(labelNov, "8 Nov");
 });
 
-test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is strictly 3 per tier", () => {
+test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is now 6 (all Gold)", () => {
   assert.equal(MAX_EDITOR_CHOICE_SLOTS, 6);
-  assert.equal(MAX_TIER_SLOTS, 3);
-  assert.equal(MAX_TIER_SLOTS * 2, MAX_EDITOR_CHOICE_SLOTS);
+  assert.equal(MAX_TIER_SLOTS, 6);
+  assert.equal(MAX_TIER_SLOTS, MAX_EDITOR_CHOICE_SLOTS);
 });
 
 test("featuredTierWeight prioritizes Gold (article) over Blue (featured) over standard", () => {

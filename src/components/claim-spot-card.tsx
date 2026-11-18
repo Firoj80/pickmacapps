@@ -5,11 +5,11 @@ import { fetchOffer } from "@/lib/directory.fn";
 export type ClaimSpotOffer = Awaited<ReturnType<typeof fetchOffer>>;
 
 export function ClaimSpotCard({
-  tier,
+  tier: _tier,
   offer: initialOffer,
   rank,
 }: {
-  tier: "article" | "featured";
+  tier?: "article" | "featured";
   offer?: ClaimSpotOffer | null;
   rank?: number;
 }) {
@@ -24,52 +24,27 @@ export function ClaimSpotCard({
     fetchOffer().then((data) => setOffer(data)).catch(() => {});
   }, [initialOffer]);
 
-  const isGold = tier === "article";
-
   // Calculate base prices in USD from backend settings
-  const rawFeaturedDollars = Math.round((offer?.featuredPriceCents ?? offer?.priceCents ?? 2000) / 100);
-  const rawArticleDollars = Math.round((offer?.articlePriceCents ?? 4000) / 100);
+  const rawArticleDollars = Math.round((offer?.articlePriceCents ?? 12000) / 100);
 
   // Black Friday 50% OFF discount (matching coupon BFCM50 auto-applied on submit page)
-  const featuredSaleDollars = Math.round(rawFeaturedDollars * 0.5);
   const articleSaleDollars = Math.round(rawArticleDollars * 0.5);
 
-  const saleDollars = isGold ? articleSaleDollars : featuredSaleDollars;
-  const originalDollars = isGold ? rawArticleDollars : rawFeaturedDollars;
-
-  const salePrice = `$${saleDollars}`;
-  const originalPrice = `$${originalDollars}`;
-
-  // Desktop styles
-  const outerFrameClass = isGold
-    ? "relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/[0.05] p-[2px] shadow-[0_6px_24px_rgba(245,158,11,0.18)] transition-all duration-300 group-hover:border-amber-400 group-hover:shadow-[0_14px_36px_rgba(245,158,11,0.32)] group-hover:-translate-y-1"
-    : "relative overflow-hidden rounded-2xl border-2 border-dashed border-sky-500/50 bg-sky-500/[0.05] p-[2px] shadow-[0_6px_24px_rgba(14,165,233,0.18)] transition-all duration-300 group-hover:border-sky-400 group-hover:shadow-[0_14px_36px_rgba(14,165,233,0.32)] group-hover:-translate-y-1";
-
-  const previewBgClass = isGold
-    ? "from-[#1d1627] via-[#14101d] to-[#0c0a11]"
-    : "from-[#0d182b] via-[#091220] to-[#050b14]";
-
-  const glowStyle = isGold
-    ? { background: "radial-gradient(circle at 50% 45%, rgba(245, 158, 11, 0.22), transparent 70%)" }
-    : { background: "radial-gradient(circle at 50% 45%, rgba(14, 165, 233, 0.22), transparent 70%)" };
-
-  // Mobile thinner card outer class
-  const mobileCardClass = isGold
-    ? "relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/70 bg-gradient-to-r from-amber-500/[0.14] via-amber-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(245,158,11,0.22)] transition-all active:scale-[0.99]"
-    : "relative overflow-hidden rounded-2xl border-2 border-dashed border-sky-500/70 bg-gradient-to-r from-sky-500/[0.14] via-sky-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(14,165,233,0.22)] transition-all active:scale-[0.99]";
+  const salePrice = `$${articleSaleDollars}`;
+  const originalPrice = `$${rawArticleDollars}`;
 
   return (
     <Link
       to="/submit"
-      search={{ tier: isGold ? "article" : "featured", coupon: "BFCM50" }}
+      search={{ tier: "article", coupon: "BFCM50" }}
       className="group block transition-all duration-300 ease-out cursor-pointer"
-      title={isGold ? `Claim Gold Spotlight — Black Friday 50% OFF (${salePrice})` : `Claim Blue Featured — Black Friday 50% OFF (${salePrice})`}
+      title={`Claim Gold Spotlight — Black Friday 50% OFF (${salePrice})`}
     >
       {/* ======================================================== */}
       {/* 1. MOBILE VIEW (< sm): Thinner horizontal row claim card */}
       {/* ======================================================== */}
       <div className="sm:hidden">
-        <div className={mobileCardClass}>
+        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/70 bg-gradient-to-r from-amber-500/[0.14] via-amber-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(245,158,11,0.22)] transition-all active:scale-[0.99]">
           <div className="flex items-center gap-2.5">
             {/* Rank / Spot Indicator (Omitted on homescreen when rank is undefined) */}
             {typeof rank === "number" ? (
@@ -99,18 +74,10 @@ export function ClaimSpotCard({
 
             {/* Dashed App Icon Placeholder with + */}
             <div className="relative shrink-0">
-              <div
-                className={`flex h-12 w-12 items-center justify-center rounded-[14px] border-2 border-dashed ${
-                  isGold ? "border-amber-400/80 bg-amber-400/10 text-amber-300" : "border-sky-400/80 bg-sky-400/10 text-sky-300"
-                } text-xl font-bold shadow-md`}
-              >
+              <div className="flex h-12 w-12 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-400/80 bg-amber-400/10 text-amber-300 text-xl font-bold shadow-md">
                 <span>+</span>
               </div>
-              <span
-                className={`absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
-                  isGold ? "bg-amber-400 text-stone-950" : "bg-sky-400 text-white"
-                }`}
-              >
+              <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-stone-950">
                 ★
               </span>
             </div>
@@ -122,7 +89,7 @@ export function ClaimSpotCard({
                 <h3 className="truncate text-[14.5px] font-bold tracking-tight text-ink group-hover:text-accent transition-colors">
                   Your App Here
                 </h3>
-                <span className={isGold ? "text-amber-400" : "text-sky-400"}>
+                <span className="text-amber-400">
                   <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
                     <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
                   </svg>
@@ -135,9 +102,7 @@ export function ClaimSpotCard({
 
               {/* Row 2: Tagline */}
               <p className="mt-0.5 line-clamp-1 text-[12px] text-amber-300/90 font-medium leading-tight">
-                {isGold
-                  ? "Black Friday Sale · Gold #1 Spot + Article (Code: BFCM50)"
-                  : "Black Friday Sale · Reach 50K+ Mac Users (Code: BFCM50)"}
+                Black Friday Sale · Gold #1 Spot + Article (Code: BFCM50)
               </p>
 
               {/* Row 3: Meta line with pricing in USD */}
@@ -155,7 +120,7 @@ export function ClaimSpotCard({
                 </span>
                 <span className="inline-flex items-center gap-1.5 shrink-0 font-bold">
                   <span className="text-[10px] text-muted line-through">{originalPrice}</span>
-                  <span className={`text-[12px] font-black ${isGold ? "text-amber-300" : "text-sky-300"}`}>{salePrice}</span>
+                  <span className="text-[12px] font-black text-amber-300">{salePrice}</span>
                   <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[9px] font-bold text-rose-300 ring-1 ring-rose-400/30">
                     50% OFF
                   </span>
@@ -164,25 +129,11 @@ export function ClaimSpotCard({
             </div>
 
             {/* Right Action Box (Matching Upvote Box Style) */}
-            <div
-              className={`shrink-0 flex flex-col items-center justify-between w-12 h-13 rounded-2xl py-1 px-1 transition-all select-none shadow-sm ${
-                isGold
-                  ? "bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 ring-1 ring-amber-200/80"
-                  : "bg-gradient-to-b from-sky-400 via-sky-500 to-blue-600 ring-1 ring-sky-300/80"
-              }`}
-            >
-              <div
-                className={`flex items-center justify-center w-7 h-5.5 rounded-lg shadow-2xs ${
-                  isGold ? "bg-stone-950/85 text-amber-400" : "bg-stone-950/85 text-sky-300"
-                }`}
-              >
+            <div className="shrink-0 flex flex-col items-center justify-between w-12 h-13 rounded-2xl py-1 px-1 transition-all select-none shadow-sm bg-gradient-to-b from-amber-300 via-amber-400 to-amber-500 ring-1 ring-amber-200/80">
+              <div className="flex items-center justify-center w-7 h-5.5 rounded-lg shadow-2xs bg-stone-950/85 text-amber-400">
                 <span className="text-sm font-black leading-none">+</span>
               </div>
-              <span
-                className={`text-[10px] font-black uppercase tracking-tight leading-none mb-0.5 ${
-                  isGold ? "text-stone-950" : "text-white"
-                }`}
-              >
+              <span className="text-[10px] font-black uppercase tracking-tight leading-none mb-0.5 text-stone-950">
                 Claim
               </span>
             </div>
@@ -195,10 +146,10 @@ export function ClaimSpotCard({
       {/* ======================================================== */}
       <div className="hidden sm:flex sm:flex-col">
         {/* Visual Screen Preview Card matching AppCard 1200/630 ratio */}
-        <div className={outerFrameClass}>
+        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/[0.05] p-[2px] shadow-[0_6px_24px_rgba(245,158,11,0.18)] transition-all duration-300 group-hover:border-amber-400 group-hover:shadow-[0_14px_36px_rgba(245,158,11,0.32)] group-hover:-translate-y-1">
           <div
-            style={glowStyle}
-            className={`relative z-10 aspect-[1200/630] overflow-hidden rounded-[14px] bg-gradient-to-br ${previewBgClass} p-3.5 sm:p-4 flex flex-col justify-between text-white select-none`}
+            style={{ background: "radial-gradient(circle at 50% 45%, rgba(245, 158, 11, 0.22), transparent 70%)" }}
+            className="relative z-10 aspect-[1200/630] overflow-hidden rounded-[14px] bg-gradient-to-br from-[#1d1627] via-[#14101d] to-[#0c0a11] p-3.5 sm:p-4 flex flex-col justify-between text-white select-none"
           >
             {/* macOS window title bar with traffic lights & header */}
             <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] pb-2">
@@ -221,18 +172,10 @@ export function ClaimSpotCard({
             <div className="flex flex-col items-center justify-center text-center my-auto py-1">
               {/* Dashed App Icon Placeholder with + */}
               <div className="relative group-hover:scale-105 transition-transform duration-300">
-                <div
-                  className={`flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-[14px] border-2 border-dashed ${
-                    isGold ? "border-amber-300/70 bg-amber-400/10" : "border-sky-300/70 bg-sky-400/10"
-                  } text-xl font-bold shadow-md`}
-                >
-                  <span className={isGold ? "text-amber-300" : "text-sky-300"}>+</span>
+                <div className="flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-300/70 bg-amber-400/10 text-xl font-bold shadow-md">
+                  <span className="text-amber-300">+</span>
                 </div>
-                <span
-                  className={`absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
-                    isGold ? "bg-amber-400 text-stone-950" : "bg-sky-400 text-white"
-                  }`}
-                >
+                <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-amber-400 text-stone-950">
                   ★
                 </span>
               </div>
@@ -241,31 +184,23 @@ export function ClaimSpotCard({
                 Your App Here
               </p>
               <p className="mt-0.5 text-xs text-amber-300/90 max-w-[280px] line-clamp-1 font-medium">
-                {isGold
-                  ? "🔥 Black Friday 50% OFF · Gold Spotlight #1 + Medium Article"
-                  : "🔥 Black Friday 50% OFF · Blue Featured Placement"}
+                🔥 Black Friday 50% OFF · Gold Spotlight #1 + Medium Article
               </p>
             </div>
 
             {/* Bottom Bar: Tier Badge on left, Price Tag on right */}
             <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
               <div className="flex items-center gap-1.5">
-                {isGold ? (
-                  <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2 py-0.5 text-[10px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
-                    ★ Gold Spotlight
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2 py-0.5 text-[10px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
-                    ✦ Blue Featured
-                  </span>
-                )}
+                <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2 py-0.5 text-[10px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
+                  ★ Gold Spotlight
+                </span>
                 <span className="text-[11px] text-white/50">7 Days Active</span>
               </div>
 
               {/* Price in USD with strikethrough & BFCM tag */}
               <div className="flex items-center gap-1.5">
                 <span className="text-[11px] text-white/50 line-through">{originalPrice}</span>
-                <span className={`text-xs sm:text-[14px] font-black ${isGold ? "text-amber-300" : "text-sky-300"}`}>
+                <span className="text-xs sm:text-[14px] font-black text-amber-300">
                   {salePrice}
                 </span>
                 <span className="rounded bg-rose-500/25 px-1.5 py-0.5 text-[9.5px] font-extrabold text-rose-300 ring-1 ring-rose-400/40">
@@ -280,9 +215,7 @@ export function ClaimSpotCard({
         <div className="mt-3.5 flex items-start gap-3 px-1">
           {/* Logo Squircle Placeholder */}
           <div
-            className={`flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[11px] border-2 border-dashed ${
-              isGold ? "border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-300" : "border-sky-500/50 bg-sky-500/10 text-sky-600 dark:text-sky-300"
-            } text-[11px] font-bold shadow-xs`}
+            className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-300 text-[11px] font-bold shadow-xs"
             title="Your App Logo"
           >
             <span className="text-xs leading-none">+</span>
@@ -296,30 +229,16 @@ export function ClaimSpotCard({
                   Your App Name Here
                 </h3>
                 {/* Verified checkmark badge icon */}
-                {isGold ? (
-                  <span title="Gold Verified Badge Included" className="flex shrink-0 items-center text-amber-500">
-                    <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                  </span>
-                ) : (
-                  <span title="Blue Verified Badge Included" className="flex shrink-0 items-center text-sky-500">
-                    <svg className="h-4 w-4 fill-sky-500" viewBox="0 0 24 24">
-                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                    </svg>
-                  </span>
-                )}
+                <span title="Gold Verified Badge Included" className="flex shrink-0 items-center text-amber-500">
+                  <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
+                  </svg>
+                </span>
               </div>
 
               {/* Click to Claim Button / Price Pill */}
               <div className="flex items-center gap-1 shrink-0">
-                <span
-                  className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold ${
-                    isGold
-                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 group-hover:bg-amber-500 group-hover:text-stone-950"
-                      : "bg-sky-500/15 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 group-hover:bg-sky-500 group-hover:text-white"
-                  } transition-colors`}
-                >
+                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 group-hover:bg-amber-500 group-hover:text-stone-950 transition-colors">
                   <span>Claim Spot</span>
                   <span className="transition-transform group-hover:translate-x-0.5">→</span>
                 </span>
@@ -327,9 +246,7 @@ export function ClaimSpotCard({
             </div>
 
             <p className="mt-1 line-clamp-1 text-[13px] text-muted">
-              {isGold
-                ? "Black Friday 50% OFF with code BFCM50 · Top Spot + Medium Article · Only $20"
-                : "Black Friday 50% OFF with code BFCM50 · Reach 50K+ Mac users · Only $10"}
+              Black Friday 50% OFF with code BFCM50 · Top Spot + Medium Article · Only {salePrice}
             </p>
           </div>
         </div>

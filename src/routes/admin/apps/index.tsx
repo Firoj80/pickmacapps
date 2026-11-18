@@ -124,17 +124,17 @@ function AppsPage() {
         </div>
 
         <div className="rounded-2xl border border-sky-200/80 bg-sky-50/40 p-3.5 shadow-xs">
-          <p className="text-[11px] font-semibold text-sky-800 uppercase tracking-wider">🔹 Blue Tier</p>
+          <p className="text-[11px] font-semibold text-sky-800 uppercase tracking-wider">🔹 Legacy Blue</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-sky-900">{blueCount} / 3</span>
-            <span className="text-[11px] text-sky-700/80">slots</span>
+            <span className="text-2xl font-bold text-sky-900">{blueCount}</span>
+            <span className="text-[11px] text-sky-700/80">active</span>
           </div>
         </div>
 
         <div className="rounded-2xl border border-amber-200/80 bg-amber-50/40 p-3.5 shadow-xs">
           <p className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider">🌟 Gold Tier</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-amber-900">{goldCount} / 3</span>
+            <span className="text-2xl font-bold text-amber-900">{goldCount} / 6</span>
             <span className="text-[11px] text-amber-700/80">slots</span>
           </div>
         </div>
@@ -183,9 +183,9 @@ function AppsPage() {
                 : item.id === "hot"
                 ? ` (${hotCount})`
                 : item.id === "blue"
-                ? ` (${blueCount}/3)`
+                ? ` (${blueCount})`
                 : item.id === "gold"
-                ? ` (${goldCount}/3)`
+                ? ` (${goldCount}/6)`
                 : item.id === "published"
                 ? ` (${publishedCount})`
                 : item.id === "unpublished" || item.id === "pending"
