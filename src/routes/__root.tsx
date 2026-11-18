@@ -34,7 +34,7 @@ function getCachedOrigin(): string | Promise<string> {
 
 const CANONICAL_GUARD = `(function(){try{if(window.location.hostname==="www.pickmacapps.store"){window.location.replace("https://pickmacapps.store"+window.location.pathname+window.location.search+window.location.hash)}}catch(e){}})()`;
 
-const THEME_SCRIPT = `(function(){try{var d=document.documentElement,m=matchMedia("(prefers-color-scheme: dark)");function a(){var adm=/^\\/admin(\\/|$)/.test(location.pathname);var t=localStorage.getItem("theme");if(t!=="dark"&&t!=="system")t="light";var dark=!adm&&(t==="dark"||(t==="system"&&m.matches));d.dataset.theme=adm?"light":t;d.classList.toggle("dark",dark);var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content",dark?"#08090a":"#ffffff")}a();m.addEventListener("change",a)}catch(e){}})()`;
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement;d.dataset.theme="dark";d.classList.add("dark");var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content","#090a0f")}catch(e){}})()`;
 
 const TSR_FALLBACK_GUARD = `(function(){try{if(typeof window!=="undefined"&&!window.$_TSR){window.$_TSR={buffer:[],router:{manifest:{},matches:[]},initialized:false,e:function(){},h:function(){}}}}catch(e){}})()`;
 
@@ -162,8 +162,8 @@ export const Route = createRootRoute({
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { name: "theme-color", content: "#ffffff" },
-        { name: "color-scheme", content: "light dark" },
+        { name: "theme-color", content: "#090a0f" },
+        { name: "color-scheme", content: "dark" },
         ...((process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)
           ? [{ name: "google-site-verification", content: (process.env.GOOGLE_SITE_VERIFICATION || process.env.VITE_GOOGLE_SITE_VERIFICATION)! }]
           : []),
@@ -211,7 +211,7 @@ export const Route = createRootRoute({
     };
   },
   component: () => (
-    <html lang="en" className="h-full antialiased" suppressHydrationWarning>
+    <html lang="en" className="h-full antialiased dark" data-theme="dark" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

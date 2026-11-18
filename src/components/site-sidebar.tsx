@@ -1,5 +1,4 @@
 import { Link, useRouterState, useRouteContext } from "@tanstack/react-router";
-import { HeaderThemeToggle } from "@/components/theme-toggle";
 import { PickMacAppsIcon } from "@/components/brand-logo";
 import { shelfCategories } from "@/lib/shelf-categories";
 
@@ -285,8 +284,8 @@ export function SiteSidebarContent({
         </div>
       </nav>
 
-      {/* Pinned Bottom CTA & Controls */}
-      <div className="shrink-0 space-y-3 border-t border-line/70 py-4">
+      {/* Pinned Bottom CTA */}
+      <div className="shrink-0 border-t border-line/70 py-4">
         <Link
           to="/submit"
           onClick={handleLinkClick}
@@ -298,11 +297,6 @@ export function SiteSidebarContent({
           </svg>
           <span>Submit an app</span>
         </Link>
-
-        <div className="flex items-center justify-between px-1">
-          <span className="text-xs text-muted">Theme</span>
-          <HeaderThemeToggle />
-        </div>
       </div>
     </div>
   );

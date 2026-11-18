@@ -1,6 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { HeaderThemeToggle } from "@/components/theme-toggle";
 import { PickMacAppsIcon } from "@/components/brand-logo";
 import { SiteSidebarContent } from "@/components/site-sidebar";
 
@@ -44,8 +43,6 @@ export function SiteHeader({ onOpenSearch }: { onOpenSearch?: () => void }) {
 
           {/* Action Controls */}
           <div className="flex shrink-0 items-center gap-2">
-            <HeaderThemeToggle />
-
             <Link
               to="/submit"
               className="rounded-full bg-ink px-3 py-1.5 text-xs font-semibold text-canvas transition hover:opacity-90"
