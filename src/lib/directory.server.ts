@@ -672,6 +672,8 @@ export async function publicOffer(): Promise<PublicOffer> {
     const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
     let articlePriceCents = Number(map.article_price_cents ?? 12000);
     const articleCompareCents = Number(map.article_compare_cents ?? 24900);
+    let hotPriceCents = Number(map.hot_price_cents ?? map.featured_price_cents ?? map.choice_price_cents ?? 9900);
+    const hotCompareCents = Number(map.hot_compare_cents ?? map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
 
     const [liveFeatured, liveArticle] = livePrices;
     if (liveFeatured != null && liveFeatured !== featuredPriceCents) {
@@ -766,8 +768,8 @@ export async function publicOffer(): Promise<PublicOffer> {
       featuredCompareCents,
       articlePriceCents,
       articleCompareCents,
-      hotPriceCents: featuredPriceCents,
-      hotCompareCents: featuredCompareCents,
+      hotPriceCents,
+      hotCompareCents,
       featuredSlots,
       articleSlots,
       hotSlots,
@@ -778,7 +780,7 @@ export async function publicOffer(): Promise<PublicOffer> {
         active: activeTotal,
         remaining: totalRemaining,
         isFull: totalRemaining === 0,
-        nextDate,
+        nextDate: defaultNextDate,
         openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
       },
     };
@@ -1424,7 +1426,7 @@ export async function setPackagePrice(tier: "featured" | "article", amountCents:
   );
   if (tier === "featured") {
     await sql.query(
-      `insert into settings (key, value) values ('choice_price_cents', $1), ('choice_compare_cents', $2)
+      `insert into settings (key, value) values ('choice_price_cents', $1), ('choice_compare_cents', $2), ('hot_price_cents', $1), ('hot_compare_cents', $2)
        on conflict (key) do update set value = excluded.value`,
       [String(amountCents), String(compareCents)],
     );

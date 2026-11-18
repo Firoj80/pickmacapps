@@ -139,10 +139,11 @@ function SubmitPage() {
   const search = Route.useSearch();
   const { tier, payment_id, submitted, coupon: searchCoupon } = search;
 
-  // Coupon state — auto-apply BFCM50 by default
-  const [couponInput, setCouponInput] = useState(() => (searchCoupon ?? "BFCM50").toUpperCase());
+  // Coupon state — applied when passed in URL (?coupon=BFCM50) or entered by user
+  const [couponInput, setCouponInput] = useState(() => (searchCoupon ? searchCoupon.toUpperCase() : ""));
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(() => {
-    const raw = (searchCoupon ?? "BFCM50").trim().toUpperCase();
+    if (!searchCoupon) return null;
+    const raw = searchCoupon.trim().toUpperCase();
     return raw === "BFCM50" ? "BFCM50" : null;
   });
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -173,11 +174,11 @@ function SubmitPage() {
   const isBfcm = appliedCoupon === "BFCM50";
   const discountMultiplier = isBfcm ? 0.5 : 1.0;
 
-  // Pricing calculations
+  // Pricing calculations: Dynamic from Admin Offer
   // Hot Boost (tier === "featured")
-  const rawHotDollars = Math.round((offer.featuredPriceCents ?? 9900) / 100);
+  const rawHotDollars = Math.round((offer.hotPriceCents ?? offer.featuredPriceCents ?? 9900) / 100);
   const hotBaseDollars = Math.round(rawHotDollars * discountMultiplier);
-  const hotCompareDollars = isBfcm ? rawHotDollars : Math.round((offer.featuredCompareCents ?? 19900) / 100);
+  const hotCompareDollars = isBfcm ? rawHotDollars : Math.round((offer.hotCompareCents ?? offer.featuredCompareCents ?? 19900) / 100);
 
   // Gold Spotlight (tier === "article")
   const rawGoldDollars = Math.round((offer.articlePriceCents ?? 12000) / 100);
@@ -818,40 +819,30 @@ function SubmitPage() {
 
                   {/* SECTION 2: Price Upgrades (Golden & Hot) Designed like macapp.supply screenshot */}
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <h2 className="font-display text-base font-semibold tracking-tight text-ink">
-                        Upgrade placement (Optional)
-                      </h2>
-                      <span className="text-xs text-muted">
-                        Free listing selected by default
-                      </span>
-                    </div>
-
                     {/* UPGRADE OPTION 1: 🌟 Gold Spotlight */}
                     <div
                       className={`rounded-2xl border transition-all ${
                         selectedPlan === "article"
                           ? "border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/40 shadow-sm"
-                          : "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50"
-                      } p-5 sm:p-6 space-y-4`}
+                          : "border-amber-500/30 bg-[#FFFDF8] dark:bg-amber-500/5 hover:border-amber-500/50"
+                      } p-6 md:p-7 space-y-5`}
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <div
-                          className="flex items-start gap-3 cursor-pointer select-none flex-1"
+                        <label
+                          htmlFor="article-toggle"
+                          className="flex items-start gap-3.5 cursor-pointer select-none flex-1"
                           onClick={toggleGold}
                         >
-                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
-                            <BadgeCheckIcon className="h-6 w-6 shrink-0 fill-amber-500 text-stone-950" />
-                          </div>
-                          <div className="space-y-1">
+                          <BadgeCheckIcon className="mt-1 h-6 w-6 shrink-0 fill-amber-500 text-white drop-shadow-sm" />
+                          <span className="space-y-1.5 block">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-500">
                               Get featured · early rate
                             </span>
-                            <div className="flex flex-wrap items-baseline gap-x-2">
-                              <span className="font-display text-[18px] sm:text-[20px] font-bold tracking-tight text-ink">
+                            <span className="flex flex-wrap items-baseline gap-x-2">
+                              <span className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
                                 Feature as Gold Spotlight for 7 days
                               </span>
-                              <span className="font-display text-[20px] sm:text-[22px] font-bold text-amber-500">
+                              <span className="font-display text-[22px] font-bold text-amber-500 md:text-[24px]">
                                 ${goldBaseDollars}
                               </span>
                               {isBfcm && (
@@ -859,40 +850,28 @@ function SubmitPage() {
                                   ${goldCompareDollars}
                                 </span>
                               )}
-                            </div>
-                            {articleSlots.isFull ? (
-                              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-amber-400">
-                                <span className="inline-flex items-center gap-1 rounded bg-amber-500/20 px-1.5 py-0.5 text-[10px] font-bold text-amber-300 ring-1 ring-amber-400/40">
-                                  <span>📅</span>
-                                  <span>This week full</span>
-                                </span>
-                                <span>Book for next week · Starts {articleSlots.nextDate}</span>
-                              </div>
-                            ) : (
-                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                <span>⚡ Only {articleSlots.remaining} of 6 spots left for this week</span>
-                              </div>
-                            )}
-                            <p className="text-xs text-muted leading-relaxed">
+                            </span>
+                            <span className="block text-sm text-muted leading-relaxed">
                               Hero spot on the homepage, premium golden choice badge and approval within 24 hours — more visibility for a full week.
-                            </p>
-                          </div>
-                        </div>
+                            </span>
+                          </span>
+                        </label>
 
                         {/* macOS / iOS Toggle Switch matching screenshot */}
                         <button
                           type="button"
+                          id="article-toggle"
                           role="switch"
                           aria-checked={selectedPlan === "article"}
                           onClick={toggleGold}
                           className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "article"
                               ? "bg-amber-500"
-                              : "bg-surface-2 border border-line hover:bg-surface"
+                              : "bg-stone-300 dark:bg-stone-700"
                           }`}
                         >
                           <span
+                            aria-hidden="true"
                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
                               selectedPlan === "article" ? "translate-x-5" : "translate-x-0"
                             }`}
@@ -902,65 +881,81 @@ function SubmitPage() {
 
                       {/* Expanded Details when selected */}
                       {selectedPlan === "article" && (
-                        <div className="border-t border-amber-500/20 pt-4 space-y-3 animate-fade-in">
-                          {articleSlots.isFull ? (
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-amber-400">
-                                <span className="flex items-center gap-1.5">
-                                  <span>📅 All 6 spots active for this week</span>
+                        <div className="space-y-5 border-t border-amber-500/20 pt-5 animate-fade-in">
+                          <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-display text-[18px] font-bold tracking-tight text-ink">
+                                7-day featured placement
+                              </h3>
+                              <div className="mt-2 flex items-baseline gap-2">
+                                <span className="font-display text-[38px] sm:text-[44px] font-bold leading-none tracking-tight text-ink">
+                                  ${goldBaseDollars}
                                 </span>
-                                <span className="rounded-md bg-amber-500/20 px-2.5 py-0.5 text-[11px] text-amber-300 font-bold ring-1 ring-amber-400/30">
-                                  Next cycle opens {articleSlots.nextDate} · Reserve now
+                                <span className="text-[15px] text-muted">
+                                  / 7 days
                                 </span>
+                                {isBfcm && (
+                                  <span className="text-sm text-muted line-through font-medium ml-2">
+                                    ${goldCompareDollars}
+                                  </span>
+                                )}
                               </div>
-                              <p className="text-[11px] text-muted leading-relaxed">
-                                Your #1 Hero Spot and Golden Badge placement will be reserved for the upcoming 7-day cycle starting <strong>{articleSlots.nextDate}</strong>.
+                              <p className="mt-1.5 text-[13px] text-muted">
+                                One-time payment. No subscription, no hidden fees.
                               </p>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between text-xs font-semibold text-amber-400">
-                              <span className="flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                                <span>⚡ Only {articleSlots.remaining} of 6 spots left for this week</span>
-                              </span>
-                              <span className="text-[11px] text-muted">1-time payment · no subscription</span>
-                            </div>
-                          )}
 
-                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
-                            <li className="flex items-start gap-2">
-                              <span className="text-amber-400 font-bold">👑</span>
-                              <span><strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
-                              <span>Exclusive <strong className="text-ink">Golden Choice Badge</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-amber-400 font-bold">📝</span>
-                              <span><strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-amber-400 font-bold">🔝</span>
-                              <span>Top spot on competitor comparison pages</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-amber-400 font-bold">✨</span>
-                              <span>Hero animated app icon in top carousel</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span>High-authority SEO dofollow backlink</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span><strong className="text-ink">No backlinks or badges required</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span>Guaranteed 24-hour publishing</span>
-                            </li>
-                          </ul>
+                              {articleSlots.isFull ? (
+                                <div className="mt-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-3 space-y-1">
+                                  <div className="flex items-center gap-1.5 text-xs font-bold text-amber-300">
+                                    <span>📅 All 6 spots active for this week</span>
+                                  </div>
+                                  <p className="text-[11px] text-muted leading-relaxed">
+                                    Next cycle opens <strong>{articleSlots.nextDate}</strong>. Your #1 Hero Spot and Golden Badge placement will be reserved for the upcoming 7-day cycle.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                  <span>⚡ Only {articleSlots.remaining} of 6 spots left for this week</span>
+                                </div>
+                              )}
+
+                              <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-body">
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span><strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span>Exclusive <strong className="text-ink">Golden Choice Badge</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span><strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span>Top spot on competitor comparison pages</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span>Hero animated app icon in top carousel</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span>High-authority SEO dofollow backlink</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span><strong className="text-ink">No backlinks or badges required</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <span>Guaranteed 24-hour publishing</span>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -970,26 +965,25 @@ function SubmitPage() {
                       className={`rounded-2xl border transition-all ${
                         selectedPlan === "featured"
                           ? "border-orange-500/60 bg-orange-500/10 ring-1 ring-orange-500/40 shadow-sm"
-                          : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500/50"
-                      } p-5 sm:p-6 space-y-4`}
+                          : "border-orange-500/30 bg-[#FFFDF8] dark:bg-orange-500/5 hover:border-orange-500/50"
+                      } p-6 md:p-7 space-y-5`}
                     >
                       <div className="flex items-start justify-between gap-4">
-                        <div
-                          className="flex items-start gap-3 cursor-pointer select-none flex-1"
+                        <label
+                          htmlFor="hot-toggle"
+                          className="flex items-start gap-3.5 cursor-pointer select-none flex-1"
                           onClick={toggleHot}
                         >
-                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-orange-500">
-                            <FlameIcon className="h-6 w-6 text-orange-500" />
-                          </div>
-                          <div className="space-y-1">
+                          <FlameIcon className="mt-1 h-6 w-6 shrink-0 text-orange-500" />
+                          <span className="space-y-1.5 block">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-orange-400">
                               Boost placement · fast-track
                             </span>
-                            <div className="flex flex-wrap items-baseline gap-x-2">
-                              <span className="font-display text-[18px] sm:text-[20px] font-bold tracking-tight text-ink">
+                            <span className="flex flex-wrap items-baseline gap-x-2">
+                              <span className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
                                 Boost as Hot App for 7 days
                               </span>
-                              <span className="font-display text-[20px] sm:text-[22px] font-bold text-orange-500">
+                              <span className="font-display text-[22px] font-bold text-orange-500 md:text-[24px]">
                                 ${hotBaseDollars}
                               </span>
                               {isBfcm && (
@@ -997,40 +991,28 @@ function SubmitPage() {
                                   ${hotCompareDollars}
                                 </span>
                               )}
-                            </div>
-                            {hotSlots.isFull ? (
-                              <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11px] font-semibold text-orange-400">
-                                <span className="inline-flex items-center gap-1 rounded bg-orange-500/20 px-1.5 py-0.5 text-[10px] font-bold text-orange-300 ring-1 ring-orange-400/40">
-                                  <span>📅</span>
-                                  <span>This week full</span>
-                                </span>
-                                <span>Book for next week · Starts {hotSlots.nextDate}</span>
-                              </div>
-                            ) : (
-                              <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-emerald-400">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                                <span>⚡ Only {hotSlots.remaining} of 6 spots left for this week</span>
-                              </div>
-                            )}
-                            <p className="text-xs text-muted leading-relaxed">
+                            </span>
+                            <span className="block text-sm text-muted leading-relaxed">
                               Positioned at the top of all free listing apps, right after Golden badge apps, hero section icon and Fire badge.
-                            </p>
-                          </div>
-                        </div>
+                            </span>
+                          </span>
+                        </label>
 
                         {/* macOS / iOS Toggle Switch matching screenshot */}
                         <button
                           type="button"
+                          id="hot-toggle"
                           role="switch"
                           aria-checked={selectedPlan === "featured"}
                           onClick={toggleHot}
                           className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "featured"
                               ? "bg-orange-500"
-                              : "bg-surface-2 border border-line hover:bg-surface"
+                              : "bg-stone-300 dark:bg-stone-700"
                           }`}
                         >
                           <span
+                            aria-hidden="true"
                             className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
                               selectedPlan === "featured" ? "translate-x-5" : "translate-x-0"
                             }`}
@@ -1040,70 +1022,86 @@ function SubmitPage() {
 
                       {/* Expanded Details when selected */}
                       {selectedPlan === "featured" && (
-                        <div className="border-t border-orange-500/20 pt-4 space-y-3 animate-fade-in">
-                          {hotSlots.isFull ? (
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-orange-400">
-                                <span className="flex items-center gap-1.5">
-                                  <span>📅 All 6 spots active for this week</span>
+                        <div className="space-y-5 border-t border-orange-500/20 pt-5 animate-fade-in">
+                          <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
+                            <div className="flex-1">
+                              <h3 className="font-display text-[18px] font-bold tracking-tight text-ink">
+                                7-day Hot Boost placement
+                              </h3>
+                              <div className="mt-2 flex items-baseline gap-2">
+                                <span className="font-display text-[38px] sm:text-[44px] font-bold leading-none tracking-tight text-ink">
+                                  ${hotBaseDollars}
                                 </span>
-                                <span className="rounded-md bg-orange-500/20 px-2.5 py-0.5 text-[11px] text-orange-300 font-bold ring-1 ring-orange-400/30">
-                                  Next cycle opens {hotSlots.nextDate} · Reserve now
+                                <span className="text-[15px] text-muted">
+                                  / 7 days
                                 </span>
+                                {isBfcm && (
+                                  <span className="text-sm text-muted line-through font-medium ml-2">
+                                    ${hotCompareDollars}
+                                  </span>
+                                )}
                               </div>
-                              <p className="text-[11px] text-muted leading-relaxed">
-                                Your Hot Boost placement will be reserved for the upcoming 7-day cycle starting <strong>{hotSlots.nextDate}</strong>. Your app will be boosted right after Golden apps as soon as the cycle opens.
+                              <p className="mt-1.5 text-[13px] text-muted">
+                                One-time payment. No subscription, no hidden fees.
                               </p>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-between text-xs font-semibold text-orange-400">
-                              <span className="flex items-center gap-1.5">
-                                <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-                                <span>⚡ Only {hotSlots.remaining} of 6 spots left for this week</span>
-                              </span>
-                              <span className="text-[11px] text-muted">1-time payment · no subscription</span>
-                            </div>
-                          )}
 
-                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange-400 font-bold">🔥</span>
-                              <span><strong className="text-ink">Top of all free listing apps</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange-400 font-bold">⏱️</span>
-                              <span><strong className="text-ink">7 days boost duration</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange-400 font-bold">🥈</span>
-                              <span><strong className="text-ink">Just right after Golden badge apps</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange-400 font-bold">✨</span>
-                              <span><strong className="text-ink">In hero section app icon</strong> carousel</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-orange-400 font-bold">🏷️</span>
-                              <span>Distinct <strong className="text-ink">Fire badge (🔥 Hot)</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span><strong className="text-ink">No backlinks or badges required</strong></span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span>Fast-track 24h editorial review</span>
-                            </li>
-                            <li className="flex items-start gap-2">
-                              <span className="text-emerald-400 font-bold">✓</span>
-                              <span>Permanent directory listing after 7 days</span>
-                            </li>
-                          </ul>
+                              {hotSlots.isFull ? (
+                                <div className="mt-3 rounded-xl border border-orange-500/30 bg-orange-500/10 p-3 space-y-1">
+                                  <div className="flex items-center gap-1.5 text-xs font-bold text-orange-300">
+                                    <span>📅 All 6 spots active for this week</span>
+                                  </div>
+                                  <p className="text-[11px] text-muted leading-relaxed">
+                                    Next cycle opens <strong>{hotSlots.nextDate}</strong>. Your Hot Boost placement will be reserved for the upcoming 7-day cycle.
+                                  </p>
+                                </div>
+                              ) : (
+                                <div className="mt-3 flex items-center gap-2 text-xs font-semibold text-emerald-400">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+                                  <span>⚡ Only {hotSlots.remaining} of 6 spots left for this week</span>
+                                </div>
+                              )}
+
+                              <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-body">
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span><strong className="text-ink">Top of all free listing apps</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span><strong className="text-ink">7 days boost duration</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span><strong className="text-ink">Just right after Golden badge apps</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span><strong className="text-ink">In hero section app icon</strong> carousel</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span>Distinct <strong className="text-ink">Fire badge (🔥 Hot)</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span><strong className="text-ink">No backlinks or badges required</strong></span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span>Fast-track 24h editorial review</span>
+                                </li>
+                                <li className="flex items-center gap-2">
+                                  <FlameIcon className="h-4 w-4 shrink-0 text-orange-500" />
+                                  <span>Permanent directory listing after 7 days</span>
+                                </li>
+                              </ul>
+                            </div>
+                          </div>
                         </div>
                       )}
                     </div>
 
-                    {/* Coupon Code Section */}
+                  {/* Coupon Code Section */}
                     {isPaid && (
                       <div className="pt-2">
                         <div className="flex items-center justify-between mb-1.5">

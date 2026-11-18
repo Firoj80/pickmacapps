@@ -561,14 +561,16 @@ function AdminHome() {
             {showPricing ? (
               <div className="my-3 space-y-3 rounded-xl border border-line bg-surface-2 p-3 text-xs">
                 <div>
-                  <div className="font-semibold text-rose-300">🔥 Hot App Placement ($99 Tier)</div>
+                  <div className="font-semibold text-rose-300">
+                    🔥 Hot App Placement (${((data.offer.hotPriceCents ?? data.offer.featuredPriceCents ?? data.offer.priceCents) / 100).toFixed(0)} Tier)
+                  </div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
                     <input type="hidden" name="tier" value="featured" />
                     <div>
                       <span className="text-[10px] text-muted">Price ($)</span>
                       <input
                         name="dollars"
-                        defaultValue={((data.offer.featuredPriceCents ?? data.offer.priceCents) / 100).toFixed(2)}
+                        defaultValue={((data.offer.hotPriceCents ?? data.offer.featuredPriceCents ?? data.offer.priceCents) / 100).toFixed(2)}
                         className={fieldClass}
                       />
                     </div>
@@ -576,7 +578,7 @@ function AdminHome() {
                       <span className="text-[10px] text-muted">Compare-At ($)</span>
                       <input
                         name="compare"
-                        defaultValue={((data.offer.featuredCompareCents ?? data.offer.compareCents) / 100).toFixed(2)}
+                        defaultValue={((data.offer.hotCompareCents ?? data.offer.featuredCompareCents ?? data.offer.compareCents) / 100).toFixed(2)}
                         className={fieldClass}
                       />
                     </div>
@@ -590,7 +592,9 @@ function AdminHome() {
                 </div>
 
                 <div className="border-t border-line pt-2.5">
-                  <div className="font-semibold text-amber-300">🌟 Gold Article Tier ($120 Tier)</div>
+                  <div className="font-semibold text-amber-300">
+                    🌟 Gold Article Tier (${((data.offer.articlePriceCents ?? 12000) / 100).toFixed(0)} Tier)
+                  </div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
                     <input type="hidden" name="tier" value="article" />
                     <div>
@@ -697,7 +701,7 @@ function AdminHome() {
             <div className="mt-4 border-t border-line pt-3">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-rose-300">🔥 Hot App Placement ({hotApps.length}/6)</span>
-                <span className="text-[11px] text-muted">{money(data.offer.featuredPriceCents ?? 9900)}</span>
+                <span className="text-[11px] text-muted">{money(data.offer.hotPriceCents ?? data.offer.featuredPriceCents ?? 9900)}</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
                 <div
