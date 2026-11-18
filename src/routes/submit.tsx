@@ -847,7 +847,7 @@ function SubmitPage() {
                           className="flex items-center gap-2 cursor-pointer select-none"
                           onClick={toggleGold}
                         >
-                          <BadgeCheckIcon className="h-5 w-5 shrink-0 fill-amber-500 text-white drop-shadow-xs" />
+                          <BadgeCheckIcon className="h-5 w-5 shrink-0 fill-amber-500 text-stone-950 drop-shadow-xs" />
                           <span className="inline-flex items-center rounded-full bg-amber-100/90 dark:bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-800 dark:text-amber-400">
                             Get featured · early rate
                           </span>
@@ -944,35 +944,35 @@ function SubmitPage() {
 
                               <ul className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-body">
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span><strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span>Exclusive <strong className="text-ink">Golden Choice Badge</strong></span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span><strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span>Top spot on competitor comparison pages</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span>Hero animated app icon in top carousel</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span>High-authority SEO dofollow backlink</span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span><strong className="text-ink">No backlinks or badges required</strong></span>
                                 </li>
                                 <li className="flex items-center gap-2">
-                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-white" />
+                                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                                   <span>Guaranteed 24-hour publishing</span>
                                 </li>
                               </ul>
@@ -1325,7 +1325,7 @@ function SubmitPage() {
                         articleSlots.isFull ? (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${goldBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-stone-950/80">
+                            <span className="inline-flex items-center gap-1 text-stone-950 font-bold">
                               <span>(</span>
                               <CalendarIcon className="h-4 w-4 shrink-0 -translate-y-px text-stone-950" />
                               <span>Book for Next Week: {articleSlots.nextDate})</span>
@@ -1334,9 +1334,9 @@ function SubmitPage() {
                         ) : (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${goldBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-stone-950/80">
+                            <span className="inline-flex items-center gap-1 text-stone-950 font-bold">
                               <span>(</span>
-                              <BadgeCheckIcon className="h-4.5 w-4.5 shrink-0 -translate-y-px fill-amber-400 text-stone-950" />
+                              <BadgeCheckIcon className="h-4.5 w-4.5 shrink-0 -translate-y-px fill-amber-500 text-stone-950 drop-shadow-xs" />
                               <span>Gold Spotlight · 7 Days)</span>
                             </span>
                           </span>

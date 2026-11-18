@@ -84,20 +84,28 @@ function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
     return next;
   }
   if (sort === "hot") {
-    // Hot 🔥 apps tab: prioritize Hot apps on top, then Featured apps, then standard apps
-    next.sort((a, b) => {
-      const hotA = a.isHot ? 1 : 0;
-      const hotB = b.isHot ? 1 : 0;
-      if (hotB !== hotA) return hotB - hotA;
-      const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
-      if (pDiff !== 0) return pDiff;
-      const timeA = new Date(a.createdAt).getTime() || 0;
-      const timeB = new Date(b.createdAt).getTime() || 0;
-      return timeA - timeB || a.name.localeCompare(b.name);
-    });
-    return next;
+    // When user explicitly views Hot apps: strictly show Hot apps capped at MAX_HOT_SLOTS (6), oldest first
+    return next
+      .filter((a) => Boolean(a.isHot))
+      .sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime() || 0;
+        const timeB = new Date(b.createdAt).getTime() || 0;
+        return timeA - timeB || a.name.localeCompare(b.name);
+      })
+      .slice(0, 6);
   }
-  // Featured tab (default): Gold apps (1st, oldest first), Blue apps (2nd, oldest first), Hot 🔥 apps (3rd, oldest first), then standard apps (oldest first)
+  if (sort === "featured") {
+    // When user explicitly views Featured apps: strictly show Golden Badge apps, capped at MAX_TIER_SLOTS (6), oldest first
+    return next
+      .filter((a) => isEditorChoice(a) && a.featuredTier === "article")
+      .sort((a, b) => {
+        const timeA = new Date(a.createdAt).getTime() || 0;
+        const timeB = new Date(b.createdAt).getTime() || 0;
+        return timeA - timeB || a.name.localeCompare(b.name);
+      })
+      .slice(0, 6);
+  }
+  // Default home feed (sort is undefined): Gold apps (1st, oldest first), Blue apps (2nd, oldest first), Hot 🔥 apps (3rd, oldest first), then standard apps (oldest first)
   return shelfApps(next);
 }
 
@@ -267,7 +275,9 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
 function Home() {
   const offer = Route.useLoaderData();
   const rawSearch = Route.useSearch();
-  const { q = "", cat = "all", sort = "featured" } = rawSearch;
+  const { q = "", cat = "all" } = rawSearch;
+  const sort = rawSearch.sort;
+  const effectiveSort = sort ?? (cat === "pick" ? "featured" : undefined);
   const navigate = useNavigate();
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
@@ -280,10 +290,10 @@ function Home() {
   const shown = arrangeHero(
     list.filter((app) => {
       if (!inHeroCategory(app, category)) return false;
-      if (sort === "free" && app.pricing !== "free") return false;
+      if (effectiveSort === "free" && app.pricing !== "free") return false;
       return true;
     }),
-    sort,
+    effectiveSort,
   );
 
   const isFiltered = Boolean(

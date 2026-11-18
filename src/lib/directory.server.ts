@@ -2789,13 +2789,24 @@ export async function submitAppUpvote(appId: string, fingerprint: string): Promi
 
   let promotedToHot = false;
   if (settings.autoHotEnabled && !currentlyHot && newCount >= settings.hotThreshold) {
-    await sql.query(
-      "update apps set is_hot = true, hot_marked_at = now(), updated_at = now() where id = $1",
-      [appId],
-    );
-    invalidatePublishedDirectoryCache();
-    await audit(sql, "auto_promote_hot", appId, `Auto-promoted to Hot via ${newCount} upvotes (threshold: ${settings.hotThreshold})`);
-    promotedToHot = true;
+    const activeHot = await countActiveHotApps();
+    if (activeHot < MAX_HOT_SLOTS) {
+      await sql.query(
+        "update apps set is_hot = true, hot_marked_at = now(), updated_at = now() where id = $1",
+        [appId],
+      );
+      invalidatePublishedDirectoryCache();
+      await audit(sql, "auto_promote_hot", appId, `Auto-promoted to Hot via ${newCount} upvotes (threshold: ${settings.hotThreshold})`);
+      promotedToHot = true;
+    } else {
+      const offer = await publicOffer();
+      const nextHotIso = offer.hotSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
+      await sql.query(
+        "update apps set hot_scheduled_for = $2, updated_at = now() where id = $1 and hot_scheduled_for is null",
+        [appId, nextHotIso],
+      );
+      await audit(sql, "auto_schedule_hot", appId, `Hot slots full (6/6). Scheduled for next cycle ${nextHotIso} via ${newCount} upvotes`);
+    }
   }
 
   return {
@@ -2811,14 +2822,23 @@ export async function promoteEligibleUpvotedApps(): Promise<number> {
   const settings = await getUpvoteSettings();
   if (!settings.autoHotEnabled) return 0;
 
+  const activeHot = await countActiveHotApps();
+  const availableSlots = Math.max(0, MAX_HOT_SLOTS - activeHot);
+  if (availableSlots <= 0) return 0;
+
   const rows = await sql.query<{ id: string }>(
     `update apps
      set is_hot = true, hot_marked_at = now(), updated_at = now()
-     where status = 'published'
-       and is_hot = false
-       and coalesce(upvote_count, 0) >= $1
+     where id in (
+       select id from apps
+       where status = 'published'
+         and is_hot = false
+         and coalesce(upvote_count, 0) >= $1
+       order by upvote_count desc, created_at asc
+       limit $2
+     )
      returning id`,
-    [settings.hotThreshold],
+    [settings.hotThreshold, availableSlots],
   );
   if (rows.length > 0) {
     invalidatePublishedDirectoryCache();
