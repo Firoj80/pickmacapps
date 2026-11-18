@@ -444,79 +444,91 @@ html, body, a, button, select, input {
 
 /* Semantic colored badges & cards */
 [data-admin-root] [class*="bg-emerald-50"],
-[data-admin-root] .bg-emerald-100 {
-  background-color: rgba(16, 185, 129, 0.12) !important;
+[data-admin-root] [class*="bg-emerald-100"] {
+  background-color: rgba(16, 185, 129, 0.15) !important;
 }
 [data-admin-root] .text-emerald-600,
 [data-admin-root] .text-emerald-700,
 [data-admin-root] .text-emerald-800,
 [data-admin-root] .text-emerald-900,
 [data-admin-root] .text-emerald-950 {
-  color: #34d399 !important;
+  color: #6ee7b7 !important;
 }
 [data-admin-root] [class*="border-emerald-200"],
-[data-admin-root] [class*="border-emerald-300"] {
+[data-admin-root] [class*="border-emerald-300"],
+[data-admin-root] [class*="ring-emerald-"] {
   border-color: rgba(16, 185, 129, 0.3) !important;
+  --tw-ring-color: rgba(16, 185, 129, 0.3) !important;
 }
 
 [data-admin-root] [class*="bg-amber-50"],
-[data-admin-root] .bg-amber-100 {
-  background-color: rgba(245, 158, 11, 0.12) !important;
+[data-admin-root] [class*="bg-amber-100"] {
+  background-color: rgba(245, 158, 11, 0.15) !important;
 }
 [data-admin-root] .text-amber-600,
 [data-admin-root] .text-amber-700,
 [data-admin-root] .text-amber-800,
 [data-admin-root] .text-amber-900,
 [data-admin-root] .text-amber-950 {
-  color: #fbbf24 !important;
+  color: #fde047 !important;
 }
 [data-admin-root] [class*="border-amber-200"],
-[data-admin-root] [class*="border-amber-300"] {
+[data-admin-root] [class*="border-amber-300"],
+[data-admin-root] [class*="ring-amber-"] {
   border-color: rgba(245, 158, 11, 0.3) !important;
+  --tw-ring-color: rgba(245, 158, 11, 0.3) !important;
 }
 
 [data-admin-root] [class*="bg-rose-50"],
-[data-admin-root] .bg-rose-100 {
-  background-color: rgba(244, 63, 94, 0.12) !important;
+[data-admin-root] [class*="bg-rose-100"] {
+  background-color: rgba(244, 63, 94, 0.2) !important;
 }
 [data-admin-root] .text-rose-600,
 [data-admin-root] .text-rose-700,
 [data-admin-root] .text-rose-800,
 [data-admin-root] .text-rose-900 {
-  color: #fb7185 !important;
+  color: #fda4af !important;
 }
 [data-admin-root] [class*="border-rose-200"],
-[data-admin-root] [class*="border-rose-300"] {
-  border-color: rgba(244, 63, 94, 0.3) !important;
+[data-admin-root] [class*="border-rose-300"],
+[data-admin-root] [class*="ring-rose-"] {
+  border-color: rgba(244, 63, 94, 0.35) !important;
+  --tw-ring-color: rgba(244, 63, 94, 0.35) !important;
 }
 
 [data-admin-root] [class*="bg-sky-50"],
-[data-admin-root] .bg-sky-100 {
-  background-color: rgba(14, 165, 233, 0.12) !important;
+[data-admin-root] [class*="bg-sky-100"] {
+  background-color: rgba(14, 165, 233, 0.15) !important;
 }
 [data-admin-root] .text-sky-600,
 [data-admin-root] .text-sky-700,
 [data-admin-root] .text-sky-800,
 [data-admin-root] .text-sky-900 {
-  color: #38bdf8 !important;
+  color: #7dd3fc !important;
 }
 [data-admin-root] [class*="border-sky-200"],
-[data-admin-root] [class*="border-sky-300"] {
+[data-admin-root] [class*="border-sky-300"],
+[data-admin-root] [class*="ring-sky-"] {
   border-color: rgba(14, 165, 233, 0.3) !important;
+  --tw-ring-color: rgba(14, 165, 233, 0.3) !important;
 }
 
 [data-admin-root] [class*="bg-indigo-50"],
-[data-admin-root] .bg-indigo-100 {
-  background-color: rgba(99, 102, 241, 0.12) !important;
+[data-admin-root] [class*="bg-indigo-100"] {
+  background-color: rgba(99, 102, 241, 0.15) !important;
 }
 [data-admin-root] .text-indigo-600,
 [data-admin-root] .text-indigo-700,
-[data-admin-root] .text-indigo-800 {
-  color: #818cf8 !important;
+[data-admin-root] .text-indigo-800,
+[data-admin-root] .text-indigo-900,
+[data-admin-root] .text-indigo-950 {
+  color: #a5b4fc !important;
 }
 [data-admin-root] [class*="border-indigo-200"],
-[data-admin-root] [class*="border-indigo-300"] {
+[data-admin-root] [class*="border-indigo-300"],
+[data-admin-root] [class*="ring-indigo-"] {
   border-color: rgba(99, 102, 241, 0.3) !important;
+  --tw-ring-color: rgba(99, 102, 241, 0.3) !important;
 }
 
 /* Admin Form Inputs, Selects & Textareas */

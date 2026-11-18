@@ -691,10 +691,10 @@ function EditAppForm({ app }: { app: EditAppData }) {
 
             {/* Hot Remaining Days */}
             {app.isHot && (
-              <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/50 p-2.5 text-xs">
+              <div className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-rose-800">🔥 Hot Status Active</span>
-                  <span className="rounded-md bg-rose-100/90 px-2 py-0.5 text-[10.5px] font-bold text-rose-900 ring-1 ring-rose-300">
+                  <span className="font-semibold text-rose-300">🔥 Hot Status Active</span>
+                  <span className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[10.5px] font-bold text-rose-300 border border-rose-500/30">
                     {(() => {
                       const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                       return `${daysLeft} days remaining (${formatted})`;

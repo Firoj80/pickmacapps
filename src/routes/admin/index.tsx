@@ -427,13 +427,13 @@ function AdminHome() {
                     return (
                       <div
                         key={h.id}
-                        className="flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50/20 p-2.5 transition hover:border-rose-200"
+                        className="flex items-center justify-between rounded-xl border border-rose-500/25 bg-rose-500/10 p-2.5 transition hover:border-rose-500/40"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           {h.icon ? (
                             <img alt="" src={h.icon} className="h-7 w-7 rounded-lg object-cover shrink-0" />
                           ) : (
-                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-stone-100 text-xs shrink-0">
+                            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-surface-2 text-xs shrink-0 text-muted">
                               📱
                             </div>
                           )}
@@ -447,7 +447,7 @@ function AdminHome() {
                               {h.name}
                             </Link>
                             <div className="flex items-center gap-1.5 text-[10px]">
-                              <span className="rounded-md bg-rose-100/90 px-1.5 py-0.2 text-[10px] font-bold text-rose-900 ring-1 ring-rose-300/80">
+                              <span className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[11px] font-bold text-rose-300 border border-rose-500/30">
                                 {daysLeft}d left ({formatted})
                               </span>
                             </div>
@@ -459,7 +459,7 @@ function AdminHome() {
                           <button
                             type="submit"
                             title="Remove Hot status"
-                            className="rounded-lg bg-white px-2 py-1 text-[11px] font-medium text-rose-600 ring-1 ring-rose-200 hover:bg-rose-50 cursor-pointer shadow-2xs"
+                            className="rounded-lg bg-surface-2 border border-line px-2 py-1 text-[11px] font-medium text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 cursor-pointer shadow-2xs transition"
                           >
                             Remove
                           </button>

@@ -323,7 +323,7 @@ function AppsPage() {
                     </div>
                     {app.editorChoice && app.featuredUntil ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-sky-50 px-2 py-0.5 text-[10.5px] font-bold text-sky-800 ring-1 ring-sky-200/70">
+                        <span className="inline-block rounded-md bg-sky-500/20 border border-sky-500/30 px-2 py-0.5 text-[10.5px] font-bold text-sky-300">
                           {(() => {
                             const until = new Date(app.featuredUntil);
                             const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -381,7 +381,7 @@ function AppsPage() {
                     </form>
                     {app.isHot ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-rose-50 px-2 py-0.5 text-[10.5px] font-bold text-rose-700 ring-1 ring-rose-200/70">
+                        <span className="inline-block rounded-md bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[10.5px] font-bold text-rose-300">
                           {(() => {
                             const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                             return `Expires: ${formatted} (${daysLeft} days left)`;
@@ -542,7 +542,7 @@ function AppsPage() {
 
             {/* Expiry alerts if active */}
             {app.editorChoice && app.featuredUntil ? (
-              <div className="text-[10.5px] font-bold text-sky-800 bg-sky-50 rounded-lg px-2.5 py-1">
+              <div className="text-[10.5px] font-bold text-sky-300 bg-sky-500/20 border border-sky-500/30 rounded-lg px-2.5 py-1">
                 {(() => {
                   const until = new Date(app.featuredUntil);
                   const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -553,7 +553,7 @@ function AppsPage() {
             ) : null}
 
             {app.isHot ? (
-              <div className="text-[10.5px] font-bold text-rose-800 bg-rose-50 rounded-lg px-2.5 py-1 ring-1 ring-rose-200/70">
+              <div className="text-[10.5px] font-bold text-rose-300 bg-rose-500/20 border border-rose-500/30 rounded-lg px-2.5 py-1">
                 {(() => {
                   const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                   return `🔥 Hot expires: ${formatted} (${daysLeft}d left)`;
