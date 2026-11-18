@@ -543,7 +543,7 @@ function AdminHome() {
           <section className="rounded-2xl border border-line bg-white p-4 shadow-xs">
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div>
-                <h3 className="text-sm font-semibold text-ink">💎 30-Day Sponsorship Slots</h3>
+                <h3 className="text-sm font-semibold text-ink">💎 7-Day Sponsorship Slots</h3>
                 <p className="text-[11px] text-muted">Fixed 3 Blue and 3 Gold premium homepage placements</p>
               </div>
               <button
