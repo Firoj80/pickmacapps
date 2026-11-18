@@ -19,7 +19,7 @@ export function SiteSidebarContent({
   const topCategories = categories.slice(0, 8);
 
   const isHome = currentPath === "/";
-  const activeSort = isHome ? (currentSearch.sort || "featured") : "";
+  const activeSort = isHome ? (currentSearch.sort ?? "") : "";
   const isPick = isHome && currentSearch.cat === "pick";
   const isFeatured = isHome && (activeSort === "featured" || isPick);
 

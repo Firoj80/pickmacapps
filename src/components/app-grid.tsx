@@ -54,11 +54,11 @@ export function AppGrid({
     setPage(0);
   }, [query, category, order, sort]);
 
-  // Default home feed: no search, all categories, featured sort
+  // Default home feed: root landing page with no search, all categories, and no explicit sort filter
   const isDefaultHomeFeed =
     category === "all" &&
     !query.trim() &&
-    (sort === "featured" || !sort);
+    !sort;
 
   // Build the fluid priority-queue display list for the default home feed
   const displayItems = useMemo((): GridItem[] => {

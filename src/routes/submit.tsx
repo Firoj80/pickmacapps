@@ -812,41 +812,23 @@ function SubmitPage() {
                   <div className="space-y-4">
                     {/* UPGRADE OPTION 1: 🌟 Gold Spotlight */}
                     <div
-                      className={`rounded-2xl border transition-all ${
+                      className={`rounded-2xl sm:rounded-3xl border transition-all ${
                         selectedPlan === "article"
-                          ? "border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/40 shadow-sm"
-                          : "border-amber-500/30 bg-[#FFFDF8] dark:bg-amber-500/5 hover:border-amber-500/50"
-                      } p-6 md:p-7 space-y-5`}
+                          ? "border-amber-500/70 bg-amber-500/10 ring-1 ring-amber-500/40 shadow-sm"
+                          : "border-amber-200/80 bg-[#FFFDF7] dark:border-amber-500/25 dark:bg-amber-500/5 hover:border-amber-400/80"
+                      } p-6 sm:p-7 space-y-3.5`}
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <label
-                          htmlFor="article-toggle"
-                          className="flex items-start gap-3.5 cursor-pointer select-none flex-1"
+                      {/* Top Row: [Icon + Pill] on left, [Toggle Switch] on right */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div
+                          className="flex items-center gap-2 cursor-pointer select-none"
                           onClick={toggleGold}
                         >
-                          <BadgeCheckIcon className="mt-1 h-6 w-6 shrink-0 fill-amber-500 text-white drop-shadow-sm" />
-                          <span className="space-y-1.5 block">
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-500">
-                              Get featured · early rate
-                            </span>
-                            <span className="flex flex-wrap items-baseline gap-x-2">
-                              <span className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
-                                Feature as Gold Spotlight for 7 days
-                              </span>
-                              <span className="font-display text-[22px] font-bold text-amber-500 md:text-[24px]">
-                                ${goldBaseDollars}
-                              </span>
-                              {isBfcm && (
-                                <span className="text-xs text-muted line-through font-medium">
-                                  ${goldCompareDollars}
-                                </span>
-                              )}
-                            </span>
-                            <span className="block text-sm text-muted leading-relaxed">
-                              Hero spot on the homepage, premium golden choice badge and approval within 24 hours — more visibility for a full week.
-                            </span>
+                          <BadgeCheckIcon className="h-5 w-5 shrink-0 fill-amber-500 text-white drop-shadow-xs" />
+                          <span className="inline-flex items-center rounded-full bg-amber-100/90 dark:bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-800 dark:text-amber-400">
+                            Get featured · early rate
                           </span>
-                        </label>
+                        </div>
 
                         {/* macOS / iOS Toggle Switch matching screenshot */}
                         <button
@@ -854,8 +836,11 @@ function SubmitPage() {
                           id="article-toggle"
                           role="switch"
                           aria-checked={selectedPlan === "article"}
-                          onClick={toggleGold}
-                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleGold();
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "article"
                               ? "bg-amber-500"
                               : "bg-stone-300 dark:bg-stone-700"
@@ -870,13 +855,36 @@ function SubmitPage() {
                         </button>
                       </div>
 
+                      {/* Row 2 & 3: Title, Price, Description */}
+                      <div
+                        className="cursor-pointer select-none space-y-1"
+                        onClick={toggleGold}
+                      >
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <h3 className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
+                            Feature my app for 7 days
+                          </h3>
+                          <span className="font-display text-[22px] font-bold text-amber-500 md:text-[24px]">
+                            ${goldBaseDollars}
+                          </span>
+                          {isBfcm && (
+                            <span className="text-xs text-muted line-through font-medium">
+                              ${goldCompareDollars}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted leading-relaxed">
+                          Hero spot on the homepage, premium featured badge and approval within 24 hours — more visibility for a full week.
+                        </p>
+                      </div>
+
                       {/* Expanded Details when selected */}
                       {selectedPlan === "article" && (
-                        <div className="space-y-5 border-t border-amber-500/20 pt-5 animate-fade-in">
+                        <div className="space-y-5 border-t border-amber-500/20 pt-5 mt-5 animate-fade-in">
                           <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
                             <div className="flex-1">
                               <h3 className="font-display text-[18px] font-bold tracking-tight text-ink">
-                                7-day featured placement
+                                7-day featured placement (Golden Choice)
                               </h3>
                               <div className="mt-2 flex items-baseline gap-2">
                                 <span className="font-display text-[38px] sm:text-[44px] font-bold leading-none tracking-tight text-ink">
@@ -953,41 +961,23 @@ function SubmitPage() {
 
                     {/* UPGRADE OPTION 2: 🔥 Hot Boost */}
                     <div
-                      className={`rounded-2xl border transition-all ${
+                      className={`rounded-2xl sm:rounded-3xl border transition-all ${
                         selectedPlan === "featured"
-                          ? "border-orange-500/60 bg-orange-500/10 ring-1 ring-orange-500/40 shadow-sm"
-                          : "border-orange-500/30 bg-[#FFFDF8] dark:bg-orange-500/5 hover:border-orange-500/50"
-                      } p-6 md:p-7 space-y-5`}
+                          ? "border-orange-500/70 bg-orange-500/10 ring-1 ring-orange-500/40 shadow-sm"
+                          : "border-orange-200/80 bg-[#FFFDF7] dark:border-orange-500/25 dark:bg-orange-500/5 hover:border-orange-400/80"
+                      } p-6 sm:p-7 space-y-3.5`}
                     >
-                      <div className="flex items-start justify-between gap-4">
-                        <label
-                          htmlFor="hot-toggle"
-                          className="flex items-start gap-3.5 cursor-pointer select-none flex-1"
+                      {/* Top Row: [Icon + Pill] on left, [Toggle Switch] on right */}
+                      <div className="flex items-center justify-between gap-4">
+                        <div
+                          className="flex items-center gap-2 cursor-pointer select-none"
                           onClick={toggleHot}
                         >
-                          <FlameIcon className="mt-1 h-6 w-6 shrink-0 text-orange-500" />
-                          <span className="space-y-1.5 block">
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-orange-400">
-                              Boost placement · fast-track
-                            </span>
-                            <span className="flex flex-wrap items-baseline gap-x-2">
-                              <span className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
-                                Boost as Hot App for 7 days
-                              </span>
-                              <span className="font-display text-[22px] font-bold text-orange-500 md:text-[24px]">
-                                ${hotBaseDollars}
-                              </span>
-                              {isBfcm && (
-                                <span className="text-xs text-muted line-through font-medium">
-                                  ${hotCompareDollars}
-                                </span>
-                              )}
-                            </span>
-                            <span className="block text-sm text-muted leading-relaxed">
-                              Positioned at the top of all free listing apps, right after Golden badge apps, hero section icon and Fire badge.
-                            </span>
+                          <FlameIcon className="h-5 w-5 shrink-0 text-orange-500" />
+                          <span className="inline-flex items-center rounded-full bg-orange-100/90 dark:bg-orange-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-orange-800 dark:text-orange-400">
+                            Boost placement · fast-track
                           </span>
-                        </label>
+                        </div>
 
                         {/* macOS / iOS Toggle Switch matching screenshot */}
                         <button
@@ -995,8 +985,11 @@ function SubmitPage() {
                           id="hot-toggle"
                           role="switch"
                           aria-checked={selectedPlan === "featured"}
-                          onClick={toggleHot}
-                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleHot();
+                          }}
+                          className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
                             selectedPlan === "featured"
                               ? "bg-orange-500"
                               : "bg-stone-300 dark:bg-stone-700"
@@ -1011,9 +1004,32 @@ function SubmitPage() {
                         </button>
                       </div>
 
+                      {/* Row 2 & 3: Title, Price, Description */}
+                      <div
+                        className="cursor-pointer select-none space-y-1"
+                        onClick={toggleHot}
+                      >
+                        <div className="flex flex-wrap items-baseline gap-x-2">
+                          <h3 className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">
+                            Boost my app as Hot for 7 days
+                          </h3>
+                          <span className="font-display text-[22px] font-bold text-orange-500 md:text-[24px]">
+                            ${hotBaseDollars}
+                          </span>
+                          {isBfcm && (
+                            <span className="text-xs text-muted line-through font-medium">
+                              ${hotCompareDollars}
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted leading-relaxed">
+                          Positioned at the top of all free listing apps, right after Golden badge apps, hero section icon and Fire badge.
+                        </p>
+                      </div>
+
                       {/* Expanded Details when selected */}
                       {selectedPlan === "featured" && (
-                        <div className="space-y-5 border-t border-orange-500/20 pt-5 animate-fade-in">
+                        <div className="space-y-5 border-t border-orange-500/20 pt-5 mt-5 animate-fade-in">
                           <div className="flex flex-col gap-6 md:flex-row md:items-stretch md:justify-between">
                             <div className="flex-1">
                               <h3 className="font-display text-[18px] font-bold tracking-tight text-ink">

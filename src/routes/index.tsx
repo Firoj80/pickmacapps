@@ -124,7 +124,7 @@ export const Route = createFileRoute("/")({
   head: ({ matches }) => {
     const origin = originFrom(matches);
     const search = matches.at(-1)?.search as { q?: string; cat?: string; sort?: HeroSort } | undefined;
-    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all") || (search?.sort && search.sort !== "featured"));
+    const filtered = Boolean(search?.q || (search?.cat && search.cat !== "all") || Boolean(search?.sort));
     const seo = buildMetadata({
       title: homeTitle,
       description: homeDescription,
@@ -287,7 +287,7 @@ function Home() {
   );
 
   const isFiltered = Boolean(
-    (rawSearch.sort && rawSearch.sort !== "featured") ||
+    rawSearch.sort ||
     (rawSearch.cat && rawSearch.cat !== "all") ||
     rawSearch.q
   );
@@ -459,7 +459,7 @@ function Home() {
           apps={shown}
           query={q}
           category={category}
-          sort={sort}
+          sort={rawSearch.sort}
           categories={heroCategories}
           arranged
           offer={offer}
