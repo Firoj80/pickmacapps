@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { BlackFridayCountdown, BFCM_COUPON_CODE } from "@/components/black-friday-countdown";
 import { verifyBadge } from "@/lib/badge";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
@@ -139,21 +140,24 @@ function SubmitPage() {
   const search = Route.useSearch();
   const { tier, payment_id, submitted, coupon: searchCoupon } = search;
 
-  // Coupon state — applied when passed in URL (?coupon=BFCM50) or entered by user
-  const [couponInput, setCouponInput] = useState(() => (searchCoupon ? searchCoupon.toUpperCase() : ""));
+  // Coupon state — auto-apply BFCM50 by default as requested
+  const [couponInput, setCouponInput] = useState(() => (searchCoupon ? searchCoupon.toUpperCase() : BFCM_COUPON_CODE));
   const [appliedCoupon, setAppliedCoupon] = useState<string | null>(() => {
-    if (!searchCoupon) return null;
-    const raw = searchCoupon.trim().toUpperCase();
-    return raw === "BFCM50" ? "BFCM50" : null;
+    if (searchCoupon) {
+      const raw = searchCoupon.trim().toUpperCase();
+      return raw === BFCM_COUPON_CODE ? BFCM_COUPON_CODE : null;
+    }
+    // Auto-applied by default for Black Friday
+    return BFCM_COUPON_CODE;
   });
   const [couponError, setCouponError] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchCoupon) {
       const raw = searchCoupon.trim().toUpperCase();
-      if (raw === "BFCM50") {
-        setAppliedCoupon("BFCM50");
-        setCouponInput("BFCM50");
+      if (raw === BFCM_COUPON_CODE) {
+        setAppliedCoupon(BFCM_COUPON_CODE);
+        setCouponInput(BFCM_COUPON_CODE);
       }
     }
   }, [searchCoupon]);
@@ -540,26 +544,13 @@ function SubmitPage() {
               </p>
             </div>
 
-            {/* Black Friday Discount Pill Banner */}
-            {isBfcm && (
-              <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-semibold text-amber-400">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                  <span>🔥 Black Friday 50% OFF active! Promo code <span className="font-mono underline">BFCM50</span> applied to both Golden Spotlight & Hot Boost.</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setAppliedCoupon(null);
-                    setCouponInput("");
-                  }}
-                  className="text-[11px] text-amber-400/80 hover:text-amber-300 cursor-pointer"
-                  title="Remove coupon"
-                >
-                  ✕ Remove
-                </button>
-              </div>
-            )}
+            {/* Black Friday Sale Banner with live countdown & auto-applied discount */}
+            <div className="mb-8">
+              <BlackFridayCountdown
+                isSubmitPage
+                onApplyCoupon={() => applyCoupon(BFCM_COUPON_CODE)}
+              />
+            </div>
 
             {/* 2-Column Split: Submit Form on Left, User Reviews on Right */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">

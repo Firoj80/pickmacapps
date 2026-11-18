@@ -3,6 +3,7 @@ import { fetchOffer } from "@/lib/directory.fn";
 import { crumbGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { pageCopy } from "@/lib/site";
+import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 
 export const Route = createFileRoute("/sponsor")({
   loader: () => fetchOffer(),
@@ -81,8 +82,13 @@ function SponsorPage() {
           </p>
         </div>
 
+        {/* Black Friday Sale Banner with Live Countdown & Auto-Applied 50% Discount */}
+        <div className="mt-8">
+          <BlackFridayCountdown isSponsorPage salePrice={salePrice} originalPrice={originalPrice} />
+        </div>
+
         {/* Main Placement Card matching macapp.supply */}
-        <section className="mt-12 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-8">
+        <section className="mt-8 rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 md:p-8">
           <div className="flex flex-col gap-8 md:flex-row md:items-stretch md:justify-between">
             <div className="flex-1">
               <h3 className="font-display text-[20px] font-bold tracking-tight text-ink md:text-[22px]">

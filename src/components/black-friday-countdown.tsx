@@ -31,11 +31,17 @@ export function BlackFridayCountdown({
   className = "",
   isMobile = false,
   isSubmitPage = false,
+  isSponsorPage = false,
+  salePrice = "$15",
+  originalPrice = "$29",
   onApplyCoupon,
 }: {
   className?: string;
   isMobile?: boolean;
   isSubmitPage?: boolean;
+  isSponsorPage?: boolean;
+  salePrice?: string;
+  originalPrice?: string;
   onApplyCoupon?: () => void;
 }) {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft);
@@ -66,41 +72,36 @@ export function BlackFridayCountdown({
     return null;
   }
 
-  // Submit page layout: wide banner placed at top of submit page
-  if (isSubmitPage) {
+  // Sponsor page layout: wide banner placed above main placement card
+  if (isSponsorPage) {
     return (
       <div
-        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 text-white shadow-lg backdrop-blur-md ${className}`}
+        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 sm:p-5 text-white shadow-lg backdrop-blur-md ${className}`}
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/15 blur-2xl" />
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3.5">
-          <div className="flex flex-col gap-1">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs">
                 🔥 Black Friday Sale
               </span>
               <span className="text-sm sm:text-base font-bold text-white tracking-tight">
-                50% OFF All Paid Listings
+                50% OFF All Sponsorships
+              </span>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+                ✓ Auto-Applied
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/80 mt-0.5">
-              <span>Use coupon code:</span>
-              <button
-                type="button"
-                onClick={(e) => {
-                  copyCoupon(e);
-                  onApplyCoupon?.();
-                }}
-                title="Click to copy & apply coupon code"
-                className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/20 px-2 py-0.5 font-mono text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition cursor-pointer active:scale-95"
-              >
-                <span>{BFCM_COUPON_CODE}</span>
-                <span className="text-[10px] text-amber-200 font-sans">
-                  {copied ? "✓ Copied & Applied" : "Copy & Apply"}
-                </span>
-              </button>
-              <span className="text-white/60">· Valid till Nov 30</span>
+            <div className="flex items-center gap-2 text-xs text-white/80">
+              <span>
+                Feature your app in the #1 Hero Spot for just{" "}
+                <strong className="text-amber-300 font-bold">{salePrice}</strong>{" "}
+                <span className="line-through text-white/50">({originalPrice})</span> with promo code{" "}
+                <span className="font-mono font-bold text-amber-300">{BFCM_COUPON_CODE}</span>
+              </span>
+              <span className="text-white/40">·</span>
+              <span className="text-white/60">Ends Nov 30</span>
             </div>
           </div>
 
@@ -108,35 +109,110 @@ export function BlackFridayCountdown({
             {/* Live Countdown Timer */}
             <div className="flex items-center gap-1.5 font-mono">
               <div className="flex flex-col items-center">
-                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
-                  {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.days).padStart(2, "0") : "12"}
                 </span>
                 <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
               </div>
               <span className="font-bold text-amber-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
                   {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
                 </span>
                 <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
               </div>
               <span className="font-bold text-amber-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
                   {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
                 </span>
                 <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
               </div>
               <span className="font-bold text-amber-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[28px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
                   {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
                 </span>
                 <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
               </div>
             </div>
 
-            {/* Direct Action Button */}
+            <Link
+              to="/submit"
+              search={{ tier: "article", coupon: BFCM_COUPON_CODE }}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:scale-105 hover:shadow-amber-500/25 active:scale-95 cursor-pointer"
+            >
+              <span>Claim 50% OFF ({salePrice})</span>
+              <span className="text-sm leading-none">→</span>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Submit page layout: wide banner placed at top of submit page
+  if (isSubmitPage) {
+    return (
+      <div
+        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 sm:p-5 text-white shadow-lg backdrop-blur-md ${className}`}
+      >
+        <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/15 blur-2xl" />
+
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex flex-col gap-1.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs">
+                🔥 Black Friday Sale
+              </span>
+              <span className="text-sm sm:text-base font-bold text-white tracking-tight">
+                50% OFF All Paid Listings
+              </span>
+              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+                ✓ Auto-Applied
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-xs text-white/80">
+              <span>
+                Promo code <span className="font-mono font-bold text-amber-300">{BFCM_COUPON_CODE}</span> auto-applied · 50% discount active for Golden Spotlight & Hot Boost
+              </span>
+              <span className="text-white/40">·</span>
+              <span className="text-white/60">Ends Nov 30</span>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-3">
+            {/* Live Countdown Timer */}
+            <div className="flex items-center gap-1.5 font-mono">
+              <div className="flex flex-col items-center">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.days).padStart(2, "0") : "12"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
+              </div>
+              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <div className="flex flex-col items-center">
+                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                  {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
+                </span>
+                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => {
@@ -144,10 +220,9 @@ export function BlackFridayCountdown({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:scale-105 hover:shadow-amber-500/25 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-3.5 py-2 text-xs font-extrabold text-emerald-300 shadow-md transition-all hover:bg-emerald-500/30 active:scale-95 cursor-pointer"
             >
-              <span>{copied ? "✓ 50% Applied!" : "Apply 50% Discount"}</span>
-              <span className="text-sm leading-none">→</span>
+              <span>{copied ? "✓ Copied BFCM50" : "✓ 50% Applied"}</span>
             </button>
           </div>
         </div>
