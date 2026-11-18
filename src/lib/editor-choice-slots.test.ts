@@ -31,9 +31,9 @@ test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is now 6 (all Gol
   assert.equal(MAX_TIER_SLOTS, MAX_EDITOR_CHOICE_SLOTS);
 });
 
-test("MAX_HOT_SLOTS is strictly 8 across server and catalog", () => {
-  assert.equal(MAX_HOT_SLOTS, 8);
-  assert.equal(CATALOG_MAX_HOT_SLOTS, 8);
+test("MAX_HOT_SLOTS is strictly 6 across server and catalog", () => {
+  assert.equal(MAX_HOT_SLOTS, 6);
+  assert.equal(CATALOG_MAX_HOT_SLOTS, 6);
   assert.equal(MAX_HOT_SLOTS, CATALOG_MAX_HOT_SLOTS);
 });
 

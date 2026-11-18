@@ -455,7 +455,7 @@ function NewAppPage() {
               <span>🔥 Mark as Hot App</span>
             </span>
             <span className="text-xs text-muted">
-              — displays fire badge on cards and ranks in the top 8 hot shelf (max 8 slots)
+              — displays fire badge on cards and ranks in the top 6 hot shelf (max 6 slots)
             </span>
           </label>
         </div>

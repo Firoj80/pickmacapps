@@ -486,7 +486,7 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
 
 export const MAX_EDITOR_CHOICE_SLOTS = 6;
 export const MAX_TIER_SLOTS = 6; // All 6 slots are Gold (Article) tier
-export const MAX_HOT_SLOTS = 8; // Maximum 8 active slots for Hot apps
+export const MAX_HOT_SLOTS = 6; // Maximum 6 active slots for Hot apps
 export const FEATURED_APP_DURATION_DAYS = 7;
 
 export function getNextCycleLabel(now = new Date()): string {
@@ -806,7 +806,7 @@ export async function adminStats() {
   try {
     await sql.query("update apps set hot_marked_at = now() where is_hot = true and hot_marked_at is null");
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
-      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 8",
+      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 6",
     );
     hotApps = hotRows.map((r) => ({
       id: r.id,

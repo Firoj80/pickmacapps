@@ -256,7 +256,7 @@ function AdminHome() {
             {waiting}
           </div>
           <p className="mt-1 text-[11px] text-muted">
-            {hotApps.length}/8 hot · {goldOccupants.length}/6 gold slots filled
+            {hotApps.length}/6 hot · {goldOccupants.length}/6 gold slots filled
           </p>
         </Link>
       </section>
@@ -406,7 +406,7 @@ function AdminHome() {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-ink">🔥 7-Day Hot Roster</span>
                 <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300 ring-1 ring-rose-500/30">
-                  {hotApps.length} / 8 active (7d policy)
+                  {hotApps.length} / 6 active (7d policy)
                 </span>
               </div>
               <Link to="/admin/apps" preload="intent" className="text-xs font-semibold text-ink hover:underline">
@@ -544,7 +544,7 @@ function AdminHome() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-ink">💎 7-Day Sponsorship Slots</h3>
-                <p className="text-[11px] text-muted">6 Gold homepage placements & 8 Hot boosted placements</p>
+                <p className="text-[11px] text-muted">6 Gold homepage placements & 6 Hot boosted placements</p>
               </div>
               <button
                 type="button"
@@ -691,16 +691,16 @@ function AdminHome() {
               </div>
             </div>
 
-            {/* Hot Placement Slots (8 Slots) */}
+            {/* Hot Placement Slots (6 Slots) */}
             <div className="mt-4 border-t border-line pt-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-rose-300">🔥 Hot App Placement ({hotApps.length}/8)</span>
+                <span className="font-semibold text-rose-300">🔥 Hot App Placement ({hotApps.length}/6)</span>
                 <span className="text-[11px] text-muted">{money(data.offer.featuredPriceCents ?? 9900)}</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
                 <div
                   className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300"
-                  style={{ width: `${Math.min(100, (hotApps.length / 8) * 100)}%` }}
+                  style={{ width: `${Math.min(100, (hotApps.length / 6) * 100)}%` }}
                 />
               </div>
             </div>

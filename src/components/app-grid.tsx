@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppCard } from "@/components/app-card";
 import { ClaimSpotCard, type ClaimSpotOffer } from "@/components/claim-spot-card";
-import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
+import { isEditorChoice, MAX_HOT_SLOTS, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
@@ -81,11 +81,11 @@ export function AppGrid({
       .filter((a) => isEditorChoice(a) && a.featuredTier !== "article")
       .sort(byOldest);
 
-    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first, capped at max 8
+    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first, capped at max 6
     const hotApps = apps
       .filter((a) => Boolean(a.isHot) && !isEditorChoice(a))
       .sort(byOldest)
-      .slice(0, 8);
+      .slice(0, MAX_HOT_SLOTS);
 
     // Priority 4: All other apps (not editor choice, not hot), oldest first
     const otherApps = apps

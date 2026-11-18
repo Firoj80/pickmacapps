@@ -349,7 +349,7 @@ export function alternativesInCategory(categorySlug: string) {
 }
 
 /** Maximum active slots for Hot apps */
-export const MAX_HOT_SLOTS = 8;
+export const MAX_HOT_SLOTS = 6;
 
 /** Hot tag active duration in days before automated expiry */
 export const HOT_APP_DURATION_DAYS = 7;

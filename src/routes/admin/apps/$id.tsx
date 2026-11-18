@@ -529,28 +529,28 @@ function EditAppForm({ app }: { app: EditAppData }) {
 
         {/* 9. Hot App Toggle */}
         <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5">
-          <label className={`flex items-center gap-2.5 text-sm text-ink ${!app.isHot && (app.otherHotCount ?? 0) >= 8 ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
+          <label className={`flex items-center gap-2.5 text-sm text-ink ${!app.isHot && (app.otherHotCount ?? 0) >= 6 ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
             <input
               type="checkbox"
               name="is_hot"
               checked={isHot}
-              disabled={!app.isHot && (app.otherHotCount ?? 0) >= 8}
+              disabled={!app.isHot && (app.otherHotCount ?? 0) >= 6}
               onChange={(e) => setIsHot(e.target.checked)}
               className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500 disabled:opacity-50"
             />
             <span className="font-semibold text-rose-300 flex items-center gap-1.5">
               <span>🔥 Mark as Hot App</span>
               <span className="text-[11px] font-normal text-rose-400/80">
-                ({app.isHot ? "Active" : `${app.otherHotCount ?? 0}/8 slots filled`})
+                ({app.isHot ? "Active" : `${app.otherHotCount ?? 0}/6 slots filled`})
               </span>
             </span>
             <span className="text-xs text-muted">
-              — displays fire badge on cards and ranks in the top 8 hot shelf
+              — displays fire badge on cards and ranks in the top 6 hot shelf
             </span>
           </label>
-          {!app.isHot && (app.otherHotCount ?? 0) >= 8 && (
+          {!app.isHot && (app.otherHotCount ?? 0) >= 6 && (
             <p className="mt-2 text-xs text-rose-400">
-              ⚠️ All 8 Hot slots are currently filled. To mark this app as Hot, remove Hot status from another app first.
+              ⚠️ All 6 Hot slots are currently filled. To mark this app as Hot, remove Hot status from another app first.
             </p>
           )}
         </div>

@@ -118,7 +118,7 @@ function AppsPage() {
         <div className="rounded-2xl border border-rose-200/80 bg-rose-50/40 p-3.5 shadow-xs">
           <p className="text-[11px] font-semibold text-rose-800 uppercase tracking-wider">🔥 Hot Shelf</p>
           <div className="mt-1 flex items-baseline gap-1.5">
-            <span className="text-2xl font-bold text-rose-900">{hotCount} / 8</span>
+            <span className="text-2xl font-bold text-rose-900">{hotCount} / 6</span>
             <span className="text-[11px] text-rose-700/80">slots</span>
           </div>
         </div>
@@ -368,24 +368,24 @@ function AppsPage() {
                       <input type="hidden" name="return_to" value="/admin/apps" />
                       <button
                         type="submit"
-                        disabled={!app.isHot && hotCount >= 8}
+                        disabled={!app.isHot && hotCount >= 6}
                         title={
                           app.isHot
                             ? "Remove Hot status"
-                            : hotCount >= 8
-                            ? "All 8 Hot slots are full. Remove an app from Hot first."
+                            : hotCount >= 6
+                            ? "All 6 Hot slots are full. Remove an app from Hot first."
                             : "Mark app as Hot"
                         }
                         className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1 text-xs font-semibold transition ${
                           app.isHot
                             ? "bg-rose-600 text-white shadow-xs hover:bg-rose-700 cursor-pointer"
-                            : hotCount >= 8
+                            : hotCount >= 6
                             ? "border border-line bg-surface-2 text-muted/50 cursor-not-allowed opacity-60"
                             : "border border-line bg-surface text-muted hover:border-rose-300 hover:text-rose-400 hover:bg-rose-500/10 cursor-pointer"
                         }`}
                       >
                         <span>🔥</span>
-                        <span>{app.isHot ? "Hot Active" : hotCount >= 8 ? "Hot Full (8/8)" : "Make Hot"}</span>
+                        <span>{app.isHot ? "Hot Active" : hotCount >= 6 ? "Hot Full (6/6)" : "Make Hot"}</span>
                       </button>
                     </form>
                     {app.isHot ? (
@@ -577,17 +577,17 @@ function AppsPage() {
                 <input type="hidden" name="return_to" value="/admin/apps" />
                 <button
                   type="submit"
-                  disabled={!app.isHot && hotCount >= 8}
+                  disabled={!app.isHot && hotCount >= 6}
                   className={`inline-flex items-center gap-1 rounded-xl px-2.5 py-1.5 text-xs font-semibold transition ${
                     app.isHot
                       ? "bg-rose-600 text-white shadow-xs cursor-pointer"
-                      : hotCount >= 8
+                      : hotCount >= 6
                       ? "border border-line bg-surface-2 text-muted/50 cursor-not-allowed opacity-60"
                       : "border border-line bg-surface-2 text-muted hover:border-rose-300 cursor-pointer"
                   }`}
                 >
                   <span>🔥</span>
-                  <span>{app.isHot ? "Hot Active" : hotCount >= 8 ? "Hot Full (8/8)" : "Make Hot"}</span>
+                  <span>{app.isHot ? "Hot Active" : hotCount >= 6 ? "Hot Full (6/6)" : "Make Hot"}</span>
                 </button>
               </form>
 
