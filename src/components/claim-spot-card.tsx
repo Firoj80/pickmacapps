@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { BadgeCheckIcon } from "@/components/icons";
 import { fetchOffer } from "@/lib/directory.fn";
 
 export type ClaimSpotOffer = Awaited<ReturnType<typeof fetchOffer>>;
@@ -89,10 +90,8 @@ export function ClaimSpotCard({
                 <h3 className="truncate text-[14.5px] font-bold tracking-tight text-ink group-hover:text-accent transition-colors">
                   Your App Here
                 </h3>
-                <span className="text-amber-400">
-                  <svg className="h-3.5 w-3.5 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
+                <span title="Gold Verified Badge" className="flex shrink-0 items-center">
+                  <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1 rounded bg-gradient-to-r from-rose-500/25 to-amber-500/25 px-1.5 py-0.2 text-[9.5px] font-extrabold text-amber-300 ring-1 ring-amber-400/40">
                   <span>🔥</span>
@@ -192,7 +191,8 @@ export function ClaimSpotCard({
             <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
               <div className="flex items-center gap-1.5">
                 <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2 py-0.5 text-[10px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
-                  ★ Gold Spotlight
+                  <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
+                  <span>Gold Spotlight</span>
                 </span>
                 <span className="text-[11px] text-white/50">7 Days Active</span>
               </div>
@@ -229,10 +229,8 @@ export function ClaimSpotCard({
                   Your App Name Here
                 </h3>
                 {/* Verified checkmark badge icon */}
-                <span title="Gold Verified Badge Included" className="flex shrink-0 items-center text-amber-500">
-                  <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                  </svg>
+                <span title="Gold Verified Badge Included" className="flex shrink-0 items-center">
+                  <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                 </span>
               </div>
 

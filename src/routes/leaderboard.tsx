@@ -5,6 +5,7 @@ import type { AppItem } from "@/lib/catalog";
 import { appIconUrl } from "@/lib/image-opt";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
 import { getOrSetVisitorId, trackClick } from "@/components/app-card";
+import { BadgeCheckIcon } from "@/components/icons";
 
 export const Route = createFileRoute("/leaderboard")({
   validateSearch: (search: Record<string, unknown>) => ({
@@ -694,12 +695,12 @@ function LeaderboardMobileCard({ app, rank }: { app: AppItem; rank: number }) {
                 {app.name}
               </h3>
 
-              {/* Verified checkmark badge */}
-              <span title="Verified Mac App" className="flex shrink-0 items-center text-amber-400">
-                <svg className="h-3.5 w-3.5 fill-amber-400" viewBox="0 0 24 24">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                </svg>
-              </span>
+              {/* Verified checkmark badge for Golden / Editor's Choice apps */}
+              {app.editorChoice ? (
+                <span title="Editor’s Choice (Golden Badge)" className="flex shrink-0 items-center">
+                  <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
+                </span>
+              ) : null}
 
               {/* Boosted / Featured Tag */}
               {isTopRanked ? (

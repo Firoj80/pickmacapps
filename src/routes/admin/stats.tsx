@@ -4,6 +4,7 @@ import { AdminShell, Notice, useAdminNotice } from "@/components/admin-shell";
 import { ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import type { AppItem } from "@/lib/catalog";
+import { BadgeCheckIcon } from "@/components/icons";
 
 export const Route = createFileRoute("/admin/stats")({
   beforeLoad: async () => {
@@ -311,8 +312,13 @@ function AppStatsAdminPage() {
                                 <div className="flex items-center gap-1.5 font-semibold text-ink">
                                   <span>{app.name}</span>
                                   {app.editorChoice ? (
-                                    <span className="rounded bg-amber-100 px-1 text-[10px] font-bold text-amber-800">
-                                      {app.featuredTier === "article" ? "🌟 Gold" : "🔹 Blue"}
+                                    <span className="inline-flex items-center gap-0.5 rounded bg-amber-100 px-1 text-[10px] font-bold text-amber-800">
+                                      {app.featuredTier === "article" ? (
+                                        <>
+                                          <BadgeCheckIcon className="h-2.5 w-2.5 shrink-0 fill-amber-500 text-stone-950" />
+                                          <span>Gold</span>
+                                        </>
+                                      ) : "🔹 Blue"}
                                     </span>
                                   ) : null}
                                   {app.isHot ? (
@@ -456,8 +462,13 @@ function AppStatsAdminPage() {
                             <div className="flex items-center gap-1 font-semibold text-ink truncate">
                               <span className="truncate">{app.name}</span>
                               {app.editorChoice ? (
-                                <span className="shrink-0 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
-                                  {app.featuredTier === "article" ? "🌟 Gold" : "🔹 Blue"}
+                                <span className="shrink-0 inline-flex items-center gap-0.5 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
+                                  {app.featuredTier === "article" ? (
+                                    <>
+                                      <BadgeCheckIcon className="h-2.5 w-2.5 shrink-0 fill-amber-500 text-stone-950" />
+                                      <span>Gold</span>
+                                    </>
+                                  ) : "🔹 Blue"}
                                 </span>
                               ) : null}
                               {app.isHot ? (

@@ -4,7 +4,7 @@ import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/compone
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn, generateDashboardTokenFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
-import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { BadgeCheckIcon, CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { getHotDaysRemaining } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/apps/$id")({
@@ -302,8 +302,9 @@ function EditAppForm({ app }: { app: EditAppData }) {
                   </span>
                   {editorChoice ? (
                     featuredTier === "article" ? (
-                      <span className="rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
-                        🌟 Gold
+                      <span className="inline-flex items-center gap-1 rounded bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-bold text-amber-800">
+                        <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                        <span>Gold</span>
                       </span>
                     ) : (
                       <span className="rounded bg-sky-500/15 px-1.5 py-0.5 text-[10px] font-bold text-sky-800">

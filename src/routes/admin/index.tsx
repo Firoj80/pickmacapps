@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
+import { BadgeCheckIcon } from "@/components/icons";
 import { fetchAdminHome, ensureAdminSession, getCachedAdminHome, seedAdminHomeCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { getHotDaysRemaining } from "@/lib/catalog";
@@ -310,8 +311,9 @@ function AdminHome() {
                                   Free
                                 </span>
                               ) : isGold ? (
-                                <span className="rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
-                                  🌟 Gold Tier
+                                <span className="inline-flex items-center gap-1 rounded-md bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">
+                                  <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                                  <span>Gold Tier</span>
                                 </span>
                               ) : (
                                 <span className="rounded-md bg-sky-100 px-1.5 py-0.5 text-[10px] font-semibold text-sky-800">

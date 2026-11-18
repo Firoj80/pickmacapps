@@ -71,7 +71,7 @@ function BadgeCheckIcon({ className = "h-5 w-5" }: { className?: string }) {
       aria-hidden="true"
     >
       <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
-      <path d="m9 12 2 2 4-4" />
+      <path d="m9 12 2 2 4-4" fill="none" />
     </svg>
   );
 }
@@ -840,8 +840,8 @@ function SubmitPage() {
                           className="flex items-start gap-3 cursor-pointer select-none flex-1"
                           onClick={toggleGold}
                         >
-                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-amber-500">
-                            <BadgeCheckIcon className="h-6 w-6 fill-amber-500/20 text-amber-500" />
+                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center">
+                            <BadgeCheckIcon className="h-6 w-6 shrink-0 fill-amber-500 text-stone-950" />
                           </div>
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-500">
@@ -933,7 +933,7 @@ function SubmitPage() {
                               <span><strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days</span>
                             </li>
                             <li className="flex items-start gap-2">
-                              <span className="text-amber-400 font-bold">🌟</span>
+                              <BadgeCheckIcon className="mt-0.5 h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                               <span>Exclusive <strong className="text-ink">Golden Choice Badge</strong></span>
                             </li>
                             <li className="flex items-start gap-2">

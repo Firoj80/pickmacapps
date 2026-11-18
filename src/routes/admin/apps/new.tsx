@@ -4,7 +4,7 @@ import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/compone
 import { shelfCategories } from "@/lib/shelf-categories";
 import { ensureAdminSession, fetchAppMetadataFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
-import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { BadgeCheckIcon, CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 
 export const Route = createFileRoute("/admin/apps/new")({
   beforeLoad: async () => {
@@ -533,8 +533,13 @@ function NewAppPage() {
               <div className="flex items-center gap-1.5">
                 <span className="font-semibold text-sm text-ink truncate">{name || "Untitled App"}</span>
                 {editorChoice ? (
-                  <span className="shrink-0 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
-                    {featuredTier === "article" ? "🌟 Gold" : "🔹 Blue"}
+                  <span className="shrink-0 inline-flex items-center gap-0.5 rounded bg-amber-100 px-1 text-[9.5px] font-bold text-amber-800">
+                    {featuredTier === "article" ? (
+                      <>
+                        <BadgeCheckIcon className="h-2.5 w-2.5 shrink-0 fill-amber-500 text-stone-950" />
+                        <span>Gold</span>
+                      </>
+                    ) : "🔹 Blue"}
                   </span>
                 ) : null}
                 {isHot ? (

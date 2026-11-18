@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, Pill, statusTone, useAdminNotice } from "@/components/admin-shell";
+import { BadgeCheckIcon } from "@/components/icons";
 import { getHotDaysRemaining, pricingLabel } from "@/lib/catalog";
 import { fetchAdminApps, ensureAdminSession, getCachedAdminApps, seedAdminAppsCache } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -310,7 +311,7 @@ function AppsPage() {
                       {app.editorChoice ? (
                         app.featuredTier === "article" ? (
                           <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[11px] font-bold text-amber-800 dark:text-amber-300">
-                            <span>🌟</span>
+                            <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
                             <span>Gold Tier</span>
                           </span>
                         ) : (
@@ -522,8 +523,9 @@ function AppsPage() {
               <Pill tone={statusTone(app.status)}>{app.status}</Pill>
               {app.editorChoice ? (
                 app.featuredTier === "article" ? (
-                  <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-800">
-                    🌟 Gold Tier
+                  <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 border border-amber-500/30 px-2 py-0.5 text-[10px] font-bold text-amber-800 dark:text-amber-300">
+                    <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                    <span>Gold Tier</span>
                   </span>
                 ) : (
                   <span className="rounded-full bg-sky-500/15 border border-sky-500/30 px-2 py-0.5 text-[10px] font-bold text-sky-800">

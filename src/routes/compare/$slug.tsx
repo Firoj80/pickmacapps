@@ -1,5 +1,6 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
+import { BadgeCheckIcon } from "@/components/icons";
 import {
   pairFaqs,
   pairHeading,
@@ -156,6 +157,11 @@ function ComparePage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate font-semibold text-ink">{pair.left.name}</h3>
+                    {isEditorChoice(pair.left) && (
+                      <span title="Editor’s Choice (Golden Badge)" className="shrink-0">
+                        <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                      </span>
+                    )}
                     <span
                       className={`rounded px-1.5 py-0.5 text-[10px] font-medium leading-none ${
                         pair.left.pricing === "free"
@@ -202,6 +208,11 @@ function ComparePage() {
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="truncate font-semibold text-ink">{pair.right.name}</h3>
+                    {isEditorChoice(pair.right) && (
+                      <span title="Editor’s Choice (Golden Badge)" className="shrink-0">
+                        <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
+                      </span>
+                    )}
                     <span
                       className={`rounded px-1.5 py-0.5 text-[10px] font-medium leading-none ${
                         pair.right.pricing === "free"

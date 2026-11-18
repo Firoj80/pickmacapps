@@ -3,6 +3,7 @@ import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { LeaderboardBanner } from "@/components/leaderboard-banner";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
+import { BadgeCheckIcon } from "@/components/icons";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -232,11 +233,9 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                 <span
                   title="Gold Spotlight App"
                   aria-label="Gold Spotlight App"
-                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-stone-950 shadow-md ring-1.5 ring-surface"
+                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center"
                 >
-                  <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
+                  <BadgeCheckIcon className="h-4.5 w-4.5 sm:h-5 sm:w-5 shrink-0 fill-amber-500 text-stone-950 drop-shadow-sm" />
                 </span>
               ) : isBlue ? (
                 <span

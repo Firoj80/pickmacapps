@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Notice, Pill, statusTone, useAdminNotice } from "@/components/admin-shell";
+import { BadgeCheckIcon } from "@/components/icons";
 import { fetchAdminHome, ensureAdminSession, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 
@@ -136,7 +137,12 @@ function SubmissionsPage() {
                         {item.plan === "choice" ? (
                           <div className="flex flex-col items-start gap-1">
                             <Pill tone="choice">
-                              {item.tier === "article" ? "🌟 Gold (Article)" : "🔹 Blue (Featured)"}
+                              {item.tier === "article" ? (
+                                <span className="inline-flex items-center gap-1">
+                                  <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                                  <span>Gold (Article)</span>
+                                </span>
+                              ) : "🔹 Blue (Featured)"}
                             </Pill>
                           </div>
                         ) : (
@@ -274,8 +280,13 @@ function SubmissionsPage() {
                     <div className="flex items-center justify-between gap-2 pt-1 border-t border-line/60">
                       <span className="text-muted">Tier:</span>
                       {item.plan === "choice" ? (
-                        <span className="font-semibold text-amber-700">
-                          {item.tier === "article" ? "🌟 Gold (Article)" : "🔹 Blue (Featured)"}
+                        <span className="font-semibold text-amber-700 inline-flex items-center gap-1">
+                          {item.tier === "article" ? (
+                            <>
+                              <BadgeCheckIcon className="h-3 w-3 shrink-0 fill-amber-500 text-stone-950" />
+                              <span>Gold (Article)</span>
+                            </>
+                          ) : "🔹 Blue (Featured)"}
                         </span>
                       ) : (
                         <div className="flex items-center gap-1.5">

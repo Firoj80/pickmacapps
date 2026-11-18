@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { AppAlternatives } from "@/components/app-alternatives";
 import { Missing } from "@/components/missing";
+import { BadgeCheckIcon } from "@/components/icons";
 import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appPairs } from "@/lib/compare";
 import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
@@ -283,9 +284,16 @@ function AppPage() {
                   className="h-[68px] w-[68px] shrink-0 rounded-[18px] bg-surface object-cover shadow-sm ring-1 ring-line/70"
                 />
                 <div className="min-w-0 flex-1">
-                  <h1 className="font-display text-[20px] sm:text-[22px] font-bold leading-snug tracking-tight text-ink line-clamp-2">
-                    {app.name}
-                  </h1>
+                  <div className="flex items-center gap-2">
+                    <h1 className="font-display text-[20px] sm:text-[22px] font-bold leading-snug tracking-tight text-ink line-clamp-2">
+                      {app.name}
+                    </h1>
+                    {isGold && (
+                      <span title="Editor’s Choice (Golden Badge)" className="shrink-0">
+                        <BadgeCheckIcon className="h-5 w-5 shrink-0 fill-amber-500 text-stone-950" />
+                      </span>
+                    )}
+                  </div>
                   <p className="mt-0.5 text-[13px] font-medium text-muted">
                     <Link
                       to="/category/$slug"
@@ -307,10 +315,8 @@ function AppPage() {
               {hasBadges ? (
                 <div className="mt-3.5 flex flex-wrap items-center gap-1.5">
                   {isGold ? (
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500 px-3 py-1 text-[11px] font-bold text-white shadow-2xs">
-                      <svg className="h-3 w-3 fill-white" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                      </svg>
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-[11px] font-bold text-amber-700 dark:text-amber-300 shadow-2xs">
+                      <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
                       <span>Featured - Gold</span>
                     </span>
                   ) : isBlue ? (

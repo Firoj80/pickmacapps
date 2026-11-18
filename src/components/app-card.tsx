@@ -2,6 +2,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { addedLabel, isEditorChoice, pricingLabel, type AppItem } from "@/lib/catalog";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
+import { BadgeCheckIcon } from "@/components/icons";
 
 function coverSrc(demo: string) {
   const clean = demo.trim();
@@ -209,8 +210,8 @@ export function AppCard({
               />
               {/* Overlay Icon Crown / Badge */}
               {isGold ? (
-                <span className="absolute -top-1.5 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gradient-to-br from-amber-300 to-amber-500 text-stone-950 text-[10px] font-bold shadow-xs ring-1 ring-stone-950">
-                  👑
+                <span className="absolute -top-1.5 -right-1 flex h-4.5 w-4.5 items-center justify-center">
+                  <BadgeCheckIcon className="h-4.5 w-4.5 shrink-0 fill-amber-500 text-stone-950 drop-shadow-sm" />
                 </span>
               ) : isBlue ? (
                 <span className="absolute -top-1.5 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-full bg-gradient-to-br from-sky-400 to-blue-600 text-white text-[9px] font-bold shadow-xs ring-1 ring-stone-950">
@@ -232,10 +233,8 @@ export function AppCard({
                 </h3>
                 {choice ? (
                   isGold ? (
-                    <span title="Gold Verified Badge" className="flex shrink-0 items-center text-amber-400">
-                      <svg className="h-3.5 w-3.5 fill-amber-400" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                      </svg>
+                    <span title="Gold Verified Badge" className="flex shrink-0 items-center">
+                      <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
                     </span>
                   ) : (
                     <span title="Blue Verified Badge" className="flex shrink-0 items-center text-sky-400">
@@ -412,8 +411,9 @@ export function AppCard({
             {isGold || isBlue ? (
               <div className="absolute top-2.5 left-2.5 z-20 flex items-center gap-1.5">
                 {isGold ? (
-                  <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2.5 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
-                    ★ Featured
+                  <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2 py-0.5 text-[10.5px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
+                    <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
+                    <span>Featured</span>
                   </span>
                 ) : isBlue ? (
                   <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 px-2.5 py-0.5 text-[10.5px] font-bold text-white shadow-xs ring-1 ring-sky-300/40">
@@ -460,10 +460,8 @@ export function AppCard({
                 </h3>
                 {choice ? (
                   isGold ? (
-                    <span title="Editor’s Choice (Featured + Article)" className="flex shrink-0 items-center text-amber-500">
-                      <svg className="h-4 w-4 fill-amber-500" viewBox="0 0 24 24">
-                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-                      </svg>
+                    <span title="Editor’s Choice (Golden Badge)" className="flex shrink-0 items-center">
+                      <BadgeCheckIcon className="h-4 w-4 shrink-0 fill-amber-500 text-stone-950" />
                     </span>
                   ) : (
                     <span title="Featured App" className="flex shrink-0 items-center text-sky-500">

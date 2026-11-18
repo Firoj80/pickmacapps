@@ -76,6 +76,31 @@ export function MonitorIcon({ className = "h-[18px] w-[18px]" }: { className?: s
   );
 }
 
+export function BadgeCheckIcon({ className = "h-4 w-4" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" fill="none" />
+    </svg>
+  );
+}
+
+export function GoldenBadge({ className = "h-4 w-4 shrink-0" }: { className?: string }) {
+  return <BadgeCheckIcon className={`${className} fill-amber-500 text-stone-950`} />;
+}
+
 export function FeaturedMark({ className = "h-4 w-4 shrink-0" }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" aria-hidden="true">
