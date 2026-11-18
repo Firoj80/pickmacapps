@@ -55,6 +55,43 @@ export const Route = createFileRoute("/submit")({
   },
 });
 
+function BadgeCheckIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.25"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+
+function FlameIcon({ className = "h-5 w-5" }: { className?: string }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 23c-4.97 0-9-3.8-9-8.5C3 9.4 7.5 4.5 10 2c.4-.4 1.1-.1 1.1.5 0 2.2 1.5 4.5 3.4 5.7 1.9-2.3 2.5-4.5 2.5-6.2 0-.6.7-.9 1.1-.5 3 3 5 6.8 5 11 0 4.7-4.03 8.5-9 8.5zm-1-6.5c0 1.9 1.6 3.5 3.5 3.5.7 0 1.4-.2 2-.6-1-2.4-2.7-4.4-4-5.9-.9 1-1.5 2-1.5 3z" />
+    </svg>
+  );
+}
+
 const testimonials = [
   {
     quote: "I liked this idea of sharing Mac Apps made by indie hackers so I've submitted Photsy to be listed here 😊",
@@ -110,7 +147,6 @@ function SubmitPage() {
   });
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  // Auto-sync coupon from search params if passed
   useEffect(() => {
     if (searchCoupon) {
       const raw = searchCoupon.trim().toUpperCase();
@@ -164,24 +200,23 @@ function SubmitPage() {
     nextDate: "7 days",
   };
 
-  // Plan Selection: "free" | "featured" (Hot Boost) | "article" (Gold Spotlight)
+  // Plan Selection: Free listing is DEFAULT
   const [selectedPlan, setSelectedPlan] = useState<"free" | "featured" | "article">(() => {
     if (tier === "article" && !articleSlots.isFull) return "article";
     if (tier === "featured" && !hotSlots.isFull) return "featured";
-    if (tier === "free") return "free";
-    return "featured"; // Default to Hot Boost
+    return "free"; // Free listing by default
   });
 
-  // Auto-sync plan when tier in search changes
-  useEffect(() => {
-    if (tier === "article" && !articleSlots.isFull) {
-      setSelectedPlan("article");
-    } else if (tier === "featured" && !hotSlots.isFull) {
-      setSelectedPlan("featured");
-    } else if (tier === "free") {
-      setSelectedPlan("free");
-    }
-  }, [tier, articleSlots.isFull, hotSlots.isFull]);
+  // Toggle handlers for the 2 upgrade options (Golden and Hot)
+  const toggleGold = () => {
+    if (articleSlots.isFull) return;
+    setSelectedPlan((prev) => (prev === "article" ? "free" : "article"));
+  };
+
+  const toggleHot = () => {
+    if (hotSlots.isFull) return;
+    setSelectedPlan((prev) => (prev === "featured" ? "free" : "featured"));
+  };
 
   // App details form state
   const [website, setWebsite] = useState("");
@@ -354,7 +389,7 @@ function SubmitPage() {
       return;
     }
     if (isSelectedTierFull) {
-      setSubmissionError("The selected placement tier is currently sold out for this cycle. Please pick another tier.");
+      setSubmissionError("The selected placement tier is currently sold out for this cycle. Please choose another tier.");
       return;
     }
 
@@ -436,11 +471,11 @@ function SubmitPage() {
 
   return (
     <div className="min-h-screen bg-canvas font-sans text-ink antialiased selection:bg-accent/20">
-      <div className="mx-auto w-full max-w-[880px] px-6 md:px-10 pt-12 pb-24 md:pt-16">
+      <div className="mx-auto w-full max-w-6xl px-4 sm:px-6 lg:px-8 pt-8 pb-24 md:pt-14">
         {/* Top Back Link matching macapp.supply */}
         <Link
           to="/"
-          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink mb-8 transition cursor-pointer"
+          className="inline-flex items-center gap-1.5 text-xs text-muted hover:text-ink mb-6 transition cursor-pointer"
         >
           <span aria-hidden="true">←</span>
           <span>Back to apps</span>
@@ -448,12 +483,12 @@ function SubmitPage() {
 
         {sent ? (
           /* Submission Confirmation View matching macapp.supply */
-          <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
+          <div className="mx-auto max-w-xl flex flex-col items-center justify-center py-10 text-center animate-fade-in">
             <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-400 ring-1 ring-emerald-500/30">
               <CheckIcon className="h-9 w-9 stroke-[2.5]" />
             </div>
 
-            <h1 className="font-display text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[56px]">
+            <h1 className="font-display text-[36px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[48px]">
               Thank you!
             </h1>
 
@@ -493,6 +528,7 @@ function SubmitPage() {
                   setDemo("");
                   setEmail("");
                   setXHandle("");
+                  setSelectedPlan("free");
                 }}
                 className="rounded-full border border-line bg-surface px-6 py-2.5 text-sm font-semibold text-ink transition hover:bg-surface-2 cursor-pointer"
               >
@@ -503,21 +539,21 @@ function SubmitPage() {
         ) : (
           <div>
             {/* Header / Intro matching macapp.supply */}
-            <div className="space-y-3">
-              <h1 className="font-display text-[36px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[52px]">
+            <div className="space-y-3 mb-8">
+              <h1 className="font-display text-[32px] sm:text-[40px] font-bold leading-[1.05] tracking-[-0.03em] text-ink md:text-[50px]">
                 Submit an app
               </h1>
-              <p className="max-w-lg text-[15px] leading-relaxed text-muted">
+              <p className="max-w-xl text-[15px] leading-relaxed text-muted">
                 Share your Mac app with thousands of macOS power users, designers, and developers. Every submission is manually reviewed.
               </p>
             </div>
 
             {/* Black Friday Discount Pill Banner */}
             {isBfcm && (
-              <div className="mt-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-semibold text-amber-400">
+              <div className="mb-8 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-xs font-semibold text-amber-400">
                 <div className="flex items-center gap-2">
                   <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-                  <span>🔥 Black Friday 50% OFF active! Promo code <span className="font-mono underline">BFCM50</span> applied across all paid tiers.</span>
+                  <span>🔥 Black Friday 50% OFF active! Promo code <span className="font-mono underline">BFCM50</span> applied to both Golden Spotlight & Hot Boost.</span>
                 </div>
                 <button
                   type="button"
@@ -533,723 +569,695 @@ function SubmitPage() {
               </div>
             )}
 
-            {/* Main Form */}
-            <form onSubmit={handleFinalSubmit} className="mt-10 space-y-8">
-              {/* SECTION 1: The App Card matching macapp.supply */}
-              <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-6">
-                <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
-                  The app
-                </h2>
+            {/* 2-Column Split: Submit Form on Left, User Reviews on Right */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-start">
+              {/* LEFT COLUMN: Main Form & Pricing Upgrades */}
+              <div className="lg:col-span-7 space-y-8">
+                <form onSubmit={handleFinalSubmit} className="space-y-8">
+                  {/* SECTION 1: The App Card matching macapp.supply */}
+                  <div className="rounded-2xl border border-line bg-surface p-6 sm:p-7 space-y-5">
+                    <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
+                      The app
+                    </h2>
 
-                {/* Website URL + Analyze Button */}
-                <div className="space-y-2">
-                  <label htmlFor="website" className="text-xs font-medium text-ink">
-                    Website URL <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <input
-                      id="website"
-                      type="url"
-                      required
-                      value={website}
-                      onChange={(e) => setWebsite(e.target.value)}
-                      placeholder="https://yourmacapp.com"
-                      className={inputFieldClass}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => void handleAutoFetch()}
-                      disabled={fetching || !website.trim()}
-                      className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-accent hover:bg-accent/10 disabled:opacity-50 cursor-pointer"
-                    >
-                      {fetching ? (
-                        <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <SparklesIcon className="h-3.5 w-3.5 text-accent" />
-                      )}
-                      <span>Analyze</span>
-                    </button>
-                  </div>
-                  <p className="text-xs text-muted">
-                    Tap Analyze to auto-fill the name, tagline, description, icon and details.
-                  </p>
-
-                  {fetchStatus === "success" && (
-                    <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
-                      {fetchMessage}
-                    </div>
-                  )}
-                  {fetchStatus === "error" && (
-                    <div className="mt-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
-                      {fetchMessage}
-                    </div>
-                  )}
-                </div>
-
-                {/* App Name */}
-                <div className="space-y-2">
-                  <label htmlFor="name" className="text-xs font-medium text-ink">
-                    App name <span className="text-rose-500">*</span>
-                  </label>
-                  <input
-                    id="name"
-                    type="text"
-                    required
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="e.g. Raycast"
-                    className={inputFieldClass}
-                  />
-                </div>
-
-                {/* Short Description (Tagline) with 60-char counter */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="tagline" className="text-xs font-medium text-ink">
-                      Short description <span className="text-rose-500">*</span>
-                    </label>
-                    <span
-                      className={`text-[11px] tabular-nums ${
-                        tagline.length > 60 ? "text-amber-400 font-semibold" : "text-muted"
-                      }`}
-                    >
-                      {tagline.length}/60
-                    </span>
-                  </div>
-                  <input
-                    id="tagline"
-                    type="text"
-                    required
-                    value={tagline}
-                    onChange={(e) => setTagline(e.target.value)}
-                    placeholder="One sharp line that sums up what the app does."
-                    className={inputFieldClass}
-                  />
-                </div>
-
-                {/* Long Description with Markdown guide chips */}
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <label htmlFor="description" className="text-xs font-medium text-ink">
-                      Long description
-                    </label>
-                    <span className="text-[11px] tabular-nums text-muted">
-                      {description.length}/6000 · optional
-                    </span>
-                  </div>
-                  <textarea
-                    id="description"
-                    rows={5}
-                    value={description}
-                    onChange={(e) => setDescription(e.target.value)}
-                    placeholder="Detailed description of what your app does, core features, keyboard shortcuts, and who it's for."
-                    className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none resize-y"
-                  />
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-muted">
-                    <span className="font-medium text-ink">Markdown supported:</span>
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">## Heading</span>
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">**bold**</span>
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">*italic*</span>
-                    <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">[text](url)</span>
-                  </div>
-                </div>
-
-                {/* Category & Pricing Model (2-column grid) */}
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label htmlFor="category" className="text-xs font-medium text-ink">
-                      Category <span className="text-rose-500">*</span>
-                    </label>
-                    <select
-                      id="category"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
-                    >
-                      {shelfCategories.map((c) => (
-                        <option key={c.slug} value={c.slug}>
-                          {c.emoji} {c.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="pricing" className="text-xs font-medium text-ink">
-                      Pricing <span className="text-rose-500">*</span>
-                    </label>
-                    <select
-                      id="pricing"
-                      value={pricing}
-                      onChange={(e) => setPricing(e.target.value as "free" | "freemium" | "paid")}
-                      className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
-                    >
-                      <option value="free">Free</option>
-                      <option value="freemium">Freemium</option>
-                      <option value="paid">Paid (one-time or subscription)</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* App Icon URL & Live Preview */}
-                <div className="space-y-2">
-                  <label htmlFor="icon" className="text-xs font-medium text-ink">
-                    App icon URL <span className="text-rose-500">*</span>
-                  </label>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 overflow-hidden shadow-xs">
-                      {icon.trim() ? (
-                        <img
-                          src={icon.trim()}
-                          alt={name || "App icon"}
-                          className="h-14 w-14 rounded-2xl object-cover"
-                          onError={(e) => {
-                            (e.currentTarget as HTMLElement).style.display = "none";
-                          }}
+                    {/* Website URL + Analyze Button */}
+                    <div className="space-y-2">
+                      <label htmlFor="website" className="text-xs font-medium text-ink">
+                        Website URL <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="website"
+                          type="url"
+                          required
+                          value={website}
+                          onChange={(e) => setWebsite(e.target.value)}
+                          placeholder="https://yourmacapp.com"
+                          className={inputFieldClass}
                         />
-                      ) : (
-                        <span className="text-[10px] text-muted text-center px-1">No icon</span>
+                        <button
+                          type="button"
+                          onClick={() => void handleAutoFetch()}
+                          disabled={fetching || !website.trim()}
+                          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface-2 px-4 py-2.5 text-xs font-semibold text-ink transition hover:border-accent hover:bg-accent/10 disabled:opacity-50 cursor-pointer"
+                        >
+                          {fetching ? (
+                            <SpinnerIcon className="h-3.5 w-3.5 animate-spin" />
+                          ) : (
+                            <SparklesIcon className="h-3.5 w-3.5 text-accent" />
+                          )}
+                          <span>Analyze</span>
+                        </button>
+                      </div>
+                      <p className="text-xs text-muted">
+                        Tap Analyze to auto-fill the name, tagline, description, icon and details.
+                      </p>
+
+                      {fetchStatus === "success" && (
+                        <div className="mt-2 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3 text-xs text-emerald-300">
+                          {fetchMessage}
+                        </div>
+                      )}
+                      {fetchStatus === "error" && (
+                        <div className="mt-2 rounded-xl border border-rose-500/30 bg-rose-500/10 p-3 text-xs text-rose-300">
+                          {fetchMessage}
+                        </div>
                       )}
                     </div>
-                    <div className="flex-1">
+
+                    {/* App Name */}
+                    <div className="space-y-2">
+                      <label htmlFor="name" className="text-xs font-medium text-ink">
+                        App name <span className="text-rose-500">*</span>
+                      </label>
                       <input
-                        id="icon"
-                        type="url"
-                        value={icon}
-                        onChange={(e) => setIcon(e.target.value)}
-                        placeholder="https://yourmacapp.com/icon.png"
+                        id="name"
+                        type="text"
+                        required
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="e.g. Raycast"
                         className={inputFieldClass}
                       />
-                      <p className="mt-1 text-[11px] text-muted">
-                        Auto-detected by Analyze, or paste an image URL (PNG, JPG or WebP).
-                      </p>
                     </div>
-                  </div>
-                </div>
 
-                {/* Cover Image or Demo Preview (1200x630) */}
-                <div className="space-y-2">
-                  <label htmlFor="demo" className="text-xs font-medium text-ink">
-                    Cover image or Demo URL (1200×630) · optional
-                  </label>
-                  <input
-                    id="demo"
-                    type="url"
-                    value={demo}
-                    onChange={(e) => setDemo(e.target.value)}
-                    placeholder="https://yourmacapp.com/og-image.png"
-                    className={inputFieldClass}
-                  />
-                  {demo.trim() && (
-                    <div className="mt-2 overflow-hidden rounded-xl border border-line bg-surface-2 aspect-[1200/630] max-h-48 flex items-center justify-center">
-                      <img
-                        src={demo.trim()}
-                        alt="Preview cover"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.currentTarget as HTMLElement).style.display = "none";
-                        }}
+                    {/* Short Description (Tagline) with 60-char counter */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="tagline" className="text-xs font-medium text-ink">
+                          Short description <span className="text-rose-500">*</span>
+                        </label>
+                        <span
+                          className={`text-[11px] tabular-nums ${
+                            tagline.length > 60 ? "text-amber-400 font-semibold" : "text-muted"
+                          }`}
+                        >
+                          {tagline.length}/60
+                        </span>
+                      </div>
+                      <input
+                        id="tagline"
+                        type="text"
+                        required
+                        value={tagline}
+                        onChange={(e) => setTagline(e.target.value)}
+                        placeholder="One sharp line that sums up what the app does."
+                        className={inputFieldClass}
                       />
                     </div>
-                  )}
-                </div>
 
-                {/* Developer Contact (2-column grid) */}
-                <div className="grid gap-5 sm:grid-cols-2 pt-2 border-t border-line/60">
-                  <div className="space-y-2">
-                    <label htmlFor="email" className="text-xs font-medium text-ink">
-                      Developer email <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      id="email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="developer@yourdomain.com"
-                      className={inputFieldClass}
-                    />
-                    <p className="text-[11px] text-muted">We’ll send review and approval status updates here.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label htmlFor="xHandle" className="text-xs font-medium text-ink">
-                      X (Twitter) handle <span className="text-rose-500">*</span>
-                    </label>
-                    <input
-                      id="xHandle"
-                      type="text"
-                      required
-                      value={xHandle}
-                      onChange={(e) => setXHandle(e.target.value)}
-                      placeholder="@username"
-                      className={inputFieldClass}
-                    />
-                    <p className="text-[11px] text-muted">Used to tag you in launch announcements on X.</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* SECTION 2: Placement Plan Selector */}
-              <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-6">
-                <div>
-                  <h2 className="font-display text-lg font-semibold tracking-tight text-ink">
-                    Choose your placement plan
-                  </h2>
-                  <p className="mt-1 text-xs text-muted">
-                    Select how you would like your app to be listed and prioritized in the directory.
-                  </p>
-                </div>
-
-                {/* 3-Tier Placement Cards */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                  {/* Card 1: Free Community Tier */}
-                  <div
-                    onClick={() => setSelectedPlan("free")}
-                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
-                      selectedPlan === "free"
-                        ? "border-line-2 bg-surface-2 ring-2 ring-line-2 shadow-xs"
-                        : "border-line bg-surface/60 hover:border-line-2 hover:bg-surface-2/50"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center rounded-md bg-stone-800 px-2 py-0.5 text-[11px] font-semibold text-stone-200">
-                          Community
+                    {/* Long Description with Markdown guide chips */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <label htmlFor="description" className="text-xs font-medium text-ink">
+                          Long description
+                        </label>
+                        <span className="text-[11px] tabular-nums text-muted">
+                          {description.length}/6000 · optional
                         </span>
-                        <div
-                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                            selectedPlan === "free"
-                              ? "border-ink bg-ink text-canvas"
-                              : "border-line bg-surface-2 text-transparent"
-                          }`}
-                        >
-                          <CheckIcon className="h-3 w-3 stroke-[3]" />
-                        </div>
                       </div>
-
-                      <div className="mt-3">
-                        <div className="font-display text-2xl font-bold text-ink">$0</div>
-                        <div className="text-[11px] text-muted">Free forever with badge</div>
+                      <textarea
+                        id="description"
+                        rows={4}
+                        value={description}
+                        onChange={(e) => setDescription(e.target.value)}
+                        placeholder="Detailed description of what your app does, core features, keyboard shortcuts, and who it's for."
+                        className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent focus:outline-none resize-y"
+                      />
+                      <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-muted">
+                        <span className="font-medium text-ink">Markdown supported:</span>
+                        <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">## Heading</span>
+                        <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">**bold**</span>
+                        <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">*italic*</span>
+                        <span className="rounded bg-surface-2 px-1.5 py-0.5 font-mono border border-line">[text](url)</span>
                       </div>
-
-                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-line/60 pt-3">
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Permanent directory listing</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Standard dofollow backlink</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">⚠️</span>
-                          <span className="font-medium text-amber-300">Requires reciprocal badge</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-stone-400 font-bold">•</span>
-                          <span>Standard review (1–2 weeks)</span>
-                        </li>
-                      </ul>
                     </div>
 
-                    <div className="mt-5 pt-3 border-t border-line/60 text-[11px] text-muted">
-                      Best for hobbyists and side projects.
+                    {/* Category & Pricing Model (2-column grid) */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label htmlFor="category" className="text-xs font-medium text-ink">
+                          Category <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                          id="category"
+                          value={category}
+                          onChange={(e) => setCategory(e.target.value)}
+                          className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                        >
+                          {shelfCategories.map((c) => (
+                            <option key={c.slug} value={c.slug}>
+                              {c.emoji} {c.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="pricing" className="text-xs font-medium text-ink">
+                          Pricing <span className="text-rose-500">*</span>
+                        </label>
+                        <select
+                          id="pricing"
+                          value={pricing}
+                          onChange={(e) => setPricing(e.target.value as "free" | "freemium" | "paid")}
+                          className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                        >
+                          <option value="free">Free</option>
+                          <option value="freemium">Freemium</option>
+                          <option value="paid">Paid (one-time or subscription)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* App Icon URL & Live Preview */}
+                    <div className="space-y-2">
+                      <label htmlFor="icon" className="text-xs font-medium text-ink">
+                        App icon URL <span className="text-rose-500">*</span>
+                      </label>
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-line bg-surface-2 overflow-hidden shadow-xs">
+                          {icon.trim() ? (
+                            <img
+                              src={icon.trim()}
+                              alt={name || "App icon"}
+                              className="h-14 w-14 rounded-2xl object-cover"
+                              onError={(e) => {
+                                (e.currentTarget as HTMLElement).style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <span className="text-[10px] text-muted text-center px-1">No icon</span>
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <input
+                            id="icon"
+                            type="url"
+                            value={icon}
+                            onChange={(e) => setIcon(e.target.value)}
+                            placeholder="https://yourmacapp.com/icon.png"
+                            className={inputFieldClass}
+                          />
+                          <p className="mt-1 text-[11px] text-muted">
+                            Auto-detected by Analyze, or paste an image URL.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Cover Image or Demo Preview (1200x630) */}
+                    <div className="space-y-2">
+                      <label htmlFor="demo" className="text-xs font-medium text-ink">
+                        Cover image (1200×630) · optional
+                      </label>
+                      <input
+                        id="demo"
+                        type="url"
+                        value={demo}
+                        onChange={(e) => setDemo(e.target.value)}
+                        placeholder="https://yourmacapp.com/og-image.png"
+                        className={inputFieldClass}
+                      />
+                      {demo.trim() && (
+                        <div className="mt-2 overflow-hidden rounded-xl border border-line bg-surface-2 aspect-[1200/630] max-h-40 flex items-center justify-center">
+                          <img
+                            src={demo.trim()}
+                            alt="Preview cover"
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.currentTarget as HTMLElement).style.display = "none";
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Developer Contact (2-column grid) */}
+                    <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-line/60">
+                      <div className="space-y-2">
+                        <label htmlFor="email" className="text-xs font-medium text-ink">
+                          Developer email <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          id="email"
+                          type="email"
+                          required
+                          value={email}
+                          onChange={(e) => setEmail(e.target.value)}
+                          placeholder="developer@yourdomain.com"
+                          className={inputFieldClass}
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="xHandle" className="text-xs font-medium text-ink">
+                          X (Twitter) handle <span className="text-rose-500">*</span>
+                        </label>
+                        <input
+                          id="xHandle"
+                          type="text"
+                          required
+                          value={xHandle}
+                          onChange={(e) => setXHandle(e.target.value)}
+                          placeholder="@username"
+                          className={inputFieldClass}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Card 2: 🔥 Hot Boost (Highlighted Tier) */}
-                  <div
-                    onClick={() => !hotSlots.isFull && setSelectedPlan("featured")}
-                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
-                      hotSlots.isFull
-                        ? "opacity-60 cursor-not-allowed border-line bg-surface/40"
-                        : selectedPlan === "featured"
-                          ? "border-orange-500/80 bg-orange-500/10 ring-2 ring-orange-500/50 shadow-md"
-                          : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500/60"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-orange-500 to-amber-500 px-2 py-0.5 text-[11px] font-bold text-white shadow-2xs">
-                          <span>🔥</span>
-                          <span>Hot Boost</span>
-                        </span>
-                        <div
-                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                            selectedPlan === "featured"
-                              ? "border-orange-500 bg-orange-500 text-white"
-                              : "border-line bg-surface-2 text-transparent"
-                          }`}
-                        >
-                          <CheckIcon className="h-3 w-3 stroke-[3]" />
-                        </div>
-                      </div>
-
-                      <div className="mt-3">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-display text-2xl font-bold text-ink">
-                            ${hotBaseDollars}
-                          </span>
-                          <span className="text-xs text-muted line-through font-medium">
-                            ${hotCompareDollars}
-                          </span>
-                          <span className="text-[11px] text-muted">one-time</span>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-orange-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
-                          <span>
-                            {hotSlots.isFull
-                              ? "Sold out for this week"
-                              : `⚡ ${hotSlots.remaining} of 6 spots left`}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* User's exact requirements for Hot Boost */}
-                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-orange-500/20 pt-3">
-                        <li className="flex items-start gap-2">
-                          <span className="text-orange-400 font-bold">🔥</span>
-                          <span>
-                            <strong className="text-ink">Top of all free listing apps</strong>
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-orange-400 font-bold">⏱️</span>
-                          <span>
-                            <strong className="text-ink">7 days duration</strong> boost
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-orange-400 font-bold">🥈</span>
-                          <span>
-                            <strong className="text-ink">Just right after Golden badge apps</strong>
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-orange-400 font-bold">✨</span>
-                          <span>
-                            <strong className="text-ink">In hero section app icon</strong> carousel
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-orange-400 font-bold">🏷️</span>
-                          <span>
-                            Distinct <strong className="text-ink">Fire badge (🔥 Hot)</strong>
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>
-                            <strong className="text-ink">No backlinks or badges required</strong>
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Fast-track 24h editorial review</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Permanent directory listing after 7 days</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="mt-5 pt-3 border-t border-orange-500/20 text-[11px] text-orange-400/90 font-medium">
-                      Maximum 6 spots active simultaneously.
-                    </div>
-                  </div>
-
-                  {/* Card 3: 🌟 Gold Spotlight Tier */}
-                  <div
-                    onClick={() => !articleSlots.isFull && setSelectedPlan("article")}
-                    className={`relative flex flex-col justify-between rounded-2xl border p-5 transition cursor-pointer ${
-                      articleSlots.isFull
-                        ? "opacity-60 cursor-not-allowed border-line bg-surface/40"
-                        : selectedPlan === "article"
-                          ? "border-amber-500/80 bg-amber-500/10 ring-2 ring-amber-500/50 shadow-md"
-                          : "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/60"
-                    }`}
-                  >
-                    <div>
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="inline-flex items-center gap-1 rounded-md bg-gradient-to-r from-amber-500 to-yellow-500 px-2 py-0.5 text-[11px] font-bold text-stone-950 shadow-2xs">
-                          <span>🌟</span>
-                          <span>Gold Spotlight</span>
-                        </span>
-                        <div
-                          className={`flex h-5 w-5 items-center justify-center rounded-full border transition ${
-                            selectedPlan === "article"
-                              ? "border-amber-500 bg-amber-500 text-stone-950"
-                              : "border-line bg-surface-2 text-transparent"
-                          }`}
-                        >
-                          <CheckIcon className="h-3 w-3 stroke-[3]" />
-                        </div>
-                      </div>
-
-                      <div className="mt-3">
-                        <div className="flex items-baseline gap-2">
-                          <span className="font-display text-2xl font-bold text-ink">
-                            ${goldBaseDollars}
-                          </span>
-                          <span className="text-xs text-muted line-through font-medium">
-                            ${goldCompareDollars}
-                          </span>
-                          <span className="text-[11px] text-muted">one-time</span>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-amber-400">
-                          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-                          <span>
-                            {articleSlots.isFull
-                              ? "Sold out for this week"
-                              : `⚡ ${articleSlots.remaining} of 6 spots left`}
-                          </span>
-                        </div>
-                      </div>
-
-                      <ul className="mt-4 space-y-2 text-xs text-body border-t border-amber-500/20 pt-3">
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">👑</span>
-                          <span>
-                            <strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">🌟</span>
-                          <span>
-                            Exclusive <strong className="text-ink">Golden Choice Badge</strong>
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">📝</span>
-                          <span>
-                            <strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)
-                          </span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">🔝</span>
-                          <span>Top spot on competitor comparison pages</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-amber-400 font-bold">✨</span>
-                          <span>Hero animated app icon in top carousel</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>High-authority SEO dofollow backlink</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Guaranteed 24-hour publishing</span>
-                        </li>
-                        <li className="flex items-start gap-2">
-                          <span className="text-emerald-400 font-bold">✓</span>
-                          <span>Permanent directory listing after 7 days</span>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="mt-5 pt-3 border-t border-amber-500/20 text-[11px] text-amber-400/90 font-medium">
-                      Maximum 6 spots active simultaneously.
-                    </div>
-                  </div>
-                </div>
-
-                {/* Coupon Code Section */}
-                <div className="pt-2 border-t border-line">
-                  <div className="flex items-center justify-between mb-1.5">
-                    <label htmlFor="coupon" className="text-xs font-medium text-ink">
-                      Discount coupon code
-                    </label>
-                    {isBfcm && (
-                      <span className="text-[11px] font-semibold text-emerald-400">
-                        ✓ BFCM50 applied (50% off)
+                  {/* SECTION 2: Price Upgrades (Golden & Hot) Designed like macapp.supply screenshot */}
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h2 className="font-display text-base font-semibold tracking-tight text-ink">
+                        Upgrade placement (Optional)
+                      </h2>
+                      <span className="text-xs text-muted">
+                        Free listing selected by default
                       </span>
+                    </div>
+
+                    {/* UPGRADE OPTION 1: 🌟 Gold Spotlight */}
+                    <div
+                      className={`rounded-2xl border transition-all ${
+                        selectedPlan === "article"
+                          ? "border-amber-500/60 bg-amber-500/10 ring-1 ring-amber-500/40 shadow-sm"
+                          : "border-amber-500/30 bg-amber-500/5 hover:border-amber-500/50"
+                      } p-5 sm:p-6 space-y-4`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div
+                          className="flex items-start gap-3 cursor-pointer select-none flex-1"
+                          onClick={toggleGold}
+                        >
+                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-amber-500">
+                            <BadgeCheckIcon className="h-6 w-6 fill-amber-500/20 text-amber-500" />
+                          </div>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-amber-500">
+                              Get featured · early rate
+                            </span>
+                            <div className="flex flex-wrap items-baseline gap-x-2">
+                              <span className="font-display text-[18px] sm:text-[20px] font-bold tracking-tight text-ink">
+                                Feature as Gold Spotlight for 7 days
+                              </span>
+                              <span className="font-display text-[20px] sm:text-[22px] font-bold text-amber-500">
+                                ${goldBaseDollars}
+                              </span>
+                              {isBfcm && (
+                                <span className="text-xs text-muted line-through font-medium">
+                                  ${goldCompareDollars}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted leading-relaxed">
+                              Hero spot on the homepage, premium golden choice badge and approval within 24 hours — more visibility for a full week.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* macOS / iOS Toggle Switch matching screenshot */}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={selectedPlan === "article"}
+                          disabled={articleSlots.isFull}
+                          onClick={toggleGold}
+                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                            selectedPlan === "article"
+                              ? "bg-amber-500"
+                              : "bg-surface-2 border border-line hover:bg-surface"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              selectedPlan === "article" ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Expanded Details when selected */}
+                      {selectedPlan === "article" && (
+                        <div className="border-t border-amber-500/20 pt-4 space-y-3 animate-fade-in">
+                          <div className="flex items-center justify-between text-xs font-semibold text-amber-400">
+                            <span className="flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+                              <span>
+                                {articleSlots.isFull
+                                  ? "🔴 Sold out for this week"
+                                  : `⚡ Only ${articleSlots.remaining} of 6 spots left`}
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-muted">1-time payment · no subscription</span>
+                          </div>
+
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-400 font-bold">👑</span>
+                              <span><strong className="text-ink">#1 Hero Spot & Top Placement</strong> for 7 days</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-400 font-bold">🌟</span>
+                              <span>Exclusive <strong className="text-ink">Golden Choice Badge</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-400 font-bold">📝</span>
+                              <span><strong className="text-ink">Dedicated Medium review article</strong> (10k+ readers)</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-400 font-bold">🔝</span>
+                              <span>Top spot on competitor comparison pages</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-amber-400 font-bold">✨</span>
+                              <span>Hero animated app icon in top carousel</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span>High-authority SEO dofollow backlink</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span><strong className="text-ink">No backlinks or badges required</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span>Guaranteed 24-hour publishing</span>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* UPGRADE OPTION 2: 🔥 Hot Boost */}
+                    <div
+                      className={`rounded-2xl border transition-all ${
+                        selectedPlan === "featured"
+                          ? "border-orange-500/60 bg-orange-500/10 ring-1 ring-orange-500/40 shadow-sm"
+                          : "border-orange-500/30 bg-orange-500/5 hover:border-orange-500/50"
+                      } p-5 sm:p-6 space-y-4`}
+                    >
+                      <div className="flex items-start justify-between gap-4">
+                        <div
+                          className="flex items-start gap-3 cursor-pointer select-none flex-1"
+                          onClick={toggleHot}
+                        >
+                          <div className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center text-orange-500">
+                            <FlameIcon className="h-6 w-6 text-orange-500" />
+                          </div>
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-orange-500/15 px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-orange-400">
+                              Boost placement · fast-track
+                            </span>
+                            <div className="flex flex-wrap items-baseline gap-x-2">
+                              <span className="font-display text-[18px] sm:text-[20px] font-bold tracking-tight text-ink">
+                                Boost as Hot App for 7 days
+                              </span>
+                              <span className="font-display text-[20px] sm:text-[22px] font-bold text-orange-500">
+                                ${hotBaseDollars}
+                              </span>
+                              {isBfcm && (
+                                <span className="text-xs text-muted line-through font-medium">
+                                  ${hotCompareDollars}
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted leading-relaxed">
+                              Positioned at the top of all free listing apps, right after Golden badge apps, hero section icon and Fire badge.
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* macOS / iOS Toggle Switch matching screenshot */}
+                        <button
+                          type="button"
+                          role="switch"
+                          aria-checked={selectedPlan === "featured"}
+                          disabled={hotSlots.isFull}
+                          onClick={toggleHot}
+                          className={`relative mt-1 inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed ${
+                            selectedPlan === "featured"
+                              ? "bg-orange-500"
+                              : "bg-surface-2 border border-line hover:bg-surface"
+                          }`}
+                        >
+                          <span
+                            className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                              selectedPlan === "featured" ? "translate-x-5" : "translate-x-0"
+                            }`}
+                          />
+                        </button>
+                      </div>
+
+                      {/* Expanded Details when selected */}
+                      {selectedPlan === "featured" && (
+                        <div className="border-t border-orange-500/20 pt-4 space-y-3 animate-fade-in">
+                          <div className="flex items-center justify-between text-xs font-semibold text-orange-400">
+                            <span className="flex items-center gap-1.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-orange-400 animate-pulse" />
+                              <span>
+                                {hotSlots.isFull
+                                  ? "🔴 Sold out for this week"
+                                  : `⚡ Only ${hotSlots.remaining} of 6 spots left`}
+                              </span>
+                            </span>
+                            <span className="text-[11px] text-muted">1-time payment · no subscription</span>
+                          </div>
+
+                          <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-body pt-1">
+                            <li className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">🔥</span>
+                              <span><strong className="text-ink">Top of all free listing apps</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">⏱️</span>
+                              <span><strong className="text-ink">7 days boost duration</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">🥈</span>
+                              <span><strong className="text-ink">Just right after Golden badge apps</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">✨</span>
+                              <span><strong className="text-ink">In hero section app icon</strong> carousel</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-orange-400 font-bold">🏷️</span>
+                              <span>Distinct <strong className="text-ink">Fire badge (🔥 Hot)</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span><strong className="text-ink">No backlinks or badges required</strong></span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span>Fast-track 24h editorial review</span>
+                            </li>
+                            <li className="flex items-start gap-2">
+                              <span className="text-emerald-400 font-bold">✓</span>
+                              <span>Permanent directory listing after 7 days</span>
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Coupon Code Section */}
+                    {isPaid && (
+                      <div className="pt-2">
+                        <div className="flex items-center justify-between mb-1.5">
+                          <label htmlFor="coupon" className="text-xs font-medium text-ink">
+                            Discount coupon code
+                          </label>
+                          {isBfcm && (
+                            <span className="text-[11px] font-semibold text-emerald-400">
+                              ✓ BFCM50 applied (50% off)
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-2 max-w-sm">
+                          <input
+                            id="coupon"
+                            type="text"
+                            placeholder="e.g. BFCM50"
+                            value={couponInput}
+                            onChange={(e) => {
+                              setCouponInput(e.target.value.toUpperCase());
+                              setCouponError(null);
+                            }}
+                            className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs font-mono font-bold text-ink uppercase placeholder:normal-case placeholder:font-normal focus:border-accent focus:outline-none"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => applyCoupon(couponInput)}
+                            className="shrink-0 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink hover:bg-surface transition cursor-pointer"
+                          >
+                            Apply
+                          </button>
+                        </div>
+                        {couponError && <p className="mt-1 text-xs text-rose-400">{couponError}</p>}
+                      </div>
                     )}
                   </div>
-                  <div className="flex gap-2 max-w-sm">
-                    <input
-                      id="coupon"
-                      type="text"
-                      placeholder="e.g. BFCM50"
-                      value={couponInput}
-                      onChange={(e) => {
-                        setCouponInput(e.target.value.toUpperCase());
-                        setCouponError(null);
-                      }}
-                      className="w-full rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs font-mono font-bold text-ink uppercase placeholder:normal-case placeholder:font-normal focus:border-accent focus:outline-none"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => applyCoupon(couponInput)}
-                      className="shrink-0 rounded-xl border border-line bg-surface-2 px-3.5 py-2 text-xs font-semibold text-ink hover:bg-surface transition cursor-pointer"
-                    >
-                      Apply
-                    </button>
-                  </div>
-                  {couponError && <p className="mt-1 text-xs text-rose-400">{couponError}</p>}
-                </div>
-              </div>
 
-              {/* SECTION 3: Reciprocal Badge Block (Visible only when Free plan selected) */}
-              {selectedPlan === "free" && (
-                <div className="rounded-2xl border border-line bg-surface p-6 md:p-8 space-y-4">
-                  <div>
-                    <h3 className="font-display text-base font-semibold text-ink">
-                      Reciprocal badge on your website
-                    </h3>
-                    <p className="mt-1 text-xs text-muted">
-                      Free community listings require adding our backlink badge to your app website. Once added, click “Check My Badge Now” below to verify.
-                    </p>
-                  </div>
+                  {/* SECTION 3: Reciprocal Badge Block (Visible only when Free plan selected) */}
+                  {selectedPlan === "free" && (
+                    <div className="rounded-2xl border border-line bg-surface p-6 sm:p-7 space-y-4">
+                      <div>
+                        <h3 className="font-display text-base font-semibold text-ink">
+                          Reciprocal badge on your website
+                        </h3>
+                        <p className="mt-1 text-xs text-muted">
+                          Free community listings require adding our badge to your app website. Once added, click “Check My Badge Now” below to verify.
+                        </p>
+                      </div>
 
-                  {/* Badge Style Selector */}
-                  <div className="flex items-center gap-2 pt-1">
-                    <button
-                      type="button"
-                      onClick={() => setBadgeVariant("logo")}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
-                        badgeVariant === "logo"
-                          ? "bg-ink text-canvas"
-                          : "border border-line bg-surface-2 text-muted hover:text-ink"
-                      }`}
-                    >
-                      Logo badge
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBadgeVariant("classic")}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
-                        badgeVariant === "classic"
-                          ? "bg-ink text-canvas"
-                          : "border border-line bg-surface-2 text-muted hover:text-ink"
-                      }`}
-                    >
-                      Classic badge
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setBadgeVariant("dark")}
-                      className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
-                        badgeVariant === "dark"
-                          ? "bg-ink text-canvas"
-                          : "border border-line bg-surface-2 text-muted hover:text-ink"
-                      }`}
-                    >
-                      Dark badge
-                    </button>
-                  </div>
+                      {/* Badge Style Selector */}
+                      <div className="flex items-center gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("logo")}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                            badgeVariant === "logo"
+                              ? "bg-ink text-canvas"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Logo badge
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("classic")}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                            badgeVariant === "classic"
+                              ? "bg-ink text-canvas"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Classic badge
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setBadgeVariant("dark")}
+                          className={`rounded-lg px-2.5 py-1 text-xs font-semibold cursor-pointer ${
+                            badgeVariant === "dark"
+                              ? "bg-ink text-canvas"
+                              : "border border-line bg-surface-2 text-muted hover:text-ink"
+                          }`}
+                        >
+                          Dark badge
+                        </button>
+                      </div>
 
-                  {/* Badge Preview */}
-                  <div className="p-4 rounded-xl border border-line bg-surface-2 flex items-center justify-center">
-                    <img
-                      src={badgeSrc}
-                      alt="Featured on PickMacApps"
-                      width={200}
-                      height={54}
-                      className="h-10 w-auto"
-                    />
-                  </div>
+                      {/* Badge Preview */}
+                      <div className="p-4 rounded-xl border border-line bg-surface-2 flex items-center justify-center">
+                        <img
+                          src={badgeSrc}
+                          alt="Featured on PickMacApps"
+                          width={200}
+                          height={54}
+                          className="h-10 w-auto"
+                        />
+                      </div>
 
-                  {/* HTML snippet with 1-click copy */}
-                  <div className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
-                    <div className="flex items-center justify-between text-xs font-semibold text-ink">
-                      <span>HTML Embed Code</span>
+                      {/* HTML snippet with 1-click copy */}
+                      <div className="rounded-xl border border-line bg-surface-2 p-3 space-y-2">
+                        <div className="flex items-center justify-between text-xs font-semibold text-ink">
+                          <span>HTML Embed Code</span>
+                          <button
+                            type="button"
+                            onClick={copyBadge}
+                            className="text-accent hover:underline cursor-pointer"
+                          >
+                            {copied ? "Copied!" : "Copy Code"}
+                          </button>
+                        </div>
+                        <pre className="overflow-x-auto rounded-lg border border-line bg-surface p-2.5 text-[11px] text-body">
+                          <code>{badgeHtml}</code>
+                        </pre>
+                      </div>
+
                       <button
                         type="button"
-                        onClick={copyBadge}
-                        className="text-accent hover:underline cursor-pointer"
+                        disabled={badge === "checking" || !website.trim()}
+                        onClick={() => void checkBadge()}
+                        className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface-2 text-xs font-semibold text-ink hover:border-accent hover:bg-accent/10 transition cursor-pointer disabled:opacity-50"
                       >
-                        {copied ? "Copied!" : "Copy Code"}
+                        {badge === "checking" ? "Checking website for badge…" : "🔍 Check My Badge Now"}
                       </button>
+
+                      {badgeMessage && (
+                        <p
+                          className={`text-xs ${
+                            badge === "ok" ? "text-emerald-400 font-medium" : "text-amber-400"
+                          }`}
+                        >
+                          {badgeMessage}
+                        </p>
+                      )}
                     </div>
-                    <pre className="overflow-x-auto rounded-lg border border-line bg-surface p-2.5 text-[11px] text-body">
-                      <code>{badgeHtml}</code>
-                    </pre>
-                  </div>
+                  )}
 
-                  <button
-                    type="button"
-                    disabled={badge === "checking" || !website.trim()}
-                    onClick={() => void checkBadge()}
-                    className="w-full py-2.5 px-4 rounded-xl border border-line bg-surface-2 text-xs font-semibold text-ink hover:border-accent hover:bg-accent/10 transition cursor-pointer disabled:opacity-50"
-                  >
-                    {badge === "checking" ? "Checking website for badge…" : "🔍 Check My Badge Now"}
-                  </button>
+                  {/* Submission Error Banner */}
+                  {submissionError && (
+                    <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-300">
+                      {submissionError}
+                    </div>
+                  )}
 
-                  {badgeMessage && (
-                    <p
-                      className={`text-xs ${
-                        badge === "ok" ? "text-emerald-400 font-medium" : "text-amber-400"
+                  {/* Submit CTA button */}
+                  <div className="space-y-3 pt-2">
+                    <button
+                      type="submit"
+                      disabled={
+                        sending ||
+                        isSelectedTierFull ||
+                        (!isPaid && badge !== "ok") ||
+                        !hasEmail ||
+                        !hasXHandle ||
+                        !website.trim() ||
+                        !name.trim()
+                      }
+                      className={`w-full rounded-full py-3.5 px-6 text-sm md:text-base font-bold transition shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
+                        selectedPlan === "featured"
+                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:opacity-95"
+                          : selectedPlan === "article"
+                            ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 hover:opacity-95"
+                            : "bg-ink text-canvas hover:opacity-90"
                       }`}
                     >
-                      {badgeMessage}
+                      {sending ? (
+                        <span className="inline-flex items-center gap-2">
+                          <SpinnerIcon className="h-4 w-4 animate-spin" />
+                          <span>{isPaid ? "Proceeding to checkout…" : "Submitting…"}</span>
+                        </span>
+                      ) : selectedPlan === "free" ? (
+                        badge === "ok" ? "Submit for review (Free)" : "Verify badge above to submit free"
+                      ) : selectedPlan === "featured" ? (
+                        `Proceed to checkout — $${hotBaseDollars} (🔥 Hot Boost)`
+                      ) : (
+                        `Proceed to checkout — $${goldBaseDollars} (🌟 Gold Spotlight)`
+                      )}
+                    </button>
+
+                    <p className="text-center text-[12px] leading-relaxed text-muted">
+                      {isPaid
+                        ? "Secure checkout by Dodo Payments, powered by Stripe — USD, excl. VAT. Full refund if it doesn't meet our listing guidelines."
+                        : "Submissions are reviewed manually by a human editor. Most take 1–2 weeks."}
                     </p>
-                  )}
-                </div>
-              )}
-
-              {/* Submission Error Banner */}
-              {submissionError && (
-                <div className="rounded-2xl border border-rose-500/30 bg-rose-500/10 p-4 text-xs font-medium text-rose-300">
-                  {submissionError}
-                </div>
-              )}
-
-              {/* Submit CTA button matching macapp.supply */}
-              <div className="space-y-3 pt-2">
-                <button
-                  type="submit"
-                  disabled={
-                    sending ||
-                    isSelectedTierFull ||
-                    (!isPaid && badge !== "ok") ||
-                    !hasEmail ||
-                    !hasXHandle ||
-                    !website.trim() ||
-                    !name.trim()
-                  }
-                  className={`w-full rounded-full py-3.5 px-6 text-sm md:text-base font-bold transition shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
-                    selectedPlan === "featured"
-                      ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:opacity-95"
-                      : selectedPlan === "article"
-                        ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 hover:opacity-95"
-                        : "bg-ink text-canvas hover:opacity-90"
-                  }`}
-                >
-                  {sending ? (
-                    <span className="inline-flex items-center gap-2">
-                      <SpinnerIcon className="h-4 w-4 animate-spin" />
-                      <span>{isPaid ? "Proceeding to checkout…" : "Submitting…"}</span>
-                    </span>
-                  ) : selectedPlan === "free" ? (
-                    badge === "ok" ? "Submit for review (Free)" : "Verify badge above to submit free"
-                  ) : selectedPlan === "featured" ? (
-                    `Proceed to checkout — $${hotBaseDollars} (🔥 Hot Boost)`
-                  ) : (
-                    `Proceed to checkout — $${goldBaseDollars} (🌟 Gold Spotlight)`
-                  )}
-                </button>
-
-                <p className="text-center text-[12px] leading-relaxed text-muted">
-                  {isPaid
-                    ? "Secure checkout by Dodo Payments, powered by Stripe — USD, excl. VAT. Full refund if it doesn't meet our listing guidelines."
-                    : "Submissions are reviewed manually by a human editor. Most take 1–2 weeks."}
-                </p>
-              </div>
-            </form>
-
-            {/* Testimonials Section matching macapp.supply */}
-            <div className="mt-16 pt-12 border-t border-line space-y-6">
-              <div className="text-center space-y-1">
-                <h3 className="font-display text-lg font-bold text-ink">
-                  Trusted by indie Mac developers
-                </h3>
-                <p className="text-xs text-muted">
-                  Here is what founders say about being listed on PickMacApps.
-                </p>
+                  </div>
+                </form>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {/* RIGHT COLUMN: User Reviews & Proof (Sticky on Desktop) */}
+              <div className="lg:col-span-5 space-y-4 lg:sticky lg:top-8">
+                <div className="flex items-center justify-between pb-1">
+                  <h3 className="font-display text-sm font-bold uppercase tracking-wider text-muted">
+                    What founders say
+                  </h3>
+                  <span className="text-[11px] text-muted">Indie makers</span>
+                </div>
+
                 {testimonials.map((t) => (
                   <div
                     key={t.name}
@@ -1258,7 +1266,7 @@ function SubmitPage() {
                     <div className="text-2xl font-serif text-muted/40 leading-none select-none mb-2">
                       “
                     </div>
-                    <p className="text-xs text-body leading-relaxed">{t.quote}</p>
+                    <p className="text-xs sm:text-sm text-body leading-relaxed">{t.quote}</p>
                     <div className="mt-4 flex items-center gap-3">
                       <div className="relative h-9 w-9 shrink-0">
                         <div
@@ -1294,6 +1302,10 @@ function SubmitPage() {
                               className="text-[11px] font-medium text-accent hover:underline inline-flex items-center gap-0.5"
                             >
                               <span>@{t.xHandle}</span>
+                              <svg className="h-2.5 w-2.5 opacity-70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                                <path d="M7 17L17 7" />
+                                <path d="M8 7h9v9" />
+                              </svg>
                             </a>
                           )}
                         </div>
@@ -1302,6 +1314,27 @@ function SubmitPage() {
                     </div>
                   </div>
                 ))}
+
+                {/* Editorial Review Quality Box */}
+                <div className="rounded-2xl border border-line bg-surface/60 p-5 space-y-3">
+                  <h4 className="text-xs font-bold text-ink uppercase tracking-wider">
+                    Our Review Quality Bar
+                  </h4>
+                  <ul className="space-y-2 text-xs text-muted">
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                      <span>Functional, crafted specifically for macOS</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                      <span>Delivers genuine value without bloat or spam</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-emerald-400 font-bold shrink-0">✓</span>
+                      <span>Transparent pricing & authentic developer identity</span>
+                    </li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
