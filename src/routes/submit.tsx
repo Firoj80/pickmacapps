@@ -116,6 +116,18 @@ function SubmitPage() {
   });
   const [couponError, setCouponError] = useState<string | null>(null);
 
+  // Auto-sync coupon from URL if changed dynamically via ClaimSpotCard / banner click
+  useEffect(() => {
+    if (searchCoupon) {
+      const raw = searchCoupon.trim().toUpperCase();
+      if (raw === "BFCM50") {
+        setAppliedCoupon("BFCM50");
+        setCouponInput("BFCM50");
+        setCouponError(null);
+      }
+    }
+  }, [searchCoupon]);
+
   const applyCoupon = (code: string) => {
     const upper = code.trim().toUpperCase();
     if (upper === "BFCM50") {
@@ -175,6 +187,15 @@ function SubmitPage() {
     if (tier === "featured") return "featured";
     return "free";
   });
+
+  // Auto-sync plan when tier changes from URL search params
+  useEffect(() => {
+    if (tier === "article" && !articleSlots.isFull) {
+      setSelectedPlan("article");
+    } else if (tier === "featured") {
+      setSelectedPlan("featured");
+    }
+  }, [tier, articleSlots.isFull]);
 
   const isPaid = selectedPlan === "featured" || selectedPlan === "article";
   const [showModal, setShowModal] = useState(false);

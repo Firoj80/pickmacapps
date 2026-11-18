@@ -26,17 +26,19 @@ export function ClaimSpotCard({
 
   const isGold = tier === "article";
 
-  // Calculate prices strictly in USD matching submit.tsx and admin backend
-  const rawFeaturedDollars = Math.round((offer?.featuredPriceCents ?? offer?.priceCents ?? 1000) / 100);
-  const rawFeaturedCompareDollars = Math.round((offer?.featuredCompareCents ?? offer?.compareCents ?? 2000) / 100);
-  const rawArticleDollars = Math.round((offer?.articlePriceCents ?? 2000) / 100);
-  const rawArticleCompareDollars = Math.round((offer?.articleCompareCents ?? 4000) / 100);
+  // Calculate base prices in USD from backend settings
+  const rawFeaturedDollars = Math.round((offer?.featuredPriceCents ?? offer?.priceCents ?? 2000) / 100);
+  const rawArticleDollars = Math.round((offer?.articlePriceCents ?? 4000) / 100);
 
-  const rawPriceDollars = isGold ? rawArticleDollars : rawFeaturedDollars;
-  const rawCompareDollars = isGold ? rawArticleCompareDollars : rawFeaturedCompareDollars;
+  // Black Friday 50% OFF discount (matching coupon BFCM50 auto-applied on submit page)
+  const featuredSaleDollars = Math.round(rawFeaturedDollars * 0.5);
+  const articleSaleDollars = Math.round(rawArticleDollars * 0.5);
 
-  const salePrice = `$${rawPriceDollars}`;
-  const originalPrice = `$${rawCompareDollars}`;
+  const saleDollars = isGold ? articleSaleDollars : featuredSaleDollars;
+  const originalDollars = isGold ? rawArticleDollars : rawFeaturedDollars;
+
+  const salePrice = `$${saleDollars}`;
+  const originalPrice = `$${originalDollars}`;
 
   // Desktop styles
   const outerFrameClass = isGold
