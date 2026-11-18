@@ -31,7 +31,7 @@ const quickNav = [
 ];
 
 export const fieldClass =
-  "mt-1.5 w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-ink shadow-2xs";
+  "mt-1.5 w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink outline-none transition placeholder:text-muted focus:border-accent shadow-2xs";
 
 export function Field({ label, hint, children }: { label: string; hint?: string; children: ReactNode }) {
   return (
@@ -44,10 +44,10 @@ export function Field({ label, hint, children }: { label: string; hint?: string;
 }
 
 const tones = {
-  ok: "bg-emerald-50 text-emerald-800 ring-1 ring-emerald-600/20",
-  wait: "bg-amber-50 text-amber-900 ring-1 ring-amber-600/20",
-  off: "bg-stone-100 text-stone-600 ring-1 ring-stone-400/20",
-  choice: "bg-accent/10 text-accent ring-1 ring-accent/25",
+  ok: "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20",
+  wait: "bg-amber-500/10 text-amber-300 ring-1 ring-amber-500/20",
+  off: "bg-surface-2 text-muted ring-1 ring-line",
+  choice: "bg-accent/15 text-accent ring-1 ring-accent/30",
 } as const;
 
 export function Pill({ tone, children }: { tone: keyof typeof tones; children: ReactNode }) {
@@ -85,14 +85,14 @@ export function Notice({ error, saved }: { error: string; saved: string }) {
   if (!error && !saved) return null;
   if (error) {
     return (
-      <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-950 shadow-xs">
+      <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-200 shadow-xs">
         <span className="text-base">⚠️</span>
         <span>{error}</span>
       </div>
     );
   }
   return (
-    <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-950 shadow-xs">
+    <div className="mb-5 flex items-center gap-2.5 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200 shadow-xs">
       <span className="text-base">✅</span>
       <span>{savedCopy[saved] ?? "Saved."}</span>
     </div>
@@ -137,7 +137,7 @@ export function AdminShell({
   const systemNav = mainNav.filter((item) => item.section === "system");
 
   return (
-    <div className="min-h-screen bg-[#f8f8f6] dark:bg-[#0d0e10] lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
+    <div className="min-h-screen bg-canvas text-ink lg:grid lg:grid-cols-[260px_minmax(0,1fr)]">
       {/* Top Loading Progress Bar */}
       {isLoading ? (
         <div
@@ -148,13 +148,13 @@ export function AdminShell({
       ) : null}
 
       {/* Mobile Top App Bar (< lg) */}
-      <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-line bg-white/90 px-4 backdrop-blur-md lg:hidden shadow-2xs">
+      <header className="sticky top-0 z-40 flex h-14 w-full items-center justify-between border-b border-line bg-surface/90 px-4 backdrop-blur-md lg:hidden shadow-2xs">
         <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setMobileDrawerOpen(true)}
             aria-label="Open navigation menu"
-            className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-stone-50 text-ink hover:bg-stone-100 transition cursor-pointer"
+            className="flex h-9 w-9 items-center justify-center rounded-xl border border-line bg-surface-2 text-ink hover:bg-line transition cursor-pointer"
           >
             <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="12" x2="21" y2="12" />
@@ -170,15 +170,15 @@ export function AdminShell({
         </div>
 
         <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-400 ring-1 ring-emerald-500/20">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
             Live
           </span>
 
           <Link
             to="/"
             title="View public site"
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-stone-50 text-sm hover:bg-stone-100 transition"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line bg-surface-2 text-sm text-ink hover:bg-line transition"
           >
             🌐
           </Link>
@@ -190,13 +190,13 @@ export function AdminShell({
         <div className="fixed inset-0 z-50 flex lg:hidden" aria-modal="true" role="dialog">
           {/* Backdrop Overlay */}
           <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity"
+            className="fixed inset-0 bg-black/60 backdrop-blur-xs transition-opacity"
             onClick={() => setMobileDrawerOpen(false)}
             aria-hidden="true"
           />
 
           {/* Drawer Content */}
-          <div className="relative flex h-full w-[280px] max-w-[85vw] flex-col border-r border-line bg-white shadow-2xl">
+          <div className="relative flex h-full w-[280px] max-w-[85vw] flex-col border-r border-line bg-surface shadow-2xl">
             {/* Drawer Header */}
             <div className="flex h-14 items-center justify-between border-b border-line px-5">
               <div className="flex items-center gap-2.5 font-display text-base font-bold text-ink">
@@ -206,7 +206,7 @@ export function AdminShell({
               <button
                 type="button"
                 onClick={() => setMobileDrawerOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-stone-100 hover:text-ink transition cursor-pointer"
+                className="flex h-8 w-8 items-center justify-center rounded-lg text-muted hover:bg-surface-2 hover:text-ink transition cursor-pointer"
                 aria-label="Close menu"
               >
                 ✕
@@ -231,8 +231,8 @@ export function AdminShell({
                         onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                           isActive
-                            ? "bg-ink font-semibold text-canvas shadow-xs"
-                            : "text-body hover:bg-stone-100 hover:text-ink"
+                            ? "bg-surface-2 font-semibold text-ink border border-line shadow-xs"
+                            : "text-muted hover:bg-surface-2 hover:text-ink"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
@@ -262,8 +262,8 @@ export function AdminShell({
                         onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-medium transition-all ${
                           isActive
-                            ? "bg-ink font-semibold text-canvas shadow-xs"
-                            : "text-body hover:bg-stone-100 hover:text-ink"
+                            ? "bg-surface-2 font-semibold text-ink border border-line shadow-xs"
+                            : "text-muted hover:bg-surface-2 hover:text-ink"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
@@ -293,15 +293,15 @@ export function AdminShell({
                         onClick={() => setTimeout(() => setMobileDrawerOpen(false), 50)}
                         className={`flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                           isActive
-                            ? "bg-ink font-semibold text-canvas shadow-xs"
-                            : "text-body hover:bg-stone-100 hover:text-ink"
+                            ? "bg-surface-2 font-semibold text-ink border border-line shadow-xs"
+                            : "text-muted hover:bg-surface-2 hover:text-ink"
                         }`}
                       >
                         <span className="flex items-center gap-2.5">
                           <span className="text-sm">{item.icon}</span>
                           <span>{item.label}</span>
                         </span>
-                        <span className="rounded-md bg-accent/10 px-1.5 py-0.5 text-[10px] font-bold text-accent">
+                        <span className="rounded-md bg-accent/20 px-1.5 py-0.5 text-[10px] font-bold text-accent">
                           {item.badge}
                         </span>
                       </Link>
@@ -315,7 +315,7 @@ export function AdminShell({
             <div className="border-t border-line p-3.5 space-y-1">
               <Link
                 to="/"
-                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-body hover:bg-stone-100 transition"
+                className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-muted hover:bg-surface-2 hover:text-ink transition"
               >
                 <span className="flex items-center gap-2">
                   <span>🌐</span>
@@ -326,7 +326,7 @@ export function AdminShell({
               <form method="post" action="/api/admin/logout">
                 <button
                   type="submit"
-                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                  className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
                 >
                   <span>🚪</span>
                   <span>Sign out</span>
@@ -338,7 +338,7 @@ export function AdminShell({
       ) : null}
 
       {/* Desktop Sticky Sidebar (lg+) */}
-      <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r border-line bg-white/95 backdrop-blur-md shadow-xs">
+      <aside className="hidden lg:sticky lg:top-0 lg:flex lg:h-screen lg:flex-col lg:border-r border-line bg-surface/95 backdrop-blur-md shadow-xs">
         {/* Brand Header */}
         <div className="px-5 pt-5 pb-4 border-b border-line">
           <Link
@@ -353,8 +353,8 @@ export function AdminShell({
             <span className="text-[10px] font-semibold tracking-wider text-muted uppercase">
               Admin Console
             </span>
-            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[9px] font-bold text-emerald-700 ring-1 ring-emerald-600/20">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-400 ring-1 ring-emerald-500/20">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Live
             </span>
           </div>
@@ -377,8 +377,8 @@ export function AdminShell({
                     preload="intent"
                     className={`group flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-ink font-semibold text-canvas shadow-xs"
-                        : "text-body hover:bg-stone-100 hover:text-ink"
+                        ? "bg-surface-2 font-semibold text-ink border border-line shadow-2xs"
+                        : "text-muted hover:bg-surface-2 hover:text-ink"
                     }`}
                   >
                     <span className="flex items-center gap-2.5">
@@ -409,8 +409,8 @@ export function AdminShell({
                     preload="intent"
                     className={`group flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-ink font-semibold text-canvas shadow-xs"
-                        : "text-body hover:bg-stone-100 hover:text-ink"
+                        ? "bg-surface-2 font-semibold text-ink border border-line shadow-2xs"
+                        : "text-muted hover:bg-surface-2 hover:text-ink"
                     }`}
                   >
                     <span className="flex items-center gap-2.5">
@@ -441,8 +441,8 @@ export function AdminShell({
                     preload="intent"
                     className={`group flex items-center justify-between rounded-xl px-3 py-2 text-sm font-medium transition-all ${
                       isActive
-                        ? "bg-ink font-semibold text-canvas shadow-xs"
-                        : "text-body hover:bg-stone-100 hover:text-ink"
+                        ? "bg-surface-2 font-semibold text-ink border border-line shadow-2xs"
+                        : "text-muted hover:bg-surface-2 hover:text-ink"
                     }`}
                   >
                     <span className="flex items-center gap-2.5">
@@ -452,8 +452,8 @@ export function AdminShell({
                     <span
                       className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold ${
                         isActive
-                          ? "bg-white/20 text-white"
-                          : "bg-accent/10 text-accent group-hover:bg-accent/20"
+                          ? "bg-accent/20 text-accent"
+                          : "bg-surface-2 text-muted group-hover:text-ink"
                       }`}
                     >
                       {item.badge}
@@ -466,7 +466,7 @@ export function AdminShell({
         </div>
 
         {/* Desktop Sidebar Footer */}
-        <div className="border-t border-line p-3.5 space-y-1 mt-auto bg-stone-50/50">
+        <div className="border-t border-line p-3.5 space-y-1 mt-auto bg-surface-2/40">
           <Link
             to="/"
             preload="intent"
@@ -475,7 +475,7 @@ export function AdminShell({
                 (window as unknown as { __invalidateDirectoryCache?: () => void }).__invalidateDirectoryCache?.();
               }
             }}
-            className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-body transition hover:bg-stone-100 hover:text-ink"
+            className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-medium text-muted transition hover:bg-surface-2 hover:text-ink"
           >
             <span className="flex items-center gap-2">
               <span>🌐</span>
@@ -486,7 +486,7 @@ export function AdminShell({
           <form method="post" action="/api/admin/logout">
             <button
               type="submit"
-              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-muted transition hover:bg-rose-50 hover:text-rose-600 cursor-pointer"
+              className="flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-medium text-muted transition hover:bg-rose-500/10 hover:text-rose-400 cursor-pointer"
             >
               <span>🚪</span>
               <span>Sign out</span>
@@ -519,7 +519,7 @@ export function AdminShell({
       {/* Mobile Bottom Navigation Bar (< lg) */}
       <nav
         aria-label="Mobile quick navigation"
-        className="fixed bottom-0 left-0 right-0 z-30 flex h-14 items-center justify-around border-t border-line bg-white/95 px-2 backdrop-blur-md lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.03)]"
+        className="fixed bottom-0 left-0 right-0 z-30 flex h-14 items-center justify-around border-t border-line bg-surface/95 px-2 backdrop-blur-md lg:hidden shadow-[0_-2px_10px_rgba(0,0,0,0.3)]"
       >
         <Link
           to="/admin"

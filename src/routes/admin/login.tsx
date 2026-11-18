@@ -24,16 +24,16 @@ function Login() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center bg-[#f8f8f6] px-4 sm:px-6 dark:bg-[#0c0d0e]">
+    <main data-admin-root className="relative flex min-h-screen items-center justify-center bg-canvas px-4 sm:px-6 text-ink">
       {/* Ambient background glow */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
-        <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full bg-gradient-to-tr from-accent/10 via-indigo-500/5 to-transparent blur-3xl opacity-70" />
+        <div className="absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 h-[400px] w-[600px] rounded-full bg-gradient-to-tr from-accent/15 via-indigo-500/10 to-transparent blur-3xl opacity-60" />
       </div>
 
-      <div className="relative w-full max-w-sm rounded-3xl border border-line bg-white/95 p-7 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.06)] backdrop-blur-xl transition">
+      <div className="relative w-full max-w-sm rounded-3xl border border-line bg-surface/95 p-7 sm:p-8 shadow-[0_12px_40px_rgba(0,0,0,0.5)] backdrop-blur-xl transition">
         {/* Brand Header */}
         <div className="flex items-center justify-between">
-          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-ink text-canvas shadow-xs">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-surface-2 border border-line text-ink shadow-xs">
             <span className="text-xl"></span>
           </div>
           <Link
@@ -53,7 +53,7 @@ function Login() {
         </div>
 
         {error ? (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50/70 px-3.5 py-2.5 text-xs font-medium text-rose-800">
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-medium text-rose-300">
             <span>⚠️</span>
             <span>That password was not accepted. Please try again.</span>
           </div>
@@ -73,7 +73,7 @@ function Login() {
                 autoComplete="current-password"
                 aria-label="Admin password"
                 placeholder="Enter admin password..."
-                className="w-full rounded-xl border border-line bg-stone-50/70 px-3.5 py-2.5 pr-10 text-xs text-ink placeholder:text-muted focus:border-ink focus:bg-white focus:outline-none shadow-2xs transition"
+                className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 pr-10 text-xs text-ink placeholder:text-muted focus:border-accent focus:outline-none shadow-2xs transition"
               />
               <button
                 type="button"

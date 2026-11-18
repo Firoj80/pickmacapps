@@ -78,10 +78,10 @@ function Frame() {
 
   if (admin) {
     return (
-      <>
+      <div data-admin-root className="min-h-screen bg-canvas text-ink antialiased">
         <NavigationProgressBar />
         <Outlet />
-      </>
+      </div>
     );
   }
 
