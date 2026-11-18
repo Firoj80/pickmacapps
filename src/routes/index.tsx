@@ -9,6 +9,7 @@ import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { homeGraph, jsonLdScript } from "@/lib/jsonld";
 import { buildMetadata, markdownAlternate, originFrom } from "@/lib/seo";
+import { fetchOffer } from "@/lib/directory.fn";
 
 const homeTitle = "PickMacApps - Discover the best hand-picked mac apps";
 const homeDescription =
@@ -117,6 +118,7 @@ export const Route = createFileRoute("/")({
     }
     return next;
   },
+  loader: () => fetchOffer(),
   component: Home,
   head: ({ matches }) => {
     const origin = originFrom(matches);
@@ -264,6 +266,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
 }
 
 function Home() {
+  const offer = Route.useLoaderData();
   const rawSearch = Route.useSearch();
   const { q = "", cat = "all", sort = "featured" } = rawSearch;
   const navigate = useNavigate();
@@ -460,6 +463,7 @@ function Home() {
           sort={sort}
           categories={heroCategories}
           arranged
+          offer={offer}
           onQuery={(value) => updateSearch({ q: value })}
           onCategory={(value) => updateSearch({ cat: value })}
           onSort={(value) => updateSearch({ sort: value })}

@@ -1,16 +1,71 @@
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { fetchOffer } from "@/lib/directory.fn";
+import {
+  type CurrencyCode,
+  detectLocalCurrency,
+  convertPrice,
+  SUPPORTED_CURRENCIES,
+} from "@/lib/currency";
+
+export type ClaimSpotOffer = Awaited<ReturnType<typeof fetchOffer>>;
 
 export function ClaimSpotCard({
   tier,
+  offer: initialOffer,
 }: {
   tier: "article" | "featured";
+  offer?: ClaimSpotOffer | null;
 }) {
+  const [offer, setOffer] = useState<ClaimSpotOffer | null>(initialOffer ?? null);
+
+  // If initialOffer was not provided by SSR, fetch it on client
+  useEffect(() => {
+    if (initialOffer) {
+      setOffer(initialOffer);
+      return;
+    }
+    fetchOffer().then((data) => setOffer(data)).catch(() => {});
+  }, [initialOffer]);
+
   const isGold = tier === "article";
 
-  // Tier specific pricing & compare pricing for 50% BFCM sale
-  const originalPrice = isGold ? "$120" : "$99";
-  const salePrice = isGold ? "$60" : "$49";
-  const discountLabel = "50% OFF";
+  const [currency] = useState<CurrencyCode>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("pma_currency");
+      if (saved && saved in SUPPORTED_CURRENCIES) return saved as CurrencyCode;
+    }
+    return detectLocalCurrency(offer?.country);
+  });
+
+  // Calculate prices strictly matching submit.tsx and admin backend
+  const rawFeaturedDollars = Math.round((offer?.featuredPriceCents ?? offer?.priceCents ?? 9900) / 100);
+  const rawFeaturedCompareDollars = Math.round((offer?.featuredCompareCents ?? offer?.compareCents ?? 19900) / 100);
+  const rawArticleDollars = Math.round((offer?.articlePriceCents ?? 12000) / 100);
+  const rawArticleCompareDollars = Math.round((offer?.articleCompareCents ?? 24900) / 100);
+
+  const rawPriceDollars = isGold ? rawArticleDollars : rawFeaturedDollars;
+  const rawCompareDollars = isGold ? rawArticleCompareDollars : rawFeaturedCompareDollars;
+
+  const priceConv = useMemo(
+    () => convertPrice(rawPriceDollars, currency, offer?.rates),
+    [rawPriceDollars, currency, offer?.rates]
+  );
+
+  const compareConv = useMemo(
+    () => convertPrice(rawCompareDollars, currency, offer?.rates),
+    [rawCompareDollars, currency, offer?.rates]
+  );
+
+  const salePrice = priceConv.formatted;
+  const originalPrice = compareConv.formatted;
+
+  const discountPercent =
+    rawCompareDollars > rawPriceDollars
+      ? Math.round(((rawCompareDollars - rawPriceDollars) / rawCompareDollars) * 100)
+      : 0;
+
+  const discountLabel = discountPercent > 0 ? `${discountPercent}% OFF` : null;
 
   const outerFrameClass = isGold
     ? "relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/[0.05] p-[2px] shadow-[0_6px_24px_rgba(245,158,11,0.18)] transition-all duration-300 group-hover:border-amber-400 group-hover:shadow-[0_14px_36px_rgba(245,158,11,0.32)] group-hover:-translate-y-1"
@@ -20,10 +75,6 @@ export function ClaimSpotCard({
     ? "from-[#1d1627] via-[#14101d] to-[#0c0a11]"
     : "from-[#0d182b] via-[#091220] to-[#050b14]";
 
-  const iconBgClass = isGold
-    ? "bg-gradient-to-br from-amber-400 via-amber-500 to-yellow-600 text-stone-950 ring-amber-300/50 shadow-[0_4px_16px_rgba(245,158,11,0.4)]"
-    : "bg-gradient-to-br from-sky-400 via-sky-500 to-blue-600 text-white ring-sky-300/50 shadow-[0_4px_16px_rgba(14,165,233,0.4)]";
-
   const glowStyle = isGold
     ? { background: "radial-gradient(circle at 50% 45%, rgba(245, 158, 11, 0.22), transparent 70%)" }
     : { background: "radial-gradient(circle at 50% 45%, rgba(14, 165, 233, 0.22), transparent 70%)" };
@@ -31,9 +82,9 @@ export function ClaimSpotCard({
   return (
     <Link
       to="/submit"
-      search={{ tier: isGold ? "article" : "featured", coupon: "BFCM50" }}
+      search={{ tier: isGold ? "article" : "featured" }}
       className="group flex flex-col transition-all duration-300 ease-out cursor-pointer"
-      title={isGold ? "List your app in Gold Spotlight (50% OFF BFCM Sale)" : "List your app in Blue Featured (50% OFF BFCM Sale)"}
+      title={isGold ? `List your app in Gold Spotlight (${salePrice})` : `List your app in Blue Featured (${salePrice})`}
     >
       {/* Visual Screen Preview Card matching AppCard 1200/630 ratio */}
       <div className={outerFrameClass}>
@@ -47,14 +98,16 @@ export function ClaimSpotCard({
               <span className="h-2 w-2 rounded-full bg-rose-500/80" />
               <span className="h-2 w-2 rounded-full bg-amber-500/80" />
               <span className="h-2 w-2 rounded-full bg-emerald-500/80" />
-              <span className="ml-2 font-mono text-[10px] text-white/40">pickmacapps.com/your-app</span>
+              <span className="ml-2 font-mono text-[10px] text-white/40">pickmacapps.store/your-app</span>
             </div>
 
-            {/* Black Friday 50% OFF Tag */}
-            <div className="flex items-center gap-1 rounded-full bg-gradient-to-r from-red-500/25 to-amber-500/25 px-2 py-0.5 text-[10px] font-bold text-amber-200 ring-1 ring-amber-400/40 shadow-xs">
-              <span className="animate-pulse">🔥</span>
-              <span>BFCM 50% OFF</span>
-            </div>
+            {/* Discount Tag if compare price is higher */}
+            {discountLabel ? (
+              <div className="flex items-center gap-1 rounded-full bg-gradient-to-r from-red-500/25 to-amber-500/25 px-2 py-0.5 text-[10px] font-bold text-amber-200 ring-1 ring-amber-400/40 shadow-xs">
+                <span className="animate-pulse">🔥</span>
+                <span>{discountLabel}</span>
+              </div>
+            ) : null}
           </div>
 
           {/* Center Relatable App Mockup */}
@@ -102,15 +155,19 @@ export function ClaimSpotCard({
               <span className="text-[11px] text-white/50">7 Days Active</span>
             </div>
 
-            {/* Price with strikethrough */}
+            {/* Price with strikethrough if compare price is higher */}
             <div className="flex items-center gap-1.5">
-              <span className="text-[11px] text-white/50 line-through">{originalPrice}</span>
+              {discountPercent > 0 && (
+                <span className="text-[11px] text-white/50 line-through">{originalPrice}</span>
+              )}
               <span className={`text-xs sm:text-[13px] font-extrabold ${isGold ? "text-amber-300" : "text-sky-300"}`}>
                 {salePrice}
               </span>
-              <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[9.5px] font-bold text-rose-300 ring-1 ring-rose-400/30">
-                {discountLabel}
-              </span>
+              {discountLabel && (
+                <span className="rounded bg-rose-500/20 px-1 py-0.2 text-[9.5px] font-bold text-rose-300 ring-1 ring-rose-400/30">
+                  {discountLabel}
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -160,7 +217,7 @@ export function ClaimSpotCard({
                     : "bg-sky-500/15 text-sky-700 dark:text-sky-300 ring-1 ring-sky-500/30 group-hover:bg-sky-500 group-hover:text-white"
                 } transition-colors`}
               >
-                <span>Add App</span>
+                <span>Claim Spot</span>
                 <span className="transition-transform group-hover:translate-x-0.5">→</span>
               </span>
             </div>
@@ -168,8 +225,8 @@ export function ClaimSpotCard({
 
           <p className="mt-1 line-clamp-1 text-[13px] text-muted">
             {isGold
-              ? "List your app here · Top spot + Medium article · 50% OFF BFCM"
-              : "List your app here · Instant discovery · 50% OFF BFCM"}
+              ? `List your app here · Top spot + Medium article · ${salePrice}`
+              : `List your app here · Instant discovery · ${salePrice}`}
           </p>
         </div>
       </div>

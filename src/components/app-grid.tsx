@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppCard } from "@/components/app-card";
-import { ClaimSpotCard } from "@/components/claim-spot-card";
+import { ClaimSpotCard, type ClaimSpotOffer } from "@/components/claim-spot-card";
 import { isEditorChoice, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
@@ -24,6 +24,7 @@ export function AppGrid({
   onSort,
   arranged = false,
   filters = "all",
+  offer,
 }: {
   apps: AppItem[];
   query: string;
@@ -35,6 +36,7 @@ export function AppGrid({
   onSort?: (value: HeroSort) => void;
   arranged?: boolean;
   filters?: "all" | "search";
+  offer?: ClaimSpotOffer | null;
 }) {
   const [order, setOrder] = useState<"oldest" | "newest" | "name" | "free">("oldest");
   const [page, setPage] = useState(0);
@@ -153,7 +155,13 @@ export function AppGrid({
       <div className="grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
         {pageItems.map((item, i) => {
           if (item.kind === "claim") {
-            return <ClaimSpotCard key={`claim-${item.tier}`} tier={item.tier} />;
+            return (
+              <ClaimSpotCard
+                key={`claim-${item.tier}`}
+                tier={item.tier}
+                offer={offer}
+              />
+            );
           }
           return (
             <AppCard
