@@ -348,6 +348,9 @@ export function alternativesInCategory(categorySlug: string) {
   return alternatives.filter((item) => item.appSlugs.some((slug) => slugs.has(slug)));
 }
 
+/** Maximum active slots for Hot apps */
+export const MAX_HOT_SLOTS = 8;
+
 /** Hot tag active duration in days before automated expiry */
 export const HOT_APP_DURATION_DAYS = 7;
 

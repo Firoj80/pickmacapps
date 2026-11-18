@@ -81,10 +81,11 @@ export function AppGrid({
       .filter((a) => isEditorChoice(a) && a.featuredTier !== "article")
       .sort(byOldest);
 
-    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first
+    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first, capped at max 8
     const hotApps = apps
       .filter((a) => Boolean(a.isHot) && !isEditorChoice(a))
-      .sort(byOldest);
+      .sort(byOldest)
+      .slice(0, 8);
 
     // Priority 4: All other apps (not editor choice, not hot), oldest first
     const otherApps = apps

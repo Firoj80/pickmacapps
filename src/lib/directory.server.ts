@@ -486,6 +486,7 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
 
 export const MAX_EDITOR_CHOICE_SLOTS = 6;
 export const MAX_TIER_SLOTS = 6; // All 6 slots are Gold (Article) tier
+export const MAX_HOT_SLOTS = 8; // Maximum 8 active slots for Hot apps
 export const FEATURED_APP_DURATION_DAYS = 7;
 
 export function getNextCycleLabel(now = new Date()): string {
@@ -527,6 +528,21 @@ export async function countActiveEditorChoiceApps(excludeId?: string): Promise<n
   return Number(rows[0]?.count ?? 0);
 }
 
+export async function countActiveHotApps(excludeId?: string): Promise<number> {
+  const sql = await directorySql();
+  if (excludeId) {
+    const rows = await sql.query<{ count: string }>(
+      "select count(*)::text as count from apps where is_hot = true and status = 'published' and id <> $1",
+      [excludeId],
+    );
+    return Number(rows[0]?.count ?? 0);
+  }
+  const rows = await sql.query<{ count: string }>(
+    "select count(*)::text as count from apps where is_hot = true and status = 'published'",
+  );
+  return Number(rows[0]?.count ?? 0);
+}
+
 export async function getPaidSlotDates(tier: "featured" | "article"): Promise<string[]> {
   const sql = await directorySql();
   const rows = await sql.query<{ featured_until: string | Date | null }>(
@@ -556,6 +572,9 @@ export type PublicOffer = {
   featuredCompareCents: number;
   articlePriceCents: number;
   articleCompareCents: number;
+  hotPriceCents?: number;
+  hotCompareCents?: number;
+  hotSlots?: EditorChoiceSlotsInfo;
   featuredSlots: EditorChoiceSlotsInfo;
   articleSlots: EditorChoiceSlotsInfo;
   slots: EditorChoiceSlotsInfo;
@@ -585,11 +604,13 @@ export async function publicOffer(): Promise<PublicOffer> {
         active_total: string;
         active_featured: string;
         active_article: string;
+        active_hot: string;
       }>(`
         select
           count(*) filter (where editor_choice = true and status = 'published')::text as active_total,
           count(*) filter (where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = 'featured')::text as active_featured,
-          count(*) filter (where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = 'article')::text as active_article
+          count(*) filter (where editor_choice = true and status = 'published' and coalesce(featured_tier, 'featured') = 'article')::text as active_article,
+          count(*) filter (where is_hot = true and status = 'published')::text as active_hot
         from apps
       `),
       sql.query<{ tier: string; featured_until: string | Date | null }>(`
@@ -633,10 +654,11 @@ export async function publicOffer(): Promise<PublicOffer> {
         .catch(() => {});
     }
 
-    const counts = countsRows[0] ?? { active_total: "0", active_featured: "0", active_article: "0" };
+    const counts = countsRows[0] ?? { active_total: "0", active_featured: "0", active_article: "0", active_hot: "0" };
     const activeTotal = Number(counts.active_total ?? 0);
     const activeFeatured = Number(counts.active_featured ?? 0);
     const activeArticle = Number(counts.active_article ?? 0);
+    const activeHot = Number(counts.active_hot ?? 0);
 
     const featuredOpenDates: string[] = [];
     const articleOpenDates: string[] = [];
@@ -653,6 +675,7 @@ export async function publicOffer(): Promise<PublicOffer> {
     const featuredRemaining = 0; // Blue (featured) tier discontinued — no new slots offered
     const articleRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeArticle);
     const totalRemaining = Math.max(0, MAX_EDITOR_CHOICE_SLOTS - activeTotal);
+    const hotRemaining = Math.max(0, MAX_HOT_SLOTS - activeHot);
 
     const featuredSlots: EditorChoiceSlotsInfo = {
       total: 0,
@@ -672,13 +695,25 @@ export async function publicOffer(): Promise<PublicOffer> {
       openDates: articleOpenDates,
     };
 
+    const hotSlots: EditorChoiceSlotsInfo = {
+      total: MAX_HOT_SLOTS,
+      active: activeHot,
+      remaining: hotRemaining,
+      isFull: hotRemaining === 0,
+      nextDate,
+      openDates: [],
+    };
+
     const result: PublicOffer = {
       featuredPriceCents,
       featuredCompareCents,
       articlePriceCents,
       articleCompareCents,
+      hotPriceCents: featuredPriceCents,
+      hotCompareCents: featuredCompareCents,
       featuredSlots,
       articleSlots,
+      hotSlots,
       priceCents: featuredPriceCents,
       compareCents: featuredCompareCents,
       slots: {
@@ -771,7 +806,7 @@ export async function adminStats() {
   try {
     await sql.query("update apps set hot_marked_at = now() where is_hot = true and hot_marked_at is null");
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
-      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 12",
+      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc limit 8",
     );
     hotApps = hotRows.map((r) => ({
       id: r.id,
@@ -896,11 +931,20 @@ export async function toggleAppHot(id: string) {
   if (!rows[0]) return null;
   const currentHot = asBool(rows[0].is_hot);
   const nextHot = !currentHot;
+  if (nextHot) {
+    const activeHot = await countActiveHotApps(id);
+    if (activeHot >= MAX_HOT_SLOTS) {
+      throw new Error(
+        `Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled (${activeHot}/${MAX_HOT_SLOTS} active). Please remove another app from Hot first.`,
+      );
+    }
+  }
   await sql.query(
     "update apps set is_hot = $1, hot_marked_at = case when $1 then now() else null end, updated_at = now() where id = $2",
     [nextHot, id],
   );
   invalidatePublishedDirectoryCache();
+  invalidatePublicOfferCache();
   await audit(sql, nextHot ? "mark_hot" : "unmark_hot", id, `Hot set to ${nextHot}`);
   return { id, isHot: nextHot };
 }
@@ -955,6 +999,13 @@ export async function createAdminApp(input: {
     }
   }
 
+  if (input.isHot === true && status === "published") {
+    const hotActive = await countActiveHotApps();
+    if (hotActive >= MAX_HOT_SLOTS) {
+      throw new Error(`Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled (${hotActive}/${MAX_HOT_SLOTS} active).`);
+    }
+  }
+
   const foundCategory = findShelfCategory(input.category);
   const category = {
     slug: foundCategory?.slug ?? "utility",
@@ -967,8 +1018,8 @@ export async function createAdminApp(input: {
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, is_hot, status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, $15, $16, false, $17, $18, $19, $20, now(), now())`,
+      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, case when $14 then now() else null end, $15, $16, false, $17, $18, $19, $20, now(), now())`,
     [
       id,
       input.name.trim(),
@@ -1036,10 +1087,11 @@ export async function getAppRow(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>("select * from apps where id = $1", [id]);
   if (!rows[0]) return null;
-  const [otherTotal, otherFeatured, otherArticle] = await Promise.all([
+  const [otherTotal, otherFeatured, otherArticle, otherHot] = await Promise.all([
     countActiveEditorChoiceApps(id),
     countActiveTierApps("featured", id),
     countActiveTierApps("article", id),
+    countActiveHotApps(id),
   ]);
   return {
     ...toApp(rows[0]),
@@ -1049,6 +1101,8 @@ export async function getAppRow(id: string) {
     featuredSlotsFull: true, // Blue tier discontinued — always full
     otherArticleCount: otherArticle,
     articleSlotsFull: otherArticle >= MAX_EDITOR_CHOICE_SLOTS,
+    otherHotCount: otherHot,
+    hotSlotsFull: otherHot >= MAX_HOT_SLOTS,
   };
 }
 
@@ -1098,6 +1152,15 @@ export async function saveApp(input: {
     }
   }
 
+  if (input.isHot === true && status === "published") {
+    const hotActive = await countActiveHotApps(input.id);
+    if (hotActive >= MAX_HOT_SLOTS) {
+      throw new Error(
+        `Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled by other published apps (${hotActive}/${MAX_HOT_SLOTS} active). Please unmark another app first.`
+      );
+    }
+  }
+
   const foundCategory = findShelfCategory(input.category);
   const category = {
     slug: foundCategory?.slug ?? row.category,
@@ -1121,6 +1184,7 @@ export async function saveApp(input: {
       featured_tier = $12,
       featured_until = case when $11 then coalesce(featured_until, now() + interval '7 days') else null end,
       status = $13, icon = $14, demo = $15, is_hot = $16,
+      hot_marked_at = case when $16 then coalesce(hot_marked_at, now()) else null end,
       check_badge = $17, x_handle = $18, submitter_x = coalesce(nullif($18, ''), submitter_x),
       updated_at = now()
      where id = $1`,
@@ -1916,7 +1980,7 @@ export async function approveSubmission(id: string, options?: { makeHot?: boolea
 export async function runBadgeChecks() {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>(
-    "select * from apps where status in ('published', 'unpublished') and editor_choice = false and (is_user_submitted = true or check_badge = true)",
+    "select * from apps where status in ('published', 'unpublished') and editor_choice = false and is_hot = false and (is_user_submitted = true or check_badge = true)",
   );
   const results: { slug: string; result: string; detail: string; action: "published" | "unpublished" | "unchanged" }[] = [];
   for (const row of rows) {

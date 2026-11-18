@@ -256,7 +256,7 @@ function AdminHome() {
             {waiting}
           </div>
           <p className="mt-1 text-[11px] text-muted">
-            {hotApps.length} hot · {blueOccupants.length + goldOccupants.length}/6 slots filled
+            {hotApps.length}/8 hot · {goldOccupants.length}/6 gold slots filled
           </p>
         </Link>
       </section>
@@ -405,8 +405,8 @@ function AdminHome() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-ink">🔥 7-Day Hot Roster</span>
-                <span className="rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-bold text-rose-700 ring-1 ring-rose-200">
-                  {hotApps.length} active (7d policy)
+                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300 ring-1 ring-rose-500/30">
+                  {hotApps.length} / 8 active (7d policy)
                 </span>
               </div>
               <Link to="/admin/apps" preload="intent" className="text-xs font-semibold text-ink hover:underline">
@@ -544,12 +544,12 @@ function AdminHome() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div>
                 <h3 className="text-sm font-semibold text-ink">💎 7-Day Sponsorship Slots</h3>
-                <p className="text-[11px] text-muted">All 6 Gold premium homepage placements (Blue tier discontinued)</p>
+                <p className="text-[11px] text-muted">6 Gold homepage placements & 8 Hot boosted placements</p>
               </div>
               <button
                 type="button"
                 onClick={() => setShowPricing(!showPricing)}
-                className="rounded-lg border border-line bg-stone-50 px-2 py-1 text-[11px] font-semibold text-ink hover:bg-stone-100 cursor-pointer"
+                className="rounded-lg border border-line bg-surface-2 px-2 py-1 text-[11px] font-semibold text-ink hover:bg-surface-3 cursor-pointer"
               >
                 {showPricing ? "Hide Pricing" : "Pricing ⚙️"}
               </button>
@@ -557,9 +557,9 @@ function AdminHome() {
 
             {/* Quick Collapsible Pricing Editor */}
             {showPricing ? (
-              <div className="my-3 space-y-3 rounded-xl border border-indigo-100 bg-indigo-50/40 p-3 text-xs">
+              <div className="my-3 space-y-3 rounded-xl border border-line bg-surface-2 p-3 text-xs">
                 <div>
-                  <div className="font-semibold text-indigo-950">🔹 Featured Placement ($99 Tier)</div>
+                  <div className="font-semibold text-rose-300">🔥 Hot App Placement ($99 Tier)</div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
                     <input type="hidden" name="tier" value="featured" />
                     <div>
@@ -580,15 +580,15 @@ function AdminHome() {
                     </div>
                     <button
                       type="submit"
-                      className="col-span-2 rounded-lg bg-ink py-1.5 text-xs font-semibold text-canvas hover:opacity-90 cursor-pointer"
+                      className="col-span-2 rounded-lg bg-rose-600 py-1.5 text-xs font-semibold text-white hover:bg-rose-500 cursor-pointer transition"
                     >
-                      Update Blue Tier Price
+                      Update Hot Placement Price
                     </button>
                   </form>
                 </div>
 
-                <div className="border-t border-indigo-100 pt-2.5">
-                  <div className="font-semibold text-amber-900">🌟 Gold Article Tier ($120 Tier)</div>
+                <div className="border-t border-line pt-2.5">
+                  <div className="font-semibold text-amber-300">🌟 Gold Article Tier ($120 Tier)</div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
                     <input type="hidden" name="tier" value="article" />
                     <div>
@@ -609,7 +609,7 @@ function AdminHome() {
                     </div>
                     <button
                       type="submit"
-                      className="col-span-2 rounded-lg bg-gradient-to-r from-amber-600 to-fuchsia-600 py-1.5 text-xs font-semibold text-white hover:opacity-90 cursor-pointer"
+                      className="col-span-2 rounded-lg bg-gradient-to-r from-amber-600 to-fuchsia-600 py-1.5 text-xs font-semibold text-white hover:opacity-90 cursor-pointer transition"
                     >
                       Update Gold Tier Price
                     </button>
@@ -688,6 +688,20 @@ function AdminHome() {
                     </div>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Hot Placement Slots (8 Slots) */}
+            <div className="mt-4 border-t border-line pt-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="font-semibold text-rose-300">🔥 Hot App Placement ({hotApps.length}/8)</span>
+                <span className="text-[11px] text-muted">{money(data.offer.featuredPriceCents ?? 9900)}</span>
+              </div>
+              <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">
+                <div
+                  className="h-full bg-gradient-to-r from-rose-500 to-amber-500 transition-all duration-300"
+                  style={{ width: `${Math.min(100, (hotApps.length / 8) * 100)}%` }}
+                />
               </div>
             </div>
 

@@ -442,20 +442,20 @@ function NewAppPage() {
         </div>
 
         {/* 9. Hot App Toggle */}
-        <div className="rounded-xl border border-rose-200 bg-rose-50/40 p-3.5">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5">
           <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer">
             <input
               type="checkbox"
               name="is_hot"
               checked={isHot}
               onChange={(e) => setIsHot(e.target.checked)}
-              className="h-4 w-4 rounded border-rose-300 text-rose-600 focus:ring-rose-500"
+              className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500"
             />
-            <span className="font-semibold text-rose-800 flex items-center gap-1.5">
+            <span className="font-semibold text-rose-300 flex items-center gap-1.5">
               <span>🔥 Mark as Hot App</span>
             </span>
             <span className="text-xs text-muted">
-              — displays fire badge and positions at top of all standard listings
+              — displays fire badge on cards and ranks in the top 8 hot shelf (max 8 slots)
             </span>
           </label>
         </div>

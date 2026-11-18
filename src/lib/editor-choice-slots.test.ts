@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { FEATURED_APP_DURATION_DAYS, getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
+import { FEATURED_APP_DURATION_DAYS, getNextCycleLabel, MAX_EDITOR_CHOICE_SLOTS, MAX_HOT_SLOTS, MAX_TIER_SLOTS } from "./directory.server.ts";
 import {
   appPriorityWeight,
   featuredTierWeight,
   getHeroAppIcons,
   getHotDaysRemaining,
   HOT_APP_DURATION_DAYS,
+  MAX_HOT_SLOTS as CATALOG_MAX_HOT_SLOTS,
   type AppItem,
 } from "./catalog.ts";
 
@@ -28,6 +29,12 @@ test("MAX_EDITOR_CHOICE_SLOTS is strictly 6 and MAX_TIER_SLOTS is now 6 (all Gol
   assert.equal(MAX_EDITOR_CHOICE_SLOTS, 6);
   assert.equal(MAX_TIER_SLOTS, 6);
   assert.equal(MAX_TIER_SLOTS, MAX_EDITOR_CHOICE_SLOTS);
+});
+
+test("MAX_HOT_SLOTS is strictly 8 across server and catalog", () => {
+  assert.equal(MAX_HOT_SLOTS, 8);
+  assert.equal(CATALOG_MAX_HOT_SLOTS, 8);
+  assert.equal(MAX_HOT_SLOTS, CATALOG_MAX_HOT_SLOTS);
 });
 
 test("featuredTierWeight prioritizes Gold (article) over Blue (featured) over standard", () => {
