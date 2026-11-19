@@ -296,14 +296,21 @@ function Home() {
       counts[slug] = (counts[slug] || 0) + 1;
     }
 
-    return [
-      { id: "all", name: "All Apps", emoji: "✨", count: list.length },
-      ...chipCategories.map((c) => ({
+    const sortedCategories = chipCategories
+      .map((c) => ({
         id: c.slug,
         name: c.name,
         emoji: c.emoji,
         count: counts[c.slug] || 0,
-      })),
+      }))
+      .sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        return a.name.localeCompare(b.name);
+      });
+
+    return [
+      { id: "all", name: "All Apps", emoji: "✨", count: list.length },
+      ...sortedCategories,
     ];
   }, [chipCategories, list]);
 
