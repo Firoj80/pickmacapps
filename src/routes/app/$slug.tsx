@@ -146,10 +146,20 @@ function AppPage() {
     return <AppAlternatives discontinued={discontinued} allApps={allApps} />;
   }
 
-  return <AppDetails app={app} allApps={allApps} slug={slug} />;
+  return <AppDetails app={app} allApps={allApps} slug={slug} directory={directory} />;
 }
 
-function AppDetails({ app, allApps, slug }: { app: AppItem; allApps: AppItem[]; slug: string }) {
+function AppDetails({
+  app,
+  allApps,
+  slug,
+  directory,
+}: {
+  app: AppItem;
+  allApps: AppItem[];
+  slug: string;
+  directory: ReturnType<typeof Route.useRouteContext>["directory"];
+}) {
 
   const allOtherApps = allApps.filter((item) => item.slug !== app.slug);
   const explicitRelated = app.related

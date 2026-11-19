@@ -196,19 +196,19 @@ export function FreshDropsBanner({
 
                     {/* Relative Time Added Pill */}
                     {timeAgo ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10.5px] font-bold text-emerald-600 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10.5px] font-semibold text-white whitespace-nowrap">
                         <span>✨</span>
-                        <span>{timeAgo}</span>
+                        <span className="text-white">{timeAgo}</span>
                       </span>
                     ) : null}
 
                     {/* Pricing Pill */}
-                    <span className="text-[10.5px] font-medium text-muted capitalize whitespace-nowrap">
+                    <span className="text-[10.5px] font-medium text-white capitalize whitespace-nowrap">
                       · {price}
                     </span>
 
                     {/* Tagline snippet */}
-                    <span className="hidden md:inline-block text-[10.5px] text-muted max-w-[180px] truncate whitespace-nowrap">
+                    <span className="hidden md:inline-block text-[10.5px] text-white max-w-[260px] truncate whitespace-nowrap">
                       · {app.tagline}
                     </span>
                   </Link>
