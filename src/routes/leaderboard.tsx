@@ -452,7 +452,7 @@ function LeaderboardRow({ app, rank }: { app: AppItem; rank: number }) {
             <a
               href={app.website}
               target="_blank"
-              rel="noreferrer"
+              rel={app.editorChoice && app.featuredTier === "article" ? "noopener noreferrer" : "nofollow noopener noreferrer"}
               onClick={() => trackClick(app.id, "try")}
               className="rounded-xl border border-line bg-surface px-2.5 py-1 sm:px-3 sm:py-1.5 text-xs font-semibold text-body hover:text-ink hover:border-line-2 transition shadow-2xs"
             >

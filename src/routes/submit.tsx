@@ -1278,17 +1278,10 @@ function SubmitPage() {
                   <div className="space-y-3 pt-2">
                     <button
                       type="submit"
-                      disabled={
-                        sending ||
-                        (!isPaid && badge !== "ok") ||
-                        !hasEmail ||
-                        !hasXHandle ||
-                        !website.trim() ||
-                        !name.trim()
-                      }
+                      disabled={sending || (!isPaid && badge !== "ok")}
                       className={`w-full rounded-full py-3.5 px-6 text-sm md:text-base font-bold transition shadow-sm cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed ${
                         selectedPlan === "featured"
-                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-white hover:opacity-95"
+                          ? "bg-gradient-to-r from-orange-500 to-amber-500 text-stone-950 hover:opacity-95"
                           : selectedPlan === "article"
                             ? "bg-gradient-to-r from-amber-500 to-yellow-500 text-stone-950 hover:opacity-95"
                             : "bg-ink text-canvas hover:opacity-90"
@@ -1296,7 +1289,7 @@ function SubmitPage() {
                     >
                       {sending ? (
                         <span className="inline-flex items-center gap-2">
-                          <SpinnerIcon className="h-4 w-4 animate-spin" />
+                          <SpinnerIcon className="h-4 w-4 animate-spin text-current" />
                           <span>{isPaid ? "Proceeding to checkout…" : "Submitting…"}</span>
                         </span>
                       ) : selectedPlan === "free" ? (
@@ -1305,18 +1298,18 @@ function SubmitPage() {
                         hotSlots.isFull ? (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${hotBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-white/95 font-bold">
+                            <span className="inline-flex items-center gap-1 text-stone-950 font-bold">
                               <span>(</span>
-                              <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-white" />
+                              <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-stone-950" />
                               <span>Hot Boost · Next Week: {hotSlots.nextDate})</span>
                             </span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${hotBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-white/95 font-bold">
+                            <span className="inline-flex items-center gap-1 text-stone-950 font-bold">
                               <span>(</span>
-                              <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-white" />
+                              <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-stone-950" />
                               <span>Hot Boost · 7 Days)</span>
                             </span>
                           </span>

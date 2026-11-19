@@ -352,7 +352,7 @@ function AppPage() {
                 <a
                   href={app.website}
                   target="_blank"
-                  rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                  rel={isGold ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                   data-ml-goal="try_app"
                   onClick={() => {
                     trackGoal("try_app", { app: app.name, slug: app.slug, url: app.website });
@@ -553,7 +553,7 @@ function AppPage() {
               <div>
                 <dt className="text-muted">Official Website</dt>
                 <dd className="mt-0.5 truncate font-medium text-accent hover:underline">
-                  <a href={app.website} target="_blank" rel={choice ? "noopener noreferrer" : "nofollow noopener noreferrer"}>
+                  <a href={app.website} target="_blank" rel={isGold ? "noopener noreferrer" : "nofollow noopener noreferrer"}>
                     {app.website.replace(/^https?:\/\/(www\.)?/, "").replace(/\/$/, "")} ↗
                   </a>
                 </dd>

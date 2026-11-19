@@ -336,7 +336,7 @@ function ComparePage() {
                     <a
                       href={pair.left.website}
                       target="_blank"
-                      rel={isEditorChoice(pair.left) ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                      rel={pair.left.editorChoice && pair.left.featuredTier === "article" ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                       className="inline-flex items-center gap-1 font-semibold text-accent hover:underline text-xs"
                     >
                       <span>Visit site</span>
@@ -351,7 +351,7 @@ function ComparePage() {
                     <a
                       href={pair.right.website}
                       target="_blank"
-                      rel={isEditorChoice(pair.right) ? "noopener noreferrer" : "nofollow noopener noreferrer"}
+                      rel={pair.right.editorChoice && pair.right.featuredTier === "article" ? "noopener noreferrer" : "nofollow noopener noreferrer"}
                       className="inline-flex items-center gap-1 font-semibold text-accent hover:underline text-xs"
                     >
                       <span>Visit site</span>
