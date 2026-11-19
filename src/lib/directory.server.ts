@@ -2090,8 +2090,12 @@ export async function approveSubmission(
     throw new Error("Editor’s Choice can be approved only after Dodo confirms payment.");
   }
 
-  if (!isChoice) {
-    // Free listing: Must verify PickMacApps badge live on website before approving
+  const wantsHot = isChoiceHot || Boolean(options?.makeHot) || Boolean(options?.scheduleHot);
+  const wantsGold = isChoiceGold || Boolean(options?.makeGold) || Boolean(options?.scheduleGold);
+
+  // Badge verification is ONLY compulsory for Standard Free listings.
+  // Hot Boost apps and Gold Spotlight apps do NOT require badge verification.
+  if (!isChoice && !wantsHot && !wantsGold) {
     const badgeCheck = await checkBadgeOnPage(submission.website);
     if (!badgeCheck.ok) {
       await updateSubmissionBadgeStatus(submission.id, false);
@@ -2122,8 +2126,6 @@ export async function approveSubmission(
   const nextHotIso = offer.hotSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
   const nextGoldIso = offer.articleSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
 
-  const wantsHot = isChoiceHot || Boolean(options?.makeHot) || Boolean(options?.scheduleHot);
-
   let shouldBeHot = false;
   let hotScheduledFor: string | null = null;
   let isHotScheduled = false;
@@ -2137,8 +2139,6 @@ export async function approveSubmission(
     shouldBeHot = true;
     hotScheduledFor = null;
   }
-
-  const wantsGold = isChoiceGold || Boolean(options?.makeGold) || Boolean(options?.scheduleGold);
 
   let shouldBeEditorChoice = false;
   let shouldBeTier: string | null = null;

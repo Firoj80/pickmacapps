@@ -209,8 +209,14 @@ export const Route = createFileRoute("/api/telegram/webhook")({
           parsed.action === "appgold" ||
           parsed.action === "appgoldsched"
         ) {
-          // Live check badge before approving if free plan
-          if (submission.plan !== "choice") {
+          const isUpgradingToHotOrGold =
+            parsed.action === "apphot" ||
+            parsed.action === "apphotsched" ||
+            parsed.action === "appgold" ||
+            parsed.action === "appgoldsched";
+
+          // Live check badge before approving ONLY if standard free plan (Hot Boost & Gold apps do NOT require badge verification)
+          if (submission.plan !== "choice" && !isUpgradingToHotOrGold) {
             const liveCheck = await checkBadgeOnPage(submission.website);
             if (!liveCheck.ok) {
               await updateSubmissionBadgeStatus(submission.id, false);
@@ -225,7 +231,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
 
               await answerTelegramCallback(
                 callback.id,
-                `⚠️ Cannot approve: PickMacApps badge not found on website!\n\n${liveCheck.message}`,
+                `⚠️ Cannot approve free listing: PickMacApps badge not found on website!\n\n${liveCheck.message}`,
                 true,
               );
 

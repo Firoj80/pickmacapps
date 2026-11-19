@@ -210,44 +210,44 @@ function SubmissionsPage() {
                               <button
                                 type="button"
                                 disabled
-                                title="Cannot approve: PickMacApps badge was not found on website. Verify badge first."
+                                title="PickMacApps badge was not found on website. Verify badge to enable standard free approve."
                                 className="rounded-lg bg-stone-200 px-2.5 py-1 text-[11px] font-medium text-stone-400 cursor-not-allowed"
                               >
-                                Approve Disabled (No Badge)
+                                Free (Badge Required)
                               </button>
                             ) : (
-                              <>
-                                <form method="post" action="/api/admin/approve">
-                                  <input type="hidden" name="id" value={item.id} />
-                                  <button
-                                    type="submit"
-                                    className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-semibold text-canvas transition hover:opacity-90 cursor-pointer"
-                                  >
-                                    ✅ Standard Approve
-                                  </button>
-                                </form>
-                                <form method="post" action="/api/admin/approve">
-                                  <input type="hidden" name="id" value={item.id} />
-                                  <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
-                                  <button
-                                    type="submit"
-                                    className="rounded-lg bg-orange-600 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-orange-700 cursor-pointer"
-                                  >
-                                    {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
-                                  </button>
-                                </form>
-                                <form method="post" action="/api/admin/approve">
-                                  <input type="hidden" name="id" value={item.id} />
-                                  <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
-                                  <button
-                                    type="submit"
-                                    className="rounded-lg bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-stone-950 transition hover:bg-amber-600 cursor-pointer"
-                                  >
-                                    {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
-                                  </button>
-                                </form>
-                              </>
+                              <form method="post" action="/api/admin/approve">
+                                <input type="hidden" name="id" value={item.id} />
+                                <button
+                                  type="submit"
+                                  className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-semibold text-canvas transition hover:opacity-90 cursor-pointer"
+                                >
+                                  ✅ Standard Approve
+                                </button>
+                              </form>
                             )}
+                            <form method="post" action="/api/admin/approve">
+                              <input type="hidden" name="id" value={item.id} />
+                              <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
+                              <button
+                                type="submit"
+                                title="No badge required for Hot Boost"
+                                className="rounded-lg bg-orange-600 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-orange-700 cursor-pointer"
+                              >
+                                {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
+                              </button>
+                            </form>
+                            <form method="post" action="/api/admin/approve">
+                              <input type="hidden" name="id" value={item.id} />
+                              <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
+                              <button
+                                type="submit"
+                                title="No badge required for Gold Spotlight"
+                                className="rounded-lg bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-stone-950 transition hover:bg-amber-600 cursor-pointer"
+                              >
+                                {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
+                              </button>
+                            </form>
                           </div>
                         ) : (
                           <span className="text-xs text-muted">{item.email}</span>
@@ -380,16 +380,17 @@ function SubmissionsPage() {
                         </form>
                       </div>
 
-                      {item.plan === "free" && !item.badge_ok ? (
-                        <button
-                          type="button"
-                          disabled
-                          className="w-full rounded-xl bg-stone-200 py-2 text-center text-xs font-semibold text-stone-400 cursor-not-allowed"
-                        >
-                          Approve Disabled (No Badge)
-                        </button>
-                      ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                        {item.plan === "free" && !item.badge_ok ? (
+                          <button
+                            type="button"
+                            disabled
+                            className="w-full rounded-xl bg-stone-200 py-2 text-center text-xs font-semibold text-stone-400 cursor-not-allowed"
+                            title="Verify badge on website to enable standard free approve."
+                          >
+                            Free (Badge Required)
+                          </button>
+                        ) : (
                           <form method="post" action="/api/admin/approve" className="w-full">
                             <input type="hidden" name="id" value={item.id} />
                             <button
@@ -399,30 +400,32 @@ function SubmissionsPage() {
                               ✅ Standard Approve
                             </button>
                           </form>
+                        )}
 
-                          <form method="post" action="/api/admin/approve" className="w-full">
-                            <input type="hidden" name="id" value={item.id} />
-                            <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
-                            <button
-                              type="submit"
-                              className="w-full rounded-xl bg-orange-600 py-2 text-center text-xs font-semibold text-white shadow-xs hover:bg-orange-700 active:opacity-80 cursor-pointer"
-                            >
-                              {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
-                            </button>
-                          </form>
+                        <form method="post" action="/api/admin/approve" className="w-full">
+                          <input type="hidden" name="id" value={item.id} />
+                          <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
+                          <button
+                            type="submit"
+                            title="No badge required for Hot Boost"
+                            className="w-full rounded-xl bg-orange-600 py-2 text-center text-xs font-semibold text-white shadow-xs hover:bg-orange-700 active:opacity-80 cursor-pointer"
+                          >
+                            {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
+                          </button>
+                        </form>
 
-                          <form method="post" action="/api/admin/approve" className="w-full">
-                            <input type="hidden" name="id" value={item.id} />
-                            <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
-                            <button
-                              type="submit"
-                              className="w-full rounded-xl bg-amber-500 py-2 text-center text-xs font-semibold text-stone-950 shadow-xs hover:bg-amber-600 active:opacity-80 cursor-pointer"
-                            >
-                              {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
-                            </button>
-                          </form>
-                        </div>
-                      )}
+                        <form method="post" action="/api/admin/approve" className="w-full">
+                          <input type="hidden" name="id" value={item.id} />
+                          <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
+                          <button
+                            type="submit"
+                            title="No badge required for Gold Spotlight"
+                            className="w-full rounded-xl bg-amber-500 py-2 text-center text-xs font-semibold text-stone-950 shadow-xs hover:bg-amber-600 active:opacity-80 cursor-pointer"
+                          >
+                            {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
+                          </button>
+                        </form>
+                      </div>
                     </div>
                   ) : null}
                 </div>
