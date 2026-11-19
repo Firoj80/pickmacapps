@@ -42,7 +42,7 @@ test("escapeTelegramHtml escapes HTML special characters", () => {
 });
 
 test("parseSubmissionCallbackData validates actions and stays under 64 bytes", () => {
-  for (const action of ["approve", "apphot", "reject", "badge", "nobadge", "conf"] as const) {
+  for (const action of ["approve", "apphot", "apphotsched", "appgold", "appgoldsched", "reject", "badge", "nobadge", "conf"] as const) {
     const raw = `sub:${action}:${sampleUuid}`;
     assert.ok(Buffer.byteLength(raw, "utf8") <= 64, `${raw} exceeds Telegram 64-byte callback limit`);
     assert.deepEqual(parseSubmissionCallbackData(raw), { action, submissionId: sampleUuid });
@@ -58,11 +58,21 @@ test("buildSubmissionInlineKeyboard returns interactive moderation buttons while
   const allButtons = kb.inline_keyboard.flat();
   assert.ok(allButtons.some((b) => b.callback_data === `sub:approve:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:apphot:${sampleUuid}`));
+  assert.ok(allButtons.some((b) => b.callback_data === `sub:appgold:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:badge:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:reject:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.callback_data === `sub:conf:${sampleUuid}`));
   assert.ok(allButtons.some((b) => b.url === "https://x.com/focusbell"));
   assert.ok(allButtons.some((b) => b.url === "https://focusbell.app/"));
+
+  // When hot/gold slots are full: Shows schedule buttons
+  const fullKb = buildSubmissionInlineKeyboard(baseSubmission, undefined, {
+    hotSlots: { isFull: true, nextDate: "22 Nov", remaining: 0 },
+    articleSlots: { isFull: true, nextDate: "22 Nov", remaining: 0 },
+  });
+  const fullButtons = fullKb.inline_keyboard.flat();
+  assert.ok(fullButtons.some((b) => b.callback_data === `sub:apphotsched:${sampleUuid}`));
+  assert.ok(fullButtons.some((b) => b.callback_data === `sub:appgoldsched:${sampleUuid}`));
 
   // When badge is missing (badgeOk: false) on free listing: Approve is disabled
   const noBadgeKb = buildSubmissionInlineKeyboard({ ...baseSubmission, badgeOk: false });
@@ -70,6 +80,7 @@ test("buildSubmissionInlineKeyboard returns interactive moderation buttons while
   assert.ok(noBadgeButtons.some((b) => b.callback_data === `sub:nobadge:${sampleUuid}`), "Must show disabled nobadge button");
   assert.equal(noBadgeButtons.some((b) => b.callback_data === `sub:approve:${sampleUuid}`), false, "Must not show approve button");
   assert.equal(noBadgeButtons.some((b) => b.callback_data === `sub:apphot:${sampleUuid}`), false, "Must not show apphot button");
+  assert.equal(noBadgeButtons.some((b) => b.callback_data === `sub:appgold:${sampleUuid}`), false, "Must not show appgold button");
 
   // Paid sponsor is exempt: Approve enabled even if badgeOk is false
   const paidKb = buildSubmissionInlineKeyboard({ ...baseSubmission, plan: "choice", badgeOk: false });

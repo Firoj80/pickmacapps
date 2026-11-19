@@ -1305,16 +1305,16 @@ function SubmitPage() {
                         hotSlots.isFull ? (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${hotBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-white/90">
+                            <span className="inline-flex items-center gap-1 text-white/95 font-bold">
                               <span>(</span>
-                              <CalendarIcon className="h-4 w-4 shrink-0 -translate-y-px text-white" />
-                              <span>Book for Next Week: {hotSlots.nextDate})</span>
+                              <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-white" />
+                              <span>Hot Boost · Next Week: {hotSlots.nextDate})</span>
                             </span>
                           </span>
                         ) : (
                           <span className="inline-flex items-center justify-center gap-1.5 flex-wrap">
                             <span>Proceed to checkout — ${hotBaseDollars}</span>
-                            <span className="inline-flex items-center gap-1 text-white/90">
+                            <span className="inline-flex items-center gap-1 text-white/95 font-bold">
                               <span>(</span>
                               <FlameIcon className="h-4 w-4 shrink-0 -translate-y-px text-white" />
                               <span>Hot Boost · 7 Days)</span>
@@ -1327,8 +1327,8 @@ function SubmitPage() {
                             <span>Proceed to checkout — ${goldBaseDollars}</span>
                             <span className="inline-flex items-center gap-1 text-stone-950 font-bold">
                               <span>(</span>
-                              <CalendarIcon className="h-4 w-4 shrink-0 -translate-y-px text-stone-950" />
-                              <span>Book for Next Week: {articleSlots.nextDate})</span>
+                              <BadgeCheckIcon className="h-4.5 w-4.5 shrink-0 -translate-y-px fill-amber-500 text-stone-950 drop-shadow-xs" />
+                              <span>Gold Spotlight · Next Week: {articleSlots.nextDate})</span>
                             </span>
                           </span>
                         ) : (

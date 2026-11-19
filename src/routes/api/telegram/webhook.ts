@@ -89,7 +89,8 @@ export const Route = createFileRoute("/api/telegram/webhook")({
               await sendTelegramMessage(chatId, "🔒 Unauthorized. Only the configured Admin chat can view pending submissions.");
               return Response.json({ ok: true });
             }
-            const { listPendingSubmissionsForTelegram } = await import("@/lib/directory.server");
+            const { listPendingSubmissionsForTelegram, publicOffer } = await import("@/lib/directory.server");
+            const offer = await publicOffer();
             const pending = await listPendingSubmissionsForTelegram(5);
             if (!pending.length) {
               await sendTelegramMessage(chatId, "✅ No pending submissions right now.");
@@ -98,8 +99,15 @@ export const Route = createFileRoute("/api/telegram/webhook")({
             for (const sub of pending) {
               await sendTelegramMessage(
                 chatId,
-                formatSubmissionNotification(sub, { kind: sub.status === "paid" ? "payment_succeeded" : "submitted" }),
-                buildSubmissionInlineKeyboard(sub),
+                formatSubmissionNotification(sub, {
+                  kind: sub.status === "paid" ? "payment_succeeded" : "submitted",
+                  hotSlots: offer.hotSlots,
+                  articleSlots: offer.articleSlots,
+                }),
+                buildSubmissionInlineKeyboard(sub, undefined, {
+                  hotSlots: offer.hotSlots,
+                  articleSlots: offer.articleSlots,
+                }),
               );
             }
             return Response.json({ ok: true });
@@ -115,6 +123,9 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         const fromId = callback.from?.id;
         const chatId = callback.message?.chat?.id;
         const messageId = callback.message?.message_id;
+        const fromUsername = callback.from?.username
+          ? `@${callback.from.username}`
+          : callback.from?.first_name || (fromId ? `ID: ${fromId}` : "admin");
 
         if (!isTelegramConfigured() || !isAuthorizedTelegramSender(fromId, chatId, adminChatId)) {
           await answerTelegramCallback(callback.id, "Unauthorized admin action.", true);
@@ -130,6 +141,7 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         const {
           approveSubmission,
           getSubmissionById,
+          publicOffer,
           rejectSubmission,
           updateSubmissionBadgeStatus,
         } = await import("@/lib/directory.server");
@@ -153,9 +165,15 @@ export const Route = createFileRoute("/api/telegram/webhook")({
         }
 
         if (parsed.action === "badge") {
+          const offer = await publicOffer();
           const check = await checkBadgeOnPage(submission.website);
           await updateSubmissionBadgeStatus(submission.id, check.ok);
-          const refreshed: typeof submission = { ...submission, badgeOk: check.ok };
+          const refreshed: typeof submission = {
+            ...submission,
+            badgeOk: check.ok,
+            hotSlots: offer.hotSlots,
+            articleSlots: offer.articleSlots,
+          };
           const checkedAt = new Date().toISOString().slice(11, 19) + " UTC";
 
           await answerTelegramCallback(
@@ -172,20 +190,37 @@ export const Route = createFileRoute("/api/telegram/webhook")({
                 badgeNote: check.ok
                   ? `live checked ${checkedAt}`
                   : `⚠️ Badge missing: ${check.message} (${checkedAt})`,
+                hotSlots: offer.hotSlots,
+                articleSlots: offer.articleSlots,
               }),
-              buildSubmissionInlineKeyboard(refreshed),
+              buildSubmissionInlineKeyboard(refreshed, undefined, {
+                hotSlots: offer.hotSlots,
+                articleSlots: offer.articleSlots,
+              }),
             );
           }
           return Response.json({ ok: true });
         }
 
-        if (parsed.action === "approve" || parsed.action === "apphot" || parsed.action === "apphotsched") {
+        if (
+          parsed.action === "approve" ||
+          parsed.action === "apphot" ||
+          parsed.action === "apphotsched" ||
+          parsed.action === "appgold" ||
+          parsed.action === "appgoldsched"
+        ) {
           // Live check badge before approving if free plan
           if (submission.plan !== "choice") {
             const liveCheck = await checkBadgeOnPage(submission.website);
             if (!liveCheck.ok) {
               await updateSubmissionBadgeStatus(submission.id, false);
-              const refreshed: typeof submission = { ...submission, badgeOk: false };
+              const offer = await publicOffer();
+              const refreshed: typeof submission = {
+                ...submission,
+                badgeOk: false,
+                hotSlots: offer.hotSlots,
+                articleSlots: offer.articleSlots,
+              };
               const checkedAt = new Date().toISOString().slice(11, 19) + " UTC";
 
               await answerTelegramCallback(
@@ -200,8 +235,13 @@ export const Route = createFileRoute("/api/telegram/webhook")({
                   messageId,
                   formatSubmissionNotification(refreshed, {
                     badgeNote: `⚠️ BLOCKED: Badge not found · ${liveCheck.message} (${checkedAt})`,
+                    hotSlots: offer.hotSlots,
+                    articleSlots: offer.articleSlots,
                   }),
-                  buildSubmissionInlineKeyboard(refreshed),
+                  buildSubmissionInlineKeyboard(refreshed, undefined, {
+                    hotSlots: offer.hotSlots,
+                    articleSlots: offer.articleSlots,
+                  }),
                 );
               }
               return Response.json({ ok: true });
@@ -212,10 +252,14 @@ export const Route = createFileRoute("/api/telegram/webhook")({
           try {
             const makeHot = parsed.action === "apphot";
             const scheduleHot = parsed.action === "apphotsched";
+            const makeGold = parsed.action === "appgold";
+            const scheduleGold = parsed.action === "appgoldsched";
             const created = await approveSubmission(submission.id, {
               approvedBy: `Telegram admin (${fromUsername})`,
               makeHot,
               scheduleHot,
+              makeGold,
+              scheduleGold,
             });
             submitToIndexNow(PRIMARY_ORIGIN, urlsForAppChange(PRIMARY_ORIGIN, created.slug));
 
@@ -227,7 +271,18 @@ export const Route = createFileRoute("/api/telegram/webhook")({
 
             let note: string | undefined = undefined;
             let answerMsg = "";
-            if (created.isHotScheduled) {
+            if (created.isGoldScheduled) {
+              const dateLabel = created.scheduledDate || "next cycle";
+              note = `Published + 📅 Gold Scheduled (${dateLabel})`;
+              answerMsg = created.isUpdate
+                ? `📅 Updated & Gold scheduled for ${dateLabel}: ${created.name}`
+                : `📅 Approved & Gold scheduled for ${dateLabel}: ${created.name}`;
+            } else if (created.isGold) {
+              note = "Published + 🌟 Gold Spotlight";
+              answerMsg = created.isUpdate
+                ? `🌟 Updated & Gold Spotlight: ${created.name}`
+                : `🌟 Approved & Gold Spotlight: ${created.name}`;
+            } else if (created.isHotScheduled) {
               const dateLabel = created.scheduledDate || "next cycle";
               note = `Published + 📅 Hot Scheduled (${dateLabel})`;
               answerMsg = created.isUpdate

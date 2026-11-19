@@ -1164,6 +1164,10 @@ export async function createAdminApp(input: {
   checkBadge?: boolean;
   xHandle?: string;
   status?: string;
+  scheduleHotNextCycle?: boolean;
+  hotScheduledFor?: string | null;
+  scheduleGoldNextCycle?: boolean;
+  featuredScheduledFor?: string | null;
 }) {
   const sql = await directorySql();
   const id = randomUUID();
@@ -1177,21 +1181,35 @@ export async function createAdminApp(input: {
   }
 
   const status = cleanStatus(input.status || "published");
-  const isChoice = input.editorChoice === true;
-  const tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : null;
+  const offer = await publicOffer();
+  const nextHotIso = input.hotScheduledFor || offer.hotSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
+  const nextGoldIso = input.featuredScheduledFor || offer.articleSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
 
-  if (isChoice && status === "published" && tier) {
-    const tierActive = await countActiveTierApps(tier);
-    if (tierActive >= MAX_TIER_SLOTS) {
-      const tierName = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
-      throw new Error(`Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken (${tierActive}/${MAX_TIER_SLOTS} active).`);
+  let hotScheduledFor: string | null = null;
+  let isHot = input.isHot === true;
+  if (input.scheduleHotNextCycle) {
+    isHot = false;
+    hotScheduledFor = nextHotIso;
+  } else if (isHot && status === "published") {
+    const hotActive = await countActiveHotApps();
+    if (hotActive >= MAX_HOT_SLOTS) {
+      throw new Error(`Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled (${hotActive}/${MAX_HOT_SLOTS} active). Please choose 'Schedule for Next Week'.`);
     }
   }
 
-  if (input.isHot === true && status === "published") {
-    const hotActive = await countActiveHotApps();
-    if (hotActive >= MAX_HOT_SLOTS) {
-      throw new Error(`Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled (${hotActive}/${MAX_HOT_SLOTS} active).`);
+  let featuredScheduledFor: string | null = null;
+  let isChoice = input.editorChoice === true;
+  let tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
+
+  if (input.scheduleGoldNextCycle) {
+    isChoice = false;
+    tier = "article";
+    featuredScheduledFor = nextGoldIso;
+  } else if (isChoice && status === "published" && tier) {
+    const tierActive = await countActiveTierApps(tier);
+    if (tierActive >= MAX_TIER_SLOTS) {
+      const tierName = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
+      throw new Error(`Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken (${tierActive}/${MAX_TIER_SLOTS} active). Please choose 'Schedule for Next Week'.`);
     }
   }
 
@@ -1207,8 +1225,9 @@ export async function createAdminApp(input: {
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
-      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, case when $14 then now() else null end, $15, $16, false, $17, $18, $19, $20, now(), now())`,
+      editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, hot_scheduled_for, featured_scheduled_for,
+      status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token, created_at, updated_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, case when $14 then now() else null end, $15, $16, $17, $18, false, $19, $20, $21, $22, now(), now())`,
     [
       id,
       input.name.trim(),
@@ -1223,7 +1242,9 @@ export async function createAdminApp(input: {
       category.emoji,
       isChoice,
       tier,
-      input.isHot === true,
+      isHot,
+      hotScheduledFor,
+      featuredScheduledFor,
       status,
       input.demo?.trim() || "",
       input.checkBadge === true,
@@ -1276,11 +1297,12 @@ export async function getAppRow(id: string) {
   const sql = await directorySql();
   const rows = await sql.query<AppRow>("select * from apps where id = $1", [id]);
   if (!rows[0]) return null;
-  const [otherTotal, otherFeatured, otherArticle, otherHot] = await Promise.all([
+  const [otherTotal, otherFeatured, otherArticle, otherHot, offer] = await Promise.all([
     countActiveEditorChoiceApps(id),
     countActiveTierApps("featured", id),
     countActiveTierApps("article", id),
     countActiveHotApps(id),
+    publicOffer(),
   ]);
   return {
     ...toApp(rows[0]),
@@ -1292,6 +1314,8 @@ export async function getAppRow(id: string) {
     articleSlotsFull: otherArticle >= MAX_EDITOR_CHOICE_SLOTS,
     otherHotCount: otherHot,
     hotSlotsFull: otherHot >= MAX_HOT_SLOTS,
+    nextHotDate: offer.hotSlots.nextDate,
+    nextGoldDate: offer.articleSlots.nextDate,
   };
 }
 
@@ -1322,6 +1346,12 @@ export async function saveApp(input: {
   checkBadge?: boolean;
   xHandle?: string;
   status: string;
+  scheduleHotNextCycle?: boolean;
+  hotScheduledFor?: string | null;
+  clearHotSchedule?: boolean;
+  scheduleGoldNextCycle?: boolean;
+  featuredScheduledFor?: string | null;
+  clearGoldSchedule?: boolean;
 }) {
   const sql = await directorySql();
   const current = await sql.query<AppRow>("select * from apps where id = $1", [input.id]);
@@ -1329,25 +1359,59 @@ export async function saveApp(input: {
   if (!row) throw new Error("App not found");
   const status = cleanStatus(input.status);
 
-  const tier = input.editorChoice ? (input.featuredTier === "article" ? "article" : "featured") : null;
+  const offer = await publicOffer();
+  const nextHotIso = input.hotScheduledFor || offer.hotSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
+  const nextGoldIso = input.featuredScheduledFor || offer.articleSlots.openDates[0] || new Date(Date.now() + 7 * 86400000).toISOString();
 
-  if (input.editorChoice && status === "published" && tier) {
+  let hotScheduledFor: string | null = row.hot_scheduled_for
+    ? (row.hot_scheduled_for instanceof Date ? row.hot_scheduled_for.toISOString() : String(row.hot_scheduled_for))
+    : null;
+  let isHot = input.isHot === true;
+
+  if (input.clearHotSchedule) {
+    hotScheduledFor = null;
+  } else if (input.scheduleHotNextCycle) {
+    isHot = false;
+    hotScheduledFor = nextHotIso;
+  } else if (input.hotScheduledFor !== undefined) {
+    hotScheduledFor = input.hotScheduledFor;
+  }
+
+  if (isHot && status === "published") {
+    const hotActive = await countActiveHotApps(input.id);
+    if (hotActive >= MAX_HOT_SLOTS) {
+      throw new Error(
+        `Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled by other published apps (${hotActive}/${MAX_HOT_SLOTS} active). Please choose 'Schedule for Next Week' or unmark another app first.`
+      );
+    }
+    hotScheduledFor = null;
+  }
+
+  let featuredScheduledFor: string | null = row.featured_scheduled_for
+    ? (row.featured_scheduled_for instanceof Date ? row.featured_scheduled_for.toISOString() : String(row.featured_scheduled_for))
+    : null;
+  let isChoice = input.editorChoice;
+  let tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
+
+  if (input.clearGoldSchedule) {
+    featuredScheduledFor = null;
+  } else if (input.scheduleGoldNextCycle) {
+    isChoice = false;
+    tier = "article";
+    featuredScheduledFor = nextGoldIso;
+  } else if (input.featuredScheduledFor !== undefined) {
+    featuredScheduledFor = input.featuredScheduledFor;
+  }
+
+  if (isChoice && status === "published" && tier) {
     const tierActive = await countActiveTierApps(tier, input.id);
     if (tierActive >= MAX_TIER_SLOTS) {
       const tierName = tier === "article" ? "Featured + Medium Article (Gold)" : "Featured Placement (Blue)";
       throw new Error(
-        `Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken by other published apps (${tierActive}/${MAX_TIER_SLOTS} active). Please uncheck this tier on another app first.`
+        `Cannot enable ${tierName}: All ${MAX_TIER_SLOTS} slots for this tier are already taken by other published apps (${tierActive}/${MAX_TIER_SLOTS} active). Please choose 'Schedule for Next Week' or uncheck another app first.`
       );
     }
-  }
-
-  if (input.isHot === true && status === "published") {
-    const hotActive = await countActiveHotApps(input.id);
-    if (hotActive >= MAX_HOT_SLOTS) {
-      throw new Error(
-        `Cannot mark as Hot: All ${MAX_HOT_SLOTS} slots are currently filled by other published apps (${hotActive}/${MAX_HOT_SLOTS} active). Please unmark another app first.`
-      );
-    }
+    featuredScheduledFor = null;
   }
 
   const foundCategory = findShelfCategory(input.category);
@@ -1375,6 +1439,8 @@ export async function saveApp(input: {
       status = $13, icon = $14, demo = $15, is_hot = $16,
       hot_marked_at = case when $16 then coalesce(hot_marked_at, now()) else null end,
       check_badge = $17, x_handle = $18, submitter_x = coalesce(nullif($18, ''), submitter_x),
+      hot_scheduled_for = $19,
+      featured_scheduled_for = $20,
       updated_at = now()
      where id = $1`,
     [
@@ -1388,14 +1454,16 @@ export async function saveApp(input: {
       category.slug,
       category.name,
       category.emoji,
-      input.editorChoice,
+      isChoice,
       tier,
       status,
       input.icon.trim(),
       input.demo.trim(),
-      input.isHot === true,
+      isHot,
       input.checkBadge !== undefined ? input.checkBadge === true : Boolean(row.check_badge),
       cleanX,
+      hotScheduledFor,
+      featuredScheduledFor,
     ],
   );
   invalidatePublicOfferCache();
@@ -1581,6 +1649,7 @@ export async function listSubmissions() {
 
 export async function getSubmissionById(id: string): Promise<TelegramSubmissionInfo | null> {
   const sql = await directorySql();
+  const offer = await publicOffer();
   const rows = await sql.query<{
     id: string;
     app_name: string;
@@ -1650,6 +1719,8 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
       existingSlug: app.slug,
       isUpdate: false,
       dashboardToken: app.dashboard_token || undefined,
+      hotSlots: offer.hotSlots,
+      articleSlots: offer.articleSlots,
     };
   }
   return {
@@ -1669,6 +1740,8 @@ export async function getSubmissionById(id: string): Promise<TelegramSubmissionI
     existingSlug: row.app_slug || undefined,
     isUpdate: Boolean(row.app_slug || row.app_id),
     dashboardToken: row.dashboard_token || undefined,
+    hotSlots: offer.hotSlots,
+    articleSlots: offer.articleSlots,
   };
 }
 
@@ -1982,6 +2055,7 @@ export async function approveSubmission(
     approvedBy?: string;
     makeHot?: boolean;
     scheduleHot?: boolean;
+    makeGold?: boolean;
     scheduleGold?: boolean;
   },
 ) {
@@ -2064,12 +2138,14 @@ export async function approveSubmission(
     hotScheduledFor = null;
   }
 
+  const wantsGold = isChoiceGold || Boolean(options?.makeGold) || Boolean(options?.scheduleGold);
+
   let shouldBeEditorChoice = false;
   let shouldBeTier: string | null = null;
   let featuredScheduledFor: string | null = null;
   let isGoldScheduled = false;
 
-  if (isChoiceGold) {
+  if (wantsGold) {
     if (options?.scheduleGold || goldSlotsFull) {
       shouldBeEditorChoice = false;
       shouldBeTier = "article";
@@ -2113,8 +2189,8 @@ export async function approveSubmission(
   }
 
   if (existingApp) {
-    const updatedEditorChoice = isChoiceGold ? shouldBeEditorChoice : existingApp.editor_choice;
-    const updatedTier = isChoiceGold ? "article" : (isChoiceHot ? null : existingApp.featured_tier);
+    const updatedEditorChoice = wantsGold ? shouldBeEditorChoice : existingApp.editor_choice;
+    const updatedTier = wantsGold ? "article" : (wantsHot ? null : existingApp.featured_tier);
     const updatedIsHot = wantsHot ? shouldBeHot : existingApp.is_hot;
 
     const dashTokenRows = await sql.query<{ dashboard_token: string | null }>(
@@ -2197,6 +2273,7 @@ export async function approveSubmission(
       dashboardToken,
       isHot: updatedIsHot,
       isHotScheduled,
+      isGold: updatedEditorChoice,
       isGoldScheduled,
       scheduledDate: isHotScheduled ? nextHotDate : isGoldScheduled ? nextGoldDate : undefined,
     };
@@ -2258,6 +2335,7 @@ export async function approveSubmission(
     dashboardToken,
     isHot: shouldBeHot,
     isHotScheduled,
+    isGold: shouldBeEditorChoice,
     isGoldScheduled,
     scheduledDate: isHotScheduled ? nextHotDate : isGoldScheduled ? nextGoldDate : undefined,
   };

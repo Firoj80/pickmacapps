@@ -464,6 +464,25 @@ function EditAppForm({ app }: { app: EditAppData }) {
 
         {/* 8. Placement & Badges */}
         <div className="space-y-3 rounded-xl border border-line bg-stone-50/50 p-4">
+          {app.featuredScheduledFor ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 text-xs text-amber-900 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📅</span>
+                <div>
+                  <p className="font-bold">
+                    Scheduled for Gold Spotlight on{" "}
+                    {new Date(app.featuredScheduledFor).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </p>
+                  <p className="text-[11px] text-amber-800">Will automatically activate in the next cycle.</p>
+                </div>
+              </div>
+              <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-rose-700 hover:text-rose-900">
+                <input type="checkbox" name="clear_gold_schedule" value="1" className="rounded" />
+                <span>Cancel Schedule</span>
+              </label>
+            </div>
+          ) : null}
+
           <label className="flex items-center gap-2.5 text-sm font-medium text-ink cursor-pointer">
             <input
               type="checkbox"
@@ -475,6 +494,21 @@ function EditAppForm({ app }: { app: EditAppData }) {
             />
             <span className="font-semibold text-ink">🌟 Feature in Editor’s Choice (Top Placement)</span>
           </label>
+
+          {app.editorChoiceSlotsFull && !editorChoice && !app.featuredScheduledFor ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50/80 p-3 text-xs text-amber-900 space-y-1.5">
+              <p className="font-semibold text-amber-950">⚠️ All 6 Gold Spotlight slots are currently active.</p>
+              <label className="flex items-center gap-2 font-medium text-amber-900 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="schedule_gold_next"
+                  value="1"
+                  className="h-4 w-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                />
+                <span>📅 Schedule Gold for Next Cycle (opens {(app as any).nextGoldDate || "Next Week"})</span>
+              </label>
+            </div>
+          ) : null}
 
           {editorChoice ? (
             <div className="mt-3 space-y-3 border-t border-line/60 pt-3">
@@ -529,7 +563,26 @@ function EditAppForm({ app }: { app: EditAppData }) {
         </div>
 
         {/* 9. Hot App Toggle */}
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 space-y-3">
+          {app.hotScheduledFor ? (
+            <div className="rounded-lg border border-rose-300 bg-rose-50 p-3 text-xs text-rose-900 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-base">📅</span>
+                <div>
+                  <p className="font-bold">
+                    Scheduled for Hot Boost on{" "}
+                    {new Date(app.hotScheduledFor).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </p>
+                  <p className="text-[11px] text-rose-800">Will automatically activate in the next cycle.</p>
+                </div>
+              </div>
+              <label className="flex items-center gap-1.5 cursor-pointer text-xs font-semibold text-rose-700 hover:text-rose-900">
+                <input type="checkbox" name="clear_hot_schedule" value="1" className="rounded" />
+                <span>Cancel Schedule</span>
+              </label>
+            </div>
+          ) : null}
+
           <label className={`flex items-center gap-2.5 text-sm text-ink ${!app.isHot && (app.otherHotCount ?? 0) >= 6 ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}>
             <input
               type="checkbox"
@@ -549,10 +602,20 @@ function EditAppForm({ app }: { app: EditAppData }) {
               — displays fire badge on cards and ranks in the top 6 hot shelf
             </span>
           </label>
-          {!app.isHot && (app.otherHotCount ?? 0) >= 6 && (
-            <p className="mt-2 text-xs text-rose-400">
-              ⚠️ All 6 Hot slots are currently filled. To mark this app as Hot, remove Hot status from another app first.
-            </p>
+
+          {!app.isHot && (app.otherHotCount ?? 0) >= 6 && !app.hotScheduledFor && (
+            <div className="rounded-lg border border-rose-400/30 bg-stone-900/40 p-3 text-xs text-rose-300 space-y-1.5">
+              <p className="font-medium text-rose-400">⚠️ All 6 Hot slots are currently active.</p>
+              <label className="flex items-center gap-2 font-semibold text-rose-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="schedule_hot_next"
+                  value="1"
+                  className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500"
+                />
+                <span>📅 Schedule Hot for Next Cycle (opens {(app as any).nextHotDate || "Next Week"})</span>
+              </label>
+            </div>
           )}
         </div>
 

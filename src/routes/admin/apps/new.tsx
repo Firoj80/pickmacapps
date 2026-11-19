@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
 import { shelfCategories } from "@/lib/shelf-categories";
-import { ensureAdminSession, fetchAppMetadataFn } from "@/lib/directory.fn";
+import { ensureAdminSession, fetchAppMetadataFn, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { BadgeCheckIcon, CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 
@@ -14,6 +14,7 @@ export const Route = createFileRoute("/admin/apps/new")({
       throw redirect({ href: "/admin/login" });
     }
   },
+  loader: () => getCachedAdminHome(),
   component: NewAppPage,
   head: ({ matches }) => {
     const seo = buildMetadata({
@@ -28,7 +29,16 @@ export const Route = createFileRoute("/admin/apps/new")({
 });
 
 function NewAppPage() {
+  const data = Route.useLoaderData();
   const notice = useAdminNotice();
+
+  const hotSlots = data?.offer?.hotSlots;
+  const isHotFull = Boolean(hotSlots?.isFull);
+  const nextHotDate = hotSlots?.nextDate || "Next Week";
+
+  const goldSlots = data?.offer?.articleSlots;
+  const isGoldFull = Boolean(goldSlots?.isFull);
+  const nextGoldDate = goldSlots?.nextDate || "Next Week";
 
   // Controlled form state identical to public submit app page
   const [website, setWebsite] = useState("");
@@ -416,6 +426,21 @@ function NewAppPage() {
             <span>🌟 Feature in Editor’s Choice (Top Placement)</span>
           </label>
 
+          {isGoldFull && !editorChoice ? (
+            <div className="rounded-lg border border-amber-300 bg-amber-50/80 p-3 text-xs text-amber-900 space-y-1.5">
+              <p className="font-semibold text-amber-950">⚠️ All 6 Gold Spotlight slots are currently active.</p>
+              <label className="flex items-center gap-2 font-medium text-amber-900 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="schedule_gold_next"
+                  value="1"
+                  className="h-4 w-4 rounded border-amber-400 text-amber-600 focus:ring-amber-500"
+                />
+                <span>📅 Schedule Gold for Next Cycle ({nextGoldDate})</span>
+              </label>
+            </div>
+          ) : null}
+
           {editorChoice ? (
             <div className="mt-3 space-y-2 border-t border-line/60 pt-3">
               <label className="block text-[13px] font-medium text-ink">
@@ -442,7 +467,7 @@ function NewAppPage() {
         </div>
 
         {/* 9. Hot App Toggle */}
-        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5">
+        <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3.5 space-y-2">
           <label className="flex items-center gap-2.5 text-sm text-ink cursor-pointer">
             <input
               type="checkbox"
@@ -458,6 +483,21 @@ function NewAppPage() {
               — displays fire badge on cards and ranks in the top 6 hot shelf (max 6 slots)
             </span>
           </label>
+
+          {isHotFull && !isHot ? (
+            <div className="rounded-lg border border-rose-400/30 bg-stone-900/40 p-3 text-xs text-rose-300 space-y-1.5">
+              <p className="font-medium text-rose-400">⚠️ All 6 Hot slots are currently active.</p>
+              <label className="flex items-center gap-2 font-semibold text-rose-200 cursor-pointer">
+                <input
+                  type="checkbox"
+                  name="schedule_hot_next"
+                  value="1"
+                  className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500"
+                />
+                <span>📅 Schedule Hot for Next Cycle ({nextHotDate})</span>
+              </label>
+            </div>
+          ) : null}
         </div>
 
         {/* 10. Automated Badge Check */}

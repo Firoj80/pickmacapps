@@ -107,6 +107,10 @@ export async function handleAdminPost(request: Request) {
           checkBadge: form.get("check_badge") === "on" || form.get("check_badge") === "true",
           xHandle: String(form.get("x_handle") ?? ""),
           status: String(form.get("status") ?? "published"),
+          scheduleHotNextCycle: form.get("schedule_hot_next") === "1" || form.get("schedule_hot_next") === "on",
+          hotScheduledFor: form.get("hot_scheduled_for") ? String(form.get("hot_scheduled_for")) : undefined,
+          scheduleGoldNextCycle: form.get("schedule_gold_next") === "1" || form.get("schedule_gold_next") === "on",
+          featuredScheduledFor: form.get("featured_scheduled_for") ? String(form.get("featured_scheduled_for")) : undefined,
         });
         return redirect(`/admin/apps/${id}?saved=created`);
       }
@@ -127,6 +131,12 @@ export async function handleAdminPost(request: Request) {
         checkBadge: form.get("check_badge") === "on" || form.get("check_badge") === "true",
         xHandle: String(form.get("x_handle") ?? ""),
         status: String(form.get("status") ?? ""),
+        scheduleHotNextCycle: form.get("schedule_hot_next") === "1" || form.get("schedule_hot_next") === "on",
+        hotScheduledFor: form.get("hot_scheduled_for") ? String(form.get("hot_scheduled_for")) : undefined,
+        clearHotSchedule: form.get("clear_hot_schedule") === "1" || form.get("clear_hot_schedule") === "true",
+        scheduleGoldNextCycle: form.get("schedule_gold_next") === "1" || form.get("schedule_gold_next") === "on",
+        featuredScheduledFor: form.get("featured_scheduled_for") ? String(form.get("featured_scheduled_for")) : undefined,
+        clearGoldSchedule: form.get("clear_gold_schedule") === "1" || form.get("clear_gold_schedule") === "true",
       });
       return redirect(`/admin/apps/${form.get("id")}?saved=1`);
     }
@@ -187,8 +197,55 @@ export async function handleAdminPost(request: Request) {
       return redirect("/admin?saved=upvote_settings");
     }
     if (action === "approve") {
-      await approveSubmission(String(form.get("id") ?? ""));
-      return redirect("/admin?saved=approved");
+      const id = String(form.get("id") ?? "");
+      const makeHot = form.get("make_hot") === "1" || form.get("make_hot") === "true";
+      const scheduleHot = form.get("schedule_hot") === "1" || form.get("schedule_hot") === "true";
+      const makeGold = form.get("make_gold") === "1" || form.get("make_gold") === "true";
+      const scheduleGold = form.get("schedule_gold") === "1" || form.get("schedule_gold") === "true";
+
+      const created = await approveSubmission(id, {
+        approvedBy: "Web Admin",
+        makeHot,
+        scheduleHot,
+        makeGold,
+        scheduleGold,
+      });
+
+      const { submitToIndexNow, urlsForAppChange } = await import("@/lib/indexnow");
+      const { PRIMARY_ORIGIN } = await import("@/lib/seo");
+      submitToIndexNow(PRIMARY_ORIGIN, urlsForAppChange(PRIMARY_ORIGIN, created.slug));
+
+      const adminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID;
+      if (adminChatId) {
+        try {
+          const { getSubmissionById } = await import("@/lib/directory.server");
+          const {
+            sendTelegramMessage,
+            formatXPostTelegramMessage,
+            buildXPostInlineKeyboard,
+          } = await import("@/lib/telegram.server");
+          const subInfo = await getSubmissionById(id);
+          if (subInfo) {
+            await sendTelegramMessage(
+              adminChatId,
+              formatXPostTelegramMessage(subInfo, 1, created.slug),
+              buildXPostInlineKeyboard(subInfo, 1, created.slug),
+            );
+            if (created.dashboardToken) {
+              const dashUrl = `${PRIMARY_ORIGIN}/dashboard/${created.dashboardToken}`;
+              await sendTelegramMessage(
+                adminChatId,
+                `🔑 <b>Submitter Dashboard Link:</b>\n<a href="${dashUrl}">${dashUrl}</a>\n\n<i>Share this private link with the developer so they can manage their listing, metrics & badges.</i>`,
+              );
+            }
+          }
+        } catch (tgErr) {
+          console.error("Failed to send X-post alert to Telegram from web admin approval:", tgErr);
+        }
+      }
+
+      const returnTo = String(form.get("return_to") ?? "/admin/submissions?saved=approved");
+      return redirect(returnTo);
     }
     if (action === "toggle-hot") {
       const id = String(form.get("id") ?? "");

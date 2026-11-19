@@ -41,6 +41,14 @@ function SubmissionsPage() {
   const pendingCount = data.submissions.filter((s) => s.status === "pending").length;
   const paidCount = data.submissions.filter((s) => s.status === "paid").length;
 
+  const hotSlots = data.offer?.hotSlots;
+  const isHotFull = Boolean(hotSlots?.isFull);
+  const nextHotDate = hotSlots?.nextDate || "Next Cycle";
+
+  const goldSlots = data.offer?.articleSlots;
+  const isGoldFull = Boolean(goldSlots?.isFull);
+  const nextGoldDate = goldSlots?.nextDate || "Next Cycle";
+
   return (
     <AdminShell
       title="Submissions Pipeline"
@@ -203,20 +211,42 @@ function SubmissionsPage() {
                                 type="button"
                                 disabled
                                 title="Cannot approve: PickMacApps badge was not found on website. Verify badge first."
-                                className="rounded-lg bg-stone-200 px-3 py-1.5 text-xs font-medium text-stone-400 cursor-not-allowed"
+                                className="rounded-lg bg-stone-200 px-2.5 py-1 text-[11px] font-medium text-stone-400 cursor-not-allowed"
                               >
-                                Approve
+                                Approve Disabled (No Badge)
                               </button>
                             ) : (
-                              <form method="post" action="/api/admin/approve">
-                                <input type="hidden" name="id" value={item.id} />
-                                <button
-                                  type="submit"
-                                  className="rounded-lg bg-ink px-3 py-1.5 text-xs font-semibold text-canvas transition hover:opacity-90 cursor-pointer"
-                                >
-                                  Approve
-                                </button>
-                              </form>
+                              <>
+                                <form method="post" action="/api/admin/approve">
+                                  <input type="hidden" name="id" value={item.id} />
+                                  <button
+                                    type="submit"
+                                    className="rounded-lg bg-ink px-2.5 py-1 text-[11px] font-semibold text-canvas transition hover:opacity-90 cursor-pointer"
+                                  >
+                                    ✅ Standard Approve
+                                  </button>
+                                </form>
+                                <form method="post" action="/api/admin/approve">
+                                  <input type="hidden" name="id" value={item.id} />
+                                  <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
+                                  <button
+                                    type="submit"
+                                    className="rounded-lg bg-orange-600 px-2.5 py-1 text-[11px] font-semibold text-white transition hover:bg-orange-700 cursor-pointer"
+                                  >
+                                    {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
+                                  </button>
+                                </form>
+                                <form method="post" action="/api/admin/approve">
+                                  <input type="hidden" name="id" value={item.id} />
+                                  <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
+                                  <button
+                                    type="submit"
+                                    className="rounded-lg bg-amber-500 px-2.5 py-1 text-[11px] font-semibold text-stone-950 transition hover:bg-amber-600 cursor-pointer"
+                                  >
+                                    {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
+                                  </button>
+                                </form>
+                              </>
                             )}
                           </div>
                         ) : (
@@ -325,48 +355,74 @@ function SubmissionsPage() {
 
                   {/* Mobile Touch Actions */}
                   {item.status === "pending" || item.status === "paid" ? (
-                    <div className="flex items-center gap-2 pt-1">
-                      {item.plan === "free" ? (
-                        <form method="post" action="/api/admin/verify-submission-badge" className="flex-1">
+                    <div className="flex flex-col gap-2 pt-1">
+                      <div className="flex items-center gap-2">
+                        {item.plan === "free" ? (
+                          <form method="post" action="/api/admin/verify-submission-badge" className="flex-1">
+                            <input type="hidden" name="id" value={item.id} />
+                            <button
+                              type="submit"
+                              className="w-full rounded-xl border border-line bg-white py-2 text-center text-xs font-semibold text-ink shadow-xs hover:bg-stone-50 active:bg-stone-100 cursor-pointer"
+                            >
+                              🔍 Check Badge
+                            </button>
+                          </form>
+                        ) : null}
+
+                        <form method="post" action="/api/admin/reject" className="shrink-0">
                           <input type="hidden" name="id" value={item.id} />
                           <button
                             type="submit"
-                            className="w-full rounded-xl border border-line bg-white py-2 text-center text-xs font-semibold text-ink shadow-xs hover:bg-stone-50 active:bg-stone-100 cursor-pointer"
+                            className="rounded-xl border border-line bg-white px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
                           >
-                            🔍 Check Badge
+                            Reject
                           </button>
                         </form>
-                      ) : null}
+                      </div>
 
                       {item.plan === "free" && !item.badge_ok ? (
                         <button
                           type="button"
                           disabled
-                          className="flex-1 rounded-xl bg-stone-200 py-2 text-center text-xs font-semibold text-stone-400 cursor-not-allowed"
+                          className="w-full rounded-xl bg-stone-200 py-2 text-center text-xs font-semibold text-stone-400 cursor-not-allowed"
                         >
-                          Approve
+                          Approve Disabled (No Badge)
                         </button>
                       ) : (
-                        <form method="post" action="/api/admin/approve" className="flex-1">
-                          <input type="hidden" name="id" value={item.id} />
-                          <button
-                            type="submit"
-                            className="w-full rounded-xl bg-ink py-2 text-center text-xs font-semibold text-canvas shadow-xs hover:opacity-90 active:opacity-80 cursor-pointer"
-                          >
-                            Approve
-                          </button>
-                        </form>
-                      )}
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                          <form method="post" action="/api/admin/approve" className="w-full">
+                            <input type="hidden" name="id" value={item.id} />
+                            <button
+                              type="submit"
+                              className="w-full rounded-xl bg-ink py-2 text-center text-xs font-semibold text-canvas shadow-xs hover:opacity-90 active:opacity-80 cursor-pointer"
+                            >
+                              ✅ Standard Approve
+                            </button>
+                          </form>
 
-                      <form method="post" action="/api/admin/reject" className="shrink-0">
-                        <input type="hidden" name="id" value={item.id} />
-                        <button
-                          type="submit"
-                          className="rounded-xl border border-line bg-white px-3 py-2 text-xs font-semibold text-rose-600 hover:bg-rose-50 cursor-pointer"
-                        >
-                          Reject
-                        </button>
-                      </form>
+                          <form method="post" action="/api/admin/approve" className="w-full">
+                            <input type="hidden" name="id" value={item.id} />
+                            <input type="hidden" name={isHotFull ? "schedule_hot" : "make_hot"} value="1" />
+                            <button
+                              type="submit"
+                              className="w-full rounded-xl bg-orange-600 py-2 text-center text-xs font-semibold text-white shadow-xs hover:bg-orange-700 active:opacity-80 cursor-pointer"
+                            >
+                              {isHotFull ? `📅 Hot (${nextHotDate})` : `🔥 Hot (${hotSlots?.remaining ?? 6} left)`}
+                            </button>
+                          </form>
+
+                          <form method="post" action="/api/admin/approve" className="w-full">
+                            <input type="hidden" name="id" value={item.id} />
+                            <input type="hidden" name={isGoldFull ? "schedule_gold" : "make_gold"} value="1" />
+                            <button
+                              type="submit"
+                              className="w-full rounded-xl bg-amber-500 py-2 text-center text-xs font-semibold text-stone-950 shadow-xs hover:bg-amber-600 active:opacity-80 cursor-pointer"
+                            >
+                              {isGoldFull ? `📅 Gold (${nextGoldDate})` : `🌟 Gold (${goldSlots?.remaining ?? 6} left)`}
+                            </button>
+                          </form>
+                        </div>
+                      )}
                     </div>
                   ) : null}
                 </div>
