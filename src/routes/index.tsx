@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
-import { LeaderboardBanner } from "@/components/leaderboard-banner";
+import { FreshDropsBanner } from "@/components/fresh-drops-banner";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { BadgeCheckIcon } from "@/components/icons";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
@@ -45,7 +45,7 @@ function inHeroCategory(app: AppItem, category: string) {
   return normalizeCategorySlug(app.category) === category;
 }
 
-function arrangeHero(list: readonly AppItem[], sort: HeroSort) {
+function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
   const next = [...list];
   if (sort === "new") {
     // Latest/Newest: Featured apps on top, then Hot apps, then all latest added apps by createdAt desc
@@ -380,10 +380,15 @@ function Home() {
             )}
           </div>
 
-          {/* Running Banner Style Leaderboard (Top Apps) */}
-          <div className="w-full mt-4 sm:mt-6 md:mt-8">
-            <LeaderboardBanner apps={list} />
-          </div>
+          {/* Running Banner: Fresh Drops (configurable from admin) */}
+          {(offer?.sidebarSettings?.enabled ?? true) && (
+            <div className="w-full mt-4 sm:mt-6 md:mt-8">
+              <FreshDropsBanner
+                apps={list}
+                settings={offer?.sidebarSettings ?? { enabled: true, duration: "24h" }}
+              />
+            </div>
+          )}
         </section>
       )}
 

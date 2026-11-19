@@ -8,9 +8,10 @@ import { getOrSetVisitorId, trackClick } from "@/components/app-card";
 import { BadgeCheckIcon } from "@/components/icons";
 
 export const Route = createFileRoute("/leaderboard")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    page: Math.max(1, Number(search.page) || 1),
-  }),
+  validateSearch: (search: Record<string, unknown>): { page?: number } => {
+    const page = Math.max(1, Number(search.page) || 1);
+    return page > 1 ? { page } : {};
+  },
   component: LeaderboardPage,
   head: ({ matches }) => {
     const origin = originFrom(matches);
@@ -34,7 +35,7 @@ export const Route = createFileRoute("/leaderboard")({
 function LeaderboardPage() {
   const { directory } = Route.useRouteContext();
   const list = publishedApps(directory);
-  const { page } = Route.useSearch();
+  const { page = 1 } = Route.useSearch();
   const navigate = useNavigate();
 
   // Sort apps strictly by upvotes descending
@@ -486,7 +487,9 @@ function LeaderboardUpvoteButton({ app }: { app: AppItem }) {
         if (Array.isArray(votedList) && votedList.includes(app.id)) {
           setHasVoted(true);
         }
-      } catch {}
+      } catch {
+        /* ignore storage error */
+      }
     }
   }, [app.id]);
 
@@ -505,7 +508,9 @@ function LeaderboardUpvoteButton({ app }: { app: AppItem }) {
         votedList.push(app.id);
         localStorage.setItem("pma_voted", JSON.stringify(votedList));
       }
-    } catch {}
+    } catch {
+      /* ignore storage error */
+    }
 
     const visitorId = getOrSetVisitorId();
     fetch("/api/upvote", {
@@ -554,7 +559,9 @@ function LeaderboardMobileCard({ app, rank }: { app: AppItem; rank: number }) {
         if (Array.isArray(votedList) && votedList.includes(app.id)) {
           setHasVoted(true);
         }
-      } catch {}
+      } catch {
+        /* ignore storage error */
+      }
     }
   }, [app.id]);
 
@@ -573,7 +580,9 @@ function LeaderboardMobileCard({ app, rank }: { app: AppItem; rank: number }) {
         votedList.push(app.id);
         localStorage.setItem("pma_voted", JSON.stringify(votedList));
       }
-    } catch {}
+    } catch {
+      /* ignore storage error */
+    }
 
     const visitorId = getOrSetVisitorId();
     fetch("/api/upvote", {

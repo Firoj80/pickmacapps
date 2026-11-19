@@ -146,6 +146,11 @@ function AppPage() {
     return <AppAlternatives discontinued={discontinued} allApps={allApps} />;
   }
 
+  return <AppDetails app={app} allApps={allApps} slug={slug} />;
+}
+
+function AppDetails({ app, allApps, slug }: { app: AppItem; allApps: AppItem[]; slug: string }) {
+
   const allOtherApps = allApps.filter((item) => item.slug !== app.slug);
   const explicitRelated = app.related
     .map((item) => allOtherApps.find((a) => a.slug === item))
@@ -195,12 +200,14 @@ function AppPage() {
       try {
         const host = new URL(app.website).hostname.replace(/^www\./, "");
         avatarUrl = `https://unavatar.io/${host}`;
-      } catch {}
+      } catch {
+        /* ignore invalid website */
+      }
     }
   }
 
-  const isGold = (app.featuredTier === "article") || (choice && app.featuredTier === "article");
-  const isBlue = (app.featuredTier === "featured") || (choice && app.featuredTier !== "article");
+  const isGold = app.featuredTier === "article";
+  const isBlue = (choice && app.featuredTier !== "article") || app.featuredTier === "featured";
   const hasBadges = isGold || isBlue || app.featured || choice || app.isHot;
 
   const handleShare = () => {

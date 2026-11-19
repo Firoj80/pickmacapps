@@ -17,6 +17,7 @@ import {
   setChoicePrice,
   setPackagePrice,
   toggleAppHot,
+  updateSidebarSettings,
   updateUpvoteSettings,
   verifySubmissionBadge,
 } from "@/lib/directory.server";
@@ -195,6 +196,12 @@ export async function handleAdminPost(request: Request) {
         hotThreshold: Number.isFinite(hotThreshold) && hotThreshold > 0 ? hotThreshold : 15,
       });
       return redirect("/admin?saved=upvote_settings");
+    }
+    if (action === "update-sidebar-settings") {
+      const duration = String(form.get("sidebar_duration") ?? "24h");
+      const enabled = form.get("sidebar_enabled") === "on" || form.get("sidebar_enabled") === "true";
+      await updateSidebarSettings({ duration, enabled });
+      return redirect("/admin?saved=sidebar_settings");
     }
     if (action === "approve") {
       const id = String(form.get("id") ?? "");

@@ -3,7 +3,11 @@ import { createFileRoute } from "@tanstack/react-router";
 interface TelegramUpdate {
   callback_query?: {
     id: string;
-    from?: { id?: number | string };
+    from?: {
+      id?: number | string;
+      username?: string;
+      first_name?: string;
+    };
     data?: string;
     message?: {
       message_id: number;
@@ -13,7 +17,11 @@ interface TelegramUpdate {
   };
   message?: {
     chat?: { id?: number | string };
-    from?: { id?: number | string };
+    from?: {
+      id?: number | string;
+      username?: string;
+      first_name?: string;
+    };
     text?: string;
   };
 }

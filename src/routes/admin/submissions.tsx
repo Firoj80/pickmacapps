@@ -165,7 +165,7 @@ function SubmissionsPage() {
                         ) : (
                           <div className="flex flex-col items-start gap-1">
                             <Pill tone="off">Free Community</Pill>
-                            {Boolean(item.badge_ok) ? (
+                            {item.badge_ok ? (
                               <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-emerald-600">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                                 Badge Verified
@@ -330,7 +330,7 @@ function SubmissionsPage() {
                       ) : (
                         <div className="flex items-center gap-1.5">
                           <span className="text-muted">Free Community</span>
-                          {Boolean(item.badge_ok) ? (
+                          {item.badge_ok ? (
                             <span className="text-[10px] font-bold text-emerald-600">✓ Verified</span>
                           ) : (
                             <span className="text-[10px] font-bold text-rose-600">⚠️ Missing</span>

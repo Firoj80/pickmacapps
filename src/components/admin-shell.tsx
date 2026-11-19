@@ -79,6 +79,7 @@ const savedCopy: Record<string, string> = {
   deleted: "Listing permanently deleted. The URL now serves the Alternatives Hub.",
   token_generated: "Secret submitter dashboard token generated successfully.",
   token_regenerated: "New secret dashboard link generated and updated.",
+  sidebar_settings: "Fresh drops banner settings updated.",
 };
 
 export function Notice({ error, saved }: { error: string; saved: string }) {

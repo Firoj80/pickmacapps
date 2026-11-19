@@ -25,6 +25,7 @@ export function AppGrid({
   arranged = false,
   filters = "all",
   offer,
+  hasSidebar = false,
 }: {
   apps: AppItem[];
   query: string;
@@ -37,6 +38,7 @@ export function AppGrid({
   arranged?: boolean;
   filters?: "all" | "search";
   offer?: ClaimSpotOffer | null;
+  hasSidebar?: boolean;
 }) {
   const [order, setOrder] = useState<"oldest" | "newest" | "name" | "free">("oldest");
   const [page, setPage] = useState(0);
@@ -149,8 +151,10 @@ export function AppGrid({
         ? "Showing 0 apps"
         : `Showing ${appsBeforePage + 1}–${appsEndPage} of ${appCount} apps`;
 
+    const gridColsClass = "grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3";
+
     contentNodes = (
-      <div className="grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+      <div className={gridColsClass}>
         {pageItems.map((item) => {
           if (item.kind === "claim") {
             return (
@@ -176,8 +180,10 @@ export function AppGrid({
     const last = Math.min(start + PAGE, visible.length);
     countLabel = `Showing ${start + 1}–${last} of ${visible.length} apps`;
 
+    const gridColsClass = "grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3";
+
     contentNodes = (
-      <div className="grid grid-cols-1 gap-y-3 sm:gap-x-6 sm:gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+      <div className={gridColsClass}>
         {slice.map((app, index) => (
           <AppCard
             key={app.id}

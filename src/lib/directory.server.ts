@@ -18,6 +18,8 @@ import {
   type FeaturedTier,
   type Post,
   type Pricing,
+  type SidebarRecentDuration,
+  type SidebarSettings,
 } from "@/lib/catalog";
 
 type AppRow = {
@@ -400,6 +402,7 @@ export type PublishedDirectory = {
   editors: string[];
   categories: ShelfCategory[];
   tombstones: { slug: string; name?: string; category?: string }[];
+  sidebarSettings?: SidebarSettings;
 };
 
 let cachedDirectory: { data: PublishedDirectory; timestamp: number } | null = null;
@@ -417,7 +420,7 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
   try {
     const sql = await directorySql();
     // Run all 4 queries concurrently on Postgres
-    const [appRows, guideRows, categoryRowsResult, tombRowsResult] = await Promise.all([
+    const [appRows, guideRows, categoryRowsResult, tombRowsResult, settingsRowsResult] = await Promise.all([
       sql.query<AppRow>(
         `select a.*, 0 as views_7d
          from apps a
@@ -445,6 +448,11 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
           console.error("published tombstones failed:", err);
           return [];
         }),
+      sql
+        .query<{ key: string; value: string }>(
+          "select key, value from settings where key in ('sidebar_recent_duration', 'sidebar_recent_enabled')",
+        )
+        .catch(() => []),
     ]);
 
     const apps = appRows.map(toApp);
@@ -465,12 +473,25 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
       category: r.category || undefined,
     }));
 
+    const settingsMap = Object.fromEntries(settingsRowsResult.map((r) => [r.key, r.value]));
+    const rawDuration = settingsMap.sidebar_recent_duration;
+    const sidebarRecentDuration: SidebarRecentDuration =
+      rawDuration === "7d" || rawDuration === "15d" || rawDuration === "30d" || rawDuration === "all" || rawDuration === "24h"
+        ? rawDuration
+        : "24h";
+    const sidebarRecentEnabled = settingsMap.sidebar_recent_enabled !== "false";
+    const sidebarSettings: SidebarSettings = {
+      enabled: sidebarRecentEnabled,
+      duration: sidebarRecentDuration,
+    };
+
     const result: PublishedDirectory = {
       apps,
       posts: guideRows.map(toPost),
       editors: apps.filter((app) => app.editorChoice).map((app) => app.slug),
       categories,
       tombstones,
+      sidebarSettings,
     };
 
     cachedDirectory = { data: result, timestamp: Date.now() };
@@ -490,6 +511,10 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
       editors: seedApps.filter((app) => app.editorChoice).map((app) => app.slug),
       categories: shelfCategories,
       tombstones: [],
+      sidebarSettings: {
+        enabled: true,
+        duration: "24h",
+      },
     };
   }
 }
@@ -615,12 +640,13 @@ export type PublicOffer = {
   articleCompareCents: number;
   hotPriceCents?: number;
   hotCompareCents?: number;
-  hotSlots?: EditorChoiceSlotsInfo;
+  hotSlots: EditorChoiceSlotsInfo;
   featuredSlots: EditorChoiceSlotsInfo;
   articleSlots: EditorChoiceSlotsInfo;
   slots: EditorChoiceSlotsInfo;
   priceCents: number;
   compareCents: number;
+  sidebarSettings?: SidebarSettings;
 };
 
 let cachedPublicOffer: { data: PublicOffer; timestamp: number } | null = null;
@@ -682,7 +708,7 @@ export async function publicOffer(): Promise<PublicOffer> {
     const featuredCompareCents = Number(map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
     let articlePriceCents = Number(map.article_price_cents ?? 12000);
     const articleCompareCents = Number(map.article_compare_cents ?? 24900);
-    let hotPriceCents = Number(map.hot_price_cents ?? map.featured_price_cents ?? map.choice_price_cents ?? 9900);
+    const hotPriceCents = Number(map.hot_price_cents ?? map.featured_price_cents ?? map.choice_price_cents ?? 9900);
     const hotCompareCents = Number(map.hot_compare_cents ?? map.featured_compare_cents ?? map.choice_compare_cents ?? 19900);
 
     const [liveFeatured, liveArticle] = livePrices;
@@ -773,6 +799,18 @@ export async function publicOffer(): Promise<PublicOffer> {
       openDates: hotOpenDates,
     };
 
+    const rawDuration = map.sidebar_recent_duration;
+    const sidebarRecentDuration: SidebarRecentDuration =
+      rawDuration === "7d" || rawDuration === "15d" || rawDuration === "30d" || rawDuration === "all" || rawDuration === "24h"
+        ? rawDuration
+        : "24h";
+    const sidebarRecentEnabled = map.sidebar_recent_enabled !== "false";
+
+    const sidebarSettings: SidebarSettings = {
+      enabled: sidebarRecentEnabled,
+      duration: sidebarRecentDuration,
+    };
+
     const result: PublicOffer = {
       featuredPriceCents,
       featuredCompareCents,
@@ -793,6 +831,7 @@ export async function publicOffer(): Promise<PublicOffer> {
         nextDate: defaultNextDate,
         openDates: [...featuredOpenDates, ...articleOpenDates].sort(),
       },
+      sidebarSettings,
     };
 
     cachedPublicOffer = { data: result, timestamp: Date.now() };
@@ -844,13 +883,46 @@ export async function publicOffer(): Promise<PublicOffer> {
         nextDate,
         openDates: [],
       },
+      sidebarSettings: {
+        enabled: true,
+        duration: "24h",
+      },
     };
+  }
+}
+
+export async function updateSidebarSettings(settings: {
+  duration?: string;
+  enabled?: boolean;
+}): Promise<void> {
+  invalidatePublicOfferCache();
+  invalidatePublishedDirectoryCache();
+  const sql = await directorySql();
+  if (settings.duration !== undefined) {
+    const valid = ["24h", "7d", "15d", "30d", "all"].includes(settings.duration) ? settings.duration : "24h";
+    await sql.query(
+      `insert into settings (key, value) values ('sidebar_recent_duration', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [valid],
+    );
+  }
+  if (settings.enabled !== undefined) {
+    await sql.query(
+      `insert into settings (key, value) values ('sidebar_recent_enabled', $1)
+       on conflict (key) do update set value = excluded.value`,
+      [String(settings.enabled)],
+    );
   }
 }
 
 export async function adminStats() {
   const sql = await directorySql();
   const apps = await sql.query<{
+    id: string;
+    name: string;
+    slug: string;
+    icon: string;
+    category_name: string;
     pricing: string;
     status: string;
     editor_choice: boolean;
@@ -858,8 +930,9 @@ export async function adminStats() {
     is_hot?: boolean;
     click_count?: number | string;
     try_count?: number | string;
+    created_at?: string | Date;
   }>(
-    "select pricing, status, editor_choice, featured_tier, is_hot, click_count, try_count from apps",
+    "select id, name, slug, icon, category_name, pricing, status, editor_choice, featured_tier, is_hot, click_count, try_count, created_at from apps",
   );
   const guides = await sql.query<{ status: string }>("select status from guides");
   const revenue = await sql.query<{ cents: string }>(
@@ -1079,6 +1152,19 @@ export async function adminStats() {
 
   const upvoteSettings = await getUpvoteSettings();
 
+  const now = Date.now();
+  const added24h = live.filter((a) => a.created_at && now - new Date(a.created_at).getTime() <= 24 * 3600 * 1000).length;
+  const added7d = live.filter((a) => a.created_at && now - new Date(a.created_at).getTime() <= 7 * 86400 * 1000).length;
+  const added15d = live.filter((a) => a.created_at && now - new Date(a.created_at).getTime() <= 15 * 86400 * 1000).length;
+  const added30d = live.filter((a) => a.created_at && now - new Date(a.created_at).getTime() <= 30 * 86400 * 1000).length;
+  const recentCounts = {
+    "24h": added24h,
+    "7d": added7d,
+    "15d": added15d,
+    "30d": added30d,
+    all: live.length,
+  };
+
   return {
     free: live.filter((app) => app.pricing === "free").length,
     paid: live.filter((app) => app.pricing === "paid").length,
@@ -1108,6 +1194,7 @@ export async function adminStats() {
     totalTryClicks,
     recentAudit,
     topPerforming,
+    recentCounts,
   };
 }
 
@@ -1199,7 +1286,7 @@ export async function createAdminApp(input: {
 
   let featuredScheduledFor: string | null = null;
   let isChoice = input.editorChoice === true;
-  let tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
+  let tier: "featured" | "article" | null = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
 
   if (input.scheduleGoldNextCycle) {
     isChoice = false;
@@ -1391,7 +1478,7 @@ export async function saveApp(input: {
     ? (row.featured_scheduled_for instanceof Date ? row.featured_scheduled_for.toISOString() : String(row.featured_scheduled_for))
     : null;
   let isChoice = input.editorChoice;
-  let tier = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
+  let tier: "featured" | "article" | null = isChoice ? (input.featuredTier === "article" ? "article" : "featured") : (input.scheduleGoldNextCycle ? "article" : null);
 
   if (input.clearGoldSchedule) {
     featuredScheduledFor = null;
@@ -1632,6 +1719,7 @@ export async function listSubmissions() {
     id: string;
     app_name: string;
     website: string;
+    tagline?: string;
     plan: string;
     tier?: string;
     status: string;
@@ -1642,8 +1730,9 @@ export async function listSubmissions() {
     updated_at?: string | Date | null;
     app_id?: string | null;
     app_slug?: string | null;
+    dashboard_token?: string | null;
   }>(
-    "select s.id, s.app_name, s.website, s.plan, coalesce(s.tier, 'featured') as tier, s.status, s.email, coalesce(s.x_handle, '') as x_handle, coalesce(s.badge_ok, false) as badge_ok, s.created_at, s.app_id, a.slug as app_slug from submissions s left join apps a on a.id = s.app_id order by s.created_at desc limit 100",
+    "select s.id, s.app_name, s.website, s.tagline, s.plan, coalesce(s.tier, 'featured') as tier, s.status, s.email, coalesce(s.x_handle, '') as x_handle, coalesce(s.badge_ok, false) as badge_ok, s.created_at, s.app_id, a.slug as app_slug, a.dashboard_token from submissions s left join apps a on a.id = s.app_id order by s.created_at desc limit 100",
   );
 }
 
@@ -2679,7 +2768,7 @@ export async function updateAppByToken(
     "select id, category, category_name, category_icon from apps where dashboard_token = $1 limit 1",
     [cleanToken],
   );
-  let current = rows[0];
+  const current = rows[0];
   if (!current) {
     // If not found in apps table, check if it's a pending submission
     const subRows = await sql.query<{ id: string; category: string }>(

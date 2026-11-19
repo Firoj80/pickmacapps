@@ -77,7 +77,9 @@ export function AppCard({
         votedList.push(app.id);
         localStorage.setItem("pma_voted", JSON.stringify(votedList));
       }
-    } catch {}
+    } catch {
+      /* ignore storage error */
+    }
 
     const visitorId = getOrSetVisitorId();
     fetch("/api/upvote", {

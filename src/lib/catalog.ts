@@ -367,3 +367,45 @@ export function getHotDaysRemaining(
   const formatted = expiry.toLocaleDateString("en-US", { month: "short", day: "numeric" });
   return { daysLeft, expiry, formatted };
 }
+
+export type SidebarRecentDuration = "24h" | "7d" | "15d" | "30d" | "all";
+
+export type SidebarSettings = {
+  enabled: boolean;
+  duration: SidebarRecentDuration;
+};
+
+export function getSidebarCutoff(duration: SidebarRecentDuration, now = Date.now()): number {
+  switch (duration) {
+    case "24h":
+      return now - 24 * 60 * 60 * 1000;
+    case "7d":
+      return now - 7 * 24 * 60 * 60 * 1000;
+    case "15d":
+      return now - 15 * 24 * 60 * 60 * 1000;
+    case "30d":
+      return now - 30 * 24 * 60 * 60 * 1000;
+    case "all":
+      return 0;
+    default:
+      return now - 24 * 60 * 60 * 1000;
+  }
+}
+
+export function formatSidebarRelativeTime(dateStr?: string | Date | null, now = Date.now()): string {
+  if (!dateStr) return "";
+  try {
+    const d = new Date(dateStr);
+    const ms = d.getTime();
+    if (isNaN(ms)) return "";
+    const diffSec = Math.floor((now - ms) / 1000);
+    if (diffSec < 60) return "just now";
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+    if (diffSec < 2592000) return `${Math.floor(diffSec / 86400)}d ago`;
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+  } catch {
+    return "";
+  }
+}

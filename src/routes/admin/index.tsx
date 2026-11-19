@@ -111,6 +111,8 @@ function AdminHome() {
   const totalCardClicks = data.stats.totalCardClicks ?? 0;
   const totalTryClicks = data.stats.totalTryClicks ?? 0;
   const conversionRate = totalCardClicks > 0 ? ((totalTryClicks / totalCardClicks) * 100).toFixed(1) : "0.0";
+  const sidebarConfig = data.offer.sidebarSettings ?? { enabled: true, duration: "24h" };
+  const recentCounts = (data.stats as { recentCounts?: Record<string, number> }).recentCounts ?? {};
 
   return (
     <AdminShell
@@ -992,6 +994,98 @@ function AdminHome() {
                 </Link>
               </div>
             </div>
+          </section>
+
+          {/* Fresh Drops Running Banner Configuration */}
+          <section className="rounded-2xl border border-line bg-white p-4 shadow-xs">
+            <div className="flex items-center justify-between border-b border-line pb-3">
+              <div className="flex items-center gap-2">
+                <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-amber-50 text-sm">
+                  ⚡
+                </span>
+                <div>
+                  <h3 className="text-sm font-semibold text-ink">Fresh Drops Running Banner</h3>
+                  <p className="text-[11px] text-muted">Controls the running Fresh Drops marquee banner under the hero</p>
+                </div>
+              </div>
+              <span
+                className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                  sidebarConfig.enabled ? "bg-emerald-100 text-emerald-800" : "bg-stone-100 text-stone-600"
+                }`}
+              >
+                {sidebarConfig.enabled ? "● Active" : "Disabled"}
+              </span>
+            </div>
+
+            <form method="post" action="/api/admin/update-sidebar-settings" className="mt-3.5 space-y-3.5">
+              {/* Enabled toggle */}
+              <div className="flex items-center justify-between rounded-xl bg-stone-50/70 p-2.5">
+                <div>
+                  <label htmlFor="sidebar_enabled" className="text-xs font-semibold text-ink cursor-pointer">
+                    Show Fresh Drops Banner
+                  </label>
+                  <div className="text-[11px] text-muted">Running marquee banner under the homepage hero section</div>
+                </div>
+                <input
+                  type="checkbox"
+                  id="sidebar_enabled"
+                  name="sidebar_enabled"
+                  defaultChecked={sidebarConfig.enabled}
+                  className="h-4.5 w-4.5 rounded border-line text-ink focus:ring-accent cursor-pointer"
+                />
+              </div>
+
+              {/* Duration selector */}
+              <div>
+                <label className="text-xs font-semibold text-ink block mb-1.5">
+                  App Addition Timeframe
+                </label>
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  {[
+                    { id: "24h", label: "24 Hours (Default)", desc: "Fresh drops under 24 hours", count: recentCounts["24h"] },
+                    { id: "7d", label: "7 Days", desc: "Added in the last 7 days", count: recentCounts["7d"] },
+                    { id: "15d", label: "15 Days", desc: "Added in the last 15 days", count: recentCounts["15d"] },
+                    { id: "30d", label: "30 Days", desc: "Added in the last 30 days", count: recentCounts["30d"] },
+                    { id: "all", label: "All Recent", desc: "Newest catalog additions", count: recentCounts.all },
+                  ].map((opt) => (
+                    <label
+                      key={opt.id}
+                      className={`flex flex-col rounded-xl border p-2.5 cursor-pointer transition ${
+                        sidebarConfig.duration === opt.id
+                          ? "border-amber-500 bg-amber-50/40 text-ink ring-1 ring-amber-500/20"
+                          : "border-line bg-white hover:bg-stone-50 text-body"
+                      } ${opt.id === "all" ? "col-span-2" : ""}`}
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="radio"
+                            name="sidebar_duration"
+                            value={opt.id}
+                            defaultChecked={sidebarConfig.duration === opt.id}
+                            className="text-amber-600 focus:ring-amber-500 cursor-pointer"
+                          />
+                          <span className="font-semibold text-ink">{opt.label}</span>
+                        </div>
+                        {opt.count !== undefined && (
+                          <span className="rounded-md bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-600">
+                            {opt.count} {opt.count === 1 ? "app" : "apps"}
+                          </span>
+                        )}
+                      </div>
+                      <span className="mt-1 text-[10px] text-muted pl-5">{opt.desc}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                className="w-full rounded-xl bg-ink py-2 text-xs font-semibold text-canvas shadow-xs transition hover:opacity-90 cursor-pointer"
+              >
+                Save Fresh Drops Settings
+              </button>
+            </form>
           </section>
 
           {/* Recent System Activity Stream */}
