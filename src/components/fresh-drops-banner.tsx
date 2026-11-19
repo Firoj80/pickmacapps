@@ -138,7 +138,10 @@ export function FreshDropsBanner({
         {/* Double-loop for smooth continuous infinite scrolling */}
         <div
           className="animate-marquee flex items-center gap-3"
-          style={touchPaused ? { animationPlayState: "paused" } : undefined}
+          style={{
+            animationDuration: "70s",
+            ...(touchPaused ? { animationPlayState: "paused" } : {}),
+          }}
         >
           {[0, 1].map((copyIndex) => (
             <div key={`loop-${copyIndex}`} className="flex items-center gap-3 shrink-0">

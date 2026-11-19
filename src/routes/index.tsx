@@ -1,7 +1,9 @@
+import { useMemo } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { FreshDropsBanner } from "@/components/fresh-drops-banner";
+import { DesktopCategoriesBar } from "@/components/desktop-categories-bar";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { BadgeCheckIcon } from "@/components/icons";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
@@ -287,6 +289,24 @@ function Home() {
     ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
+  const desktopCategories = useMemo(() => {
+    const counts: Record<string, number> = { all: list.length };
+    for (const app of list) {
+      const slug = normalizeCategorySlug(app.category);
+      counts[slug] = (counts[slug] || 0) + 1;
+    }
+
+    return [
+      { id: "all", name: "All Apps", emoji: "✨", count: list.length },
+      ...chipCategories.map((c) => ({
+        id: c.slug,
+        name: c.name,
+        emoji: c.emoji,
+        count: counts[c.slug] || 0,
+      })),
+    ];
+  }, [chipCategories, list]);
+
   const shown = arrangeHero(
     list.filter((app) => {
       if (!inHeroCategory(app, category)) return false;
@@ -303,12 +323,20 @@ function Home() {
   );
 
   function updateSearch(next: { q?: string; cat?: string; sort?: HeroSort }) {
+    const nextCat =
+      next.cat !== undefined
+        ? next.cat === "all"
+          ? undefined
+          : next.cat
+        : cat === "all"
+        ? undefined
+        : cat;
     navigate({
       to: "/",
       search: {
-        q: next.q ?? q,
-        cat: next.cat ?? cat,
-        sort: next.sort ?? sort,
+        q: next.q !== undefined ? next.q || undefined : q || undefined,
+        cat: nextCat,
+        sort: next.sort !== undefined ? next.sort : sort,
       },
     });
   }
@@ -403,6 +431,16 @@ function Home() {
             ? "Trending Mac apps"
             : "Featured Mac apps"}
         </h2>
+
+        {/* Desktop Only: Categories Filter Strip (in the gap between Fresh Drops banner and Apps Grid) */}
+        <DesktopCategoriesBar
+          categories={desktopCategories}
+          activeCategory={category}
+          onSelect={(selectedSlug) => {
+            updateSearch({ cat: selectedSlug === "all" ? "all" : selectedSlug });
+          }}
+        />
+
         {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) - Mobile only (desktop uses left sidebar) */}
         <div className="mb-4 sm:mb-6 flex lg:hidden flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
           <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
