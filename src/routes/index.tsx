@@ -3,7 +3,7 @@ import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { LeaderboardBanner } from "@/components/leaderboard-banner";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
-import { BadgeCheckIcon } from "@/components/icons";
+import { BadgeCheckIcon, SearchIcon } from "@/components/icons";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
@@ -360,6 +360,54 @@ function Home() {
               Explore a hand-picked collection of beautiful, useful, and powerful Mac apps.
             </p>
 
+            {/* Quick Hero Exploration Badges */}
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <Link
+                to="/"
+                search={{ sort: "hot", cat: "all" }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-orange-500/25 bg-orange-500/10 px-3 py-1 text-xs font-semibold text-orange-600 dark:text-orange-400 hover:bg-orange-500/20 transition-colors shadow-2xs"
+              >
+                <span>🔥</span>
+                <span>Hot Apps</span>
+              </Link>
+              <Link
+                to="/"
+                search={{ sort: "featured", cat: "all" }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-amber-500/25 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-700 dark:text-amber-300 hover:bg-amber-500/20 transition-colors shadow-2xs"
+              >
+                <BadgeCheckIcon className="h-3.5 w-3.5 fill-amber-500 text-stone-950" />
+                <span>Featured Picks</span>
+              </Link>
+              <Link
+                to="/"
+                search={{ sort: "new", cat: "all" }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-sky-500/25 bg-sky-500/10 px-3 py-1 text-xs font-semibold text-sky-700 dark:text-sky-300 hover:bg-sky-500/20 transition-colors shadow-2xs"
+              >
+                <span>✨</span>
+                <span>Latest Added</span>
+              </Link>
+              <a
+                href="#apps"
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-body hover:text-ink hover:bg-surface-2 transition-colors shadow-2xs"
+              >
+                <span>⚡</span>
+                <span>Browse All ({list.length})</span>
+              </a>
+              <button
+                type="button"
+                onClick={() => {
+                  if (typeof window !== "undefined") {
+                    window.dispatchEvent(new CustomEvent("open-search"));
+                  }
+                }}
+                className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-1 text-xs font-medium text-muted hover:text-ink hover:bg-surface-2 transition-colors cursor-pointer shadow-2xs"
+              >
+                <SearchIcon className="h-3 w-3" />
+                <span>Search</span>
+                <kbd className="hidden sm:inline-block rounded border border-line bg-surface-2 px-1 py-0.2 text-[10px] text-muted">⌘K</kbd>
+              </button>
+            </div>
+
             {/* Mobile: Black Friday Sale Countdown (below the site title, hot app icons hidden for now) */}
             <div className="block sm:hidden mt-3.5">
               <BlackFridayCountdown isMobile />
@@ -398,69 +446,126 @@ function Home() {
             ? "Trending Mac apps"
             : "Featured Mac apps"}
         </h2>
-        {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) - Mobile only (desktop uses left sidebar) */}
-        <div className="mb-4 sm:mb-6 flex lg:hidden flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
-          <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs">
-            {/* Featured */}
-            <Link
-              to="/"
-              search={{ sort: "featured", cat: "all" }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-                sort === "featured" || cat === "pick"
-                  ? "bg-ink text-canvas shadow-xs"
-                  : "text-muted hover:bg-surface-2 hover:text-ink"
-              }`}
-            >
-              <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
-              <span>Featured</span>
-            </Link>
+        {/* Universal Discovery & Category Filter Bar */}
+        <div className="mb-4 sm:mb-6 border-b border-line/60 pb-3 sm:pb-4 space-y-3">
+          {/* Top row: Sort tabs + Count / Reset filters */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 sm:gap-3">
+            <div className="inline-flex items-center gap-1 rounded-xl border border-line bg-surface p-1 shadow-2xs overflow-x-auto max-w-full">
+              {/* All */}
+              <Link
+                to="/"
+                search={{ sort: undefined, cat: "all" }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                  !sort && (cat === "all" || !cat)
+                    ? "bg-ink text-canvas shadow-xs"
+                    : "text-muted hover:bg-surface-2 hover:text-ink"
+                }`}
+              >
+                <span>All</span>
+              </Link>
 
-            {/* Hot */}
-            <Link
-              to="/"
-              search={{ sort: "hot", cat: "all" }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-                sort === "hot" && cat !== "pick"
-                  ? "bg-ink text-canvas shadow-xs"
-                  : "text-muted hover:bg-surface-2 hover:text-ink"
-              }`}
-            >
-              <span>🔥</span>
-              <span>Hot</span>
-            </Link>
+              {/* Featured */}
+              <Link
+                to="/"
+                search={{ sort: "featured", cat: cat !== "all" && cat !== "pick" ? cat : "all" }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                  sort === "featured" || cat === "pick"
+                    ? "bg-ink text-canvas shadow-xs"
+                    : "text-muted hover:bg-surface-2 hover:text-ink"
+                }`}
+              >
+                <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
+                <span>Featured</span>
+              </Link>
 
-            {/* Latest */}
-            <Link
-              to="/"
-              search={{ sort: "new", cat: "all" }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-                sort === "new"
-                  ? "bg-ink text-canvas shadow-xs"
-                  : "text-muted hover:bg-surface-2 hover:text-ink"
-              }`}
-            >
-              <span>✨</span>
-              <span>Latest</span>
-            </Link>
+              {/* Hot */}
+              <Link
+                to="/"
+                search={{ sort: "hot", cat: cat !== "all" && cat !== "pick" ? cat : "all" }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                  sort === "hot" && cat !== "pick"
+                    ? "bg-ink text-canvas shadow-xs"
+                    : "text-muted hover:bg-surface-2 hover:text-ink"
+                }`}
+              >
+                <span>🔥</span>
+                <span>Hot</span>
+              </Link>
 
-            {/* Trending */}
-            <Link
-              to="/"
-              search={{ sort: "trending", cat: "all" }}
-              className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
-                sort === "trending"
-                  ? "bg-ink text-canvas shadow-xs"
-                  : "text-muted hover:bg-surface-2 hover:text-ink"
-              }`}
-            >
-              <span>📈</span>
-              <span>Trending</span>
-            </Link>
+              {/* Latest */}
+              <Link
+                to="/"
+                search={{ sort: "new", cat: cat !== "all" && cat !== "pick" ? cat : "all" }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                  sort === "new"
+                    ? "bg-ink text-canvas shadow-xs"
+                    : "text-muted hover:bg-surface-2 hover:text-ink"
+                }`}
+              >
+                <span>✨</span>
+                <span>Latest</span>
+              </Link>
+
+              {/* Trending */}
+              <Link
+                to="/"
+                search={{ sort: "trending", cat: cat !== "all" && cat !== "pick" ? cat : "all" }}
+                className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs sm:text-[13px] font-semibold transition-all cursor-pointer ${
+                  sort === "trending"
+                    ? "bg-ink text-canvas shadow-xs"
+                    : "text-muted hover:bg-surface-2 hover:text-ink"
+                }`}
+              >
+                <span>📈</span>
+                <span>Trending</span>
+              </Link>
+            </div>
+
+            <div className="flex items-center gap-3">
+              {isFiltered && (
+                <Link
+                  to="/"
+                  search={{ sort: undefined, cat: "all" }}
+                  className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400 hover:underline cursor-pointer"
+                >
+                  ✕ Reset filters
+                </Link>
+              )}
+              <span className="text-xs font-medium text-muted">
+                {shown.length} {shown.length === 1 ? "app" : "apps"}
+              </span>
+            </div>
           </div>
 
-          <span className="text-xs font-medium text-muted">
-            {shown.length} {shown.length === 1 ? "app" : "apps"}
-          </span>
+          {/* Bottom row: Horizontal Category Pill Strip */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 pt-0.5 scrollbar-none text-xs">
+            <span className="text-muted text-[11px] font-medium uppercase tracking-wider shrink-0 mr-1 hidden sm:inline">
+              Category:
+            </span>
+            {heroCategories.map((c) => {
+              const active = (c.id === "all" && (cat === "all" || !cat)) || cat === c.id;
+              return (
+                <button
+                  key={c.id}
+                  type="button"
+                  onClick={() => updateSearch({ cat: c.id })}
+                  className={`shrink-0 rounded-full px-2.5 py-1 text-xs font-medium transition-colors cursor-pointer ${
+                    active
+                      ? "bg-ink text-canvas font-semibold shadow-2xs"
+                      : "bg-surface border border-line text-body hover:bg-surface-2 hover:text-ink"
+                  }`}
+                >
+                  {c.label}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Mobile helper tip */}
+          <div className="sm:hidden flex items-center gap-2 rounded-lg bg-surface-2/60 border border-line/60 px-3 py-1.5 text-[11px] text-muted">
+            <span>💡</span>
+            <span>Tap any app card to preview full details, screenshots, and bookmark for your Mac.</span>
+          </div>
         </div>
 
         <AppGrid

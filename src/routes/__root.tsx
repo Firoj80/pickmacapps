@@ -60,6 +60,24 @@ function Frame() {
   const wasAdminRef = useRef(admin);
   const [searchOpen, setSearchOpen] = useState(false);
 
+  useEffect(() => {
+    function handleOpenSearch() {
+      setSearchOpen(true);
+    }
+    function handleGlobalKeyDown(e: KeyboardEvent) {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener("open-search", handleOpenSearch);
+    window.addEventListener("keydown", handleGlobalKeyDown);
+    return () => {
+      window.removeEventListener("open-search", handleOpenSearch);
+      window.removeEventListener("keydown", handleGlobalKeyDown);
+    };
+  }, []);
+
   // Synchronously seed directory cache on client during initial render
   if (typeof window !== "undefined" && !admin && directory) {
     seedDirectoryCache(directory);
