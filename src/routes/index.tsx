@@ -294,10 +294,10 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                 <Link
                   to="/app/$slug"
                   params={{ slug: app.slug }}
-                  className="block overflow-hidden rounded-2xl border border-line-2 bg-[#12131a] shadow-[0_20px_50px_rgba(0,0,0,0.7)] transition-all duration-150 hover:border-line hover:brightness-105"
+                  className="block overflow-hidden rounded-2xl border border-line bg-white shadow-[0_16px_36px_rgba(0,0,0,0.12)] transition-all duration-150 hover:border-line-2"
                 >
                   {/* Card Top: App Screenshot Preview */}
-                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0d0e15] border-b border-line-2/60 flex items-center justify-center p-1.5">
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-stone-100 border-b border-line flex items-center justify-center p-1.5">
                     {optimizedCover ? (
                       <img
                         alt={`${app.name} preview`}
@@ -314,22 +314,22 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                         }}
                       />
                     ) : (
-                      <div className="flex h-full w-full flex-col items-center justify-center p-4 bg-gradient-to-b from-[#181a24] to-[#12131a]">
+                      <div className="flex h-full w-full flex-col items-center justify-center p-4 bg-stone-50">
                         <img
                           alt={`${app.name} icon`}
                           src={appIconUrl(app.icon)}
                           width={40}
                           height={40}
-                          className="h-10 w-10 rounded-[12px] object-cover ring-1 ring-white/10 shadow-md"
+                          className="h-10 w-10 rounded-[12px] object-cover ring-1 ring-black/10 shadow-md"
                         />
-                        <span className="mt-2 text-xs font-semibold text-white/90">{app.name}</span>
+                        <span className="mt-2 text-xs font-semibold text-stone-900">{app.name}</span>
                       </div>
                     )}
                   </div>
 
                   {/* Card Bottom: App Details Bar */}
-                  <div className="p-3 sm:p-3.5 flex items-start gap-2.5 bg-[#12131a]">
-                    <div className="h-8 w-8 shrink-0 rounded-[8px] overflow-hidden bg-surface-2 ring-1 ring-white/10 shadow-xs">
+                  <div className="p-3 sm:p-3.5 flex items-start gap-2.5 bg-white">
+                    <div className="h-8 w-8 shrink-0 rounded-[8px] overflow-hidden bg-surface-2 ring-1 ring-black/10 shadow-xs">
                       <img
                         alt={app.name}
                         src={appIconUrl(app.icon)}
@@ -347,7 +347,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-[13px] font-bold text-white tracking-tight truncate">
+                        <span className="text-[13px] font-bold text-ink tracking-tight truncate">
                           {app.name}
                         </span>
                         {isGold || app.checkBadge ? (
@@ -362,7 +362,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
                           <span className="text-[10px]">🔥</span>
                         ) : null}
                       </div>
-                      <p className="mt-0.5 text-[11px] text-stone-300 line-clamp-2 leading-relaxed font-normal">
+                      <p className="mt-0.5 text-[11px] text-muted line-clamp-2 leading-relaxed font-normal">
                         {app.tagline}
                       </p>
                     </div>

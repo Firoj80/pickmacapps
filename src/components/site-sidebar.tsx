@@ -65,10 +65,10 @@ export function SiteSidebarContent({
             onOpenSearch();
           }}
           aria-label="Search apps"
-          className="mt-4 sm:mt-5 flex w-full items-center gap-2 rounded-xl border border-line-2 bg-surface-2/70 px-3 py-2 text-[13px] text-stone-300 shadow-2xs transition hover:border-stone-500 hover:text-white cursor-pointer"
+          className="mt-4 sm:mt-5 flex w-full items-center gap-2 rounded-xl border border-line bg-white px-3 py-2 text-[13px] text-muted shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition hover:border-stone-400 hover:text-ink cursor-pointer"
         >
           <svg
-            className="h-4 w-4 shrink-0 text-stone-400"
+            className="h-4 w-4 shrink-0 text-muted"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
@@ -80,7 +80,7 @@ export function SiteSidebarContent({
             <path d="m21 21-4.3-4.3" />
           </svg>
           <span className="flex-1 text-left font-medium">Search apps</span>
-          <span className="rounded border border-line-2 bg-surface-2 px-1.5 py-0.5 text-[10px] font-semibold text-stone-300">
+          <span className="rounded border border-line bg-stone-100 px-1.5 py-0.5 text-[10px] font-semibold text-stone-600">
             ⌘K
           </span>
         </button>
@@ -92,7 +92,7 @@ export function SiteSidebarContent({
         className="-mx-1 mt-4 sm:mt-5 min-h-0 flex-1 overflow-y-auto px-1 pb-6 [scrollbar-width:thin]"
       >
         {/* 1. DISCOVER Section */}
-        <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.1em] text-stone-400">
+        <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
           Discover
         </p>
         <div className="mt-1.5 space-y-0.5">
@@ -102,12 +102,12 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               isFeatured
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
             <span className="flex items-center gap-2.5">
-              <svg className="h-4 w-4 text-accent fill-accent/20 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-4 w-4 text-accent fill-accent/15 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
                 <path d="m9 12 2 2 4-4" />
               </svg>
@@ -121,12 +121,12 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               isHome && activeSort === "hot" && !isPick
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
             <span className="flex items-center gap-2.5">
-              <svg className="h-4 w-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-4 w-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4" />
               </svg>
               <span>Hot</span>
@@ -139,12 +139,12 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               isHome && activeSort === "new"
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
             <span className="flex items-center gap-2.5">
-              <svg className="h-4 w-4 text-sky-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-4 w-4 text-sky-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
                 <path d="M20 2v4" />
                 <path d="M22 4h-4" />
@@ -160,12 +160,12 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               isHome && activeSort === "trending"
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
             <span className="flex items-center gap-2.5">
-              <svg className="h-4 w-4 text-emerald-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+              <svg className="h-4 w-4 text-emerald-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M16 7h6v6" />
                 <path d="m22 7-8.5 8.5-5-5L2 17" />
               </svg>
@@ -176,13 +176,13 @@ export function SiteSidebarContent({
 
         {/* 2. CATEGORIES Section */}
         <div className="mt-6 flex items-center justify-between pr-2.5">
-          <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.1em] text-stone-400">
+          <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted">
             Categories
           </p>
           <Link
             to="/category"
             onClick={handleLinkClick}
-            className="text-[11px] text-stone-400 transition hover:text-white font-medium"
+            className="text-[11px] text-muted transition hover:text-ink font-medium"
           >
             View all
           </Link>
@@ -198,8 +198,8 @@ export function SiteSidebarContent({
                 onClick={handleLinkClick}
                 className={`flex w-full items-center justify-between rounded-lg px-2.5 py-1 text-left text-[13px] transition ${
                   isActive
-                    ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                    : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                    ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                    : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
                 }`}
               >
                 <span className="truncate">{cat.name}</span>
@@ -209,7 +209,7 @@ export function SiteSidebarContent({
         </div>
 
         {/* 3. MORE Section */}
-        <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.1em] text-stone-400 mt-6">
+        <p className="px-2.5 text-[11px] font-bold uppercase tracking-[0.08em] text-muted mt-6">
           More
         </p>
         <div className="mt-1.5 space-y-0.5">
@@ -218,11 +218,11 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               currentPath === "/leaderboard"
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
-            <svg className="h-4 w-4 text-amber-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-amber-600 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
               <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
               <path d="M4 22h16" />
@@ -237,11 +237,11 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               currentPath.startsWith("/compare")
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
-            <svg className="h-4 w-4 text-stone-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-stone-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="18" cy="18" r="3" />
               <circle cx="6" cy="6" r="3" />
               <path d="M13 6h3a2 2 0 0 1 2 2v7" />
@@ -255,11 +255,11 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               currentPath.startsWith("/blog")
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
-            <svg className="h-4 w-4 text-stone-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-stone-500 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
               <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z" />
               <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z" />
             </svg>
@@ -271,11 +271,11 @@ export function SiteSidebarContent({
             onClick={handleLinkClick}
             className={`flex w-full items-center gap-2.5 rounded-lg px-2.5 py-1.5 text-left text-[13.5px] transition ${
               currentPath === "/sponsor"
-                ? "bg-white/10 font-semibold text-white shadow-xs border border-white/15"
-                : "text-stone-300 hover:bg-white/5 hover:text-white font-medium"
+                ? "bg-stone-200/80 font-semibold text-ink shadow-2xs"
+                : "text-stone-700 hover:bg-stone-200/50 hover:text-ink font-medium"
             }`}
           >
-            <svg className="h-4 w-4 text-amber-500 fill-amber-500/20 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg className="h-4 w-4 text-amber-600 fill-amber-500/20 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z" />
               <path d="m9 12 2 2 4-4" />
             </svg>

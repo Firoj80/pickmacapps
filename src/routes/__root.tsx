@@ -34,7 +34,7 @@ function getCachedOrigin(): string | Promise<string> {
 
 const CANONICAL_GUARD = `(function(){try{if(window.location.hostname==="www.pickmacapps.store"){window.location.replace("https://pickmacapps.store"+window.location.pathname+window.location.search+window.location.hash)}}catch(e){}})()`;
 
-const THEME_SCRIPT = `(function(){try{var d=document.documentElement;d.dataset.theme="dark";d.classList.add("dark");var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content","#090a0f")}catch(e){}})()`;
+const THEME_SCRIPT = `(function(){try{var d=document.documentElement;d.dataset.theme="light";d.classList.remove("dark");var mc=document.querySelector('meta[name="theme-color"]');if(mc)mc.setAttribute("content","#f4f4f6")}catch(e){}})()`;
 
 const TSR_FALLBACK_GUARD = `(function(){try{if(typeof window!=="undefined"&&!window.$_TSR){window.$_TSR={buffer:[],router:{manifest:{},matches:[]},initialized:false,e:function(){},h:function(){}}}}catch(e){}})()`;
 
@@ -211,7 +211,7 @@ export const Route = createRootRoute({
     };
   },
   component: () => (
-    <html lang="en" className="h-full antialiased dark" data-theme="dark" suppressHydrationWarning>
+    <html lang="en" className="h-full antialiased" data-theme="light" suppressHydrationWarning>
       <head>
         <HeadContent />
       </head>

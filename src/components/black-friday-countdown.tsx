@@ -76,7 +76,7 @@ export function BlackFridayCountdown({
   if (isSponsorPage) {
     return (
       <div
-        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 sm:p-5 text-white shadow-lg backdrop-blur-md ${className}`}
+        className={`relative overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-rose-500/10 p-4 sm:p-5 text-stone-900 shadow-sm backdrop-blur-md ${className}`}
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/15 blur-2xl" />
 
@@ -86,22 +86,22 @@ export function BlackFridayCountdown({
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs">
                 🔥 Black Friday Sale
               </span>
-              <span className="text-sm sm:text-base font-bold text-white tracking-tight">
+              <span className="text-sm sm:text-base font-bold text-stone-900 tracking-tight">
                 50% OFF All Sponsorships
               </span>
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-300">
                 ✓ Auto-Applied
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/80">
+            <div className="flex items-center gap-2 text-xs text-stone-600">
               <span>
                 Feature your app in the #1 Hero Spot for just{" "}
-                <strong className="text-amber-300 font-bold">{salePrice}</strong>{" "}
-                <span className="line-through text-white/50">({originalPrice})</span> with promo code{" "}
-                <span className="font-mono font-bold text-amber-300">{BFCM_COUPON_CODE}</span>
+                <strong className="text-amber-900 font-bold">{salePrice}</strong>{" "}
+                <span className="line-through text-stone-400">({originalPrice})</span> with promo code{" "}
+                <span className="font-mono font-bold text-amber-900">{BFCM_COUPON_CODE}</span>
               </span>
-              <span className="text-white/40">·</span>
-              <span className="text-white/60">Ends Nov 30</span>
+              <span className="text-stone-300">·</span>
+              <span className="text-stone-500">Ends Nov 30</span>
             </div>
           </div>
 
@@ -109,38 +109,38 @@ export function BlackFridayCountdown({
             {/* Live Countdown Timer */}
             <div className="flex items-center gap-1.5 font-mono">
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.days).padStart(2, "0") : "12"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Days</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Hours</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Mins</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Secs</span>
               </div>
             </div>
 
             <Link
               to="/submit"
               search={{ tier: "article", coupon: BFCM_COUPON_CODE }}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:scale-105 hover:shadow-amber-500/25 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3.5 py-2 text-xs font-extrabold text-neutral-950 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
             >
               <span>Claim 50% OFF ({salePrice})</span>
               <span className="text-sm leading-none">→</span>
@@ -155,7 +155,7 @@ export function BlackFridayCountdown({
   if (isSubmitPage) {
     return (
       <div
-        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 p-4 sm:p-5 text-white shadow-lg backdrop-blur-md ${className}`}
+        className={`relative overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-rose-500/10 p-4 sm:p-5 text-stone-900 shadow-sm backdrop-blur-md ${className}`}
       >
         <div className="pointer-events-none absolute -right-10 -top-10 h-32 w-32 rounded-full bg-amber-500/15 blur-2xl" />
 
@@ -165,19 +165,19 @@ export function BlackFridayCountdown({
               <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs">
                 🔥 Black Friday Sale
               </span>
-              <span className="text-sm sm:text-base font-bold text-white tracking-tight">
+              <span className="text-sm sm:text-base font-bold text-stone-900 tracking-tight">
                 50% OFF All Paid Listings
               </span>
-              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[11px] font-bold text-emerald-300 ring-1 ring-emerald-500/30">
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-800 ring-1 ring-emerald-300">
                 ✓ Auto-Applied
               </span>
             </div>
-            <div className="flex items-center gap-2 text-xs text-white/80">
+            <div className="flex items-center gap-2 text-xs text-stone-600">
               <span>
-                Promo code <span className="font-mono font-bold text-amber-300">{BFCM_COUPON_CODE}</span> auto-applied · 50% discount active for Golden Spotlight & Hot Boost
+                Promo code <span className="font-mono font-bold text-amber-900">{BFCM_COUPON_CODE}</span> auto-applied · 50% discount active for Golden Spotlight & Hot Boost
               </span>
-              <span className="text-white/40">·</span>
-              <span className="text-white/60">Ends Nov 30</span>
+              <span className="text-stone-300">·</span>
+              <span className="text-stone-500">Ends Nov 30</span>
             </div>
           </div>
 
@@ -185,31 +185,31 @@ export function BlackFridayCountdown({
             {/* Live Countdown Timer */}
             <div className="flex items-center gap-1.5 font-mono">
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.days).padStart(2, "0") : "12"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Days</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Hours</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Mins</span>
               </div>
-              <span className="font-bold text-amber-400 -mt-3.5">:</span>
+              <span className="font-bold text-stone-400 -mt-3.5">:</span>
               <div className="flex flex-col items-center">
-                <span className="min-w-[30px] rounded-lg bg-white/10 px-2 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
+                <span className="min-w-[30px] rounded-lg bg-white border border-stone-200 px-2 py-1 text-center font-mono text-xs font-extrabold text-stone-900 shadow-2xs">
                   {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
                 </span>
-                <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
+                <span className="text-[9px] font-semibold text-stone-500 uppercase mt-0.5">Secs</span>
               </div>
             </div>
 
@@ -220,7 +220,7 @@ export function BlackFridayCountdown({
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
               }}
-              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-500/20 px-3.5 py-2 text-xs font-extrabold text-emerald-300 shadow-md transition-all hover:bg-emerald-500/30 active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 rounded-xl border border-emerald-500/40 bg-emerald-100 px-3.5 py-2 text-xs font-extrabold text-emerald-800 shadow-xs transition-all hover:bg-emerald-200 active:scale-95 cursor-pointer"
             >
               <span>{copied ? "✓ Copied BFCM50" : "✓ 50% Applied"}</span>
             </button>
@@ -234,19 +234,19 @@ export function BlackFridayCountdown({
   if (isMobile) {
     return (
       <div
-        className={`relative overflow-hidden rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/60 p-3.5 text-white shadow-md ${className}`}
+        className={`relative overflow-hidden rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-rose-500/15 p-3.5 text-stone-900 shadow-xs ${className}`}
       >
         {/* Glow accent */}
-        <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-amber-500/20 blur-xl" />
+        <div className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-amber-500/15 blur-xl" />
 
-        <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-2.5">
+        <div className="flex items-center justify-between gap-2 border-b border-black/[0.08] pb-2.5">
           <div className="flex items-center gap-1.5">
-            <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
-            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-400">
+            <span className="flex h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="text-xs font-extrabold uppercase tracking-wider text-amber-900">
               BLACK FRIDAY SALE IS LIVE · 50% OFF
             </span>
           </div>
-          <span className="text-[10px] font-medium text-white/70">Ends Nov 30</span>
+          <span className="text-[10px] font-medium text-stone-500">Ends Nov 30</span>
         </div>
 
         <div className="mt-2.5 flex items-center justify-between gap-2">
@@ -255,40 +255,40 @@ export function BlackFridayCountdown({
             type="button"
             onClick={copyCoupon}
             title="Click to copy coupon code"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-400/40 bg-amber-400/15 px-2.5 py-1 text-xs font-mono font-bold text-amber-300 hover:bg-amber-400/25 transition cursor-pointer active:scale-95"
+            className="inline-flex items-center gap-1.5 rounded-lg border border-amber-300 bg-amber-100/90 px-2.5 py-1 text-xs font-mono font-bold text-amber-900 hover:bg-amber-200 transition cursor-pointer active:scale-95"
           >
             <span>{BFCM_COUPON_CODE}</span>
-            <span className="text-[10px] text-amber-200/80 font-sans">
+            <span className="text-[10px] text-amber-700 font-sans">
               {copied ? "✓ Copied" : "Copy"}
             </span>
           </button>
 
           {/* Countdown timer */}
-          <div className="flex items-center gap-1 font-mono text-xs font-bold text-amber-200">
-            <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
+          <div className="flex items-center gap-1 font-mono text-xs font-bold text-stone-900">
+            <span className="rounded bg-white border border-stone-200 px-1.5 py-0.5 text-stone-900">
               {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}d
             </span>
             <span>:</span>
-            <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
+            <span className="rounded bg-white border border-stone-200 px-1.5 py-0.5 text-stone-900">
               {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}h
             </span>
             <span>:</span>
-            <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
+            <span className="rounded bg-white border border-stone-200 px-1.5 py-0.5 text-stone-900">
               {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}m
             </span>
             <span>:</span>
-            <span className="rounded bg-white/10 px-1.5 py-0.5 text-white">
+            <span className="rounded bg-white border border-stone-200 px-1.5 py-0.5 text-stone-900">
               {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}s
             </span>
           </div>
         </div>
 
-        <div className="mt-2.5 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
-          <span className="text-[11px] text-white/70">50% off all paid listings</span>
+        <div className="mt-2.5 pt-2 border-t border-black/[0.08] flex items-center justify-between text-xs">
+          <span className="text-[11px] text-stone-600">50% off all paid listings</span>
           <Link
             to="/submit"
             search={{ coupon: BFCM_COUPON_CODE }}
-            className="font-bold text-amber-400 hover:underline flex items-center gap-1"
+            className="font-bold text-amber-800 hover:underline flex items-center gap-1"
           >
             <span>Claim 50% OFF</span>
             <span>→</span>
@@ -301,7 +301,7 @@ export function BlackFridayCountdown({
   // Desktop layout: placed in hero, height strictly matches icon height (h-11 sm:h-12)
   return (
     <div
-      className={`relative shrink-0 inline-flex items-center gap-2 sm:gap-2.5 h-11 sm:h-12 rounded-[14px] sm:rounded-[16px] border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 px-3 text-white shadow-lg backdrop-blur-md transition-all hover:border-amber-400/60 ${className}`}
+      className={`relative shrink-0 inline-flex items-center gap-2 sm:gap-2.5 h-11 sm:h-12 rounded-[14px] sm:rounded-[16px] border border-amber-300/80 bg-gradient-to-r from-amber-500/10 via-amber-500/5 to-rose-500/10 px-3 text-stone-900 shadow-sm backdrop-blur-md transition-all hover:border-amber-400 ${className}`}
     >
       {/* Decorative ambient flare */}
       <div className="pointer-events-none absolute -right-6 -bottom-6 h-16 w-16 rounded-full bg-amber-500/15 blur-lg" />
@@ -313,38 +313,38 @@ export function BlackFridayCountdown({
 
       {/* Coupon Code & Discount Pill */}
       <div className="flex items-center gap-1.5 text-xs shrink-0 whitespace-nowrap">
-        <span className="font-extrabold text-amber-300">50% OFF</span>
+        <span className="font-extrabold text-amber-900">50% OFF</span>
         <button
           type="button"
           onClick={copyCoupon}
           title="Click to copy coupon code BFCM50"
-          className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/20 px-1.5 py-0.5 font-mono text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition cursor-pointer active:scale-95"
+          className="inline-flex items-center gap-1 rounded-md border border-amber-300/90 bg-amber-100 px-1.5 py-0.5 font-mono text-xs font-bold text-amber-900 hover:bg-amber-200 transition cursor-pointer active:scale-95"
         >
           <span>{BFCM_COUPON_CODE}</span>
-          <span className="text-[9.5px] text-amber-200 font-sans">
+          <span className="text-[9.5px] text-amber-700 font-sans">
             {copied ? "✓" : "Copy"}
           </span>
         </button>
       </div>
 
       {/* Subtle Divider */}
-      <div className="h-5 w-px bg-white/20 shrink-0" />
+      <div className="h-5 w-px bg-stone-300 shrink-0" />
 
       {/* Countdown Timer Blocks (Clean single line) */}
-      <div className="flex items-center gap-1 font-mono text-xs shrink-0">
-        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+      <div className="flex items-center gap-1 font-mono text-xs shrink-0 whitespace-nowrap">
+        <span className="rounded-md bg-white border border-stone-200 px-1.5 py-0.5 font-bold text-stone-900 shadow-2xs">
           {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}d
         </span>
-        <span className="text-amber-400/60">:</span>
-        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+        <span className="text-stone-400">:</span>
+        <span className="rounded-md bg-white border border-stone-200 px-1.5 py-0.5 font-bold text-stone-900 shadow-2xs">
           {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}h
         </span>
-        <span className="text-amber-400/60">:</span>
-        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+        <span className="text-stone-400">:</span>
+        <span className="rounded-md bg-white border border-stone-200 px-1.5 py-0.5 font-bold text-stone-900 shadow-2xs">
           {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}m
         </span>
-        <span className="text-amber-400/60">:</span>
-        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+        <span className="text-stone-400">:</span>
+        <span className="rounded-md bg-white border border-stone-200 px-1.5 py-0.5 font-bold text-stone-900 shadow-2xs">
           {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}s
         </span>
       </div>
@@ -353,7 +353,7 @@ export function BlackFridayCountdown({
       <Link
         to="/submit"
         search={{ coupon: BFCM_COUPON_CODE }}
-        className="ml-1 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 sm:px-3 py-1.5 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:brightness-105 active:scale-95 shrink-0"
+        className="ml-1 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 sm:px-3 py-1.5 text-xs font-extrabold text-neutral-950 shadow-xs transition-all hover:brightness-105 active:scale-95 shrink-0 whitespace-nowrap"
       >
         <span>Claim</span>
         <span className="text-sm leading-none">→</span>

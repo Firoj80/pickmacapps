@@ -123,10 +123,10 @@ export function AppCard({
 
   // Desktop Outer Frame Class
   const outerFrameClass = isGold
-    ? "relative overflow-hidden rounded-2xl bg-amber-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(245,158,11,0.38)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(245,158,11,0.48)] dark:bg-amber-500/25"
+    ? "relative overflow-hidden rounded-2xl bg-amber-400/40 p-[2px] shadow-[0_4px_20px_rgba(245,158,11,0.22)] transition-all duration-300 group-hover:shadow-[0_10px_28px_rgba(245,158,11,0.32)]"
     : isBlue
-    ? "relative overflow-hidden rounded-2xl bg-sky-400/40 p-[2px] shadow-[0_6px_26px_-8px_rgba(14,165,233,0.34)] transition-all duration-300 group-hover:shadow-[0_14px_34px_-6px_rgba(14,165,233,0.45)] dark:bg-sky-500/25"
-    : "relative overflow-hidden rounded-2xl border border-line/60 shadow-[0_4px_20px_rgba(0,0,0,0.06)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.14)]";
+    ? "relative overflow-hidden rounded-2xl bg-sky-400/40 p-[2px] shadow-[0_4px_20px_rgba(14,165,233,0.2)] transition-all duration-300 group-hover:shadow-[0_10px_28px_rgba(14,165,233,0.3)]"
+    : "relative overflow-hidden rounded-2xl border border-line bg-surface shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition-all duration-300 group-hover:border-line-2 group-hover:shadow-[0_8px_24px_rgba(0,0,0,0.08)]";
 
   const waveRingClass = isGold
     ? "card-wave-ring card-wave-ring-gold"
@@ -140,12 +140,12 @@ export function AppCard({
 
   // Mobile Thinner Card Outer Class
   const mobileCardClass = isGold
-    ? "relative overflow-hidden rounded-2xl border-1.5 border-amber-500/60 bg-gradient-to-r from-amber-500/[0.14] via-amber-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(245,158,11,0.22)] transition-all active:scale-[0.99]"
+    ? "relative overflow-hidden rounded-2xl border-1.5 border-amber-400 bg-amber-50/60 p-3 shadow-xs transition-all active:scale-[0.99]"
     : isBlue
-    ? "relative overflow-hidden rounded-2xl border-1.5 border-sky-500/60 bg-gradient-to-r from-sky-500/[0.14] via-sky-500/[0.04] to-surface p-3 shadow-[0_4px_22px_rgba(14,165,233,0.22)] transition-all active:scale-[0.99]"
+    ? "relative overflow-hidden rounded-2xl border-1.5 border-sky-400 bg-sky-50/60 p-3 shadow-xs transition-all active:scale-[0.99]"
     : isHotCard
-    ? "relative overflow-hidden rounded-2xl border border-rose-500/40 bg-gradient-to-r from-rose-500/[0.09] via-rose-500/[0.03] to-surface p-3 shadow-[0_4px_16px_rgba(244,63,94,0.15)] transition-all active:scale-[0.99]"
-    : "relative overflow-hidden rounded-2xl border border-line/80 bg-surface/90 p-3 shadow-2xs transition-all active:scale-[0.99] hover:border-line-2";
+    ? "relative overflow-hidden rounded-2xl border border-rose-300 bg-rose-50/60 p-3 shadow-xs transition-all active:scale-[0.99]"
+    : "relative overflow-hidden rounded-2xl border border-line bg-surface p-3 shadow-2xs transition-all active:scale-[0.99] hover:border-line-2";
 
   return (
     <Link
@@ -363,7 +363,7 @@ export function AppCard({
         <div className={outerFrameClass}>
           {isAnimated ? <div aria-hidden="true" className={waveRingClass} /> : null}
           <div
-            className={`relative z-10 aspect-[1200/630] overflow-hidden bg-surface-2 dark:bg-[#101114] ${
+            className={`relative z-10 aspect-[1200/630] overflow-hidden bg-surface-2 ${
               isAnimated ? "rounded-[14px]" : "rounded-2xl"
             }`}
           >
@@ -387,7 +387,7 @@ export function AppCard({
                 className="h-full w-full object-cover object-center transition-transform duration-500 ease-out group-hover:scale-[1.025]"
               />
             ) : (
-              <div className="flex h-full w-full flex-col items-center justify-center bg-[#0f0f11] p-6 text-center dark:bg-[#141416]">
+              <div className="flex h-full w-full flex-col items-center justify-center bg-stone-100 p-6 text-center">
                 <img
                   alt={`${app.name} icon`}
                   src={optimizedIcon}
@@ -402,10 +402,10 @@ export function AppCard({
                       event.currentTarget.src = "/site-favicon.svg";
                     }
                   }}
-                  className="h-16 w-16 rounded-[18px] object-cover shadow-lg ring-1 ring-white/10"
+                  className="h-16 w-16 rounded-[18px] object-cover shadow-md ring-1 ring-black/10"
                 />
-                <p className="mt-3 text-sm font-semibold text-white/90">{app.name}</p>
-                <p className="mt-1 line-clamp-2 max-w-[240px] text-xs text-white/60">{app.tagline}</p>
+                <p className="mt-3 text-sm font-semibold text-stone-900">{app.name}</p>
+                <p className="mt-1 line-clamp-2 max-w-[240px] text-xs text-stone-500">{app.tagline}</p>
               </div>
             )}
 
@@ -426,7 +426,7 @@ export function AppCard({
             ) : null}
 
             {/* Top-Right Arrow Action Circle Indicator */}
-            <div className="absolute top-2.5 right-2.5 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-black/40 text-white/70 backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-black/70 group-hover:text-white">
+            <div className="absolute top-2.5 right-2.5 z-20 flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-stone-700 shadow-2xs backdrop-blur-md transition-all duration-200 group-hover:scale-110 group-hover:bg-white group-hover:text-ink">
               <svg className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="7" y1="17" x2="17" y2="7" />
                 <polyline points="7 7 17 7 17 17" />
@@ -451,7 +451,7 @@ export function AppCard({
                 event.currentTarget.src = "/site-favicon.svg";
               }
             }}
-            className="h-10 w-10 shrink-0 rounded-[11px] object-cover shadow-sm ring-1 ring-line"
+            className="h-10 w-10 shrink-0 rounded-[11px] object-cover shadow-xs ring-1 ring-black/10"
           />
 
           <div className="min-w-0 flex-1">
@@ -488,8 +488,8 @@ export function AppCard({
                   title={hasVoted ? "You upvoted this app" : "Upvote this app"}
                   className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-all ${
                     hasVoted
-                      ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/30"
-                      : "bg-surface-2 text-stone-300 ring-1 ring-line-2 hover:bg-amber-500/10 hover:text-amber-300 hover:ring-amber-400/30 cursor-pointer"
+                      ? "bg-amber-100 text-amber-900 ring-1 ring-amber-300"
+                      : "bg-surface-2 text-stone-700 ring-1 ring-line hover:bg-stone-200/70 hover:text-ink cursor-pointer"
                   }`}
                 >
                   <span className="text-[10px]">▲</span>
@@ -499,17 +499,17 @@ export function AppCard({
                 <span
                   className={`rounded-md px-1.5 py-0.5 text-[11px] font-medium leading-none ${
                     app.pricing === "free"
-                      ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400"
+                      ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/80"
                       : app.pricing === "freemium"
-                      ? "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400"
-                      : "bg-surface-2 text-stone-300 ring-1 ring-line-2"
+                      ? "bg-sky-50 text-sky-700 ring-1 ring-sky-200/80"
+                      : "bg-surface-2 text-stone-700 ring-1 ring-line"
                   }`}
                 >
                   {pricingLabel[app.pricing] || "Free"}
                 </span>
               </div>
             </div>
-            <p className="mt-0.5 line-clamp-1 text-[13px] leading-normal text-stone-300 font-normal">
+            <p className="mt-0.5 line-clamp-1 text-[13px] leading-normal text-muted font-normal">
               {app.tagline}
             </p>
           </div>

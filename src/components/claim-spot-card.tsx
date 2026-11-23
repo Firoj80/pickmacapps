@@ -143,25 +143,25 @@ export function ClaimSpotCard({
       {/* ======================================================== */}
       <div className="hidden sm:flex sm:flex-col">
         {/* Visual Screen Preview Card matching AppCard 1200/630 ratio */}
-        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/[0.05] p-[2px] shadow-[0_6px_24px_rgba(245,158,11,0.18)] transition-all duration-300 group-hover:border-amber-400 group-hover:shadow-[0_14px_36px_rgba(245,158,11,0.32)] group-hover:-translate-y-1">
+        <div className="relative overflow-hidden rounded-2xl border-2 border-dashed border-amber-500/50 bg-amber-500/[0.05] p-[2px] shadow-[0_4px_20px_rgba(245,158,11,0.15)] transition-all duration-300 group-hover:border-amber-400 group-hover:shadow-[0_10px_28px_rgba(245,158,11,0.25)] group-hover:-translate-y-0.5">
           <div
-            style={{ background: "radial-gradient(circle at 50% 45%, rgba(245, 158, 11, 0.22), transparent 70%)" }}
-            className="relative z-10 aspect-[1200/630] overflow-hidden rounded-[14px] bg-gradient-to-br from-[#1d1627] via-[#14101d] to-[#0c0a11] p-3.5 sm:p-4 flex flex-col justify-between text-white select-none"
+            style={{ background: "radial-gradient(circle at 50% 45%, rgba(245, 158, 11, 0.15), transparent 70%)" }}
+            className="relative z-10 aspect-[1200/630] overflow-hidden rounded-[14px] bg-gradient-to-br from-[#FFFDF7] via-amber-50/40 to-stone-100/60 p-3.5 sm:p-4 flex flex-col justify-between text-stone-900 select-none border border-amber-200/60"
           >
             {/* macOS window title bar with traffic lights & header */}
-            <div className="flex items-center justify-between gap-2 border-b border-white/[0.08] pb-2">
+            <div className="flex items-center justify-between gap-2 border-b border-black/[0.06] pb-2">
               <div className="flex items-center gap-1.5">
-                <span className="h-2 w-2 rounded-full bg-rose-500/80" />
-                <span className="h-2 w-2 rounded-full bg-amber-500/80" />
-                <span className="h-2 w-2 rounded-full bg-emerald-500/80" />
-                <span className="ml-2 font-mono text-[10px] text-white/40">pickmacapps.store/your-app</span>
+                <span className="h-2 w-2 rounded-full bg-rose-400" />
+                <span className="h-2 w-2 rounded-full bg-amber-400" />
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                <span className="ml-2 font-mono text-[10px] text-stone-400">pickmacapps.store/your-app</span>
               </div>
 
               {/* Black Friday 50% OFF Badge */}
-              <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500/30 to-rose-500/30 px-2.5 py-0.5 text-[10px] font-bold text-amber-200 ring-1 ring-amber-400/50 shadow-xs">
-                <span className="animate-pulse">🔥</span>
+              <div className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[10px] font-bold text-black shadow-xs">
+                <span>🔥</span>
                 <span>BLACK FRIDAY 50% OFF</span>
-                <span className="font-mono bg-black/40 px-1 py-0.2 rounded text-[9.5px] text-amber-300">BFCM50</span>
+                <span className="font-mono bg-black/20 px-1 py-0.2 rounded text-[9.5px] text-white">BFCM50</span>
               </div>
             </div>
 
@@ -169,37 +169,37 @@ export function ClaimSpotCard({
             <div className="flex flex-col items-center justify-center text-center my-auto py-1">
               {/* Dashed App Icon Placeholder with + */}
               <div className="relative group-hover:scale-105 transition-transform duration-300">
-                <div className="flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-300/70 bg-amber-400/10 text-xl font-bold shadow-md">
-                  <span className="text-amber-300">+</span>
+                <div className="flex h-12 w-12 sm:h-13 sm:w-13 items-center justify-center rounded-[14px] border-2 border-dashed border-amber-500/70 bg-amber-500/10 text-xl font-bold text-amber-700 shadow-sm">
+                  <span>+</span>
                 </div>
-                <BadgeCheckIcon className="absolute -bottom-1 -right-1 h-4.5 w-4.5 shrink-0 fill-amber-400 text-stone-950" />
+                <BadgeCheckIcon className="absolute -bottom-1 -right-1 h-4.5 w-4.5 shrink-0 fill-amber-500 text-stone-950" />
               </div>
 
-              <p className="mt-2 text-[15px] sm:text-base font-bold tracking-tight text-white drop-shadow-sm">
+              <p className="mt-2 text-[15px] sm:text-base font-bold tracking-tight text-stone-900 drop-shadow-2xs">
                 Your App Here
               </p>
-              <p className="mt-0.5 text-xs text-amber-300/90 max-w-[280px] line-clamp-1 font-medium">
+              <p className="mt-0.5 text-xs text-amber-800 max-w-[280px] line-clamp-1 font-medium">
                 🔥 Black Friday 50% OFF · Gold Spotlight #1 + Medium Article
               </p>
             </div>
 
             {/* Bottom Bar: Tier Badge on left, Price Tag on right */}
-            <div className="flex items-center justify-between pt-2 border-t border-white/[0.08]">
+            <div className="flex items-center justify-between pt-2 border-t border-black/[0.06]">
               <div className="flex items-center gap-1.5">
                 <span className="flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-400 to-yellow-300 px-2 py-0.5 text-[10px] font-bold text-stone-950 shadow-xs ring-1 ring-amber-200/70">
                   <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
                   <span>Gold Spotlight</span>
                 </span>
-                <span className="text-[11px] text-white/50">7 Days Active</span>
+                <span className="text-[11px] text-stone-500">7 Days Active</span>
               </div>
 
               {/* Price in USD with strikethrough & BFCM tag */}
               <div className="flex items-center gap-1.5">
-                <span className="text-[11px] text-white/50 line-through">{originalPrice}</span>
-                <span className="text-xs sm:text-[14px] font-black text-amber-300">
+                <span className="text-[11px] text-stone-400 line-through">{originalPrice}</span>
+                <span className="text-xs sm:text-[14px] font-black text-amber-900">
                   {salePrice}
                 </span>
-                <span className="rounded bg-rose-500/25 px-1.5 py-0.5 text-[9.5px] font-extrabold text-rose-300 ring-1 ring-rose-400/40">
+                <span className="rounded bg-rose-500/15 px-1.5 py-0.5 text-[9.5px] font-extrabold text-rose-700 ring-1 ring-rose-400/30">
                   50% OFF · BFCM50
                 </span>
               </div>
@@ -211,7 +211,7 @@ export function ClaimSpotCard({
         <div className="mt-3.5 flex items-start gap-3 px-1">
           {/* Logo Squircle Placeholder */}
           <div
-            className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-amber-500/50 bg-amber-500/10 text-amber-600 dark:text-amber-300 text-[11px] font-bold shadow-xs"
+            className="flex h-10 w-10 shrink-0 flex-col items-center justify-center rounded-[11px] border-2 border-dashed border-amber-500/50 bg-amber-500/10 text-amber-700 text-[11px] font-bold shadow-xs"
             title="Your App Logo"
           >
             <span className="text-xs leading-none">+</span>
@@ -232,14 +232,14 @@ export function ClaimSpotCard({
 
               {/* Click to Claim Button / Price Pill */}
               <div className="flex items-center gap-1 shrink-0">
-                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 ring-1 ring-amber-500/30 group-hover:bg-amber-500 group-hover:text-stone-950 transition-colors">
+                <span className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-bold bg-amber-500/15 text-amber-800 ring-1 ring-amber-500/30 group-hover:bg-amber-500 group-hover:text-stone-950 transition-colors">
                   <span>Claim Spot</span>
                   <span className="transition-transform group-hover:translate-x-0.5">→</span>
                 </span>
               </div>
             </div>
 
-            <p className="mt-1 line-clamp-1 text-[13px] text-stone-300 font-normal">
+            <p className="mt-1 line-clamp-1 text-[13px] text-muted font-normal">
               Black Friday 50% OFF with code BFCM50 · Top Spot + Medium Article · Only {salePrice}
             </p>
           </div>

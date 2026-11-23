@@ -1,5 +1,5 @@
 export type ThemePreference = "dark" | "light" | "system";
-export type ResolvedTheme = "dark";
+export type ResolvedTheme = "light";
 
 export const THEME_STORAGE_KEY = "theme";
 export const THEME_EVENT = "pickmacapps-theme-change";
@@ -9,25 +9,25 @@ export function isAdminPathname(pathname?: string): boolean {
 }
 
 export function getStoredTheme(): ThemePreference {
-  return "dark";
+  return "light";
 }
 
 export function resolveTheme(pref?: ThemePreference): ResolvedTheme {
-  return "dark";
+  return "light";
 }
 
 export function syncThemeToDom(pref?: ThemePreference, pathname?: string): ResolvedTheme {
-  if (typeof document === "undefined") return "dark";
+  if (typeof document === "undefined") return "light";
 
   const root = document.documentElement;
-  root.dataset.theme = "dark";
-  root.classList.add("dark");
+  root.dataset.theme = "light";
+  root.classList.remove("dark");
 
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    meta.setAttribute("content", "#090a0f");
+    meta.setAttribute("content", "#f4f4f6");
   }
-  return "dark";
+  return "light";
 }
 
 export function setThemePreference(pref?: ThemePreference): ResolvedTheme {
@@ -35,5 +35,5 @@ export function setThemePreference(pref?: ThemePreference): ResolvedTheme {
 }
 
 export function toggleLightDarkTheme(): ResolvedTheme {
-  return "dark";
+  return "light";
 }
