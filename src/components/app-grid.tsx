@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppCard } from "@/components/app-card";
 import { ClaimSpotCard, type ClaimSpotOffer } from "@/components/claim-spot-card";
-import { isEditorChoice, MAX_HOT_SLOTS, shelfApps, type AppItem } from "@/lib/catalog";
+import { isEditorChoice, isSeedApp, MAX_HOT_SLOTS, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
@@ -89,9 +89,14 @@ export function AppGrid({
       .sort(byOldest)
       .slice(0, MAX_HOT_SLOTS);
 
-    // Priority 4: All other apps (not editor choice, not hot), oldest first
-    const otherApps = apps
-      .filter((a) => !isEditorChoice(a) && !a.isHot)
+    // Priority 4: Active non-seeded apps (user-submitted + admin-added, not editor choice, not hot), oldest first
+    const activeApps = apps
+      .filter((a) => !isEditorChoice(a) && !a.isHot && !isSeedApp(a))
+      .sort(byOldest);
+
+    // Priority 5: The 24 initial seed starter apps (not editor choice, not hot), oldest first
+    const seededApps = apps
+      .filter((a) => !isEditorChoice(a) && !a.isHot && isSeedApp(a))
       .sort(byOldest);
 
     const goldFull = goldApps.length >= MAX_HOME_TIER_SLOTS;
@@ -105,8 +110,10 @@ export function AppGrid({
       ...(!goldFull ? [{ kind: "claim" as const, tier: "article" as const }] : []),
       // Hot apps
       ...hotApps.map((app) => ({ kind: "app" as const, app, priority: false })),
-      // All remaining apps, oldest first
-      ...otherApps.map((app) => ({ kind: "app" as const, app, priority: false })),
+      // Active non-seeded apps (user-submitted + admin-added)
+      ...activeApps.map((app) => ({ kind: "app" as const, app, priority: false })),
+      // Starter seeded apps below active apps
+      ...seededApps.map((app) => ({ kind: "app" as const, app, priority: false })),
     ];
   }, [apps, isDefaultHomeFeed]);
 

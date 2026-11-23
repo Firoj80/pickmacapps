@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { appPriorityWeight, posts } from "@/lib/catalog";
+import { appPriorityWeight, isSeedApp, posts } from "@/lib/catalog";
 import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
@@ -112,6 +112,9 @@ function CategoryPage() {
   const listed = [...rawListed].sort((a, b) => {
     const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
+    const aSeed = isSeedApp(a);
+    const bSeed = isSeedApp(b);
+    if (aSeed !== bSeed) return aSeed ? 1 : -1;
     return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() || a.name.localeCompare(b.name);
   });
   const label = category.name.toLowerCase();

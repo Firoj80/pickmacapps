@@ -33,6 +33,7 @@ export type AppItem = {
   dashboardToken?: string | null;
   checkBadge?: boolean;
   xHandle?: string | null;
+  isSeed?: boolean;
   createdAt: string;
   updatedAt?: string;
   demo: string;
@@ -102,6 +103,11 @@ export const categories = raw.categories as CategoryInfo[];
 export const posts = raw.posts as Post[];
 export const alternatives = raw.alternatives as Alternative[];
 const shelfRank = new Map(apps.map((app, index) => [app.slug, index]));
+export const seedSlugs = new Set(apps.map((a) => a.slug));
+
+export function isSeedApp(app: AppItem): boolean {
+  return Boolean(app.isSeed ?? seedSlugs.has(app.slug));
+}
 
 const priceRank: Record<string, number> = { free: 0, freemium: 1, paid: 2 };
 
@@ -144,14 +150,18 @@ export function sortApps(list: AppItem[], order: "oldest" | "newest" | "name" | 
   } else {
     next.sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.name.localeCompare(b.name));
   }
+  // Active non-seeded apps (user-submitted + admin-added) MUST rank above starter seed apps
   next.sort((a, b) => {
-    const ap = pinRank(a.slug);
-    const bp = pinRank(b.slug);
-    const aPinned = Number.isFinite(ap);
-    const bPinned = Number.isFinite(bp);
-    if (aPinned && bPinned) return ap - bp;
-    if (aPinned) return -1;
-    if (bPinned) return 1;
+    const aSeed = isSeedApp(a);
+    const bSeed = isSeedApp(b);
+    if (aSeed !== bSeed) {
+      return aSeed ? 1 : -1;
+    }
+    if (aSeed && bSeed) {
+      const ap = pinRank(a.slug);
+      const bp = pinRank(b.slug);
+      return ap - bp;
+    }
     return 0;
   });
   return next;
@@ -239,6 +249,12 @@ export function shelfApps(
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
       return timeA - timeB || a.name.localeCompare(b.name);
+    }
+    // For standard apps: active non-seeded apps always rank above starter seed apps
+    const aSeed = isSeedApp(a);
+    const bSeed = isSeedApp(b);
+    if (aSeed !== bSeed) {
+      return aSeed ? 1 : -1;
     }
     return 0;
   });

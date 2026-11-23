@@ -14,6 +14,7 @@ import {
 } from "@/lib/telegram.server";
 import {
   HOT_APP_DURATION_DAYS,
+  seedSlugs,
   type AppItem,
   type FeaturedTier,
   type Post,
@@ -60,6 +61,7 @@ type AppRow = {
   dashboard_token?: string | null;
   check_badge?: boolean;
   x_handle?: string | null;
+  is_seed?: boolean;
 };
 
 type GuideRow = {
@@ -120,6 +122,7 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     hotScheduledFor: row.hot_scheduled_for ? iso(row.hot_scheduled_for) : null,
     featuredScheduledFor: row.featured_scheduled_for ? iso(row.featured_scheduled_for) : null,
     isUserSubmitted: asBool(row.is_user_submitted),
+    isSeed: asBool(row.is_seed) || seedSlugs.has(row.slug),
     views7d: Number(row.views_7d ?? 0),
     createdAt: iso(row.created_at),
     updatedAt: row.updated_at ? iso(row.updated_at) : undefined,
@@ -204,8 +207,8 @@ async function seedCatalogApps(sql: Sql) {
       await sql.query(
         `insert into apps (
           id, name, slug, tagline, description, icon, website, pricing, category, category_name,
-          category_icon, editor_choice, created_at, demo, related, status
-        ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published')
+          category_icon, editor_choice, created_at, demo, related, status, is_seed
+        ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15::jsonb,'published',true)
          on conflict (slug) do nothing`,
         [
           app.id,
@@ -500,6 +503,7 @@ export async function publishedDirectory(): Promise<PublishedDirectory> {
     console.error("[directory] publishedDirectory DB query failed, using static fallback:", err);
     const seedApps = (raw.apps as unknown as AppItem[]).map((app) => ({
       ...app,
+      isSeed: true,
       editorChoice: Boolean(app.editorChoice),
       status: "published",
       badgeStatus: "verified",

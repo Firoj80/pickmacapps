@@ -18,21 +18,20 @@ test("editor's choice comes only from the saved flag", () => {
   assert.equal(grouped.length + choice.length, apps.length)
 })
 
-test("new apps follow the original shelf, newest first", () => {
+test("new apps precede the starter shelf, newest first", () => {
   const sample = apps[0]
-  const newer = { ...sample, id: "brand-new", slug: "brand-new", name: "Brand New", editorChoice: false, createdAt: "2026-11-01" } as AppItem
-  const older = { ...sample, id: "older-new", slug: "older-new", name: "Older New", editorChoice: false, createdAt: "2026-01-01" } as AppItem
+  const newer = { ...sample, id: "brand-new", slug: "brand-new", name: "Brand New", editorChoice: false, isSeed: false, createdAt: "2026-11-01" } as AppItem
+  const older = { ...sample, id: "older-new", slug: "older-new", name: "Older New", editorChoice: false, isSeed: false, createdAt: "2026-01-01" } as AppItem
   const slugs = shelfApps([...apps, newer, older], "", "all", "newest").map((app) => app.slug)
   const shelf = apps.map((app) => app.slug)
-  assert.equal(slugs[0], shelf[0])
-  assert.deepEqual(slugs.slice(0, shelf.length), shelf)
-  assert.deepEqual(slugs.slice(-2), ["brand-new", "older-new"])
+  assert.deepEqual(slugs.slice(0, 2), ["brand-new", "older-new"])
+  assert.deepEqual(slugs.slice(2), shelf)
 })
 
 test("sortApps with oldest orders apps from oldest to newest", () => {
   const sample = apps[0]
-  const older = { ...sample, id: "app-old", slug: "app-old", name: "Older App", createdAt: "2024-01-01" } as AppItem
-  const newer = { ...sample, id: "app-new", slug: "app-new", name: "Newer App", createdAt: "2026-05-01" } as AppItem
+  const older = { ...sample, id: "app-old", slug: "app-old", name: "Older App", isSeed: false, createdAt: "2024-01-01" } as AppItem
+  const newer = { ...sample, id: "app-new", slug: "app-new", name: "Newer App", isSeed: false, createdAt: "2026-05-01" } as AppItem
   const sorted = sortApps([newer, older], "oldest")
   assert.deepEqual(sorted.map((a) => a.slug), ["app-old", "app-new"])
 })
@@ -48,15 +47,17 @@ test("shelfApps orders featured and hot apps from oldest to newest", () => {
   assert.deepEqual(hotSlugs, ["hot-old", "hot-new"])
 })
 
-test("by default, user submitted apps are ordered oldest first (hardebell -> shedi -> photosy)", () => {
+test("by default, user submitted apps are ordered oldest first above seed apps (hardebell -> shedi -> photosy)", () => {
   const sample = apps[0]
-  const hardebell = { ...sample, id: "hardebell", slug: "hardebell", name: "Hardebell", editorChoice: false, createdAt: "2026-11-01" } as AppItem
-  const shedi = { ...sample, id: "shedi", slug: "shedi", name: "Shedi", editorChoice: false, createdAt: "2026-11-02" } as AppItem
-  const photosy = { ...sample, id: "photosy", slug: "photosy", name: "Photosy", editorChoice: false, createdAt: "2026-11-03" } as AppItem
+  const hardebell = { ...sample, id: "hardebell", slug: "hardebell", name: "Hardebell", editorChoice: false, isSeed: false, createdAt: "2026-11-01" } as AppItem
+  const shedi = { ...sample, id: "shedi", slug: "shedi", name: "Shedi", editorChoice: false, isSeed: false, createdAt: "2026-11-02" } as AppItem
+  const photosy = { ...sample, id: "photosy", slug: "photosy", name: "Photosy", editorChoice: false, isSeed: false, createdAt: "2026-11-03" } as AppItem
 
   const results = shelfApps([...apps, photosy, hardebell, shedi], "", "all")
-  const userAppSlugs = results.slice(-3).map((a) => a.slug)
+  const userAppSlugs = results.slice(0, 3).map((a) => a.slug)
   assert.deepEqual(userAppSlugs, ["hardebell", "shedi", "photosy"])
+  const remainingSlugs = results.slice(3).map((a) => a.slug)
+  assert.deepEqual(remainingSlugs, apps.map((a) => a.slug))
 })
 
 test("hot tier and hero section icons order hot apps oldest first (hardebell -> photosy)", () => {

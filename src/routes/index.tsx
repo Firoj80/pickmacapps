@@ -6,7 +6,7 @@ import { FreshDropsBanner } from "@/components/fresh-drops-banner";
 import { DesktopCategoriesBar } from "@/components/desktop-categories-bar";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { BadgeCheckIcon } from "@/components/icons";
-import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, posts, shelfApps, type AppItem } from "@/lib/catalog";
+import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, isSeedApp, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
@@ -50,10 +50,13 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
   const next = [...list];
   if (sort === "new") {
-    // Latest/Newest: Featured apps on top, then Hot apps, then all latest added apps by createdAt desc
+    // Latest/Newest: Featured apps on top, then Hot apps, then all active latest added apps by createdAt desc, then seed apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      const aSeed = isSeedApp(a);
+      const bSeed = isSeedApp(b);
+      if (aSeed !== bSeed) return aSeed ? 1 : -1;
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
       return timeB - timeA || a.name.localeCompare(b.name);
@@ -61,10 +64,13 @@ function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
     return next;
   }
   if (sort === "trending") {
-    // Trending: Featured apps on top, then Hot apps, then all most viewed apps in the last 7 days
+    // Trending: Featured apps on top, then Hot apps, then all active most viewed apps, then seed apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      const aSeed = isSeedApp(a);
+      const bSeed = isSeedApp(b);
+      if (aSeed !== bSeed) return aSeed ? 1 : -1;
       const vA = a.views7d ?? 0;
       const vB = b.views7d ?? 0;
       if (vB !== vA) return vB - vA;
@@ -75,10 +81,13 @@ function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
     return next;
   }
   if (sort === "free") {
-    // Free: Featured apps (if free) on top, then Hot apps, then free apps (oldest first)
+    // Free: Featured apps (if free) on top, then Hot apps, then active free apps, then seed free apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      const aSeed = isSeedApp(a);
+      const bSeed = isSeedApp(b);
+      if (aSeed !== bSeed) return aSeed ? 1 : -1;
       const timeA = new Date(a.createdAt).getTime() || 0;
       const timeB = new Date(b.createdAt).getTime() || 0;
       return timeA - timeB || a.name.localeCompare(b.name);
