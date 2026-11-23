@@ -103,7 +103,7 @@ export function ClaimSpotCard({
               </p>
 
               {/* Row 3: Meta line with pricing in USD */}
-              <div className="mt-1 flex items-center gap-2 text-[10.5px] text-muted overflow-hidden">
+              <div className="mt-1 flex items-center gap-2 text-[10.5px] text-stone-400 overflow-hidden">
                 <span className="inline-flex items-center gap-1 truncate max-w-[85px]">
                   <svg className="h-3 w-3 shrink-0 text-amber-400/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10" />
@@ -239,7 +239,7 @@ export function ClaimSpotCard({
               </div>
             </div>
 
-            <p className="mt-1 line-clamp-1 text-[13px] text-muted">
+            <p className="mt-1 line-clamp-1 text-[13px] text-stone-300 font-normal">
               Black Friday 50% OFF with code BFCM50 · Top Spot + Medium Article · Only {salePrice}
             </p>
           </div>

@@ -266,15 +266,15 @@ export function AppCard({
               </div>
 
               {/* Row 2: Tagline */}
-              <p className="mt-0.5 line-clamp-1 text-[12px] text-muted leading-tight">
+              <p className="mt-0.5 line-clamp-1 text-[12px] text-stone-300 leading-normal font-normal">
                 {app.tagline}
               </p>
 
               {/* Row 3: Meta line */}
-              <div className="mt-1 flex items-center gap-2 text-[10.5px] text-muted overflow-hidden">
+              <div className="mt-1 flex items-center gap-2 text-[10.5px] text-stone-400 overflow-hidden">
                 {domain ? (
                   <span className="inline-flex items-center gap-1 truncate max-w-[90px]">
-                    <svg className="h-3 w-3 shrink-0 text-muted/70" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <svg className="h-3 w-3 shrink-0 text-stone-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <circle cx="12" cy="12" r="10" />
                       <line x1="2" y1="12" x2="22" y2="12" />
                       <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
@@ -489,7 +489,7 @@ export function AppCard({
                   className={`inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[11px] font-semibold transition-all ${
                     hasVoted
                       ? "bg-amber-500/15 text-amber-700 dark:text-amber-400 ring-1 ring-amber-500/30"
-                      : "bg-surface-2 text-muted ring-1 ring-line hover:bg-amber-500/10 hover:text-amber-600 hover:ring-amber-400/30 cursor-pointer"
+                      : "bg-surface-2 text-stone-300 ring-1 ring-line-2 hover:bg-amber-500/10 hover:text-amber-300 hover:ring-amber-400/30 cursor-pointer"
                   }`}
                 >
                   <span className="text-[10px]">▲</span>
@@ -502,14 +502,14 @@ export function AppCard({
                       ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-400/15 dark:text-emerald-400"
                       : app.pricing === "freemium"
                       ? "bg-sky-500/10 text-sky-600 dark:bg-sky-400/15 dark:text-sky-400"
-                      : "bg-surface-2 text-muted ring-1 ring-line"
+                      : "bg-surface-2 text-stone-300 ring-1 ring-line-2"
                   }`}
                 >
                   {pricingLabel[app.pricing] || "Free"}
                 </span>
               </div>
             </div>
-            <p className="mt-0.5 line-clamp-1 text-[13px] leading-tight text-body/80">
+            <p className="mt-0.5 line-clamp-1 text-[13px] leading-normal text-stone-300 font-normal">
               {app.tagline}
             </p>
           </div>

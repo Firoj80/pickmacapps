@@ -243,7 +243,7 @@ export function BlackFridayCountdown({
           <div className="flex items-center gap-1.5">
             <span className="flex h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
             <span className="text-xs font-extrabold uppercase tracking-wider text-amber-400">
-              Black Friday Sale · 50% OFF
+              BLACK FRIDAY SALE IS LIVE · 50% OFF
             </span>
           </div>
           <span className="text-[10px] font-medium text-white/70">Ends Nov 30</span>
@@ -298,83 +298,64 @@ export function BlackFridayCountdown({
     );
   }
 
-  // Desktop layout: placed next to the hot app icons in hero
+  // Desktop layout: placed in hero, height strictly matches icon height (h-11 sm:h-12)
   return (
     <div
-      className={`relative shrink-0 inline-flex items-center gap-3.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 py-2 px-3.5 text-white shadow-lg backdrop-blur-md transition-all hover:border-amber-400/60 ${className}`}
+      className={`relative shrink-0 inline-flex items-center gap-2 sm:gap-2.5 h-11 sm:h-12 rounded-[14px] sm:rounded-[16px] border border-amber-500/40 bg-gradient-to-r from-neutral-950 via-neutral-900 to-amber-950/70 px-3 text-white shadow-lg backdrop-blur-md transition-all hover:border-amber-400/60 ${className}`}
     >
       {/* Decorative ambient flare */}
-      <div className="pointer-events-none absolute -right-6 -bottom-6 h-20 w-20 rounded-full bg-amber-500/15 blur-lg" />
+      <div className="pointer-events-none absolute -right-6 -bottom-6 h-16 w-16 rounded-full bg-amber-500/15 blur-lg" />
 
-      {/* Sale info column */}
-      <div className="flex flex-col gap-0.5">
-        <div className="flex items-center gap-2">
-          <span className="inline-flex items-center gap-1 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wider text-black shadow-xs">
-            🔥 Black Friday
-          </span>
-          <span className="text-xs font-bold text-white tracking-tight">
-            50% OFF Paid Listing
-          </span>
-        </div>
+      {/* Sale Pill */}
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-amber-500 to-rose-500 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold uppercase tracking-wider text-black shadow-xs shrink-0 whitespace-nowrap">
+        🔥 BLACK FRIDAY SALE IS LIVE
+      </span>
 
-        <div className="flex items-center gap-2 text-[11px] text-white/80 mt-1">
-          <span>Use coupon:</span>
-          <button
-            type="button"
-            onClick={copyCoupon}
-            title="Click to copy coupon code"
-            className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/20 px-1.5 py-0.5 font-mono text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition cursor-pointer active:scale-95"
-          >
-            <span>{BFCM_COUPON_CODE}</span>
-            <span className="text-[10px] text-amber-200 font-sans">
-              {copied ? "✓ Copied" : "Copy"}
-            </span>
-          </button>
-          <span className="text-[10px] text-white/60">· Valid till Nov 30</span>
-        </div>
+      {/* Coupon Code & Discount Pill */}
+      <div className="flex items-center gap-1.5 text-xs shrink-0 whitespace-nowrap">
+        <span className="font-extrabold text-amber-300">50% OFF</span>
+        <button
+          type="button"
+          onClick={copyCoupon}
+          title="Click to copy coupon code BFCM50"
+          className="inline-flex items-center gap-1 rounded-md border border-amber-400/40 bg-amber-400/20 px-1.5 py-0.5 font-mono text-xs font-bold text-amber-300 hover:bg-amber-400/30 transition cursor-pointer active:scale-95"
+        >
+          <span>{BFCM_COUPON_CODE}</span>
+          <span className="text-[9.5px] text-amber-200 font-sans">
+            {copied ? "✓" : "Copy"}
+          </span>
+        </button>
       </div>
 
-      {/* Divider */}
-      <div className="h-10 w-px bg-white/15" />
+      {/* Subtle Divider */}
+      <div className="h-5 w-px bg-white/20 shrink-0" />
 
-      {/* Countdown Timer Blocks */}
-      <div className="flex items-center gap-1.5">
-        <div className="flex flex-col items-center">
-          <span className="min-w-[28px] rounded-lg bg-white/10 px-1.5 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
-            {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}
-          </span>
-          <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Days</span>
-        </div>
-        <span className="font-bold text-amber-400 -mt-3.5">:</span>
-        <div className="flex flex-col items-center">
-          <span className="min-w-[28px] rounded-lg bg-white/10 px-1.5 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
-            {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}
-          </span>
-          <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Hours</span>
-        </div>
-        <span className="font-bold text-amber-400 -mt-3.5">:</span>
-        <div className="flex flex-col items-center">
-          <span className="min-w-[28px] rounded-lg bg-white/10 px-1.5 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
-            {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}
-          </span>
-          <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Mins</span>
-        </div>
-        <span className="font-bold text-amber-400 -mt-3.5">:</span>
-        <div className="flex flex-col items-center">
-          <span className="min-w-[28px] rounded-lg bg-white/10 px-1.5 py-1 text-center font-mono text-xs font-extrabold text-amber-300 shadow-inner">
-            {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}
-          </span>
-          <span className="text-[9px] font-semibold text-white/60 uppercase mt-0.5">Secs</span>
-        </div>
+      {/* Countdown Timer Blocks (Clean single line) */}
+      <div className="flex items-center gap-1 font-mono text-xs shrink-0">
+        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+          {mounted ? String(timeLeft.days).padStart(2, "0") : "14"}d
+        </span>
+        <span className="text-amber-400/60">:</span>
+        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+          {mounted ? String(timeLeft.hours).padStart(2, "0") : "00"}h
+        </span>
+        <span className="text-amber-400/60">:</span>
+        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+          {mounted ? String(timeLeft.minutes).padStart(2, "0") : "00"}m
+        </span>
+        <span className="text-amber-400/60">:</span>
+        <span className="rounded-md bg-white/10 px-1.5 py-0.5 font-bold text-amber-300">
+          {mounted ? String(timeLeft.seconds).padStart(2, "0") : "00"}s
+        </span>
       </div>
 
       {/* Direct CTA button */}
       <Link
         to="/submit"
         search={{ coupon: BFCM_COUPON_CODE }}
-        className="ml-1 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-3 py-2 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:scale-105 hover:shadow-amber-500/25 active:scale-95"
+        className="ml-1 inline-flex items-center gap-1 rounded-xl bg-gradient-to-r from-amber-400 to-amber-500 px-2.5 sm:px-3 py-1.5 text-xs font-extrabold text-neutral-950 shadow-md transition-all hover:brightness-105 active:scale-95 shrink-0"
       >
-        <span>Claim 50% OFF</span>
+        <span>Claim</span>
         <span className="text-sm leading-none">→</span>
       </Link>
     </div>

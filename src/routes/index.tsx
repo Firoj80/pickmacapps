@@ -1,9 +1,8 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { AppGrid } from "@/components/app-grid";
 import { GuideStrip } from "@/components/guide-strip";
 import { FreshDropsBanner } from "@/components/fresh-drops-banner";
-import { DesktopCategoriesBar } from "@/components/desktop-categories-bar";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { BadgeCheckIcon } from "@/components/icons";
 import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, isSeedApp, posts, shelfApps, type AppItem } from "@/lib/catalog";
@@ -176,106 +175,201 @@ export const Route = createFileRoute("/")({
 
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
-  // Dynamic curved arc fan-out: middle icons lifted higher, outward icons rotated and spread (auto-arranged up to 12 apps)
-  const shown = apps.slice(0, 12);
-  const count = shown.length;
-  const mid = (count - 1) / 2;
+  const shown = apps.slice(0, 8);
+  const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Dynamic overlap: as icon count increases from 6 up to 12, smoothly adjust overlap so they always fit comfortably
-  // At 6 icons: -14px overlap. At 12 icons: -24px overlap.
-  const overlap = count <= 6 ? -14 : Math.round(-14 - ((count - 6) / 6) * 10);
+  const handleMouseEnter = (slug: string) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+      timeoutRef.current = null;
+    }
+    setHoveredSlug(slug);
+  };
+
+  const handleMouseLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setHoveredSlug(null);
+    }, 140);
+  };
 
   return (
-    <div className="relative flex items-center justify-center pt-2 pb-2 max-w-full overflow-hidden px-1">
-      <div className="flex items-center justify-center">
+    <div className="relative flex items-center py-1 overflow-visible">
+      <div className="flex items-center overflow-visible">
         {shown.map((app, index) => {
-          const offset = index - mid;
-          const normalized = mid > 0 ? offset / mid : 0;
-          // Smooth parabolic arc curve: center icons lifted higher, outward icons lower
-          const translateY = Math.pow(Math.abs(normalized), 1.35) * (count > 6 ? 11 : 9);
-          const rotate = normalized * (count > 6 ? 14 : 11);
-          const zIndex = Math.round(50 - Math.abs(offset) * 2);
-
           const choice = isEditorChoice(app);
           const isGold = (choice && app.featuredTier === "article") || app.featuredTier === "article";
           const isBlue = (choice && app.featuredTier !== "article") || (app.featuredTier === "featured");
           const isHot = Boolean(app.isHot && !isGold && !isBlue);
 
-          const appTitle = isGold
-            ? `${app.name} 🌟 Gold Spotlight`
-            : isBlue
-            ? `${app.name} ✦ Featured`
-            : isHot
-            ? `${app.name} 🔥 Hot`
-            : app.name;
+          const isHovered = hoveredSlug === app.slug;
+          // Left-to-right stacking: later icons overlap on top of previous icons
+          const zIndex = isHovered ? 60 : index + 1;
 
-          const ringClass = isGold
-            ? "ring-2 ring-amber-400/90 shadow-[0_8px_22px_rgba(245,158,11,0.28)]"
-            : isBlue
-            ? "ring-2 ring-sky-400/90 shadow-[0_8px_22px_rgba(14,165,233,0.28)]"
-            : "ring-2 ring-line shadow-[0_8px_20px_rgba(0,0,0,0.14)]";
+          const cover = app.demo?.trim();
+          const optimizedCover = cover ? appCoverUrl(cover) : "";
 
           return (
-            <Link
+            <div
               key={app.slug}
-              to="/app/$slug"
-              params={{ slug: app.slug }}
-              title={appTitle}
+              className="relative group/icon shrink-0"
               style={{
                 zIndex,
-                marginLeft: index === 0 ? 0 : overlap,
-                transform: `translateY(${translateY}px) rotate(${rotate}deg)`,
+                marginLeft: index === 0 ? 0 : -14,
               }}
-              className={`group relative h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-[15px] sm:rounded-[17px] bg-surface ${ringClass} transition-all duration-200 hover:!z-[99] hover:!-translate-y-2.5 hover:!rotate-0 hover:scale-115 hover:shadow-[0_16px_32px_rgba(0,0,0,0.25)]`}
+              onMouseEnter={() => handleMouseEnter(app.slug)}
+              onMouseLeave={handleMouseLeave}
             >
-              <div className="h-full w-full overflow-hidden rounded-[15px] sm:rounded-[17px]">
-                <img
-                  alt={app.name}
-                  src={appIconUrl(app.icon)}
-                  loading="eager"
-                  decoding="async"
-                  width={60}
-                  height={60}
-                  onError={(event) => {
-                    if (event.currentTarget.src !== app.icon) {
-                      event.currentTarget.src = app.icon;
-                    } else {
-                      event.currentTarget.src = "/site-favicon.svg";
-                    }
-                  }}
-                  className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                />
-              </div>
+              {/* Squircle App Icon: Strictly 100% IDENTICAL SIZE for all icons, straight & level */}
+              <Link
+                to="/app/$slug"
+                params={{ slug: app.slug }}
+                className={`relative block h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-[14px] sm:rounded-[16px] bg-surface-2 ring-1.5 ring-canvas shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-all duration-200 ease-out cursor-pointer ${
+                  isHovered
+                    ? "-translate-y-1.5 !shadow-[0_14px_28px_rgba(0,0,0,0.6)] !ring-amber-400"
+                    : isGold
+                    ? "ring-amber-500/80 hover:-translate-y-1"
+                    : isBlue
+                    ? "ring-sky-500/80 hover:-translate-y-1"
+                    : "ring-line-2 hover:-translate-y-1"
+                }`}
+                title={app.name}
+              >
+                <div className="h-full w-full overflow-hidden rounded-[14px] sm:rounded-[16px]">
+                  <img
+                    alt={app.name}
+                    src={appIconUrl(app.icon)}
+                    loading="eager"
+                    decoding="async"
+                    width={48}
+                    height={48}
+                    onError={(event) => {
+                      if (event.currentTarget.src !== app.icon) {
+                        event.currentTarget.src = app.icon;
+                      } else {
+                        event.currentTarget.src = "/site-favicon.svg";
+                      }
+                    }}
+                    className="h-full w-full object-cover select-none pointer-events-none"
+                  />
+                </div>
 
-              {/* Badges: Gold Spotlight, Blue Featured, or Hot */}
-              {isGold ? (
-                <span
-                  title="Gold Spotlight App"
-                  aria-label="Gold Spotlight App"
-                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center"
+                {/* Subtle Tier Badge on Icon */}
+                {isGold ? (
+                  <span
+                    title="Gold Spotlight App"
+                    className="absolute -top-1 -right-1 z-10 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center pointer-events-none"
+                  >
+                    <BadgeCheckIcon className="h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 fill-amber-500 text-stone-950 drop-shadow-sm" />
+                  </span>
+                ) : isBlue ? (
+                  <span
+                    title="Featured App"
+                    className="absolute -top-1 -right-1 z-10 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-600 text-white shadow-xs ring-1 ring-canvas pointer-events-none"
+                  >
+                    <svg className="h-2 w-2 fill-current" viewBox="0 0 24 24">
+                      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                  </span>
+                ) : isHot ? (
+                  <span
+                    title="Hot App"
+                    className="absolute -top-1 -right-1 z-10 flex h-3.5 w-3.5 sm:h-4 sm:w-4 items-center justify-center rounded-full bg-rose-600 text-[8px] sm:text-[9px] shadow-xs ring-1 ring-canvas pointer-events-none"
+                  >
+                    🔥
+                  </span>
+                ) : null}
+              </Link>
+
+              {/* Hover Popover Preview Card (opens straight and aligned) */}
+              <div
+                className={`absolute top-full left-0 pt-3 z-[70] w-[270px] sm:w-[280px] transition-all duration-200 ease-out ${
+                  isHovered
+                    ? "opacity-100 visible translate-y-0 pointer-events-auto"
+                    : "opacity-0 invisible translate-y-2 pointer-events-none"
+                }`}
+                onMouseEnter={() => handleMouseEnter(app.slug)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <Link
+                  to="/app/$slug"
+                  params={{ slug: app.slug }}
+                  className="block overflow-hidden rounded-2xl border border-line-2 bg-[#12131a] shadow-[0_20px_50px_rgba(0,0,0,0.7)] transition-all duration-150 hover:border-line hover:brightness-105"
                 >
-                  <BadgeCheckIcon className="h-4.5 w-4.5 sm:h-5 sm:w-5 shrink-0 fill-amber-500 text-stone-950 drop-shadow-sm" />
-                </span>
-              ) : isBlue ? (
-                <span
-                  title="Featured App"
-                  aria-label="Featured App"
-                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-600 text-white shadow-md ring-1.5 ring-surface"
-                >
-                  <svg className="h-2.5 w-2.5 sm:h-3 sm:w-3 fill-current" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                  </svg>
-                </span>
-              ) : isHot ? (
-                <span
-                  title="Hot App"
-                  aria-label="Hot App"
-                  className="absolute -top-1 -right-1 z-10 flex h-4.5 w-4.5 sm:h-5 sm:w-5 items-center justify-center rounded-full bg-rose-600 text-[9px] sm:text-[10px] shadow-md ring-1.5 ring-surface"
-                >
-                  🔥
-                </span>
-              ) : null}
-            </Link>
+                  {/* Card Top: App Screenshot Preview */}
+                  <div className="relative aspect-[16/10] w-full overflow-hidden bg-[#0d0e15] border-b border-line-2/60 flex items-center justify-center p-1.5">
+                    {optimizedCover ? (
+                      <img
+                        alt={`${app.name} preview`}
+                        src={optimizedCover}
+                        loading="lazy"
+                        decoding="async"
+                        className="h-full w-full object-contain object-center rounded-lg"
+                        onError={(e) => {
+                          if (cover && e.currentTarget.src !== cover) {
+                            e.currentTarget.src = cover;
+                          } else {
+                            e.currentTarget.style.display = "none";
+                          }
+                        }}
+                      />
+                    ) : (
+                      <div className="flex h-full w-full flex-col items-center justify-center p-4 bg-gradient-to-b from-[#181a24] to-[#12131a]">
+                        <img
+                          alt={`${app.name} icon`}
+                          src={appIconUrl(app.icon)}
+                          width={40}
+                          height={40}
+                          className="h-10 w-10 rounded-[12px] object-cover ring-1 ring-white/10 shadow-md"
+                        />
+                        <span className="mt-2 text-xs font-semibold text-white/90">{app.name}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Card Bottom: App Details Bar */}
+                  <div className="p-3 sm:p-3.5 flex items-start gap-2.5 bg-[#12131a]">
+                    <div className="h-8 w-8 shrink-0 rounded-[8px] overflow-hidden bg-surface-2 ring-1 ring-white/10 shadow-xs">
+                      <img
+                        alt={app.name}
+                        src={appIconUrl(app.icon)}
+                        width={32}
+                        height={32}
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                          if (event.currentTarget.src !== app.icon) {
+                            event.currentTarget.src = app.icon;
+                          } else {
+                            event.currentTarget.src = "/site-favicon.svg";
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-[13px] font-bold text-white tracking-tight truncate">
+                          {app.name}
+                        </span>
+                        {isGold || app.checkBadge ? (
+                          <BadgeCheckIcon className="h-3.5 w-3.5 shrink-0 fill-amber-500 text-stone-950" />
+                        ) : isBlue ? (
+                          <span className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-gradient-to-r from-sky-400 to-blue-600 text-white">
+                            <svg className="h-2 w-2 fill-current" viewBox="0 0 24 24">
+                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg>
+                          </span>
+                        ) : isHot ? (
+                          <span className="text-[10px]">🔥</span>
+                        ) : null}
+                      </div>
+                      <p className="mt-0.5 text-[11px] text-stone-300 line-clamp-2 leading-relaxed font-normal">
+                        {app.tagline}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              </div>
+            </div>
           );
         })}
       </div>
@@ -298,30 +392,6 @@ function Home() {
     ...chipCategories.map((item) => ({ id: item.slug, label: item.name })),
   ];
   const category = heroCategories.some((item) => item.id === cat) ? cat : "all";
-  const desktopCategories = useMemo(() => {
-    const counts: Record<string, number> = { all: list.length };
-    for (const app of list) {
-      const slug = normalizeCategorySlug(app.category);
-      counts[slug] = (counts[slug] || 0) + 1;
-    }
-
-    const sortedCategories = chipCategories
-      .map((c) => ({
-        id: c.slug,
-        name: c.name,
-        emoji: c.emoji,
-        count: counts[c.slug] || 0,
-      }))
-      .sort((a, b) => {
-        if (b.count !== a.count) return b.count - a.count;
-        return a.name.localeCompare(b.name);
-      });
-
-    return [
-      { id: "all", name: "All Apps", emoji: "✨", count: list.length },
-      ...sortedCategories,
-    ];
-  }, [chipCategories, list]);
 
   const shown = arrangeHero(
     list.filter((app) => {
@@ -400,21 +470,19 @@ function Home() {
               </span>
               on the internet.
             </h1>
-            <p className="mt-3 text-[14px] sm:text-[16px] text-muted max-w-2xl leading-relaxed">
-              Explore a hand-picked collection of beautiful, useful, and powerful Mac apps.
-            </p>
 
             {/* Mobile: Black Friday Sale Countdown (below the site title, hot app icons hidden for now) */}
-            <div className="block sm:hidden mt-3.5">
+            <div className="block sm:hidden mt-4">
               <BlackFridayCountdown isMobile />
             </div>
 
-            {/* Desktop: App Icons Arc strictly side-by-side with Black Friday Countdown */}
-            <div className="hidden sm:flex items-center gap-4 lg:gap-6 mt-4">
-              <div className="shrink-0">
-                <ChoiceIcons apps={getHeroAppIcons(list, 12)} />
+            {/* Desktop: App Icons Row with Black Friday Sale Banner in the same row, centered across screen width */}
+            <div className="hidden sm:flex items-center mt-5 sm:mt-6 w-full relative z-30 overflow-visible min-h-[56px]">
+              <div className="shrink-0 relative overflow-visible z-30">
+                <ChoiceIcons apps={getHeroAppIcons(list, 8)} />
               </div>
-              <div className="shrink-0">
+
+              <div className="sm:relative sm:ml-auto lg:absolute lg:left-1/2 lg:-translate-x-1/2 lg:ml-0 z-20 pointer-events-auto">
                 <BlackFridayCountdown />
               </div>
             </div>
@@ -447,15 +515,6 @@ function Home() {
             ? "Trending Mac apps"
             : "Featured Mac apps"}
         </h2>
-
-        {/* Desktop Only: Categories Filter Strip (in the gap between Fresh Drops banner and Apps Grid) */}
-        <DesktopCategoriesBar
-          categories={desktopCategories}
-          activeCategory={category}
-          onSelect={(selectedSlug) => {
-            updateSearch({ cat: selectedSlug === "all" ? "all" : selectedSlug });
-          }}
-        />
 
         {/* Discover Filter Tabs (Featured, Hot, Latest, Trending) - Mobile only (desktop uses left sidebar) */}
         <div className="mb-4 sm:mb-6 flex lg:hidden flex-wrap items-center justify-between gap-2.5 sm:gap-3 border-b border-line/60 pb-3 sm:pb-4">
