@@ -71,11 +71,11 @@ export function LeaderboardBanner({ apps }: { apps: AppItem[] }) {
         {/* Left & Right Gradient Fade Masks */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-canvas via-canvas/80 to-transparent"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-white via-white/80 to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-canvas via-canvas/80 to-transparent"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-white via-white/80 to-transparent"
         />
 
         {/* Double-loop for smooth continuous infinite scrolling */}

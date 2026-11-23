@@ -128,11 +128,11 @@ export function FreshDropsBanner({
         {/* Left & Right Gradient Fade Masks */}
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-canvas via-canvas/80 to-transparent"
+          className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 sm:w-20 bg-gradient-to-r from-white via-white/80 to-transparent"
         />
         <div
           aria-hidden="true"
-          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-canvas via-canvas/80 to-transparent"
+          className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 sm:w-20 bg-gradient-to-l from-white via-white/80 to-transparent"
         />
 
         {/* Double-loop for smooth continuous infinite scrolling */}
@@ -157,7 +157,7 @@ export function FreshDropsBanner({
                     key={`${app.id || app.slug}-${copyIndex}-${idx}`}
                     to="/app/$slug"
                     params={{ slug: app.slug }}
-                    className="group flex items-center gap-2.5 rounded-2xl border border-line bg-surface/90 px-3.5 py-2 shadow-xs transition hover:border-accent hover:bg-surface hover:shadow-sm shrink-0"
+                    className="group flex items-center gap-2.5 rounded-xl border border-line bg-white px-3.5 py-1.5 shadow-[0_1px_3px_rgba(0,0,0,0.04)] transition hover:border-accent hover:shadow-sm shrink-0"
                     title={`${app.name} — ${app.tagline}`}
                   >
                     {/* App Icon */}
@@ -165,7 +165,7 @@ export function FreshDropsBanner({
                       <img
                         src={appIconUrl(app.icon)}
                         alt=""
-                        className="h-7 w-7 rounded-lg object-cover ring-1 ring-line/80 shadow-2xs"
+                        className="h-7 w-7 rounded-lg object-cover ring-1 ring-black/10 shadow-2xs"
                         loading="lazy"
                         onError={(e) => {
                           if (e.currentTarget.src !== app.icon) {
@@ -199,19 +199,19 @@ export function FreshDropsBanner({
 
                     {/* Relative Time Added Pill */}
                     {timeAgo ? (
-                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10.5px] font-semibold text-white whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 text-[10.5px] font-semibold text-emerald-800 whitespace-nowrap">
                         <span>✨</span>
-                        <span className="text-white">{timeAgo}</span>
+                        <span>{timeAgo}</span>
                       </span>
                     ) : null}
 
                     {/* Pricing Pill */}
-                    <span className="text-[10.5px] font-medium text-white capitalize whitespace-nowrap">
+                    <span className="text-[10.5px] font-medium text-stone-600 capitalize whitespace-nowrap">
                       · {price}
                     </span>
 
                     {/* Tagline snippet */}
-                    <span className="hidden md:inline-block text-[10.5px] text-white max-w-[260px] truncate whitespace-nowrap">
+                    <span className="hidden md:inline-block text-[10.5px] text-stone-500 max-w-[260px] truncate whitespace-nowrap">
                       · {app.tagline}
                     </span>
                   </Link>
