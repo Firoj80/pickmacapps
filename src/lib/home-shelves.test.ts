@@ -85,3 +85,89 @@ test("gold and blue featured badges are also ordered oldest first", () => {
   const hero = getHeroAppIcons([blueNew, goldNew, blueOld, goldOld], 6)
   assert.deepEqual(hero.map((a) => a.slug), ["gold-old", "gold-new", "blue-old", "blue-new"])
 })
+
+test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly featured app (Notchy) is 2nd regardless of createdAt", () => {
+  const sample = apps[0];
+  // Notchy was created earlier (Nov 15) but featured later (Nov 23, expires Nov 30)
+  const notchy = {
+    ...sample,
+    id: "notchy",
+    slug: "notchy",
+    name: "Notchy",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-15T16:30:30.634Z",
+    featuredUntil: "2026-11-30T09:26:03.691Z",
+    featuredAt: "2026-11-23T09:26:03.691Z",
+  } as AppItem;
+
+  // Shotbase was created later (Nov 17) but featured earlier (Nov 18, expires Nov 25)
+  const shotbase = {
+    ...sample,
+    id: "shotbase",
+    slug: "shotbase",
+    name: "Shotbase",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-17T11:15:14.631Z",
+    featuredUntil: "2026-11-25T03:14:04.509Z",
+    featuredAt: "2026-11-18T03:14:04.509Z",
+  } as AppItem;
+
+  // Third app featured even later
+  const cleanApp = {
+    ...sample,
+    id: "cleanapp",
+    slug: "cleanapp",
+    name: "CleanApp",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-01T10:00:00.000Z",
+    featuredUntil: "2026-12-01T12:00:00.000Z",
+    featuredAt: "2026-11-24T12:00:00.000Z",
+  } as AppItem;
+
+  // In default feed, Shotbase MUST be 1st, Notchy 2nd, CleanApp 3rd
+  const results = shelfApps([notchy, cleanApp, shotbase], "", "all");
+  assert.deepEqual(results.map((a) => a.slug), ["shotbase", "notchy", "cleanapp"]);
+
+  // In hero icons, Shotbase MUST be 1st, Notchy 2nd, CleanApp 3rd
+  const heroIcons = getHeroAppIcons([notchy, cleanApp, shotbase], 6);
+  assert.deepEqual(heroIcons.map((a) => a.slug), ["shotbase", "notchy", "cleanapp"]);
+});
+
+test("when earlier featured app expires, the 2nd featured app immediately takes 1st place", () => {
+  const sample = apps[0];
+  // Shotbase whose featuredUntil is in the past (expired)
+  const expiredShotbase = {
+    ...sample,
+    id: "shotbase",
+    slug: "shotbase",
+    name: "Shotbase",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-17T11:15:14.631Z",
+    featuredUntil: "2026-11-20T00:00:00.000Z", // Past!
+    featuredAt: "2026-11-13T00:00:00.000Z",
+  } as AppItem;
+
+  // Notchy whose featuredUntil is still active (future)
+  const activeNotchy = {
+    ...sample,
+    id: "notchy",
+    slug: "notchy",
+    name: "Notchy",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-15T16:30:30.634Z",
+    featuredUntil: "2026-11-30T09:26:03.691Z",
+    featuredAt: "2026-11-23T09:26:03.691Z",
+  } as AppItem;
+
+  // Notchy must take 1st place because Shotbase has expired
+  const results = shelfApps([expiredShotbase, activeNotchy], "", "all");
+  assert.equal(results[0]?.slug, "notchy");
+
+  const heroIcons = getHeroAppIcons([expiredShotbase, activeNotchy], 6);
+  assert.equal(heroIcons[0]?.slug, "notchy");
+});

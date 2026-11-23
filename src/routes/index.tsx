@@ -5,7 +5,7 @@ import { GuideStrip } from "@/components/guide-strip";
 import { FreshDropsBanner } from "@/components/fresh-drops-banner";
 import { BlackFridayCountdown } from "@/components/black-friday-countdown";
 import { BadgeCheckIcon } from "@/components/icons";
-import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, isEditorChoice, isSeedApp, posts, shelfApps, type AppItem } from "@/lib/catalog";
+import { appPriorityWeight, featuredTierWeight, getHeroAppIcons, getPriorityTimestamp, isEditorChoice, isHotApp, isSeedApp, posts, shelfApps, type AppItem } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appCoverUrl, appIconUrl } from "@/lib/image-opt";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
@@ -49,10 +49,13 @@ function inHeroCategory(app: AppItem, category: string) {
 function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
   const next = [...list];
   if (sort === "new") {
-    // Latest/Newest: Featured apps on top, then Hot apps, then all active latest added apps by createdAt desc, then seed apps
+    // Latest/Newest: Featured apps on top (FIFO seniority), then Hot apps (FIFO seniority), then all active latest added apps by createdAt desc, then seed apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      if (appPriorityWeight(a) > 0) {
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+      }
       const aSeed = isSeedApp(a);
       const bSeed = isSeedApp(b);
       if (aSeed !== bSeed) return aSeed ? 1 : -1;
@@ -63,10 +66,13 @@ function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
     return next;
   }
   if (sort === "trending") {
-    // Trending: Featured apps on top, then Hot apps, then all active most viewed apps, then seed apps
+    // Trending: Featured apps on top (FIFO seniority), then Hot apps (FIFO seniority), then all active most viewed apps, then seed apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      if (appPriorityWeight(a) > 0) {
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+      }
       const aSeed = isSeedApp(a);
       const bSeed = isSeedApp(b);
       if (aSeed !== bSeed) return aSeed ? 1 : -1;
@@ -80,10 +86,13 @@ function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
     return next;
   }
   if (sort === "free") {
-    // Free: Featured apps (if free) on top, then Hot apps, then active free apps, then seed free apps
+    // Free: Featured apps (if free) on top (FIFO seniority), then Hot apps (FIFO seniority), then active free apps, then seed free apps
     next.sort((a, b) => {
       const pDiff = appPriorityWeight(b) - appPriorityWeight(a);
       if (pDiff !== 0) return pDiff;
+      if (appPriorityWeight(a) > 0) {
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+      }
       const aSeed = isSeedApp(a);
       const bSeed = isSeedApp(b);
       if (aSeed !== bSeed) return aSeed ? 1 : -1;
@@ -94,24 +103,20 @@ function arrangeHero(list: readonly AppItem[], sort?: HeroSort) {
     return next;
   }
   if (sort === "hot") {
-    // When user explicitly views Hot apps: strictly show Hot apps capped at MAX_HOT_SLOTS (6), oldest first
+    // When user explicitly views Hot apps: strictly show Hot apps capped at MAX_HOT_SLOTS (6), FIFO seniority (earliest hot first)
     return next
-      .filter((a) => Boolean(a.isHot))
+      .filter((a) => isHotApp(a))
       .sort((a, b) => {
-        const timeA = new Date(a.createdAt).getTime() || 0;
-        const timeB = new Date(b.createdAt).getTime() || 0;
-        return timeA - timeB || a.name.localeCompare(b.name);
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
       })
       .slice(0, 6);
   }
   if (sort === "featured") {
-    // When user explicitly views Featured apps: strictly show Golden Badge apps, capped at MAX_TIER_SLOTS (6), oldest first
+    // When user explicitly views Featured apps: strictly show Golden Badge apps, capped at MAX_TIER_SLOTS (6), FIFO seniority (earliest featured first)
     return next
       .filter((a) => isEditorChoice(a) && a.featuredTier === "article")
       .sort((a, b) => {
-        const timeA = new Date(a.createdAt).getTime() || 0;
-        const timeB = new Date(b.createdAt).getTime() || 0;
-        return timeA - timeB || a.name.localeCompare(b.name);
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
       })
       .slice(0, 6);
   }

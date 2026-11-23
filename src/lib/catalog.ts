@@ -20,6 +20,7 @@ export type AppItem = {
   featured: boolean;
   editorChoice?: boolean;
   featuredTier?: FeaturedTier | null;
+  featuredAt?: string | null;
   featuredUntil?: string | null;
   isHot?: boolean;
   hotMarkedAt?: string | null;
@@ -167,14 +168,66 @@ export function sortApps(list: AppItem[], order: "oldest" | "newest" | "name" | 
   return next;
 }
 
-export function isEditorChoice(app: AppItem) {
-  return app.editorChoice === true;
+export const FEATURED_APP_DURATION_DAYS = 7;
+
+export function isEditorChoice(app: AppItem): boolean {
+  if (app.editorChoice !== true) return false;
+  if (app.featuredUntil) {
+    const until = new Date(app.featuredUntil).getTime();
+    if (!isNaN(until) && until <= Date.now()) {
+      return false;
+    }
+  }
+  return true;
+}
+
+export function isHotApp(app: AppItem): boolean {
+  if (!app.isHot) return false;
+  if (app.hotMarkedAt) {
+    const markedAt = new Date(app.hotMarkedAt).getTime();
+    if (!isNaN(markedAt) && markedAt + (HOT_APP_DURATION_DAYS * 24 * 60 * 60 * 1000) <= Date.now()) {
+      return false;
+    }
+  }
+  return true;
 }
 
 export function featuredTierWeight(app: AppItem): number {
   if (!isEditorChoice(app)) return 0;
   if (app.featuredTier === "article") return 2; // Priority 1: Gold badge (Featured + Medium Article)
   return 1; // Priority 2: Blue badge (Featured Placement)
+}
+
+/**
+ * Returns the timestamp when the app was granted priority (featured or marked hot).
+ * For featured apps: uses featuredAt if provided, or calculates start time from featuredUntil - 7 days, fallback to createdAt.
+ * For hot apps: uses hotMarkedAt, fallback to createdAt.
+ * Sorting priority apps by this timestamp ascending guarantees FIFO seniority:
+ * First featured app stays #1; second featured app stays #2; when #1 expires, #2 takes #1 place!
+ */
+export function getPriorityTimestamp(app: AppItem): number {
+  if (isEditorChoice(app)) {
+    if (app.featuredAt) {
+      const t = new Date(app.featuredAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    if (app.featuredUntil) {
+      const t = new Date(app.featuredUntil).getTime();
+      if (!isNaN(t) && t > 0) return t - (FEATURED_APP_DURATION_DAYS * 24 * 60 * 60 * 1000);
+    }
+    const t = new Date(app.createdAt).getTime();
+    return isNaN(t) ? 0 : t;
+  }
+  if (isHotApp(app)) {
+    if (app.hotMarkedAt) {
+      const t = new Date(app.hotMarkedAt).getTime();
+      if (!isNaN(t) && t > 0) return t;
+    }
+    const t = new Date(app.createdAt).getTime();
+    return isNaN(t) ? 0 : t;
+  }
+  const t = new Date(app.createdAt).getTime();
+  return isNaN(t) ? 0 : t;
 }
 
 /**
@@ -188,23 +241,22 @@ export function appPriorityWeight(app: AppItem): number {
   if (isEditorChoice(app)) {
     return app.featuredTier === "article" ? 3 : 2;
   }
-  if (app.isHot) return 1;
+  if (isHotApp(app)) return 1;
   return 0;
 }
 
 /**
  * Hero app icons logic for homepage hero section (capped at max 12 apps):
  * Priority 1: Paid apps (Editor's Choice, sorted by featuredTier weight: Gold article first, then Blue featured).
- * If 12 paid apps are NOT available, then toggle/include the top Hot apps (isHot: true) to fill the remaining slots up to max.
+ * Within the same tier, strictly maintains FIFO order (oldest featured first).
+ * If 12 paid apps are NOT available, then toggle/include the top Hot apps (isHot: true) to fill the remaining slots up to max, also in FIFO order.
  * If 12 paid apps ARE available, only the paid apps are shown (no hot apps toggled).
  */
 export function getHeroAppIcons(list: readonly AppItem[], max = 12): AppItem[] {
   const paidApps = [...list.filter((app) => isEditorChoice(app))].sort((a, b) => {
     const wDiff = featuredTierWeight(b) - featuredTierWeight(a);
     if (wDiff !== 0) return wDiff;
-    const timeA = new Date(a.createdAt).getTime() || 0;
-    const timeB = new Date(b.createdAt).getTime() || 0;
-    return timeA - timeB || a.name.localeCompare(b.name);
+    return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
   });
 
   // If max or more paid apps are available, use strictly the paid apps
@@ -217,11 +269,9 @@ export function getHeroAppIcons(list: readonly AppItem[], max = 12): AppItem[] {
   const paidSlugs = new Set(paidApps.map((a) => a.slug));
 
   const hotApps = list
-    .filter((app) => app.isHot && !paidSlugs.has(app.slug))
+    .filter((app) => isHotApp(app) && !paidSlugs.has(app.slug))
     .sort((a, b) => {
-      const timeA = new Date(a.createdAt).getTime() || 0;
-      const timeB = new Date(b.createdAt).getTime() || 0;
-      return timeA - timeB || a.name.localeCompare(b.name);
+      return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
     })
     .slice(0, remainingSlots);
 
@@ -244,11 +294,9 @@ export function shelfApps(
   return [...sortApps(filtered, order)].sort((a, b) => {
     const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
-    // For featured and hot apps on the hot list: old first then new (createdAt asc)
+    // For featured and hot apps: strict FIFO order (earliest featured/hot first)
     if (appPriorityWeight(a) > 0) {
-      const timeA = new Date(a.createdAt).getTime() || 0;
-      const timeB = new Date(b.createdAt).getTime() || 0;
-      return timeA - timeB || a.name.localeCompare(b.name);
+      return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
     }
     // For standard apps: active non-seeded apps always rank above starter seed apps
     const aSeed = isSeedApp(a);
@@ -308,9 +356,7 @@ export function homeGroups(list: AppItem[], order: "oldest" | "newest" | "name" 
   const choice = [...list.filter(isEditorChoice)].sort((a, b) => {
     const diff = featuredTierWeight(b) - featuredTierWeight(a);
     if (diff !== 0) return diff;
-    const timeA = new Date(a.createdAt).getTime() || 0;
-    const timeB = new Date(b.createdAt).getTime() || 0;
-    return timeA - timeB || a.name.localeCompare(b.name);
+    return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
   });
   const rest = new Map(list.filter((app) => !isEditorChoice(app)).map((app) => [app.slug, app]));
   const groups = homeJobs.flatMap((job) => {

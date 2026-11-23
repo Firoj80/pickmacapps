@@ -37,6 +37,7 @@ type AppRow = {
   category_icon: string;
   editor_choice: boolean;
   featured_tier?: string | null;
+  featured_at?: string | Date | null;
   featured_until?: string | Date | null;
   is_hot?: boolean;
   hot_marked_at?: string | Date | null;
@@ -112,6 +113,11 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     featured: false,
     editorChoice: asBool(row.editor_choice),
     featuredTier: (row.featured_tier as FeaturedTier) || (asBool(row.editor_choice) ? "article" : null),
+    featuredAt: row.featured_at
+      ? iso(row.featured_at)
+      : row.featured_until
+      ? iso(new Date(new Date(row.featured_until).getTime() - 7 * 24 * 60 * 60 * 1000))
+      : null,
     featuredUntil: row.featured_until ? iso(row.featured_until) : null,
     isHot: asBool(row.is_hot),
     hotMarkedAt: row.hot_marked_at
@@ -986,10 +992,11 @@ export async function adminStats() {
   let blueOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   let goldOccupants: { id: string; name: string; slug: string; icon: string; featuredUntil: string | null }[] = [];
   try {
+    await expireOldFeaturedApps().catch(() => {});
     await expireOldHotApps().catch(() => {});
     await sql.query("update apps set hot_marked_at = now() where is_hot = true and hot_marked_at is null");
     const hotRows = await sql.query<{ id: string; name: string; slug: string; icon: string; hot_marked_at: string | Date | null }>(
-      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by created_at asc",
+      "select id, name, slug, icon, hot_marked_at from apps where status = 'published' and is_hot = true order by coalesce(hot_marked_at, created_at) asc",
     );
     hotApps = hotRows.map((r) => ({
       id: r.id,
@@ -1082,7 +1089,7 @@ export async function adminStats() {
     }));
 
     const blueRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
-      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by created_at asc",
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and (featured_tier = 'featured' or featured_tier is null) order by coalesce(featured_at, featured_until - interval '7 days', created_at) asc",
     );
     blueOccupants = blueRows.map((r) => ({
       id: r.id,
@@ -1093,7 +1100,7 @@ export async function adminStats() {
     }));
 
     const goldRows = await sql.query<{ id: string; name: string; slug: string; icon: string; featured_until: string | null }>(
-      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and featured_tier = 'article' order by created_at asc",
+      "select id, name, slug, icon, featured_until from apps where status = 'published' and editor_choice = true and featured_tier = 'article' order by coalesce(featured_at, featured_until - interval '7 days', created_at) asc",
     );
     goldOccupants = goldRows.map((r) => ({
       id: r.id,
@@ -1526,6 +1533,7 @@ export async function saveApp(input: {
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
       category = $8, category_name = $9, category_icon = $10, editor_choice = $11,
       featured_tier = $12,
+      featured_at = case when $11 and (not editor_choice or featured_at is null) then now() when not $11 then null else featured_at end,
       featured_until = case when $11 then coalesce(featured_until, now() + interval '7 days') else null end,
       status = $13, icon = $14, demo = $15, is_hot = $16,
       hot_marked_at = case when $16 then coalesce(hot_marked_at, now()) else null end,
@@ -2306,6 +2314,12 @@ export async function approveSubmission(
         demo = coalesce(nullif($10, ''), demo),
         editor_choice = $11,
         featured_tier = $12,
+        featured_at = case
+          when $11 and not editor_choice then now()
+          when $11 and editor_choice and (featured_at is null or featured_until < now()) then now()
+          when not $11 then null
+          else featured_at
+        end,
         featured_until = case
           when $11 and not editor_choice then now() + interval '7 days'
           when $11 and editor_choice and (featured_until is null or featured_until < now()) then now() + interval '7 days'
@@ -2500,12 +2514,30 @@ export async function runBadgeChecks() {
 }
 
 // -------------------------------------------------------------
-// Hot Auto-Expiry (7 days)
+// Hot & Featured Auto-Expiry (7 days)
 // -------------------------------------------------------------
 export { HOT_APP_DURATION_DAYS };
 
+export async function expireOldFeaturedApps(): Promise<number> {
+  const sql = await directorySql();
+  const rows = await sql.query<{ id: string; name: string }>(
+    `update apps
+     set editor_choice = false, featured_tier = null, featured_at = null, featured_until = null, updated_at = now()
+     where editor_choice = true
+       and featured_until is not null
+       and featured_until <= now()
+     returning id, name`,
+  );
+  if (rows.length > 0) {
+    invalidatePublishedDirectoryCache();
+    await audit(sql, "expire_featured", `${rows.length} apps`, `Expired featured/gold apps past their 7-day period`);
+  }
+  return rows.length;
+}
+
 export async function expireOldHotApps(): Promise<number> {
   const sql = await directorySql();
+  await expireOldFeaturedApps().catch(() => {});
   const rows = await sql.query<{ id: string }>(
     `update apps
      set is_hot = false, hot_marked_at = null, updated_at = now()
@@ -2569,7 +2601,7 @@ export async function expireOldHotApps(): Promise<number> {
       for (const app of readyGold) {
         await sql.query(
           `update apps
-           set editor_choice = true, featured_tier = 'article', featured_until = now() + interval '7 days', featured_scheduled_for = null, updated_at = now()
+           set editor_choice = true, featured_tier = 'article', featured_at = now(), featured_until = now() + interval '7 days', featured_scheduled_for = null, updated_at = now()
            where id = $1`,
           [app.id],
         );
