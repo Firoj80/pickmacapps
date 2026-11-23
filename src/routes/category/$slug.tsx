@@ -1,6 +1,6 @@
 import { createFileRoute, Link, notFound, redirect } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
-import { appPriorityWeight, isSeedApp, posts } from "@/lib/catalog";
+import { appPriorityWeight, getPriorityTimestamp, isSeedApp, posts } from "@/lib/catalog";
 import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
 import { categoryGraph, jsonLdScript } from "@/lib/jsonld";
@@ -66,6 +66,9 @@ export const Route = createFileRoute("/category/$slug")({
     const listed = [...rawListed].sort((a, b) => {
       const diff = appPriorityWeight(b) - appPriorityWeight(a);
       if (diff !== 0) return diff;
+      if (appPriorityWeight(a) > 0) {
+        return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+      }
       return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime() || a.name.localeCompare(b.name);
     });
 
@@ -112,6 +115,9 @@ function CategoryPage() {
   const listed = [...rawListed].sort((a, b) => {
     const diff = appPriorityWeight(b) - appPriorityWeight(a);
     if (diff !== 0) return diff;
+    if (appPriorityWeight(a) > 0) {
+      return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+    }
     const aSeed = isSeedApp(a);
     const bSeed = isSeedApp(b);
     if (aSeed !== bSeed) return aSeed ? 1 : -1;

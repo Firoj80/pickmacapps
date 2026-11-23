@@ -1,6 +1,6 @@
 import { Link, useRouteContext } from "@tanstack/react-router";
 import { PickMacAppsIcon } from "@/components/brand-logo";
-import { featuredTierWeight, isEditorChoice } from "@/lib/catalog";
+import { featuredTierWeight, getPriorityTimestamp, isEditorChoice } from "@/lib/catalog";
 import { publishedApps } from "@/lib/app-seed";
 import { appIconUrl } from "@/lib/image-opt";
 import { BadgeCheckIcon } from "@/components/icons";
@@ -12,10 +12,14 @@ export function SiteFooter() {
   const list = publishedApps(directory);
   const categories = [...(directory?.categories ?? [])].sort((a, b) => a.name.localeCompare(b.name));
 
-  // Show only Editor's Choice apps, sorted by tier priority (Golden Article first, then Blue Featured)
+  // Show only Editor's Choice apps, sorted by tier priority (Golden Article first, then Blue Featured), then FIFO seniority
   const featured = list
     .filter((app) => isEditorChoice(app))
-    .sort((a, b) => featuredTierWeight(b) - featuredTierWeight(a));
+    .sort((a, b) => {
+      const wDiff = featuredTierWeight(b) - featuredTierWeight(a);
+      if (wDiff !== 0) return wDiff;
+      return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+    });
 
   return (
     <footer className="mt-auto border-t border-line/70 bg-surface">

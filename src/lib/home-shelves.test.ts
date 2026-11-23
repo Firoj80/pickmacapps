@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { apps, getHeroAppIcons, homeGroups, isEditorChoice, shelfApps, sortApps, type AppItem } from "./catalog.ts"
+import { apps, getHeroAppIcons, getPriorityTimestamp, homeGroups, isEditorChoice, shelfApps, sortApps, type AppItem } from "./catalog.ts"
 
 test("editor's choice comes only from the saved flag", () => {
   const { choice, groups } = homeGroups(apps, "newest")
@@ -170,4 +170,39 @@ test("when earlier featured app expires, the 2nd featured app immediately takes 
 
   const heroIcons = getHeroAppIcons([expiredShotbase, activeNotchy], 6);
   assert.equal(heroIcons[0]?.slug, "notchy");
+});
+
+test("FIFO seniority queue sorts earlier featured app ahead even if created later", () => {
+  const sample = apps[0];
+  const shotbase = {
+    ...sample,
+    id: "shotbase",
+    slug: "shotbase",
+    name: "Shotbase",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-17T11:15:14.631Z",
+    featuredUntil: "2026-11-25T03:14:04.509Z",
+    featuredAt: "2026-11-18T03:14:04.509Z",
+  } as AppItem;
+
+  const notchy = {
+    ...sample,
+    id: "notchy",
+    slug: "notchy",
+    name: "Notchy",
+    editorChoice: true,
+    featuredTier: "article",
+    createdAt: "2026-11-15T16:30:30.634Z",
+    featuredUntil: "2026-11-30T09:26:03.691Z",
+    featuredAt: "2026-11-23T09:26:03.691Z",
+  } as AppItem;
+
+  const byPriorityQueue = (a: AppItem, b: AppItem) => {
+    return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+  };
+
+  const goldList = [notchy, shotbase].sort(byPriorityQueue);
+  assert.equal(goldList[0]?.slug, "shotbase");
+  assert.equal(goldList[1]?.slug, "notchy");
 });

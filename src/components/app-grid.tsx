@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { AppCard } from "@/components/app-card";
 import { ClaimSpotCard, type ClaimSpotOffer } from "@/components/claim-spot-card";
-import { isEditorChoice, isSeedApp, MAX_HOT_SLOTS, shelfApps, type AppItem } from "@/lib/catalog";
+import { getPriorityTimestamp, isEditorChoice, isHotApp, isSeedApp, MAX_HOT_SLOTS, shelfApps, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 
 const PAGE = 60;
@@ -66,27 +66,31 @@ export function AppGrid({
   const displayItems = useMemo((): GridItem[] => {
     if (!isDefaultHomeFeed) return [];
 
+    const byPriorityQueue = (a: AppItem, b: AppItem) => {
+      return getPriorityTimestamp(a) - getPriorityTimestamp(b) || a.name.localeCompare(b.name);
+    };
+
     const byOldest = (a: AppItem, b: AppItem) => {
       const tA = new Date(a.createdAt).getTime() || 0;
       const tB = new Date(b.createdAt).getTime() || 0;
       return tA - tB || a.name.localeCompare(b.name);
     };
 
-    // Priority 1: Gold badge apps (editorChoice + featuredTier="article"), oldest first, max 6
+    // Priority 1: Gold badge apps (editorChoice + featuredTier="article"), FIFO seniority, max 6
     const goldApps = apps
       .filter((a) => isEditorChoice(a) && a.featuredTier === "article")
-      .sort(byOldest)
+      .sort(byPriorityQueue)
       .slice(0, MAX_HOME_TIER_SLOTS);
 
-    // Priority 2 (legacy): Blue badge apps still displayed if in DB, but no new claim cards offered
+    // Priority 2 (legacy): Blue badge apps still displayed if in DB, FIFO seniority
     const blueApps = apps
       .filter((a) => isEditorChoice(a) && a.featuredTier !== "article")
-      .sort(byOldest);
+      .sort(byPriorityQueue);
 
-    // Priority 3: Hot apps (isHot, non-editor-choice), oldest first, capped at max 6
+    // Priority 3: Hot apps (isHot, non-editor-choice), FIFO seniority, capped at max 6
     const hotApps = apps
-      .filter((a) => Boolean(a.isHot) && !isEditorChoice(a))
-      .sort(byOldest)
+      .filter((a) => isHotApp(a) && !isEditorChoice(a))
+      .sort(byPriorityQueue)
       .slice(0, MAX_HOT_SLOTS);
 
     // Priority 4: Active non-seeded apps (user-submitted + admin-added, not editor choice, not hot), oldest first
