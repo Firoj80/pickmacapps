@@ -586,7 +586,7 @@ function AdminHome() {
             <div className="flex items-center justify-between border-b border-line pb-3">
               <div className="flex items-center gap-2">
                 <span className="text-sm font-semibold text-ink">🔥 7-Day Hot Roster</span>
-                <span className="rounded-full bg-rose-500/20 px-2 py-0.5 text-[10px] font-bold text-rose-300 ring-1 ring-rose-500/30">
+                <span className="rounded-full bg-rose-100 px-2.5 py-0.5 text-[10px] font-bold text-rose-800 ring-1 ring-rose-200">
                   {hotApps.length} / 6 active (7d policy)
                 </span>
               </div>
@@ -608,7 +608,7 @@ function AdminHome() {
                     return (
                       <div
                         key={h.id}
-                        className="flex items-center justify-between rounded-xl border border-rose-500/25 bg-rose-500/10 p-2.5 transition hover:border-rose-500/40"
+                        className="flex items-center justify-between rounded-xl border border-rose-200 bg-rose-50/70 p-2.5 transition hover:border-rose-300"
                       >
                         <div className="flex items-center gap-2.5 min-w-0">
                           {h.icon ? (
@@ -628,7 +628,7 @@ function AdminHome() {
                               {h.name}
                             </Link>
                             <div className="flex items-center gap-1.5 text-[10px]">
-                              <span className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[11px] font-bold text-rose-300 border border-rose-500/30">
+                              <span className="rounded-md bg-rose-100 px-2 py-0.5 text-[11px] font-bold text-rose-900 border border-rose-300">
                                 {daysLeft}d left ({formatted})
                               </span>
                             </div>
@@ -640,7 +640,7 @@ function AdminHome() {
                           <button
                             type="submit"
                             title="Remove Hot status"
-                            className="rounded-lg bg-surface-2 border border-line px-2 py-1 text-[11px] font-medium text-rose-400 hover:bg-rose-500/20 hover:text-rose-300 cursor-pointer shadow-2xs transition"
+                            className="rounded-lg bg-white border border-rose-200 px-2 py-1 text-[11px] font-medium text-rose-700 hover:bg-rose-50 hover:text-rose-900 cursor-pointer shadow-2xs transition"
                           >
                             Remove
                           </button>
@@ -740,7 +740,7 @@ function AdminHome() {
             {showPricing ? (
               <div className="my-3 space-y-3 rounded-xl border border-line bg-surface-2 p-3 text-xs">
                 <div>
-                  <div className="font-semibold text-rose-300">
+                  <div className="font-semibold text-rose-800">
                     🔥 Hot App Placement (${((data.offer.hotPriceCents ?? data.offer.featuredPriceCents ?? data.offer.priceCents) / 100).toFixed(0)} Tier)
                   </div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
@@ -771,7 +771,7 @@ function AdminHome() {
                 </div>
 
                 <div className="border-t border-line pt-2.5">
-                  <div className="font-semibold text-amber-300">
+                  <div className="font-semibold text-amber-800">
                     🌟 Gold Article Tier (${((data.offer.articlePriceCents ?? 12000) / 100).toFixed(0)} Tier)
                   </div>
                   <form method="post" action="/api/admin/price" className="mt-1.5 grid grid-cols-2 gap-2">
@@ -879,7 +879,7 @@ function AdminHome() {
             {/* Hot Placement Slots (6 Slots) */}
             <div className="mt-4 border-t border-line pt-3">
               <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-rose-300">🔥 Hot App Placement ({hotApps.length}/6)</span>
+                <span className="font-semibold text-rose-800">🔥 Hot App Placement ({hotApps.length}/6)</span>
                 <span className="text-[11px] text-muted">{money(data.offer.hotPriceCents ?? data.offer.featuredPriceCents ?? 9900)}</span>
               </div>
               <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-surface-2">

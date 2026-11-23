@@ -332,7 +332,7 @@ function AppsPage() {
                     </div>
                     {app.editorChoice && app.featuredUntil ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-sky-500/20 border border-sky-500/30 px-2 py-0.5 text-[10.5px] font-bold text-sky-300">
+                        <span className="inline-block rounded-md bg-sky-100 border border-sky-300 px-2 py-0.5 text-[10.5px] font-bold text-sky-900">
                           {(() => {
                             const until = new Date(app.featuredUntil);
                             const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -344,7 +344,7 @@ function AppsPage() {
                     ) : null}
                     {app.featuredScheduledFor ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10.5px] font-bold text-amber-300">
+                        <span className="inline-block rounded-md bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10.5px] font-bold text-amber-900">
                           {(() => {
                             const dt = new Date(app.featuredScheduledFor);
                             const formatted = isNaN(dt.getTime()) ? app.featuredScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -410,7 +410,7 @@ function AppsPage() {
                     </form>
                     {app.isHot ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-rose-500/20 border border-rose-500/30 px-2 py-0.5 text-[10.5px] font-bold text-rose-300">
+                        <span className="inline-block rounded-md bg-rose-100 border border-rose-300 px-2 py-0.5 text-[10.5px] font-bold text-rose-900">
                           {(() => {
                             const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                             return `Expires: ${formatted} (${daysLeft} days left)`;
@@ -420,7 +420,7 @@ function AppsPage() {
                     ) : null}
                     {app.hotScheduledFor ? (
                       <div className="mt-1">
-                        <span className="inline-block rounded-md bg-amber-500/20 border border-amber-500/30 px-2 py-0.5 text-[10.5px] font-bold text-amber-300">
+                        <span className="inline-block rounded-md bg-amber-100 border border-amber-300 px-2 py-0.5 text-[10.5px] font-bold text-amber-900">
                           {(() => {
                             const dt = new Date(app.hotScheduledFor);
                             const formatted = isNaN(dt.getTime()) ? app.hotScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -583,7 +583,7 @@ function AppsPage() {
 
             {/* Expiry alerts if active */}
             {app.editorChoice && app.featuredUntil ? (
-              <div className="text-[10.5px] font-bold text-sky-300 bg-sky-500/20 border border-sky-500/30 rounded-lg px-2.5 py-1">
+              <div className="text-[10.5px] font-bold text-sky-900 bg-sky-100 border border-sky-300 rounded-lg px-2.5 py-1">
                 {(() => {
                   const until = new Date(app.featuredUntil);
                   const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
@@ -594,7 +594,7 @@ function AppsPage() {
             ) : null}
 
             {app.isHot ? (
-              <div className="text-[10.5px] font-bold text-rose-300 bg-rose-500/20 border border-rose-500/30 rounded-lg px-2.5 py-1">
+              <div className="text-[10.5px] font-bold text-rose-900 bg-rose-100 border border-rose-300 rounded-lg px-2.5 py-1">
                 {(() => {
                   const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                   return `🔥 Hot expires: ${formatted} (${daysLeft}d left)`;
@@ -602,7 +602,7 @@ function AppsPage() {
               </div>
             ) : null}
             {app.hotScheduledFor ? (
-              <div className="text-[10.5px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 rounded-lg px-2.5 py-1">
+              <div className="text-[10.5px] font-bold text-amber-900 bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1">
                 {(() => {
                   const dt = new Date(app.hotScheduledFor);
                   const formatted = isNaN(dt.getTime()) ? app.hotScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });
@@ -611,7 +611,7 @@ function AppsPage() {
               </div>
             ) : null}
             {app.featuredScheduledFor ? (
-              <div className="text-[10.5px] font-bold text-amber-300 bg-amber-500/20 border border-amber-500/30 rounded-lg px-2.5 py-1">
+              <div className="text-[10.5px] font-bold text-amber-900 bg-amber-100 border border-amber-300 rounded-lg px-2.5 py-1">
                 {(() => {
                   const dt = new Date(app.featuredScheduledFor);
                   const formatted = isNaN(dt.getTime()) ? app.featuredScheduledFor : dt.toLocaleDateString("en-US", { month: "short", day: "numeric" });

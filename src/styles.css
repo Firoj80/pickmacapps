@@ -377,13 +377,12 @@ html, body, a, button, select, input {
 }
 
 /* ==========================================================================
-   Admin Dark Theme Scoped System
-   Transforms the complete admin console (/admin/*) into the refined
-   PickMacApps dark aesthetic. Scoped to [data-admin-root] to guarantee zero
-   bleed into any other page.
+   Admin Theme Scoped System
+   Guarantees high-contrast readability across all admin pages (/admin/*)
+   in the new light theme default while supporting dark mode seamlessly.
    ========================================================================== */
 [data-admin-root] {
-  color-scheme: dark;
+  color-scheme: light;
   background-color: var(--color-canvas);
   color: var(--color-ink);
 }
@@ -442,17 +441,17 @@ html, body, a, button, select, input {
   border-color: var(--color-line) !important;
 }
 
-/* Semantic colored badges & cards */
+/* Semantic colored badges & cards - High contrast for light mode */
 [data-admin-root] [class*="bg-emerald-50"],
 [data-admin-root] [class*="bg-emerald-100"] {
-  background-color: rgba(16, 185, 129, 0.15) !important;
+  background-color: rgba(16, 185, 129, 0.12) !important;
 }
 [data-admin-root] .text-emerald-600,
 [data-admin-root] .text-emerald-700,
 [data-admin-root] .text-emerald-800,
 [data-admin-root] .text-emerald-900,
 [data-admin-root] .text-emerald-950 {
-  color: #6ee7b7 !important;
+  color: #065f46 !important;
 }
 [data-admin-root] [class*="border-emerald-200"],
 [data-admin-root] [class*="border-emerald-300"],
@@ -463,14 +462,14 @@ html, body, a, button, select, input {
 
 [data-admin-root] [class*="bg-amber-50"],
 [data-admin-root] [class*="bg-amber-100"] {
-  background-color: rgba(245, 158, 11, 0.15) !important;
+  background-color: rgba(245, 158, 11, 0.12) !important;
 }
 [data-admin-root] .text-amber-600,
 [data-admin-root] .text-amber-700,
 [data-admin-root] .text-amber-800,
 [data-admin-root] .text-amber-900,
 [data-admin-root] .text-amber-950 {
-  color: #fde047 !important;
+  color: #78350f !important;
 }
 [data-admin-root] [class*="border-amber-200"],
 [data-admin-root] [class*="border-amber-300"],
@@ -481,30 +480,30 @@ html, body, a, button, select, input {
 
 [data-admin-root] [class*="bg-rose-50"],
 [data-admin-root] [class*="bg-rose-100"] {
-  background-color: rgba(244, 63, 94, 0.2) !important;
+  background-color: rgba(244, 63, 94, 0.12) !important;
 }
 [data-admin-root] .text-rose-600,
 [data-admin-root] .text-rose-700,
 [data-admin-root] .text-rose-800,
 [data-admin-root] .text-rose-900 {
-  color: #fda4af !important;
+  color: #881337 !important;
 }
 [data-admin-root] [class*="border-rose-200"],
 [data-admin-root] [class*="border-rose-300"],
 [data-admin-root] [class*="ring-rose-"] {
-  border-color: rgba(244, 63, 94, 0.35) !important;
-  --tw-ring-color: rgba(244, 63, 94, 0.35) !important;
+  border-color: rgba(244, 63, 94, 0.3) !important;
+  --tw-ring-color: rgba(244, 63, 94, 0.3) !important;
 }
 
 [data-admin-root] [class*="bg-sky-50"],
 [data-admin-root] [class*="bg-sky-100"] {
-  background-color: rgba(14, 165, 233, 0.15) !important;
+  background-color: rgba(14, 165, 233, 0.12) !important;
 }
 [data-admin-root] .text-sky-600,
 [data-admin-root] .text-sky-700,
 [data-admin-root] .text-sky-800,
 [data-admin-root] .text-sky-900 {
-  color: #7dd3fc !important;
+  color: #075985 !important;
 }
 [data-admin-root] [class*="border-sky-200"],
 [data-admin-root] [class*="border-sky-300"],
@@ -515,20 +514,78 @@ html, body, a, button, select, input {
 
 [data-admin-root] [class*="bg-indigo-50"],
 [data-admin-root] [class*="bg-indigo-100"] {
-  background-color: rgba(99, 102, 241, 0.15) !important;
+  background-color: rgba(99, 102, 241, 0.12) !important;
 }
 [data-admin-root] .text-indigo-600,
 [data-admin-root] .text-indigo-700,
 [data-admin-root] .text-indigo-800,
 [data-admin-root] .text-indigo-900,
 [data-admin-root] .text-indigo-950 {
-  color: #a5b4fc !important;
+  color: #3730a3 !important;
 }
 [data-admin-root] [class*="border-indigo-200"],
 [data-admin-root] [class*="border-indigo-300"],
 [data-admin-root] [class*="ring-indigo-"] {
   border-color: rgba(99, 102, 241, 0.3) !important;
   --tw-ring-color: rgba(99, 102, 241, 0.3) !important;
+}
+
+/* Scoped dark mode overrides when .dark is explicitly active */
+.dark [data-admin-root] {
+  color-scheme: dark;
+}
+.dark [data-admin-root] [class*="bg-emerald-50"],
+.dark [data-admin-root] [class*="bg-emerald-100"] {
+  background-color: rgba(16, 185, 129, 0.15) !important;
+}
+.dark [data-admin-root] .text-emerald-600,
+.dark [data-admin-root] .text-emerald-700,
+.dark [data-admin-root] .text-emerald-800,
+.dark [data-admin-root] .text-emerald-900,
+.dark [data-admin-root] .text-emerald-950 {
+  color: #6ee7b7 !important;
+}
+.dark [data-admin-root] [class*="bg-amber-50"],
+.dark [data-admin-root] [class*="bg-amber-100"] {
+  background-color: rgba(245, 158, 11, 0.15) !important;
+}
+.dark [data-admin-root] .text-amber-600,
+.dark [data-admin-root] .text-amber-700,
+.dark [data-admin-root] .text-amber-800,
+.dark [data-admin-root] .text-amber-900,
+.dark [data-admin-root] .text-amber-950 {
+  color: #fde047 !important;
+}
+.dark [data-admin-root] [class*="bg-rose-50"],
+.dark [data-admin-root] [class*="bg-rose-100"] {
+  background-color: rgba(244, 63, 94, 0.2) !important;
+}
+.dark [data-admin-root] .text-rose-600,
+.dark [data-admin-root] .text-rose-700,
+.dark [data-admin-root] .text-rose-800,
+.dark [data-admin-root] .text-rose-900 {
+  color: #fda4af !important;
+}
+.dark [data-admin-root] [class*="bg-sky-50"],
+.dark [data-admin-root] [class*="bg-sky-100"] {
+  background-color: rgba(14, 165, 233, 0.15) !important;
+}
+.dark [data-admin-root] .text-sky-600,
+.dark [data-admin-root] .text-sky-700,
+.dark [data-admin-root] .text-sky-800,
+.dark [data-admin-root] .text-sky-900 {
+  color: #7dd3fc !important;
+}
+.dark [data-admin-root] [class*="bg-indigo-50"],
+.dark [data-admin-root] [class*="bg-indigo-100"] {
+  background-color: rgba(99, 102, 241, 0.15) !important;
+}
+.dark [data-admin-root] .text-indigo-600,
+.dark [data-admin-root] .text-indigo-700,
+.dark [data-admin-root] .text-indigo-800,
+.dark [data-admin-root] .text-indigo-900,
+.dark [data-admin-root] .text-indigo-950 {
+  color: #a5b4fc !important;
 }
 
 /* Admin Form Inputs, Selects & Textareas */

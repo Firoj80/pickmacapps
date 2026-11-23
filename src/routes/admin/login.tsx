@@ -53,7 +53,7 @@ function Login() {
         </div>
 
         {error ? (
-          <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-500/30 bg-rose-500/10 px-3.5 py-2.5 text-xs font-medium text-rose-300">
+          <div className="mt-4 flex items-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3.5 py-2.5 text-xs font-medium text-rose-800">
             <span>⚠️</span>
             <span>That password was not accepted. Please try again.</span>
           </div>

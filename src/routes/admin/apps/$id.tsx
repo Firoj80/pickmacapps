@@ -592,9 +592,9 @@ function EditAppForm({ app }: { app: EditAppData }) {
               onChange={(e) => setIsHot(e.target.checked)}
               className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500 disabled:opacity-50"
             />
-            <span className="font-semibold text-rose-300 flex items-center gap-1.5">
+            <span className="font-semibold text-rose-800 flex items-center gap-1.5">
               <span>🔥 Mark as Hot App</span>
-              <span className="text-[11px] font-normal text-rose-400/80">
+              <span className="text-[11px] font-normal text-rose-700">
                 ({app.isHot ? "Active" : `${app.otherHotCount ?? 0}/6 slots filled`})
               </span>
             </span>
@@ -604,9 +604,9 @@ function EditAppForm({ app }: { app: EditAppData }) {
           </label>
 
           {!app.isHot && (app.otherHotCount ?? 0) >= 6 && !app.hotScheduledFor && (
-            <div className="rounded-lg border border-rose-400/30 bg-stone-900/40 p-3 text-xs text-rose-300 space-y-1.5">
-              <p className="font-medium text-rose-400">⚠️ All 6 Hot slots are currently active.</p>
-              <label className="flex items-center gap-2 font-semibold text-rose-200 cursor-pointer">
+            <div className="rounded-lg border border-rose-200 bg-rose-50/80 p-3 text-xs text-rose-900 space-y-1.5">
+              <p className="font-medium text-rose-800">⚠️ All 6 Hot slots are currently active.</p>
+              <label className="flex items-center gap-2 font-semibold text-rose-900 cursor-pointer">
                 <input
                   type="checkbox"
                   name="schedule_hot_next"
@@ -762,13 +762,32 @@ function EditAppForm({ app }: { app: EditAppData }) {
 
             {/* Hot Remaining Days */}
             {app.isHot && (
-              <div className="mt-3 rounded-xl border border-rose-500/30 bg-rose-500/10 p-2.5 text-xs">
+              <div className="mt-3 rounded-xl border border-rose-200 bg-rose-50/80 p-2.5 text-xs">
                 <div className="flex items-center justify-between">
-                  <span className="font-semibold text-rose-300">🔥 Hot Status Active</span>
-                  <span className="rounded-md bg-rose-500/20 px-2 py-0.5 text-[10.5px] font-bold text-rose-300 border border-rose-500/30">
+                  <span className="font-semibold text-rose-900">🔥 Hot Status Active</span>
+                  <span className="rounded-md bg-rose-100 px-2 py-0.5 text-[10.5px] font-bold text-rose-900 border border-rose-300">
                     {(() => {
                       const { daysLeft, formatted } = getHotDaysRemaining(app.hotMarkedAt, app.createdAt);
                       return `${daysLeft} days remaining (${formatted})`;
+                    })()}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Featured / Paid Placement Remaining Days */}
+            {app.editorChoice && app.featuredUntil && (
+              <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50/80 p-2.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-amber-900">
+                    {app.featuredTier === "article" ? "🌟 Gold Spotlight Active" : "🔹 Featured Active"}
+                  </span>
+                  <span className="rounded-md bg-amber-100 px-2 py-0.5 text-[10.5px] font-bold text-amber-900 border border-amber-300">
+                    {(() => {
+                      const until = new Date(app.featuredUntil);
+                      const days = Math.max(0, Math.min(30, Math.round((until.getTime() - Date.now()) / (24 * 60 * 60 * 1000))));
+                      const formatted = until.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+                      return days > 0 ? `${days} days remaining (${formatted})` : `Expired (${formatted})`;
                     })()}
                   </span>
                 </div>

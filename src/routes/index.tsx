@@ -173,6 +173,17 @@ export const Route = createFileRoute("/")({
   },
 });
 
+const ICON_FAN_PRESETS = [
+  { rotate: -3.5, translateY: 0 },
+  { rotate: -2, translateY: 2 },
+  { rotate: 3, translateY: -2 },
+  { rotate: 1.5, translateY: 0 },
+  { rotate: -3, translateY: 3 },
+  { rotate: -0.5, translateY: -1 },
+  { rotate: 3, translateY: 1 },
+  { rotate: -2, translateY: 0 },
+];
+
 function ChoiceIcons({ apps }: { apps: AppItem[] }) {
   if (apps.length === 0) return null;
   const shown = apps.slice(0, 8);
@@ -205,6 +216,7 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
           const isHovered = hoveredSlug === app.slug;
           // Left-to-right stacking: later icons overlap on top of previous icons
           const zIndex = isHovered ? 60 : index + 1;
+          const preset = ICON_FAN_PRESETS[index % ICON_FAN_PRESETS.length];
 
           const cover = app.demo?.trim();
           const optimizedCover = cover ? appCoverUrl(cover) : "";
@@ -215,23 +227,28 @@ function ChoiceIcons({ apps }: { apps: AppItem[] }) {
               className="relative group/icon shrink-0"
               style={{
                 zIndex,
-                marginLeft: index === 0 ? 0 : -14,
+                marginLeft: index === 0 ? 0 : -16,
               }}
               onMouseEnter={() => handleMouseEnter(app.slug)}
               onMouseLeave={handleMouseLeave}
             >
-              {/* Squircle App Icon: Strictly 100% IDENTICAL SIZE for all icons, straight & level */}
+              {/* Squircle App Icon: Strictly 100% IDENTICAL SIZE for all icons, subtle organic fan tilt */}
               <Link
                 to="/app/$slug"
                 params={{ slug: app.slug }}
-                className={`relative block h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-[14px] sm:rounded-[16px] bg-surface-2 ring-1.5 ring-canvas shadow-[0_4px_12px_rgba(0,0,0,0.35)] transition-all duration-200 ease-out cursor-pointer ${
+                style={{
+                  transform: isHovered
+                    ? "rotate(0deg) translateY(-6px) scale(1.08)"
+                    : `rotate(${preset.rotate}deg) translateY(${preset.translateY}px)`,
+                }}
+                className={`relative block h-11 w-11 sm:h-12 sm:w-12 shrink-0 rounded-[14px] sm:rounded-[16px] bg-white ring-2 ring-white shadow-[0_4px_14px_rgba(0,0,0,0.18)] transition-all duration-200 ease-out cursor-pointer ${
                   isHovered
-                    ? "-translate-y-1.5 !shadow-[0_14px_28px_rgba(0,0,0,0.6)] !ring-amber-400"
+                    ? "!shadow-[0_16px_32px_rgba(0,0,0,0.28)] !ring-amber-400 z-50"
                     : isGold
-                    ? "ring-amber-500/80 hover:-translate-y-1"
+                    ? "hover:ring-amber-400"
                     : isBlue
-                    ? "ring-sky-500/80 hover:-translate-y-1"
-                    : "ring-line-2 hover:-translate-y-1"
+                    ? "hover:ring-sky-400"
+                    : "hover:ring-stone-300"
                 }`}
                 title={app.name}
               >

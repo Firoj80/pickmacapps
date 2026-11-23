@@ -476,7 +476,7 @@ function NewAppPage() {
               onChange={(e) => setIsHot(e.target.checked)}
               className="h-4 w-4 rounded border-rose-400 text-rose-600 focus:ring-rose-500"
             />
-            <span className="font-semibold text-rose-300 flex items-center gap-1.5">
+            <span className="font-semibold text-rose-800 flex items-center gap-1.5">
               <span>🔥 Mark as Hot App</span>
             </span>
             <span className="text-xs text-muted">
@@ -485,9 +485,9 @@ function NewAppPage() {
           </label>
 
           {isHotFull && !isHot ? (
-            <div className="rounded-lg border border-rose-400/30 bg-stone-900/40 p-3 text-xs text-rose-300 space-y-1.5">
-              <p className="font-medium text-rose-400">⚠️ All 6 Hot slots are currently active.</p>
-              <label className="flex items-center gap-2 font-semibold text-rose-200 cursor-pointer">
+            <div className="rounded-lg border border-rose-200 bg-rose-50/80 p-3 text-xs text-rose-900 space-y-1.5">
+              <p className="font-medium text-rose-800">⚠️ All 6 Hot slots are currently active.</p>
+              <label className="flex items-center gap-2 font-semibold text-rose-900 cursor-pointer">
                 <input
                   type="checkbox"
                   name="schedule_hot_next"
