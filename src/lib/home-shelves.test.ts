@@ -88,7 +88,9 @@ test("gold and blue featured badges are also ordered oldest first", () => {
 
 test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly featured app (Notchy) is 2nd regardless of createdAt", () => {
   const sample = apps[0];
-  // Notchy was created earlier (Nov 15) but featured later (Nov 23, expires Nov 30)
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
+  // Notchy was created earlier but featured later
   const notchy = {
     ...sample,
     id: "notchy",
@@ -96,12 +98,12 @@ test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly
     name: "Notchy",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-15T16:30:30.634Z",
-    featuredUntil: "2026-11-30T09:26:03.691Z",
-    featuredAt: "2026-11-23T09:26:03.691Z",
+    createdAt: new Date(now - 12 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 5 * dayMs).toISOString(),
+    featuredAt: new Date(now - 2 * dayMs).toISOString(),
   } as AppItem;
 
-  // Shotbase was created later (Nov 17) but featured earlier (Nov 18, expires Nov 25)
+  // Shotbase was created later but featured earlier
   const shotbase = {
     ...sample,
     id: "shotbase",
@@ -109,9 +111,9 @@ test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly
     name: "Shotbase",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-17T11:15:14.631Z",
-    featuredUntil: "2026-11-25T03:14:04.509Z",
-    featuredAt: "2026-11-18T03:14:04.509Z",
+    createdAt: new Date(now - 10 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 3 * dayMs).toISOString(),
+    featuredAt: new Date(now - 4 * dayMs).toISOString(),
   } as AppItem;
 
   // Third app featured even later
@@ -122,9 +124,9 @@ test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly
     name: "CleanApp",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-01T10:00:00.000Z",
-    featuredUntil: "2026-12-01T12:00:00.000Z",
-    featuredAt: "2026-11-24T12:00:00.000Z",
+    createdAt: new Date(now - 20 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 6 * dayMs).toISOString(),
+    featuredAt: new Date(now - 1 * dayMs).toISOString(),
   } as AppItem;
 
   // In default feed, Shotbase MUST be 1st, Notchy 2nd, CleanApp 3rd
@@ -138,6 +140,8 @@ test("strict FIFO seniority: earlier featured app (Shotbase) stays 1st and newly
 
 test("when earlier featured app expires, the 2nd featured app immediately takes 1st place", () => {
   const sample = apps[0];
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
   // Shotbase whose featuredUntil is in the past (expired)
   const expiredShotbase = {
     ...sample,
@@ -146,9 +150,9 @@ test("when earlier featured app expires, the 2nd featured app immediately takes 
     name: "Shotbase",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-17T11:15:14.631Z",
-    featuredUntil: "2026-11-20T00:00:00.000Z", // Past!
-    featuredAt: "2026-11-13T00:00:00.000Z",
+    createdAt: new Date(now - 10 * dayMs).toISOString(),
+    featuredUntil: new Date(now - 1 * dayMs).toISOString(), // Past!
+    featuredAt: new Date(now - 8 * dayMs).toISOString(),
   } as AppItem;
 
   // Notchy whose featuredUntil is still active (future)
@@ -159,9 +163,9 @@ test("when earlier featured app expires, the 2nd featured app immediately takes 
     name: "Notchy",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-15T16:30:30.634Z",
-    featuredUntil: "2026-11-30T09:26:03.691Z",
-    featuredAt: "2026-11-23T09:26:03.691Z",
+    createdAt: new Date(now - 12 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 5 * dayMs).toISOString(),
+    featuredAt: new Date(now - 2 * dayMs).toISOString(),
   } as AppItem;
 
   // Notchy must take 1st place because Shotbase has expired
@@ -174,6 +178,8 @@ test("when earlier featured app expires, the 2nd featured app immediately takes 
 
 test("FIFO seniority queue sorts earlier featured app ahead even if created later", () => {
   const sample = apps[0];
+  const now = Date.now();
+  const dayMs = 24 * 60 * 60 * 1000;
   const shotbase = {
     ...sample,
     id: "shotbase",
@@ -181,9 +187,9 @@ test("FIFO seniority queue sorts earlier featured app ahead even if created late
     name: "Shotbase",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-17T11:15:14.631Z",
-    featuredUntil: "2026-11-25T03:14:04.509Z",
-    featuredAt: "2026-11-18T03:14:04.509Z",
+    createdAt: new Date(now - 10 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 3 * dayMs).toISOString(),
+    featuredAt: new Date(now - 4 * dayMs).toISOString(),
   } as AppItem;
 
   const notchy = {
@@ -193,9 +199,9 @@ test("FIFO seniority queue sorts earlier featured app ahead even if created late
     name: "Notchy",
     editorChoice: true,
     featuredTier: "article",
-    createdAt: "2026-11-15T16:30:30.634Z",
-    featuredUntil: "2026-11-30T09:26:03.691Z",
-    featuredAt: "2026-11-23T09:26:03.691Z",
+    createdAt: new Date(now - 12 * dayMs).toISOString(),
+    featuredUntil: new Date(now + 5 * dayMs).toISOString(),
+    featuredAt: new Date(now - 2 * dayMs).toISOString(),
   } as AppItem;
 
   const byPriorityQueue = (a: AppItem, b: AppItem) => {

@@ -1,6 +1,9 @@
-import type { SVGProps } from "react";
+import { useId, type SVGProps } from "react";
 
 export function PickMacAppsIcon({ className = "h-5 w-5", ...props }: SVGProps<SVGSVGElement>) {
+  const uid = useId().replace(/:/g, "");
+  const gradId = `pma-icon-bg-${uid}`;
+
   return (
     <svg
       viewBox="0 0 32 32"
@@ -11,7 +14,7 @@ export function PickMacAppsIcon({ className = "h-5 w-5", ...props }: SVGProps<SV
       {...props}
     >
       <defs>
-        <linearGradient id="pma-icon-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+        <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
           <stop offset="0%" stopColor="#1c1d22" />
           <stop offset="100%" stopColor="#090a0d" />
         </linearGradient>
@@ -22,7 +25,7 @@ export function PickMacAppsIcon({ className = "h-5 w-5", ...props }: SVGProps<SV
         width="30.5"
         height="30.5"
         rx="8.5"
-        fill="url(#pma-icon-bg)"
+        fill={`url(#${gradId})`}
         stroke="currentColor"
         strokeOpacity="0.18"
         strokeWidth="1.2"

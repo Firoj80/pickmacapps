@@ -182,6 +182,9 @@ export const Route = createRootRoute({
           : []),
         { rel: "preconnect", href: "https://pub-621eb870dc3341c586576c494fa43fdc.r2.dev", crossOrigin: "anonymous" },
         { rel: "icon", type: "image/svg+xml", href: "/favicon.svg" },
+        { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
+        { rel: "icon", type: "image/png", sizes: "192x192", href: "/icon-192.png" },
+        { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" },
         { rel: "stylesheet", href: appCss },
         {
           rel: "stylesheet",
