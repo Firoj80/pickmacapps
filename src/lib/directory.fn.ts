@@ -64,6 +64,10 @@ export const submitListingFn = createServerFn({ method: "POST" })
       description: String(data.description ?? "").slice(0, 8000),
       icon: String(data.icon ?? "").slice(0, 400),
       demo: String(data.demo ?? "").slice(0, 400),
+      galleryImages: Array.isArray(data.galleryImages)
+        ? data.galleryImages.filter((u): u is string => typeof u === "string").slice(0, 6)
+        : [],
+      youtubeUrl: typeof data.youtubeUrl === "string" ? data.youtubeUrl.trim().slice(0, 300) : "",
       pricing: data.pricing === "paid" || data.pricing === "freemium" || data.pricing === "free" ? data.pricing : "free",
       category: String(data.category ?? "").slice(0, 80),
       macosVersion: typeof data.macosVersion === "string" ? data.macosVersion.trim().slice(0, 40) : "",

@@ -24,6 +24,60 @@ export function getAppArchitecture(app: { appleSilicon?: boolean; intelSupported
   return app.appleSilicon !== false && app.intelSupported === false ? "silicon" : "universal";
 }
 
+export const MAX_GALLERY_IMAGES = 6;
+
+/**
+ * Extracts an 11-character YouTube video ID from watch, youtu.be, shorts, or embed URLs.
+ */
+export function parseYouTubeVideoId(rawUrl?: string | null): string | null {
+  if (!rawUrl || typeof rawUrl !== "string") return null;
+  const trimmed = rawUrl.trim();
+  if (!trimmed) return null;
+  try {
+    const withProto = /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+    const u = new URL(withProto);
+    const host = u.hostname.replace(/^www\./i, "").toLowerCase();
+    let id = "";
+    if (host === "youtu.be") {
+      id = u.pathname.split("/").filter(Boolean)[0] ?? "";
+    } else if (host === "youtube.com" || host === "m.youtube.com" || host === "youtube-nocookie.com") {
+      if (u.pathname === "/watch") {
+        id = u.searchParams.get("v") ?? "";
+      } else {
+        const parts = u.pathname.split("/").filter(Boolean);
+        if (parts[0] === "embed" || parts[0] === "shorts" || parts[0] === "live" || parts[0] === "v") {
+          id = parts[1] ?? "";
+        }
+      }
+    }
+    return /^[a-zA-Z0-9_-]{11}$/.test(id) ? id : null;
+  } catch {
+    return null;
+  }
+}
+
+export function normalizeYouTubeUrl(rawUrl?: string | null): string {
+  const id = parseYouTubeVideoId(rawUrl);
+  return id ? `https://www.youtube.com/watch?v=${id}` : "";
+}
+
+export function sanitizeGalleryImages(input: unknown): string[] {
+  if (!Array.isArray(input)) return [];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const item of input) {
+    if (typeof item !== "string") continue;
+    const url = item.trim();
+    if (!url) continue;
+    if (!url.startsWith("/") && !/^https?:\/\//i.test(url)) continue;
+    if (seen.has(url)) continue;
+    seen.add(url);
+    out.push(url);
+    if (out.length >= MAX_GALLERY_IMAGES) break;
+  }
+  return out;
+}
+
 export type FeaturedTier = "article" | "featured";
 
 export type AppItem = {
@@ -59,6 +113,8 @@ export type AppItem = {
   createdAt: string;
   updatedAt?: string;
   demo: string;
+  galleryImages?: string[];
+  youtubeUrl?: string | null;
   related: string[];
   developerName?: string;
   price?: string | number;

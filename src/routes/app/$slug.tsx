@@ -4,7 +4,7 @@ import { AppCard } from "@/components/app-card";
 import { AppAlternatives } from "@/components/app-alternatives";
 import { Missing } from "@/components/missing";
 import { BadgeCheckIcon } from "@/components/icons";
-import { isEditorChoice, posts, pricingClass, pricingLabel, type AppItem } from "@/lib/catalog";
+import { isEditorChoice, parseYouTubeVideoId, posts, pricingClass, pricingLabel, sanitizeGalleryImages, type AppItem } from "@/lib/catalog";
 import { appPairs } from "@/lib/compare";
 import { directoryFromMatches, resolveRouteDirectoryMatch } from "@/lib/directory-cache";
 import { publishedApps } from "@/lib/app-seed";
@@ -192,6 +192,25 @@ function AppDetails({
   }, [slug]);
 
   const [copied, setCopied] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+
+  const galleryImages = sanitizeGalleryImages(app.galleryImages);
+  const youtubeId = parseYouTubeVideoId(app.youtubeUrl);
+
+  useEffect(() => {
+    setLightboxIndex(null);
+  }, [slug]);
+
+  useEffect(() => {
+    if (lightboxIndex === null || galleryImages.length === 0) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLightboxIndex(null);
+      else if (e.key === "ArrowLeft") setLightboxIndex((i) => (i === null ? null : (i - 1 + galleryImages.length) % galleryImages.length));
+      else if (e.key === "ArrowRight") setLightboxIndex((i) => (i === null ? null : (i + 1) % galleryImages.length));
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [lightboxIndex, galleryImages.length]);
 
   let authorName = app.developerName || "Indie Developer";
   let authorUrl: string | null = null;
@@ -527,6 +546,121 @@ function AppDetails({
                   }}
                   className="block h-auto max-h-[580px] w-full object-cover"
                 />
+              )}
+            </div>
+          ) : null}
+
+          {/* YouTube Demo Video */}
+          {youtubeId ? (
+            <section className="space-y-3">
+              <h2 className="font-display text-[20px] font-bold tracking-tight text-ink">
+                Video Demo
+              </h2>
+              <div className="overflow-hidden rounded-2xl border border-line/70 bg-black aspect-video shadow-xs">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${youtubeId}`}
+                  title={`${app.name} video demo`}
+                  loading="lazy"
+                  className="h-full w-full"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            </section>
+          ) : null}
+
+          {/* App Gallery (up to 6 screenshots) */}
+          {galleryImages.length > 0 ? (
+            <section className="space-y-3">
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="font-display text-[20px] font-bold tracking-tight text-ink">
+                  Gallery
+                </h2>
+                <span className="text-xs font-medium text-muted">
+                  {galleryImages.length} {galleryImages.length === 1 ? "screenshot" : "screenshots"}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                {galleryImages.map((imgUrl, idx) => (
+                  <button
+                    key={`${imgUrl}-${idx}`}
+                    type="button"
+                    onClick={() => setLightboxIndex(idx)}
+                    className="group relative aspect-[16/10] overflow-hidden rounded-xl border border-line/70 bg-surface-2/40 shadow-2xs transition hover:border-line-2 cursor-pointer"
+                  >
+                    <img
+                      src={appCoverUrl(imgUrl)}
+                      alt={`${app.name} screenshot ${idx + 1}`}
+                      loading="lazy"
+                      decoding="async"
+                      onError={(e) => {
+                        if (e.currentTarget.src !== imgUrl) {
+                          e.currentTarget.src = imgUrl;
+                        }
+                      }}
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    />
+                  </button>
+                ))}
+              </div>
+            </section>
+          ) : null}
+
+          {/* Lightbox Modal */}
+          {lightboxIndex !== null && galleryImages[lightboxIndex] ? (
+            <div
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-xs p-4 sm:p-8"
+              onClick={() => setLightboxIndex(null)}
+              role="dialog"
+              aria-modal="true"
+              aria-label={`${app.name} gallery preview`}
+            >
+              <button
+                type="button"
+                onClick={() => setLightboxIndex(null)}
+                aria-label="Close gallery"
+                className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-xl font-bold text-white hover:bg-white/25 cursor-pointer"
+              >
+                ×
+              </button>
+              {galleryImages.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex((lightboxIndex - 1 + galleryImages.length) % galleryImages.length);
+                  }}
+                  aria-label="Previous screenshot"
+                  className="absolute left-3 sm:left-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-lg font-bold text-white hover:bg-white/25 cursor-pointer"
+                >
+                  ←
+                </button>
+              )}
+              <div
+                className="relative max-h-[85vh] max-w-5xl overflow-hidden rounded-2xl border border-white/15 bg-black shadow-2xl"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <img
+                  src={galleryImages[lightboxIndex]}
+                  alt={`${app.name} screenshot ${lightboxIndex + 1}`}
+                  className="max-h-[85vh] w-auto object-contain"
+                />
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-black/75 px-3 py-1 text-xs font-semibold text-white">
+                  {lightboxIndex + 1} / {galleryImages.length}
+                </div>
+              </div>
+              {galleryImages.length > 1 && (
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightboxIndex((lightboxIndex + 1) % galleryImages.length);
+                  }}
+                  aria-label="Next screenshot"
+                  className="absolute right-3 sm:right-6 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-lg font-bold text-white hover:bg-white/25 cursor-pointer"
+                >
+                  →
+                </button>
               )}
             </div>
           ) : null}

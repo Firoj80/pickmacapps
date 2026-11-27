@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
+import { MediaGalleryEditor } from "@/components/media-gallery-editor";
 import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn, generateDashboardTokenFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -56,6 +57,8 @@ function EditAppForm({ app }: { app: EditAppData }) {
   const [description, setDescription] = useState(app.description || "");
   const [icon, setIcon] = useState(app.icon || "");
   const [demo, setDemo] = useState(app.demo || "");
+  const [galleryImages, setGalleryImages] = useState<string[]>(app.galleryImages || []);
+  const [youtubeUrl, setYoutubeUrl] = useState(app.youtubeUrl || "");
   const [category, setCategory] = useState(normalizeCategorySlug(app.category) || "productivity");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">(app.pricing as "free" | "freemium" | "paid" || "free");
   const [macosVersion, setMacosVersion] = useState(app.macosVersion || "");
@@ -418,6 +421,16 @@ function EditAppForm({ app }: { app: EditAppData }) {
             />
           </Field>
         </div>
+
+        {/* 5b. App Gallery (Max 6 images) & YouTube Video */}
+        <MediaGalleryEditor
+          galleryImages={galleryImages}
+          onGalleryChange={setGalleryImages}
+          youtubeUrl={youtubeUrl}
+          onYoutubeChange={setYoutubeUrl}
+          includeHiddenInputs
+          uploadEndpoint="/api/admin/upload"
+        />
 
         {/* 6. Pricing & Category */}
         <div className="grid gap-4 sm:grid-cols-2">

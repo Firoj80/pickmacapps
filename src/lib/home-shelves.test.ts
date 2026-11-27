@@ -1,6 +1,6 @@
 import assert from "node:assert/strict"
 import { test } from "node:test"
-import { apps, getHeroAppIcons, getPriorityTimestamp, homeGroups, isEditorChoice, shelfApps, sortApps, type AppItem } from "./catalog.ts"
+import { apps, getHeroAppIcons, getPriorityTimestamp, homeGroups, isEditorChoice, normalizeYouTubeUrl, parseYouTubeVideoId, sanitizeGalleryImages, shelfApps, sortApps, type AppItem } from "./catalog.ts"
 
 test("editor's choice comes only from the saved flag", () => {
   const { choice, groups } = homeGroups(apps, "newest")
@@ -211,4 +211,34 @@ test("FIFO seniority queue sorts earlier featured app ahead even if created late
   const goldList = [notchy, shotbase].sort(byPriorityQueue);
   assert.equal(goldList[0]?.slug, "shotbase");
   assert.equal(goldList[1]?.slug, "notchy");
+});
+
+test("parseYouTubeVideoId and sanitizeGalleryImages enforce YouTube parsing and max 6 image cap", () => {
+  assert.equal(parseYouTubeVideoId("https://www.youtube.com/watch?v=dQw4w9WgXcQ"), "dQw4w9WgXcQ");
+  assert.equal(parseYouTubeVideoId("https://youtu.be/dQw4w9WgXcQ?t=10"), "dQw4w9WgXcQ");
+  assert.equal(parseYouTubeVideoId("https://youtube.com/shorts/dQw4w9WgXcQ"), "dQw4w9WgXcQ");
+  assert.equal(parseYouTubeVideoId("https://example.com/not-youtube"), null);
+  assert.equal(normalizeYouTubeUrl("https://youtu.be/dQw4w9WgXcQ"), "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+
+  const rawImages = [
+    "https://cdn.example.com/1.webp",
+    "https://cdn.example.com/2.webp",
+    "https://cdn.example.com/2.webp", // duplicate
+    "https://cdn.example.com/3.webp",
+    "javascript:alert(1)", // invalid protocol
+    "https://cdn.example.com/4.webp",
+    "https://cdn.example.com/5.webp",
+    "https://cdn.example.com/6.webp",
+    "https://cdn.example.com/7.webp", // over limit
+  ];
+  const sanitized = sanitizeGalleryImages(rawImages);
+  assert.equal(sanitized.length, 6);
+  assert.deepEqual(sanitized, [
+    "https://cdn.example.com/1.webp",
+    "https://cdn.example.com/2.webp",
+    "https://cdn.example.com/3.webp",
+    "https://cdn.example.com/4.webp",
+    "https://cdn.example.com/5.webp",
+    "https://cdn.example.com/6.webp",
+  ]);
 });

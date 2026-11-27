@@ -3,6 +3,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
 import { ARCHITECTURE_OPTIONS, getAppArchitecture, MACOS_VERSION_OPTIONS, pricingLabel, type AppArchitecture, type Pricing, type AppItem } from "@/lib/catalog";
+import { MediaGalleryEditor } from "@/components/media-gallery-editor";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchDashboardAppFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -44,6 +45,8 @@ function SubmitterDashboardPage() {
   const [macosVersion, setMacosVersion] = useState(app.macosVersion || "");
   const [architecture, setArchitecture] = useState<AppArchitecture>(getAppArchitecture(app));
   const [icon, setIcon] = useState(app.icon || "");
+  const [galleryImages, setGalleryImages] = useState<string[]>(app.galleryImages || []);
+  const [youtubeUrl, setYoutubeUrl] = useState(app.youtubeUrl || "");
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
   const [message, setMessage] = useState("");
@@ -71,6 +74,8 @@ function SubmitterDashboardPage() {
           macosVersion,
           architecture,
           icon,
+          galleryImages,
+          youtubeUrl,
         }),
       });
       const data = (await res.json()) as { ok?: boolean; error?: string };
@@ -424,6 +429,13 @@ function SubmitterDashboardPage() {
               className="mt-1 w-full rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm text-ink focus:border-ink focus:outline-none"
             />
           </div>
+
+          <MediaGalleryEditor
+            galleryImages={galleryImages}
+            onGalleryChange={setGalleryImages}
+            youtubeUrl={youtubeUrl}
+            onYoutubeChange={setYoutubeUrl}
+          />
 
           <div className="pt-3">
             <button

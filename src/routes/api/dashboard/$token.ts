@@ -18,6 +18,8 @@ export const Route = createFileRoute("/api/dashboard/$token")({
             icon?: string;
             macosVersion?: string;
             architecture?: "universal" | "silicon";
+            galleryImages?: string[];
+            youtubeUrl?: string;
           };
 
           const { updateAppByToken } = await import("@/lib/directory.server");

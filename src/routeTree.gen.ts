@@ -30,6 +30,7 @@ import { Route as AdminSubmissionsRouteImport } from './routes/admin/submissions
 import { Route as AdminTelegramRouteImport } from './routes/admin/telegram'
 import { Route as AdminUpvotesRouteImport } from './routes/admin/upvotes'
 import { Route as ApiTrackRouteImport } from './routes/api/track'
+import { Route as ApiUploadRouteImport } from './routes/api/upload'
 import { Route as ApiUpvoteRouteImport } from './routes/api/upvote'
 import { Route as AppSlugRouteImport } from './routes/app/$slug'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
@@ -162,6 +163,11 @@ const AdminUpvotesRoute = AdminUpvotesRouteImport.update({
 const ApiTrackRoute = ApiTrackRouteImport.update({
   id: '/api/track',
   path: '/api/track',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadRoute = ApiUploadRouteImport.update({
+  id: '/api/upload',
+  path: '/api/upload',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiUpvoteRoute = ApiUpvoteRouteImport.update({
@@ -326,6 +332,7 @@ export interface FileRoutesByFullPath {
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
+  '/api/upload': typeof ApiUploadRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -377,6 +384,7 @@ export interface FileRoutesByTo {
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
+  '/api/upload': typeof ApiUploadRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -429,6 +437,7 @@ export interface FileRoutesById {
   '/admin/telegram': typeof AdminTelegramRoute
   '/admin/upvotes': typeof AdminUpvotesRoute
   '/api/track': typeof ApiTrackRoute
+  '/api/upload': typeof ApiUploadRoute
   '/api/upvote': typeof ApiUpvoteRoute
   '/app/$slug': typeof AppSlugRoute
   '/blog/$slug': typeof BlogSlugRoute
@@ -482,6 +491,7 @@ export interface FileRouteTypes {
     | '/admin/telegram'
     | '/admin/upvotes'
     | '/api/track'
+    | '/api/upload'
     | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
@@ -533,6 +543,7 @@ export interface FileRouteTypes {
     | '/admin/telegram'
     | '/admin/upvotes'
     | '/api/track'
+    | '/api/upload'
     | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
@@ -584,6 +595,7 @@ export interface FileRouteTypes {
     | '/admin/telegram'
     | '/admin/upvotes'
     | '/api/track'
+    | '/api/upload'
     | '/api/upvote'
     | '/app/$slug'
     | '/blog/$slug'
@@ -636,6 +648,7 @@ export interface RootRouteChildren {
   AdminTelegramRoute: typeof AdminTelegramRoute
   AdminUpvotesRoute: typeof AdminUpvotesRoute
   ApiTrackRoute: typeof ApiTrackRoute
+  ApiUploadRoute: typeof ApiUploadRoute
   ApiUpvoteRoute: typeof ApiUpvoteRoute
   AppSlugRoute: typeof AppSlugRoute
   BlogSlugRoute: typeof BlogSlugRoute
@@ -814,6 +827,13 @@ declare module '@tanstack/react-router' {
       path: '/api/track'
       fullPath: '/api/track'
       preLoaderRoute: typeof ApiTrackRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/upload': {
+      id: '/api/upload'
+      path: '/api/upload'
+      fullPath: '/api/upload'
+      preLoaderRoute: typeof ApiUploadRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/upvote': {
@@ -1036,6 +1056,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminTelegramRoute: AdminTelegramRoute,
   AdminUpvotesRoute: AdminUpvotesRoute,
   ApiTrackRoute: ApiTrackRoute,
+  ApiUploadRoute: ApiUploadRoute,
   ApiUpvoteRoute: ApiUpvoteRoute,
   AppSlugRoute: AppSlugRoute,
   BlogSlugRoute: BlogSlugRoute,

@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
 import { adminCookie, adminSessionOk, clearAdminCookie, passwordsMatch } from "@/lib/admin-auth.server";
+import { uploadAppImage } from "@/lib/storage.server";
 import {
   approveSubmission,
   createAdminApp,
@@ -51,20 +52,8 @@ export async function handleAdminPost(request: Request) {
           headers: { "content-type": "application/json" },
         });
       }
-      const bytes = Buffer.from(await file.arrayBuffer());
-      const mime = file.type || "image/png";
-      let ext = "png";
-      if (mime.includes("jpeg") || mime.includes("jpg")) ext = "jpg";
-      else if (mime.includes("webp")) ext = "webp";
-      else if (mime.includes("gif")) ext = "gif";
-      else if (mime.includes("svg")) ext = "svg";
-
-      const filename = `${randomUUID()}.${ext}`;
-      const uploadDir = path.resolve(process.cwd(), "public", "uploads");
-      await fs.promises.mkdir(uploadDir, { recursive: true });
-      await fs.promises.writeFile(path.join(uploadDir, filename), bytes);
-
-      return new Response(JSON.stringify({ ok: true, url: `/uploads/${filename}` }), {
+      const { url: uploadedUrl } = await uploadAppImage(file, "admin");
+      return new Response(JSON.stringify({ ok: true, url: uploadedUrl }), {
         status: 200,
         headers: { "content-type": "application/json" },
       });
@@ -99,6 +88,15 @@ export async function handleAdminPost(request: Request) {
           description: String(form.get("description") ?? ""),
           icon: String(form.get("icon") ?? ""),
           demo: String(form.get("demo") ?? ""),
+          galleryImages: (() => {
+            try {
+              const raw = form.get("gallery_images");
+              return raw ? (JSON.parse(String(raw)) as string[]) : [];
+            } catch {
+              return [];
+            }
+          })(),
+          youtubeUrl: String(form.get("youtube_url") ?? ""),
           website: String(form.get("website") ?? ""),
           pricing: String(form.get("pricing") ?? "free"),
           category: String(form.get("category") ?? "utility"),
@@ -125,6 +123,15 @@ export async function handleAdminPost(request: Request) {
         description: String(form.get("description") ?? ""),
         icon: String(form.get("icon") ?? ""),
         demo: String(form.get("demo") ?? ""),
+        galleryImages: (() => {
+          try {
+            const raw = form.get("gallery_images");
+            return raw ? (JSON.parse(String(raw)) as string[]) : undefined;
+          } catch {
+            return undefined;
+          }
+        })(),
+        youtubeUrl: form.has("youtube_url") ? String(form.get("youtube_url") ?? "") : undefined,
         website: String(form.get("website") ?? ""),
         pricing: String(form.get("pricing") ?? ""),
         category: String(form.get("category") ?? ""),

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { createFileRoute, Link, redirect } from "@tanstack/react-router";
 import { AdminShell, Field, Notice, fieldClass, useAdminNotice } from "@/components/admin-shell";
+import { MediaGalleryEditor } from "@/components/media-gallery-editor";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { ensureAdminSession, fetchAppMetadataFn, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -49,6 +50,8 @@ function NewAppPage() {
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("");
   const [demo, setDemo] = useState("");
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [category, setCategory] = useState("productivity");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
   const [macosVersion, setMacosVersion] = useState("");
@@ -371,6 +374,16 @@ function NewAppPage() {
             />
           </Field>
         </div>
+
+        {/* 5b. App Gallery (Max 6 images) & YouTube Video */}
+        <MediaGalleryEditor
+          galleryImages={galleryImages}
+          onGalleryChange={setGalleryImages}
+          youtubeUrl={youtubeUrl}
+          onYoutubeChange={setYoutubeUrl}
+          includeHiddenInputs
+          uploadEndpoint="/api/admin/upload"
+        />
 
         {/* 6. Category & Pricing Model */}
         <div className="grid gap-4 sm:grid-cols-2">

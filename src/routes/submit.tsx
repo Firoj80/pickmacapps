@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { BlackFridayCountdown, BFCM_COUPON_CODE } from "@/components/black-friday-countdown";
+import { MediaGalleryEditor } from "@/components/media-gallery-editor";
 import { verifyBadge } from "@/lib/badge";
 import { ARCHITECTURE_OPTIONS, MACOS_VERSION_OPTIONS, type AppArchitecture } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
@@ -252,6 +253,8 @@ function SubmitPage() {
   const [description, setDescription] = useState("");
   const [icon, setIcon] = useState("");
   const [demo, setDemo] = useState("");
+  const [galleryImages, setGalleryImages] = useState<string[]>([]);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
   const [category, setCategory] = useState("productivity");
   const [macosVersion, setMacosVersion] = useState("");
@@ -447,6 +450,8 @@ function SubmitPage() {
           description: description.trim() || tagline.trim() || "Handcrafted macOS application.",
           icon: icon.trim(),
           demo: demo.trim(),
+          galleryImages,
+          youtubeUrl: youtubeUrl.trim(),
           pricing,
           category,
           macosVersion,
@@ -840,6 +845,14 @@ function SubmitPage() {
                         </div>
                       )}
                     </div>
+
+                    {/* App Gallery (Max 6 images) & YouTube Demo Video */}
+                    <MediaGalleryEditor
+                      galleryImages={galleryImages}
+                      onGalleryChange={setGalleryImages}
+                      youtubeUrl={youtubeUrl}
+                      onYoutubeChange={setYoutubeUrl}
+                    />
 
                     {/* Developer Contact (2-column grid) */}
                     <div className="grid gap-4 sm:grid-cols-2 pt-2 border-t border-line/60">

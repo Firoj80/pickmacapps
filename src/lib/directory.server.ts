@@ -14,6 +14,8 @@ import {
 } from "@/lib/telegram.server";
 import {
   HOT_APP_DURATION_DAYS,
+  normalizeYouTubeUrl,
+  sanitizeGalleryImages,
   seedSlugs,
   type AppItem,
   type FeaturedTier,
@@ -66,6 +68,8 @@ type AppRow = {
   macos_version?: string | null;
   apple_silicon?: boolean | null;
   intel_supported?: boolean | null;
+  gallery_images?: string[] | string | null;
+  youtube_url?: string | null;
 };
 
 type GuideRow = {
@@ -136,6 +140,8 @@ export function toApp(row: AppRow): AppItem & { editorChoice: boolean; status: s
     createdAt: iso(row.created_at),
     updatedAt: row.updated_at ? iso(row.updated_at) : undefined,
     demo: row.demo,
+    galleryImages: sanitizeGalleryImages(asJson(row.gallery_images ?? [], [])),
+    youtubeUrl: row.youtube_url ? row.youtube_url : null,
     related: asJson(row.related, []),
     status: row.status,
     badgeStatus: row.badge_status,
@@ -1268,6 +1274,8 @@ export async function createAdminApp(input: {
   description: string;
   icon?: string;
   demo?: string;
+  galleryImages?: string[];
+  youtubeUrl?: string;
   website: string;
   pricing: string;
   category: string;
@@ -1338,14 +1346,16 @@ export async function createAdminApp(input: {
   const xHandleClean = (input.xHandle || "").trim().replace(/^@/, "");
   const macosVersion = (input.macosVersion || "").trim().slice(0, 40);
   const archFlags = resolveArchitectureFlags(input.architecture);
+  const galleryImages = JSON.stringify(sanitizeGalleryImages(input.galleryImages));
+  const youtubeUrl = normalizeYouTubeUrl(input.youtubeUrl);
 
   await sql.query(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
       editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, hot_scheduled_for, featured_scheduled_for,
       status, demo, is_user_submitted, check_badge, x_handle, submitter_x, dashboard_token,
-      macos_version, apple_silicon, intel_supported, created_at, updated_at
-    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, case when $14 then now() else null end, $15, $16, $17, $18, false, $19, $20, $21, $22, $23, $24, $25, now(), now())`,
+      macos_version, apple_silicon, intel_supported, gallery_images, youtube_url, created_at, updated_at
+    ) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, case when $12 then now() + interval '7 days' else null end, $14, case when $14 then now() else null end, $15, $16, $17, $18, false, $19, $20, $21, $22, $23, $24, $25, $26::jsonb, $27, now(), now())`,
     [
       id,
       input.name.trim(),
@@ -1372,6 +1382,8 @@ export async function createAdminApp(input: {
       macosVersion,
       archFlags.appleSilicon,
       archFlags.intelSupported,
+      galleryImages,
+      youtubeUrl,
     ],
   );
   await sql.query("delete from app_tombstones where slug = $1", [slug]);
@@ -1458,6 +1470,8 @@ export async function saveApp(input: {
   description: string;
   icon: string;
   demo: string;
+  galleryImages?: string[];
+  youtubeUrl?: string;
   website: string;
   pricing: string;
   category: string;
@@ -1558,9 +1572,18 @@ export async function saveApp(input: {
     input.architecture !== undefined
       ? resolveArchitectureFlags(input.architecture)
       : {
-          appleSilicon: row.apple_silicon === undefined || row.apple_silicon === null ? true : asBool(row.apple_silicon),
-          intelSupported: row.intel_supported === undefined || row.intel_supported === null ? true : asBool(row.intel_supported),
-        };
+      appleSilicon: row.apple_silicon === undefined || row.apple_silicon === null ? true : asBool(row.apple_silicon),
+      intelSupported: row.intel_supported === undefined || row.intel_supported === null ? true : asBool(row.intel_supported),
+    };
+  const galleryImages = JSON.stringify(
+    input.galleryImages !== undefined
+      ? sanitizeGalleryImages(input.galleryImages)
+      : sanitizeGalleryImages(asJson(row.gallery_images ?? [], [])),
+  );
+  const youtubeUrl =
+    input.youtubeUrl !== undefined
+      ? normalizeYouTubeUrl(input.youtubeUrl)
+      : (row.youtube_url ?? "");
 
   await sql.query(
     `update apps set name = $2, slug = $3, tagline = $4, description = $5, website = $6, pricing = $7,
@@ -1576,6 +1599,8 @@ export async function saveApp(input: {
       macos_version = $21,
       apple_silicon = $22,
       intel_supported = $23,
+      gallery_images = $24::jsonb,
+      youtube_url = $25,
       updated_at = now()
      where id = $1`,
     [
@@ -1602,6 +1627,8 @@ export async function saveApp(input: {
       macosVersion,
       archFlags.appleSilicon,
       archFlags.intelSupported,
+      galleryImages,
+      youtubeUrl,
     ],
   );
   invalidatePublicOfferCache();
@@ -1997,6 +2024,8 @@ export async function submitListing(
     description: string;
     icon: string;
     demo: string;
+    galleryImages?: string[];
+    youtubeUrl?: string;
     pricing: string;
     category: string;
     macosVersion?: string;
@@ -2061,9 +2090,11 @@ export async function submitListing(
   const initialStatus = plan === "choice" ? "awaiting_payment" : "pending";
   const macosVersion = (input.macosVersion || "").trim().slice(0, 40);
   const archFlags = resolveArchitectureFlags(input.architecture);
+  const galleryImages = JSON.stringify(sanitizeGalleryImages(input.galleryImages));
+  const youtubeUrl = normalizeYouTubeUrl(input.youtubeUrl);
   await sql.query(
-    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category, macos_version, apple_silicon, intel_supported, app_id, dashboard_token)
-     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
+    `insert into submissions (id, app_name, website, tagline, email, x_handle, plan, tier, badge_ok, status, description, icon, demo, pricing, category, macos_version, apple_silicon, intel_supported, gallery_images, youtube_url, app_id, dashboard_token)
+     values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb,$20,$21,$22)`,
     [
       id,
       name,
@@ -2083,6 +2114,8 @@ export async function submitListing(
       macosVersion,
       archFlags.appleSilicon,
       archFlags.intelSupported,
+      galleryImages,
+      youtubeUrl,
       existingApp ? existingApp.id : null,
       submissionToken,
     ],
@@ -2220,6 +2253,8 @@ export async function approveSubmission(
     macos_version?: string | null;
     apple_silicon?: boolean | null;
     intel_supported?: boolean | null;
+    gallery_images?: string[] | string | null;
+    youtube_url?: string | null;
     email: string;
     x_handle?: string;
     plan: string;
@@ -2389,6 +2424,8 @@ export async function approveSubmission(
         macos_version = coalesce(nullif($20, ''), macos_version),
         apple_silicon = $21,
         intel_supported = $22,
+        gallery_images = case when jsonb_array_length($23::jsonb) > 0 then $23::jsonb else gallery_images end,
+        youtube_url = coalesce(nullif($24, ''), youtube_url),
         status = 'published',
         badge_misses = 0,
         updated_at = now()
@@ -2416,6 +2453,8 @@ export async function approveSubmission(
         submission.macos_version || "",
         submission.apple_silicon === undefined || submission.apple_silicon === null ? true : asBool(submission.apple_silicon),
         submission.intel_supported === undefined || submission.intel_supported === null ? true : asBool(submission.intel_supported),
+        JSON.stringify(sanitizeGalleryImages(asJson(submission.gallery_images ?? [], []))),
+        normalizeYouTubeUrl(submission.youtube_url),
       ],
     );
 
@@ -2456,8 +2495,8 @@ export async function approveSubmission(
     `insert into apps (
       id, name, slug, tagline, description, icon, website, pricing, category, category_name, category_icon,
       editor_choice, featured_tier, featured_until, is_hot, hot_marked_at, hot_scheduled_for, featured_scheduled_for, demo, status, submitter_email, submitter_x, is_user_submitted, dashboard_token,
-      macos_version, apple_silicon, intel_supported
-    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '7 days' else null end,$14,case when $14 then now() else null end,$15,$16,$17,'published',$18,$19,true,$20,$21,$22,$23)`,
+      macos_version, apple_silicon, intel_supported, gallery_images, youtube_url
+    ) values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,case when $12 then now() + interval '7 days' else null end,$14,case when $14 then now() else null end,$15,$16,$17,'published',$18,$19,true,$20,$21,$22,$23,$24::jsonb,$25)`,
     [
       appId,
       submission.app_name,
@@ -2482,6 +2521,8 @@ export async function approveSubmission(
       submission.macos_version || "",
       submission.apple_silicon === undefined || submission.apple_silicon === null ? true : asBool(submission.apple_silicon),
       submission.intel_supported === undefined || submission.intel_supported === null ? true : asBool(submission.intel_supported),
+      JSON.stringify(sanitizeGalleryImages(asJson(submission.gallery_images ?? [], []))),
+      normalizeYouTubeUrl(submission.youtube_url),
     ],
   );
 
@@ -2778,6 +2819,8 @@ export async function getDashboardByToken(token: string): Promise<DashboardViewD
     macos_version?: string | null;
     apple_silicon?: boolean | null;
     intel_supported?: boolean | null;
+    gallery_images?: string[] | string | null;
+    youtube_url?: string | null;
   }>(
     "select * from submissions where dashboard_token = $1 limit 1",
     [cleanToken],
@@ -2847,6 +2890,8 @@ export async function getDashboardByToken(token: string): Promise<DashboardViewD
     macosVersion: sub.macos_version || undefined,
     appleSilicon: sub.apple_silicon === undefined || sub.apple_silicon === null ? true : asBool(sub.apple_silicon),
     intelSupported: sub.intel_supported === undefined || sub.intel_supported === null ? true : asBool(sub.intel_supported),
+    galleryImages: sanitizeGalleryImages(asJson(sub.gallery_images ?? [], [])),
+    youtubeUrl: sub.youtube_url ? sub.youtube_url : null,
   };
 }
 
@@ -2862,20 +2907,22 @@ export async function updateAppByToken(
     name?: string;
     macosVersion?: string;
     architecture?: "universal" | "silicon";
+    galleryImages?: string[];
+    youtubeUrl?: string;
   },
 ): Promise<boolean> {
   if (!token || typeof token !== "string") return false;
   const sql = await directorySql();
   const cleanToken = token.trim();
-  const rows = await sql.query<{ id: string; category: string; category_name: string; category_icon: string; macos_version: string | null; apple_silicon: boolean | null; intel_supported: boolean | null }>(
-    "select id, category, category_name, category_icon, macos_version, apple_silicon, intel_supported from apps where dashboard_token = $1 limit 1",
+  const rows = await sql.query<{ id: string; category: string; category_name: string; category_icon: string; macos_version: string | null; apple_silicon: boolean | null; intel_supported: boolean | null; gallery_images: string[] | string | null; youtube_url: string | null }>(
+    "select id, category, category_name, category_icon, macos_version, apple_silicon, intel_supported, gallery_images, youtube_url from apps where dashboard_token = $1 limit 1",
     [cleanToken],
   );
   const current = rows[0];
   if (!current) {
     // If not found in apps table, check if it's a pending submission
-    const subRows = await sql.query<{ id: string; category: string; macos_version: string | null; apple_silicon: boolean | null; intel_supported: boolean | null }>(
-      "select id, category, macos_version, apple_silicon, intel_supported from submissions where dashboard_token = $1 limit 1",
+    const subRows = await sql.query<{ id: string; category: string; macos_version: string | null; apple_silicon: boolean | null; intel_supported: boolean | null; gallery_images: string[] | string | null; youtube_url: string | null }>(
+      "select id, category, macos_version, apple_silicon, intel_supported, gallery_images, youtube_url from submissions where dashboard_token = $1 limit 1",
       [cleanToken],
     );
     const sub = subRows[0];
@@ -2895,6 +2942,13 @@ export async function updateAppByToken(
             appleSilicon: sub.apple_silicon === undefined || sub.apple_silicon === null ? true : asBool(sub.apple_silicon),
             intelSupported: sub.intel_supported === undefined || sub.intel_supported === null ? true : asBool(sub.intel_supported),
           };
+    const galleryImages = JSON.stringify(
+      changes.galleryImages !== undefined
+        ? sanitizeGalleryImages(changes.galleryImages)
+        : sanitizeGalleryImages(asJson(sub.gallery_images ?? [], [])),
+    );
+    const youtubeUrl =
+      changes.youtubeUrl !== undefined ? normalizeYouTubeUrl(changes.youtubeUrl) : (sub.youtube_url ?? "");
 
     await sql.query(
       `update submissions set
@@ -2907,8 +2961,10 @@ export async function updateAppByToken(
         icon = coalesce(nullif($7, ''), icon),
         macos_version = $8,
         apple_silicon = $9,
-        intel_supported = $10
-      where id = $11`,
+        intel_supported = $10,
+        gallery_images = $11::jsonb,
+        youtube_url = $12
+      where id = $13`,
       [
         changes.name?.trim() || "",
         changes.tagline?.trim() || "",
@@ -2920,6 +2976,8 @@ export async function updateAppByToken(
         macosVersion,
         archFlags.appleSilicon,
         archFlags.intelSupported,
+        galleryImages,
+        youtubeUrl,
         sub.id,
       ],
     );
@@ -2946,6 +3004,13 @@ export async function updateAppByToken(
           appleSilicon: current.apple_silicon === undefined || current.apple_silicon === null ? true : asBool(current.apple_silicon),
           intelSupported: current.intel_supported === undefined || current.intel_supported === null ? true : asBool(current.intel_supported),
         };
+  const galleryImages = JSON.stringify(
+    changes.galleryImages !== undefined
+      ? sanitizeGalleryImages(changes.galleryImages)
+      : sanitizeGalleryImages(asJson(current.gallery_images ?? [], [])),
+  );
+  const youtubeUrl =
+    changes.youtubeUrl !== undefined ? normalizeYouTubeUrl(changes.youtubeUrl) : (current.youtube_url ?? "");
 
   await sql.query(
     `update apps set
@@ -2961,8 +3026,10 @@ export async function updateAppByToken(
       macos_version = $10,
       apple_silicon = $11,
       intel_supported = $12,
+      gallery_images = $13::jsonb,
+      youtube_url = $14,
       updated_at = now()
-    where id = $13`,
+    where id = $15`,
     [
       changes.name?.trim() || "",
       changes.tagline?.trim() || "",
@@ -2976,6 +3043,8 @@ export async function updateAppByToken(
       macosVersion,
       archFlags.appleSilicon,
       archFlags.intelSupported,
+      galleryImages,
+      youtubeUrl,
       current.id,
     ],
   );
