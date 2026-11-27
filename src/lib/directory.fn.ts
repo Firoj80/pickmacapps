@@ -66,6 +66,8 @@ export const submitListingFn = createServerFn({ method: "POST" })
       demo: String(data.demo ?? "").slice(0, 400),
       pricing: data.pricing === "paid" || data.pricing === "freemium" || data.pricing === "free" ? data.pricing : "free",
       category: String(data.category ?? "").slice(0, 80),
+      macosVersion: typeof data.macosVersion === "string" ? data.macosVersion.trim().slice(0, 40) : "",
+      architecture: data.architecture === "silicon" ? ("silicon" as const) : ("universal" as const),
       email: String(data.email ?? "").slice(0, 180),
       xHandle: String(data.xHandle ?? data.x_handle ?? "").slice(0, 80),
       plan: data.plan === "choice" ? "choice" : "free",

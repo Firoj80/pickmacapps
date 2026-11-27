@@ -3,6 +3,27 @@ import { normalizeCategorySlug } from "@/lib/shelf-categories";
 
 export type Pricing = "free" | "paid" | "freemium";
 
+export type AppArchitecture = "universal" | "silicon";
+
+export const MACOS_VERSION_OPTIONS = [
+  { value: "", label: "All / Default (Sequoia, Sonoma & Ventura)" },
+  { value: "25+", label: "macOS 25+" },
+  { value: "26+", label: "macOS 26+" },
+  { value: "27", label: "macOS 27" },
+  { value: "15+", label: "macOS 15+ (Sequoia)" },
+  { value: "14+", label: "macOS 14+ (Sonoma)" },
+  { value: "13+", label: "macOS 13+ (Ventura)" },
+] as const;
+
+export const ARCHITECTURE_OPTIONS: { value: AppArchitecture; label: string }[] = [
+  { value: "universal", label: "Universal (Apple Silicon & Intel)" },
+  { value: "silicon", label: "Silicon Only" },
+];
+
+export function getAppArchitecture(app: { appleSilicon?: boolean; intelSupported?: boolean }): AppArchitecture {
+  return app.appleSilicon !== false && app.intelSupported === false ? "silicon" : "universal";
+}
+
 export type FeaturedTier = "article" | "featured";
 
 export type AppItem = {

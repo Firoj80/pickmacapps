@@ -5,6 +5,7 @@ import { shelfCategories } from "@/lib/shelf-categories";
 import { ensureAdminSession, fetchAppMetadataFn, getCachedAdminHome } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { BadgeCheckIcon, CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
+import { ARCHITECTURE_OPTIONS, MACOS_VERSION_OPTIONS, type AppArchitecture } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/apps/new")({
   beforeLoad: async () => {
@@ -50,6 +51,8 @@ function NewAppPage() {
   const [demo, setDemo] = useState("");
   const [category, setCategory] = useState("productivity");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
+  const [macosVersion, setMacosVersion] = useState("");
+  const [architecture, setArchitecture] = useState<AppArchitecture>("universal");
   const [status, setStatus] = useState<"published" | "draft" | "unpublished">("published");
   const [editorChoice, setEditorChoice] = useState(false);
   const [featuredTier, setFeaturedTier] = useState<"featured" | "article">("article");
@@ -395,6 +398,38 @@ function NewAppPage() {
               <option value="free">Free</option>
               <option value="freemium">Freemium</option>
               <option value="paid">Paid</option>
+            </select>
+          </Field>
+        </div>
+
+        {/* 6b. Platform & Architecture */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Platform (macOS Version)">
+            <select
+              name="macos_version"
+              value={macosVersion}
+              onChange={(e) => setMacosVersion(e.target.value)}
+              className={fieldClass}
+            >
+              {MACOS_VERSION_OPTIONS.map((opt) => (
+                <option key={opt.value || "default"} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Architecture">
+            <select
+              name="architecture"
+              value={architecture}
+              onChange={(e) => setArchitecture(e.target.value as AppArchitecture)}
+              className={fieldClass}
+            >
+              {ARCHITECTURE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
             </select>
           </Field>
         </div>

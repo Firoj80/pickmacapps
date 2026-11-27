@@ -2,7 +2,7 @@ import { useState } from "react";
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { AppCard } from "@/components/app-card";
 import { Missing } from "@/components/missing";
-import { pricingLabel, type Pricing, type AppItem } from "@/lib/catalog";
+import { ARCHITECTURE_OPTIONS, getAppArchitecture, MACOS_VERSION_OPTIONS, pricingLabel, type AppArchitecture, type Pricing, type AppItem } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchDashboardAppFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
@@ -41,6 +41,8 @@ function SubmitterDashboardPage() {
   const [demo, setDemo] = useState(app.demo || "");
   const [pricing, setPricing] = useState<Pricing>(app.pricing);
   const [category, setCategory] = useState(app.category);
+  const [macosVersion, setMacosVersion] = useState(app.macosVersion || "");
+  const [architecture, setArchitecture] = useState<AppArchitecture>(getAppArchitecture(app));
   const [icon, setIcon] = useState(app.icon || "");
   const [saving, setSaving] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "success" | "error">("idle");
@@ -66,6 +68,8 @@ function SubmitterDashboardPage() {
           demo,
           pricing,
           category,
+          macosVersion,
+          architecture,
           icon,
         }),
       });
@@ -361,6 +365,38 @@ function SubmitterDashboardPage() {
                 {shelfCategories.map((c) => (
                   <option key={c.slug} value={c.slug}>
                     {c.emoji} {c.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label className="text-xs font-medium text-body">Platform (macOS Version)</label>
+              <select
+                value={macosVersion}
+                onChange={(e) => setMacosVersion(e.target.value)}
+                className="mt-1 w-full rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+              >
+                {MACOS_VERSION_OPTIONS.map((opt) => (
+                  <option key={opt.value || "default"} value={opt.value}>
+                    {opt.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="text-xs font-medium text-body">Architecture</label>
+              <select
+                value={architecture}
+                onChange={(e) => setArchitecture(e.target.value as AppArchitecture)}
+                className="mt-1 w-full rounded-xl border border-line bg-canvas px-3.5 py-2 text-sm text-ink focus:border-ink focus:outline-none"
+              >
+                {ARCHITECTURE_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>
+                    {opt.label}
                   </option>
                 ))}
               </select>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
 import { BlackFridayCountdown, BFCM_COUPON_CODE } from "@/components/black-friday-countdown";
 import { verifyBadge } from "@/lib/badge";
+import { ARCHITECTURE_OPTIONS, MACOS_VERSION_OPTIONS, type AppArchitecture } from "@/lib/catalog";
 import { shelfCategories } from "@/lib/shelf-categories";
 import { fetchAppMetadataFn, fetchOffer, submitListingFn } from "@/lib/directory.fn";
 import { trackGoal, identifyUser, getAttribution, appendAttributionToUrl } from "@/lib/analytics";
@@ -253,6 +254,8 @@ function SubmitPage() {
   const [demo, setDemo] = useState("");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">("free");
   const [category, setCategory] = useState("productivity");
+  const [macosVersion, setMacosVersion] = useState("");
+  const [architecture, setArchitecture] = useState<AppArchitecture>("universal");
   const [email, setEmail] = useState("");
   const [xHandle, setXHandle] = useState("");
 
@@ -446,6 +449,8 @@ function SubmitPage() {
           demo: demo.trim(),
           pricing,
           category,
+          macosVersion,
+          architecture,
           email: email.trim(),
           xHandle: xHandle.trim(),
           plan: isPaid ? "choice" : "free",
@@ -731,6 +736,44 @@ function SubmitPage() {
                           <option value="free">Free</option>
                           <option value="freemium">Freemium</option>
                           <option value="paid">Paid (one-time or subscription)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Platform (macOS Version) & Architecture (2-column grid) */}
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label htmlFor="macos-version" className="text-xs font-medium text-ink">
+                          Platform (macOS Version)
+                        </label>
+                        <select
+                          id="macos-version"
+                          value={macosVersion}
+                          onChange={(e) => setMacosVersion(e.target.value)}
+                          className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                        >
+                          {MACOS_VERSION_OPTIONS.map((opt) => (
+                            <option key={opt.value || "default"} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="architecture" className="text-xs font-medium text-ink">
+                          Architecture
+                        </label>
+                        <select
+                          id="architecture"
+                          value={architecture}
+                          onChange={(e) => setArchitecture(e.target.value as AppArchitecture)}
+                          className="w-full rounded-xl border border-line bg-surface-2 px-3.5 py-2.5 text-sm text-ink focus:border-accent focus:outline-none cursor-pointer"
+                        >
+                          {ARCHITECTURE_OPTIONS.map((opt) => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))}
                         </select>
                       </div>
                     </div>

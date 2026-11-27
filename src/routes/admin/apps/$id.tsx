@@ -5,7 +5,7 @@ import { normalizeCategorySlug, shelfCategories } from "@/lib/shelf-categories";
 import { fetchAdminApp, ensureAdminSession, fetchAppMetadataFn, generateDashboardTokenFn } from "@/lib/directory.fn";
 import { buildMetadata, originFrom } from "@/lib/seo";
 import { BadgeCheckIcon, CheckIcon, SparklesIcon, SpinnerIcon } from "@/components/icons";
-import { getHotDaysRemaining } from "@/lib/catalog";
+import { ARCHITECTURE_OPTIONS, getAppArchitecture, getHotDaysRemaining, MACOS_VERSION_OPTIONS, type AppArchitecture } from "@/lib/catalog";
 
 export const Route = createFileRoute("/admin/apps/$id")({
   beforeLoad: async () => {
@@ -58,6 +58,8 @@ function EditAppForm({ app }: { app: EditAppData }) {
   const [demo, setDemo] = useState(app.demo || "");
   const [category, setCategory] = useState(normalizeCategorySlug(app.category) || "productivity");
   const [pricing, setPricing] = useState<"free" | "freemium" | "paid">(app.pricing as "free" | "freemium" | "paid" || "free");
+  const [macosVersion, setMacosVersion] = useState(app.macosVersion || "");
+  const [architecture, setArchitecture] = useState<AppArchitecture>(getAppArchitecture(app));
   const [status, setStatus] = useState(app.status || "published");
   const [editorChoice, setEditorChoice] = useState(Boolean(app.editorChoice));
   const [featuredTier, setFeaturedTier] = useState<"featured" | "article">(
@@ -441,6 +443,38 @@ function EditAppForm({ app }: { app: EditAppData }) {
               {shelfCategories.map((c) => (
                 <option key={c.slug} value={c.slug}>
                   {c.name}
+                </option>
+              ))}
+            </select>
+          </Field>
+        </div>
+
+        {/* 6b. Platform & Architecture */}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Platform (macOS Version)">
+            <select
+              name="macos_version"
+              value={macosVersion}
+              onChange={(e) => setMacosVersion(e.target.value)}
+              className={fieldClass}
+            >
+              {MACOS_VERSION_OPTIONS.map((opt) => (
+                <option key={opt.value || "default"} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          </Field>
+          <Field label="Architecture">
+            <select
+              name="architecture"
+              value={architecture}
+              onChange={(e) => setArchitecture(e.target.value as AppArchitecture)}
+              className={fieldClass}
+            >
+              {ARCHITECTURE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
                 </option>
               ))}
             </select>

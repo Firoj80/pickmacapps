@@ -16,6 +16,8 @@ export const Route = createFileRoute("/api/dashboard/$token")({
             pricing?: Pricing;
             category?: string;
             icon?: string;
+            macosVersion?: string;
+            architecture?: "universal" | "silicon";
           };
 
           const { updateAppByToken } = await import("@/lib/directory.server");

@@ -557,7 +557,7 @@ function AppDetails({
                   {app.appleSilicon !== false && app.intelSupported !== false
                     ? "Universal (Apple Silicon & Intel)"
                     : app.appleSilicon !== false
-                    ? "Apple Silicon Native"
+                    ? "Silicon Only"
                     : "Intel x86_64"}
                 </dd>
               </div>
